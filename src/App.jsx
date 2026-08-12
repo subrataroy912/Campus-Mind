@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './App.css'
 
 const featureCards = [
@@ -24,12 +25,12 @@ function App() {
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Campus Mind</p>
             <h1 className="text-xl font-bold text-gray-900">Classroom Chat Platform</h1>
           </div>
-          <a
+          <Link
             className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            href="/dashboard"
+            to="/dashboard"
           >
             Open dashboard
-          </a>
+          </Link>
         </nav>
 
         <div className="grid flex-1 items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr]">
