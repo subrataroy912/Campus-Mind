@@ -5,6 +5,8 @@ This file provides context, architectural constraints, strict code conventions, 
 ---## 1. Project Overview & ScopeThe **Classroom Chat Platform** is a modern, responsive, Google Classroom-inspired educational management and real-time communication application. It integrates academic course management, assignments, submissions, workflows, grading, and chat modules.
 ### 🛑 CRITICAL SCOPE BOUNDARY- **NO VIDEO CALLING:** Video calling, conferencing, and audio streaming features are explicitly **out of scope**. Do not write or suggest any frontend code relating to WebRTC, Agora, Zoom SDKs, or peer-to-peer media interfaces. Focus exclusively on text messaging, asset management, and assignment tracking within the user interface.
 ---## 2. Frontend Technology Stack Context- **Framework:** React.js (Functional components with hooks)- **Routing:** React Router (Declarative browser routing rules)- **Styling:** Tailwind CSS (Modern Light Mode theme focus with custom utility classes)- **Networking:** Axios (Stateless REST API integration with interceptors for JWT injection)- **Real-Time Communication:** WebSocket with STOMP Client (SockJS or native browser WebSockets layer)
+Links:
+https://vite.dev/guide/
 ---## 3. Strict Directory Structure
 All code updates must align perfectly with this preset folder topology inside the frontend workspace root:
 ```text
