@@ -7,6 +7,8 @@ This file provides context, architectural constraints, strict code conventions, 
 ---## 2. Frontend Technology Stack Context- **Framework:** React.js (Functional components with hooks)- **Routing:** React Router (Declarative browser routing rules)- **Styling:** Tailwind CSS (Modern Light Mode theme focus with custom utility classes)- **Networking:** Axios (Stateless REST API integration with interceptors for JWT injection)- **Real-Time Communication:** WebSocket with STOMP Client (SockJS or native browser WebSockets layer)
 Links:
 https://vite.dev/guide/
+https://reactrouter.com/start/declarative/installation
+
 ---## 3. Strict Directory Structure
 All code updates must align perfectly with this preset folder topology inside the frontend workspace root:
 ```text
