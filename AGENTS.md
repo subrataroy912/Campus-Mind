@@ -8,7 +8,8 @@ This file provides context, architectural constraints, strict code conventions, 
 Links:
 https://vite.dev/guide/
 https://reactrouter.com/start/declarative/installation
-
+https://tailwindcss.com/docs/installation/using-vite
+https://tailwindcss.com
 ---## 3. Strict Directory Structure
 All code updates must align perfectly with this preset folder topology inside the frontend workspace root:
 ```text
