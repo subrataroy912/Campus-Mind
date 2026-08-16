@@ -19,6 +19,7 @@ import NotFoundPage from '../pages/NotFoundPage.jsx'
 import NotificationsPage from '../pages/notification/NotificationsPage.jsx'
 import ProfilePage from '../pages/profile/ProfilePage.jsx'
 import SettingsPage from '../pages/settings/SettingsPage.jsx'
+import GuardedRoute from './GuardedRoute.jsx'
 
 function AppRoutes() {
   return (
@@ -28,20 +29,20 @@ function AppRoutes() {
       <Route element={<RegisterPage />} path="/register" />
       <Route element={<ForgotPasswordPage />} path="/forgot-password" />
       <Route element={<ResetPasswordPage />} path="/reset-password" />
-      <Route element={<DashboardPage />} path="/dashboard" />
-      <Route element={<ClassesPage />} path="/classes" />
-      <Route element={<CreateClassPage />} path="/classes/create" />
-      <Route element={<JoinClassPage />} path="/classes/join" />
-      <Route element={<ClassStreamPage />} path="/classes/:classId" />
-      <Route element={<ClassworkPage />} path="/classes/:classId/classwork" />
-      <Route element={<AssignmentDetailPage />} path="/classes/:classId/assignments/:assignmentId" />
-      <Route element={<MaterialsPage />} path="/classes/:classId/materials" />
-      <Route element={<PeoplePage />} path="/classes/:classId/people" />
-      <Route element={<ClassChatPage />} path="/classes/:classId/chat" />
-      <Route element={<ChatPage />} path="/chat" />
-      <Route element={<NotificationsPage />} path="/notifications" />
-      <Route element={<ProfilePage />} path="/profile" />
-      <Route element={<SettingsPage />} path="/settings" />
+      <Route element={<GuardedRoute><DashboardPage /></GuardedRoute>} path="/dashboard" />
+      <Route element={<GuardedRoute><ClassesPage /></GuardedRoute>} path="/classes" />
+      <Route element={<GuardedRoute allowedRoles={['TEACHER']}><CreateClassPage /></GuardedRoute>} path="/classes/create" />
+      <Route element={<GuardedRoute><JoinClassPage /></GuardedRoute>} path="/classes/join" />
+      <Route element={<GuardedRoute><ClassStreamPage /></GuardedRoute>} path="/classes/:classId" />
+      <Route element={<GuardedRoute><ClassworkPage /></GuardedRoute>} path="/classes/:classId/classwork" />
+      <Route element={<GuardedRoute><AssignmentDetailPage /></GuardedRoute>} path="/classes/:classId/assignments/:assignmentId" />
+      <Route element={<GuardedRoute><MaterialsPage /></GuardedRoute>} path="/classes/:classId/materials" />
+      <Route element={<GuardedRoute><PeoplePage /></GuardedRoute>} path="/classes/:classId/people" />
+      <Route element={<GuardedRoute><ClassChatPage /></GuardedRoute>} path="/classes/:classId/chat" />
+      <Route element={<GuardedRoute><ChatPage /></GuardedRoute>} path="/chat" />
+      <Route element={<GuardedRoute><NotificationsPage /></GuardedRoute>} path="/notifications" />
+      <Route element={<GuardedRoute><ProfilePage /></GuardedRoute>} path="/profile" />
+      <Route element={<GuardedRoute><SettingsPage /></GuardedRoute>} path="/settings" />
       <Route element={<NotFoundPage />} path="/404" />
       <Route element={<Navigate replace to="/404" />} path="*" />
     </Routes>
