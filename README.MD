@@ -40,6 +40,51 @@
 
 ---
 
+## 🧪 Local Run & White Screen Troubleshooting
+
+This repository is a **Vite + React single-page application**. It must be served by Vite or by a static host that serves the built `dist/` folder. Do **not** open `index.html` directly with a `file://` URL; browser ES module loading will be blocked and the result can look like a blank white screen.
+
+### Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite, usually `http://localhost:5173/`.
+
+### Build and preview production output
+
+```bash
+npm run build
+npm run preview
+```
+
+Open the preview URL printed by Vite.
+
+### Environment variables
+
+A `.env` file is optional for the UI to start. The frontend has safe defaults for API and WebSocket paths:
+
+```text
+VITE_API_BASE_URL=/api
+VITE_WS_URL=/ws
+```
+
+Copy `.env.example` only when you need to point the frontend at a specific backend host, for example during local backend development.
+
+### Render/static hosting deployment
+
+For Render, deploy this project as a **Static Site** with:
+
+- Build command: `npm install && npm run build`
+- Publish directory: `dist`
+- SPA rewrite: `/*` → `/index.html`
+
+The included `render.yaml` captures those settings. If the app is deployed as a static site without publishing `dist`, or if it is opened directly as an HTML file, the browser can show a white page even though `npm run build` succeeds.
+
+---
+
 ## 📚 Table of Contents
 
 - [📖 Project Overview](#-project-overview)
