@@ -1,0 +1,24 @@
+import { ArrowRight } from 'lucide-react'
+
+function DashboardHeader() {
+  return (
+    <section className="page-header">
+      <div>
+        <p className="greeting">Good morning ☀️</p>
+
+        <h1>Welcome back, Nabojeet.</h1>
+
+        <p className="subtitle">
+          Stay organized, keep learning, and achieve your goals.
+        </p>
+      </div>
+
+      <button className="primary-btn">
+        Explore Classes
+        <ArrowRight size={18} />
+      </button>
+    </section>
+  )
+}
+
+export default DashboardHeader
