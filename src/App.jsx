@@ -12,7 +12,7 @@ function App() {
           <div className="hidden items-center gap-12 text-base font-semibold text-gray-800 md:flex">
             <a href="#features">Features</a><a href="#how-it-works">How it Works</a><a href="#teachers">For Teachers</a><a href="#students">For Students</a>
           </div>
-          <Button to="/login" className="px-8">Get Started</Button>
+          <Button to="/login" className="px-8">Get Started nabo</Button>
         </nav>
 
         <div className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[0.85fr_1.15fr]">
