@@ -32,7 +32,7 @@
 
 ### 🚀 Try Campus Mind
 
-**[👉 Open the Live Application](https://campusmind-u6zq.onrender.com/)**
+**[👉 Open the Live Application](https://campus-mind-ev1s.onrender.com)**
 
 </div>
 
