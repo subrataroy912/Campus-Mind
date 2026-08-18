@@ -5,7 +5,7 @@
 ### A modern classroom, assignment, study material, grading & real-time communication platform.
 
 <p>
-  <a href="https://campusmind-u6zq.onrender.com/">
+  <a href="https://campus-mind-ev1s.onrender.com">
     <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Campus%20Mind-4285F4?style=for-the-badge" alt="Live Demo"/>
   </a>
 </p>
@@ -733,7 +733,7 @@ over simply adding a large number of features.
 
 ### 🚀 Built to make digital classrooms simpler.
 
-**[🌐 Visit Campus Mind](https://campusmind-u6zq.onrender.com/)**
+**[🌐 Visit Campus Mind](https://campus-mind-ev1s.onrender.com)**
 
 <br>
 
