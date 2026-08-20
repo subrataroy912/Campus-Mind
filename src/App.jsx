@@ -1,43 +1,68 @@
-import { ArrowRight, BookOpen, CalendarDays, MessageCircle, Play } from 'lucide-react'
-import BrandLogo from './components/common/BrandLogo.jsx'
-import Button from './components/common/Button.jsx'
+import { Link } from 'react-router-dom'
+import { ArrowRight, AlertTriangle, Route } from 'lucide-react'
 import './App.css'
 
 function App() {
+  const devRoutes = [
+    { name: 'Home(Current page)', path: '/' },
+    { name: 'Login', path: '/login' },
+    { name: 'Register', path: '/register' },
+    { name: 'Forgot Password', path: '/forgot-password' },
+    { name: 'Reset Password', path: '/reset-password' },
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Classes', path: '/classes' },
+    { name: '404 Not Found', path: '/404' },
+  ]
+
   return (
-    <main className="min-h-screen overflow-hidden bg-gradient-to-br from-white via-purple-50/40 to-blue-50 text-gray-950">
-      <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 sm:px-8 lg:px-10">
-        <nav className="flex items-center justify-between">
-          <BrandLogo />
-          <div className="hidden items-center gap-12 text-base font-semibold text-gray-800 md:flex">
-            <a href="#features">Features</a><a href="#how-it-works">How it Works</a><a href="#teachers">For Teachers</a><a href="#students">For Students</a>
-          </div>
-          <Button to="/login" className="px-8">Get Started nabo</Button>
-        </nav>
+    <main className="min-h-screen w-full bg-gradient-to-br from-white via-purple-50/40 to-blue-50 text-gray-950 flex items-center justify-center p-4 sm:p-8">
 
-        <div className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[0.85fr_1.15fr]">
-          <section className="space-y-8">
-            <h1 className="text-6xl font-black leading-none tracking-tight sm:text-7xl lg:text-8xl">Learn. Share. <span className="block bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Connect.</span></h1>
-            <p className="max-w-xl text-2xl leading-10 text-gray-700">A modern learning platform that brings classes, assignments and real-time text chat together.</p>
-            <div className="flex flex-wrap gap-5">
-              <Button to="/login" className="px-8 text-lg">Get Started <ArrowRight size={24} /></Button>
-              <Button to="/dashboard" variant="secondary" className="px-8 text-lg">Learn More <Play className="rounded-full border border-purple-200 p-1 text-purple-600" size={30} /></Button>
-            </div>
-          </section>
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
 
-          <section className="relative rounded-[2.5rem] border border-white/80 bg-white/70 p-8 shadow-2xl shadow-purple-200/60 backdrop-blur">
-            <div className="absolute left-8 top-8 rounded-3xl bg-purple-600 p-5 text-white shadow-xl"><BookOpen size={44} /></div>
-            <div className="absolute right-10 top-12 rounded-3xl bg-blue-500 p-5 text-white shadow-xl"><MessageCircle size={44} /></div>
-            <div className="mx-auto flex min-h-[28rem] max-w-2xl items-center justify-center gap-3 pt-16 text-[8rem] sm:text-[10rem]">👩🏻‍💻🧑🏾‍🎓👩🏻‍🎓</div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <article className="rounded-3xl bg-white p-5 shadow-lg"><p className="text-xl font-black">Biology 101</p><p className="mt-2 text-gray-600">Live Class • Today</p></article>
-              <article className="rounded-3xl bg-white p-5 shadow-lg"><p className="text-xl font-black">Assignment Due</p><p className="mt-2 text-gray-600">Poster Design • Fri</p></article>
-            </div>
-            <div className="absolute bottom-44 left-4 rounded-2xl bg-teal-400 p-4 text-white shadow-lg"><p className="font-black">Team Chat</p><p className="text-sm">Discuss. Ask. Solve.</p></div>
-            <CalendarDays className="absolute bottom-16 right-16 text-purple-500" size={42} />
-          </section>
+        {/* Warning Banner */}
+        <div className="bg-red-600 px-6 py-8 text-center text-white sm:px-12">
+          <h1 className="text-xl font-black uppercase tracking-wider sm:text-2xl md:text-3xl">
+            CUMPUS MIND
+          </h1>
+          <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-red-200" />
+          <h1 className="text-xl font-black uppercase tracking-wider sm:text-2xl md:text-3xl">
+            Don't change this page without team approval
+          </h1>
+
+          <h2 className="mt-2 text-sm font-semibold tracking-wide text-red-200 sm:text-base">
+            Main Entry Point of the Website
+          </h2>
         </div>
-      </section>
+
+        {/* Development Routes Section */}
+        <div className="p-6 sm:p-10">
+          <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
+            <Route className="h-6 w-6 text-purple-600" />
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">Development Environment</h3>
+              <p className="text-sm text-gray-500">Current working routes for easy testing.</p>
+            </div>
+          </div>
+
+          {/* Responsive Grid for Links */}
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
+            {devRoutes.map((route) => (
+              <li key={route.path}>
+                <Link
+                  to={route.path}
+                  className="group flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-4 transition-all hover:border-purple-300 hover:bg-purple-50 hover:shadow-md"
+                >
+                  <span className="font-semibold text-gray-700 group-hover:text-purple-700">
+                    {route.name}
+                  </span>
+                  <ArrowRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-purple-600" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+      </div>
     </main>
   )
 }
