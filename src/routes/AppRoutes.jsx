@@ -12,7 +12,6 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<App />} path="/" />
-
       {/* Authentication Routes */}
       <Route element={<LoginPage />} path="/login" />
       <Route element={<RegisterPage />} path="/register" />
