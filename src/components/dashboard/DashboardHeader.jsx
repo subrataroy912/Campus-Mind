@@ -3,6 +3,7 @@ import { FaAngleDown } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { IoIosNotificationsOutline } from 'react-icons/io';
 import { useState } from 'react';
+import avatarImage from "../../assets/avatar.png";
 
 function DashboardHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -35,7 +36,7 @@ function DashboardHeader() {
           </li>
           <li className='relative'>
             <div className="flex items-center gap-2">
-              <img src="../../assets/avatar.png" alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+              <img src={avatarImage} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
               <button onClick={() => { setIsDropdownOpen(!isDropdownOpen) }} className="flex items-center gap-1 cursor-pointer">
                 <FaAngleDown className="text-gray-600" />
               </button>
