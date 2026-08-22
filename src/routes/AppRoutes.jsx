@@ -23,6 +23,10 @@ function AppRoutes() {
 
       <Route element={<DashboardPage />} path="/dashboard" />
       <Route element={<ClassesPage />} path="/classes" />
+      <Route element={<h1>WORKING</h1>} path="/settings" />
+      <Route element={<h1>WORKING</h1>} path="/chat" />
+      <Route element={<h1>WORKING</h1>} path="/notification" />
+      <Route element={<h1>WORKING</h1>} path="/profile" />
 
 
 

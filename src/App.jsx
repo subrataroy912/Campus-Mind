@@ -5,13 +5,17 @@ import './App.css'
 function App() {
   const devRoutes = [
     { name: 'Home(Current page)', path: '/' },
-    { name: 'Code Practics', path: '/practics' },
+    { name: 'Code Practics(ONLY FOR DEVELOPMENT TIME)', path: '/practics' },
     { name: 'Login', path: '/login' },
     { name: 'Register', path: '/register' },
     { name: 'Forgot Password', path: '/forgot-password' },
     { name: 'Reset Password', path: '/reset-password' },
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Classes', path: '/classes' },
+    { name: 'Settings', path: '/settings' },
+    { name: 'Chat', path: '/chat' },
+    { name: 'Profile', path: '/profile' },
+    { name: 'Notification', path: '/notification' },
     { name: '404 Not Found', path: '/404' },
   ]
 
@@ -31,7 +35,7 @@ function App() {
           </h1>
 
           <h2 className="mt-2 text-sm font-semibold tracking-wide text-red-200 sm:text-base">
-            Main Entry Point of the Website
+            This page is for development purposes only. It contains all the routes and links for easy testing and navigation during the development phase. Please refrain from making any changes without prior approval from the team.
           </h2>
         </div>
 

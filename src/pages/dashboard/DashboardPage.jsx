@@ -1,5 +1,5 @@
 // src/layouts/DashboardLayout.jsx
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { IoBookOutline, IoHomeOutline } from 'react-icons/io5';
 import { BsChat } from 'react-icons/bs';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
@@ -10,11 +10,11 @@ function DashboardPage() {
   return (
     <div className="flex min-h-screen w-full bg-slate-50/50">
       <aside className="w-64 min-w-[256px] border-r border-indigo-100 bg-white flex flex-col">
-        <div className="flex p-4 gap-3 items-center border-b border-slate-100">
+        <Link to="/" className="flex p-4 gap-3 items-center border-b border-slate-100">
           <img src="/src/assets/profile-image.jpg" alt="Campus Mind Logo" className="w-10 h-10 rounded-lg object-cover" />
           <h1 className="font-bold text-xl text-slate-800 tracking-tight">Campus Mind</h1>
-        </div>
-        
+        </Link>
+
         <nav className="p-3 flex-1">
           <ul className="space-y-1">
             <li>
@@ -42,7 +42,7 @@ function DashboardPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader />
         <main className="p-6 md:p-8 overflow-y-auto flex-1">
-         
+
         </main>
       </div>
     </div>
