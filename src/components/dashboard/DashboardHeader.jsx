@@ -35,7 +35,7 @@ function DashboardHeader() {
           </li>
           <li className='relative'>
             <div className="flex items-center gap-2">
-              <img src="/src/assets/profile-image.jpg" alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+              <img src="../../assets/avatar.png" alt="Profile" className="w-10 h-10 rounded-full object-cover" />
               <button onClick={() => { setIsDropdownOpen(!isDropdownOpen) }} className="flex items-center gap-1 cursor-pointer">
                 <FaAngleDown className="text-gray-600" />
               </button>
