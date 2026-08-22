@@ -11,11 +11,11 @@ function App() {
     { name: 'Forgot Password', path: '/forgot-password' },
     { name: 'Reset Password', path: '/reset-password' },
     { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Classes', path: '/classes' },
-    { name: 'Settings', path: '/settings' },
-    { name: 'Chat', path: '/chat' },
-    { name: 'Profile', path: '/profile' },
-    { name: 'Notification', path: '/notification' },
+    { name: 'Classes', path: '/dashboard/classes' },
+    { name: 'Settings', path: '/dashboard/settings' },
+    { name: 'Chat', path: '/dashboard/chat' },
+    { name: 'Profile', path: '/dashboard/profile' },
+    { name: 'Notification', path: '/dashboard/notification' },
     { name: '404 Not Found', path: '/404' },
   ]
 

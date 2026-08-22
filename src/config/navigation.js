@@ -21,7 +21,7 @@ export const SIDEBAR_NAV_ITEMS = [
   },
   {
     label: 'Settings',
-    to: '/settings',
+    to: '/dashboard/settings',
     Icon: GoGear,
   },
 ];
