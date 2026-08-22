@@ -4,8 +4,6 @@ import Navbar from "../../components/common/Navbar"
 function ClassesPage() {
   return (
     <main className="min-h-screen bg-gray-50">
-      <Navbar />
-
       {/* Outer Wrapper: Split Left & Right Columns */}
       <div className="flex items-start w-full px-6 gap-0.5">
         <LeftBar />
