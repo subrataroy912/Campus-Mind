@@ -7,11 +7,13 @@ import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
 import ClassesPage from '../pages/classroom/ClassesPage.jsx'
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
+import PracticsPage from '../pages/PracticsPage.jsx'
 
 function AppRoutes() {
   return (
     <Routes>
       <Route element={<App />} path="/" />
+      <Route element={<PracticsPage />} path="/practics" />
       {/* Authentication Routes */}
       <Route element={<LoginPage />} path="/login" />
       <Route element={<RegisterPage />} path="/register" />

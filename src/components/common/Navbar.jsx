@@ -8,10 +8,10 @@ import {
 
 export default function Navbar() {
     return (
-        <nav className="flex items-center justify-between w-full px-4 py-3 bg-gray-900 text-gray-100 shadow-md sm:px-6">
+        <nav className=" flex items-center justify-between w-full px-4 py-3 bg-gray-900 text-gray-100 shadow-md sm:px-6">
             
             {/* Left Section: Logo */}
-            <div className="flex items-center flex-shrink-0 cursor-pointer">
+            <div className="flex items-center shrink-0 cursor-pointer">
                 <BrandLogo />
             </div>
 

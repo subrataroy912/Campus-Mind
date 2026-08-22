@@ -5,6 +5,7 @@ import './App.css'
 function App() {
   const devRoutes = [
     { name: 'Home(Current page)', path: '/' },
+    { name: 'Code Practics', path: '/practics' },
     { name: 'Login', path: '/login' },
     { name: 'Register', path: '/register' },
     { name: 'Forgot Password', path: '/forgot-password' },
@@ -15,7 +16,7 @@ function App() {
   ]
 
   return (
-    <main className="min-h-screen w-full bg-gradient-to-br from-white via-purple-50/40 to-blue-50 text-gray-950 flex items-center justify-center p-4 sm:p-8">
+    <main className="min-h-screen w-full bg-linear-to-br from-white via-purple-50/40 to-blue-50 text-gray-950 flex items-center justify-center p-4 sm:p-8">
 
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
 

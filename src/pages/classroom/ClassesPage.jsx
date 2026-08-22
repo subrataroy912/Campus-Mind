@@ -7,7 +7,7 @@ function ClassesPage() {
       <Navbar />
 
       {/* Outer Wrapper: Split Left & Right Columns */}
-      <div className="flex items-start w-full px-6 py-6 gap-6">
+      <div className="flex items-start w-full px-6 gap-0.5">
         <LeftBar />
         <RightBar />
       </div>
@@ -19,9 +19,9 @@ export default ClassesPage
 
 function LeftBar() {
   return (
-    <div className="w-1/4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm flex flex-col h-screen">
+    <div className="w-1/4 bg-white p-4 border border-gray-200 rounded-b-md shadow-sm flex flex-col h-screen">
 
-      <h1 className="text-xl font-bold text-gray-800 mb-4 px-2">
+      <h1 className="text-xl font-bold text-gray-800 mb-4 px-2 py-3 shadow-[0_3px_3px_-2px_rgba(0,0,0,0.1)]">
         My Classes
       </h1>
 
