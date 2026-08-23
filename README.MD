@@ -29,15 +29,12 @@
 ## 🌐 Live Demo
 
 <div align="center">
-
-### 🚀 Try Campus Mind
-
-**[👉 Open the Live Application](https://campus-mind-ev1s.onrender.com)**
-
+  <a href="https://campus-mind-ev1s.onrender.com">
+    <img src="src/assets/page-view.png" alt="Try Campus Mind" width="600">
+  </a>
 </div>
 
 > ⚠️ **Note:** This project does not include video calling.
-
 ---
 
 ## 🧪 Local Run & White Screen Troubleshooting
