@@ -21,7 +21,7 @@ function DashboardHomeView() {
             <input type='text'
               placeholder='Enter Class Code'
               className='block px-4 py-2 w-full bg-white border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded-lg' />
-            <button className='block mx-auto rounded-2xl bg-emerald-500 px-6 py-2 text-white cursor-pointer'>Join</button>
+            <button className='block mx-full rounded-2xl bg-emerald-500 px-6 py-2 text-white cursor-pointer'>Join</button>
           </div>
         </div>
       </div>
