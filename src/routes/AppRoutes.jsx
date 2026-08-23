@@ -8,8 +8,7 @@ import ClassesPage from '../pages/classroom/ClassesPage.jsx'
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 import PracticsPage from '../pages/PracticsPage.jsx'
-
-const DashboardHomeView = () => <div className="text-xl font-semibold">Welcome to your Main Dashboard Area!</div>
+import DashboardHomeView from '../components/dashboard/DashboardHomeView.jsx'
 
 function AppRoutes() {
   return (
