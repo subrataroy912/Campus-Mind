@@ -4,7 +4,6 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage.jsx'
 import LoginPage from '../pages/auth/LoginPage.jsx'
 import RegisterPage from '../pages/auth/RegisterPage.jsx'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
-import ClassesPage from '../pages/classroom/ClassesPage.jsx'
 import DashboardPage from '../pages/dashboard/DashboardPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 import PracticsPage from '../pages/PracticsPage.jsx'
@@ -27,7 +26,7 @@ function AppRoutes() {
         <Route index element={<DashboardHomeView />} />
 
 
-        <Route element={<ClassesPage />} path="classes" />
+        <Route element={<h1>Working</h1>} path="classes" />
         <Route element={<h1>Chat View Working</h1>} path="chat" />
         <Route element={<h1>Settings View Working</h1>} path="settings" />
         <Route element={<h1>Notification View Working</h1>} path="notification" />
