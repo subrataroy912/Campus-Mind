@@ -9,7 +9,6 @@ export default function SidebarNav() {
         {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
           <li key={to}>
             <NavLink to={to} className={getNavLinkStyles}>
-              {/* Dynamic JSX initialization for icons */}
               <Icon size={20} className="shrink-0" />
               <span>{label}</span>
             </NavLink>

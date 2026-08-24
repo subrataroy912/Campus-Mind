@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, AlertTriangle, Route } from 'lucide-react'
-import './App.css'
 
 function App() {
   const devRoutes = [

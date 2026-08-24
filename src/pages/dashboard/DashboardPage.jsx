@@ -1,21 +1,33 @@
-import { Outlet } from 'react-router-dom'; // 1. Import Outlet
+import { Outlet } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import SidebarNav from '../../components/common/SidebarNav';
 import BrandLogo from "../../components/common/BrandLogo";
 
 function DashboardPage() {
   return (
-    <div className="flex min-h-screen w-full bg-slate-50/50">
-      <aside className="w-64 min-w-[256px] border-r border-indigo-100 bg-white flex flex-col">
-        <BrandLogo/>
-        <SidebarNav/>
+
+    <div className="flex h-screen w-full bg-slate-50/50 overflow-hidden">
+
+
+      <aside className="hidden md:flex w-46 lg:w-54 flex-col border-r border-indigo-100 bg-white shadow-sm z-20 shrink-0">
+        <BrandLogo />
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <SidebarNav />
+        </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <DashboardHeader />
-        <main className=" overflow-y-auto flex-1">
-          <Outlet /> 
+      <div className="flex-1 flex flex-col min-w-0 h-full relative">
+
+        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md">
+          <DashboardHeader />
+        </div>
+
+
+        <main className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">
+          <Outlet />
         </main>
+
       </div>
     </div>
   );

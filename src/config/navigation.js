@@ -5,7 +5,7 @@ import { GoGear } from 'react-icons/go';
 
 export const SIDEBAR_NAV_ITEMS = [
   {
-    label: 'Home',
+    label: 'Dashboard',
     to: '/dashboard',
     Icon: IoHomeOutline,
   },
