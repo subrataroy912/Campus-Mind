@@ -127,7 +127,7 @@ function LoginPage() {
               />
               Remember me
             </label>
-            <Link className="text-purple-700 hover:underline" to="/forgot-password">Forgot Password?</Link>
+            <Link className="text-purple-700 hover:underline" to="/auth/forgot-password">Forgot Password?</Link>
           </div>
 
           <Button className="w-full text-lg flex items-center justify-center gap-2" type="submit" disabled={isLoading}>
