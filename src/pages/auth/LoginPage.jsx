@@ -145,7 +145,7 @@ function LoginPage() {
           <Button variant="secondary" disabled={isLoading}>Microsoft</Button>
         </div>
         <p className="mt-8 text-center text-gray-600">
-          Don&apos;t have an account? <Link className="font-bold text-purple-700 hover:underline" to="/register">Sign up</Link>
+          Don&apos;t have an account? <Link className="font-bold text-purple-700 hover:underline" to="/auth/register">Sign up</Link>
         </p>
       </Card>
     </AuthLayout>

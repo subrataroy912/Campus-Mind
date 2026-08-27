@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import { useNavigate } from 'react-router-dom'; 
 
 function RegisterPage() {
   const navigate = useNavigate(); // Initialize navigate
@@ -69,7 +69,7 @@ function RegisterPage() {
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{' '}
-              <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <a href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
                 sign in to your existing account
               </a>
             </p>
