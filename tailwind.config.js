@@ -1,6 +1,7 @@
 
 /**@type{import('tailwindcss')*/
 module.exports = {
+    darkMode: 'class',
     content: ["./src/**/*.{jsx,html,js}"],
     theme: {
         extend: {},
