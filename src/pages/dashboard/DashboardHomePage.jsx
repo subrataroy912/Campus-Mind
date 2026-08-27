@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRightCircle } from 'lucide-react';
-import ClassCard from "./ClassCard.jsx";
+import ClassCard from "../../components/dashboard/ClassCard";
 
-function DashboardHomeView() {
+function DashboardHome() {
   return (
     <div className="min-h-screen  bg-gray-50/30">
 
@@ -86,4 +86,4 @@ function DashboardHomeView() {
   );
 }
 
-export default DashboardHomeView;
+export default DashboardHome;

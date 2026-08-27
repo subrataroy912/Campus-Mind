@@ -4,10 +4,13 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage.jsx'
 import LoginPage from '../pages/auth/LoginPage.jsx'
 import RegisterPage from '../pages/auth/RegisterPage.jsx'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
-import DashboardPage from '../pages/dashboard/DashboardPage.jsx'
+import DashboardLayout from '../components/layout/DashboardLayout.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 import PracticsPage from '../pages/PracticsPage.jsx'
-import DashboardHomeView from '../components/dashboard/DashboardHomeView.jsx'
+import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx'
+import DashboardClassesPage from '../pages/dashboard/DashboardClassesPage.jsx'
+import DashboardChatPage from '../pages/dashboard/DashboardChatPage.jsx'
+import DashboardSettingsPage from '../pages/dashboard/DashboardSettingsPage.jsx'
 
 function AppRoutes() {
   return (
@@ -17,20 +20,20 @@ function AppRoutes() {
       <Route element={<PracticsPage />} path="/practics" />
 
       {/* Authentication Routes */}
-      <Route element={<LoginPage />} path="/login" />
-      <Route element={<RegisterPage />} path="/register" />
-      <Route element={<ForgotPasswordPage />} path="/forgot-password" />
-      <Route element={<ResetPasswordPage />} path="/reset-password" />
+      <Route path='/auth'>
+        <Route index element={<Navigate to="login" replace />} />
+        <Route element={<LoginPage />} path="login" />
+        <Route element={<RegisterPage />} path="register" />
+        <Route element={<ForgotPasswordPage />} path="forgot-password" />
+        <Route element={<ResetPasswordPage />} path="reset-password" />
+      </Route>
 
-      <Route element={<DashboardPage />} path="/dashboard">
-        <Route index element={<DashboardHomeView />} />
+      <Route element={<DashboardLayout />} path="/dashboard">
 
-
-        <Route element={<h1>Working</h1>} path="classes" />
-        <Route element={<h1>Chat View Working</h1>} path="chat" />
-        <Route element={<h1>Settings View Working</h1>} path="settings" />
-        <Route element={<h1>Notification View Working</h1>} path="notification" />
-        <Route element={<h1>Profile View Working</h1>} path="profile" />
+        <Route index element={<DashboardHomePage />} />
+        <Route element={<DashboardClassesPage/>} path="classes" />
+        <Route element={<DashboardChatPage/>} path="chat" />
+        <Route element={<DashboardSettingsPage/>} path="settings" />
       </Route>
 
       <Route element={<NotFoundPage />} path="/404" />

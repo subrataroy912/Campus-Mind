@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router-dom';
-import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import SidebarNav from '../../components/common/SidebarNav';
-import BrandLogo from "../../components/common/BrandLogo";
+import DashboardHeader from '../dashboard/DashboardHeader';
+import SidebarNav from '../common/SidebarNav';
+import BrandLogo from "../common/BrandLogo";
 
-function DashboardPage() {
+function DashboardLayout() {
   return (
 
     <div className="flex h-screen w-full bg-slate-50/50 overflow-hidden">
@@ -33,4 +33,4 @@ function DashboardPage() {
   );
 }
 
-export default DashboardPage;
+export default DashboardLayout;
