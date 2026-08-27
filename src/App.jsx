@@ -7,12 +7,12 @@ function App() {
   return (
     <div className='min-h-screen bg-sky-500 flex flex-col items-center justify-center p-4'>
 
-      <div class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-md outline outline-black/5 dark:bg-gray-800">
-        <span class="inline-flex shrink-0 rounded-full border border-pink-300 bg-pink-100 p-2 dark:border-pink-300/10 dark:bg-pink-400/10">
+      <div className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-md outline outline-black/5 dark:bg-gray-800">
+        <span className="inline-flex shrink-0 rounded-full border border-pink-300 bg-pink-100 p-2 dark:border-pink-300/10 dark:bg-pink-400/10">
           <MdOutlinePublic color='white' />
         </span>
         <div>
-          <p class="text-gray-700 dark:text-gray-400">
+          <p className="text-gray-700 dark:text-gray-400">
             For Testing Purpose All Routes Are Public
           </p>
         </div>
