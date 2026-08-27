@@ -5,18 +5,15 @@ import { MdOutlinePublic } from 'react-icons/md'
 
 function App() {
   return (
-    <div className='min-h-screen bg-sky-500 flex flex-col items-center justify-center p-4'>
-
-      <div className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-md outline outline-black/5 dark:bg-gray-800">
-        <span className="inline-flex shrink-0 rounded-full border border-pink-300 bg-pink-100 p-2 dark:border-pink-300/10 dark:bg-pink-400/10">
-          <MdOutlinePublic color='white' />
-        </span>
-        <div>
-          <p className="text-gray-700 dark:text-gray-400">
-            For Testing Purpose All Routes Are Public
-          </p>
-        </div>
+    <div className='min-h-screen bg-sky-500 flex flex-col items-center justify-center p-4 relative pt-12'>
+      
+      {/* Running Warning Text Banner at the top */}
+      <div className="absolute top-0 left-0 w-full bg-yellow-400 text-black py-1 font-bold text-sm shadow-md overflow-hidden z-50">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+          ⚠️ WARNING: For Testing Purposes All Routes Are Public!⚠️
+        </marquee>
       </div>
+      
       <div className='text-center mb-10 text-white'>
         <div className='flex justify-center mb-4'>
           <BrandLogo />
@@ -27,10 +24,10 @@ function App() {
       </div>
 
       <div className='flex flex-col items-center justify-center bg-white p-6 rounded-lg shadow-lg gap-4'>
-        <Link to="/dashboard" className="text-xl font-serif text-sky-600 hover:underline">
+        <Link to="/dashboard" className="text-xl font-serif text-sky-600  shadow-lg shadow-black-sm">
           Go to Dashboard
         </Link>
-        <Link to="/auth" className="text-xl font-serif text-sky-600 hover:underline">
+        <Link to="/auth" className="text-xl font-serif text-sky-600 shadow-lg shadow-black-sm">
           Go to Login/Register
         </Link>
       </div>
