@@ -11,13 +11,20 @@ import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx'
 import DashboardClassesPage from '../pages/dashboard/DashboardClassesPage.jsx'
 import DashboardChatPage from '../pages/dashboard/DashboardChatPage.jsx'
 import DashboardSettingsPage from '../pages/dashboard/DashboardSettingsPage.jsx'
-
+import ProfilePage from "../pages/profile/ProfilePage.jsx"
+import NotificationPage from "../pages/notification/NotificationsPage.jsx"
 function AppRoutes() {
   return (
     <Routes>
       {/* Root public routes */}
       <Route element={<App />} path="/" />
       <Route element={<PracticsPage />} path="/practics" />
+      
+      {/** Protected routes: Have to protect */}
+      <Route element={<ProfilePage />} path="/profile" />
+      <Route element={<NotificationPage />} path="/notification" />
+
+
 
       {/* Authentication Routes */}
       <Route path='/auth'>
