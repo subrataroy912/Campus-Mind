@@ -12,7 +12,7 @@ function DashboardLayout() {
       <aside className="hidden md:flex w-46 lg:w-54 flex-col border-r border-indigo-100 bg-white shadow-sm z-20 shrink-0">
         <BrandLogo />
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 overflow-y-auto scrollbar-none">
           <SidebarNav />
         </div>
       </aside>

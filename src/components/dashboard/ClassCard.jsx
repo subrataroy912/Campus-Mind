@@ -15,7 +15,7 @@ export default function ClassCard({ classItem }) {
           <h3 className="font-bold text-gray-800 text-lg sm:text-xl truncate w-full tracking-tight">
             {name}
           </h3>
-          <span className="text-[11px] truncate font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
+          <span className="text-[11px] truncate tracking-tight font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
             by {created_by_user_id}
           </span>
         </div>
