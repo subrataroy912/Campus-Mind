@@ -1,11 +1,22 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import BrandLogo from './components/common/BrandLogo'
+import { MdOutlinePublic } from 'react-icons/md'
 
 function App() {
   return (
     <div className='min-h-screen bg-sky-500 flex flex-col items-center justify-center p-4'>
-      
+
+      <div class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-md outline outline-black/5 dark:bg-gray-800">
+        <span class="inline-flex shrink-0 rounded-full border border-pink-300 bg-pink-100 p-2 dark:border-pink-300/10 dark:bg-pink-400/10">
+          <MdOutlinePublic color='white' />
+        </span>
+        <div>
+          <p class="text-gray-700 dark:text-gray-400">
+            For Testing Purpose All Routes Are Public
+          </p>
+        </div>
+      </div>
       <div className='text-center mb-10 text-white'>
         <div className='flex justify-center mb-4'>
           <BrandLogo />
@@ -23,7 +34,7 @@ function App() {
           Go to Login/Register
         </Link>
       </div>
-      
+
     </div>
   )
 }
