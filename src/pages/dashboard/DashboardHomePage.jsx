@@ -52,27 +52,14 @@ function DashboardHome() {
               ))}
             </div>
           </div>
-
-          {/* Bottom Modules Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="flex flex-col bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm min-h-52">
-              <h2 className="font-semibold text-gray-800 text-sm sm:text-base mb-3">Upcoming Assignments</h2>
-              <div className="grow flex items-center justify-center text-gray-400 text-sm">No assignments due soon.</div>
-            </div>
-            <div className="flex flex-col bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm min-h-52">
-              <h2 className="font-semibold text-gray-800 text-sm sm:text-base mb-3">Global Announcements</h2>
-              <div className="grow flex items-center justify-center text-gray-400 text-sm">No new announcements.</div>
-            </div>
-          </div>
-
         </div>
 
         {/* Right Sidebar Area */}
-        <div className="flex flex-col gap-4 sm:gap-6 lg:col-span-3 mt-2 lg:mt-0">
+        <div className="hidden  md:flex flex-col gap-4 sm:gap-6 lg:col-span-3 mt-2 lg:mt-0">
 
           <div className="flex flex-col bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm min-h-52 sm:min-h-64">
             <h2 className="font-semibold text-gray-800 text-sm sm:text-base mb-3">Recent Activities</h2>
-             <div className="grow flex items-center justify-center text-gray-400 text-sm">No recent activity.</div>
+            <div className="grow flex items-center justify-center text-gray-400 text-sm">No recent activity.</div>
           </div>
 
           <div className="flex flex-col bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm min-h-52 sm:min-h-64">

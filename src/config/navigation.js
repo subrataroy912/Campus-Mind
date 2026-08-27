@@ -2,6 +2,7 @@
 import { IoBookOutline, IoHomeOutline } from 'react-icons/io5';
 import { BsChat } from 'react-icons/bs';
 import { GoGear } from 'react-icons/go';
+import { MdAssignment } from 'react-icons/md';
 
 export const SIDEBAR_NAV_ITEMS = [
   {
@@ -18,6 +19,11 @@ export const SIDEBAR_NAV_ITEMS = [
     label: 'Chat',
     to: '/dashboard/chat',
     Icon: BsChat,
+  },
+  {
+    label: 'Assignment',
+    to: '/dashboard/Assignment',
+    Icon: MdAssignment,
   },
   {
     label: 'Settings',

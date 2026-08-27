@@ -11,15 +11,17 @@ import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx'
 import DashboardClassesPage from '../pages/dashboard/DashboardClassesPage.jsx'
 import DashboardChatPage from '../pages/dashboard/DashboardChatPage.jsx'
 import DashboardSettingsPage from '../pages/dashboard/DashboardSettingsPage.jsx'
+import DashboardAssignmentPage from '../pages/dashboard/DashboardAssignmentPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
 import NotificationPage from "../pages/notification/NotificationsPage.jsx"
+
 function AppRoutes() {
   return (
     <Routes>
       {/* Root public routes */}
       <Route element={<App />} path="/" />
       <Route element={<PracticsPage />} path="/practics" />
-      
+
       {/** Protected routes: Have to protect */}
       <Route element={<ProfilePage />} path="/profile" />
       <Route element={<NotificationPage />} path="/notification" />
@@ -38,9 +40,10 @@ function AppRoutes() {
       <Route element={<DashboardLayout />} path="/dashboard">
 
         <Route index element={<DashboardHomePage />} />
-        <Route element={<DashboardClassesPage/>} path="classes" />
-        <Route element={<DashboardChatPage/>} path="chat" />
-        <Route element={<DashboardSettingsPage/>} path="settings" />
+        <Route element={<DashboardClassesPage />} path="classes" />
+        <Route element={<DashboardChatPage />} path="chat" />
+        <Route element={<DashboardAssignmentPage />} path="assignment" />
+        <Route element={<DashboardSettingsPage />} path="settings" />
       </Route>
 
       <Route element={<NotFoundPage />} path="/404" />

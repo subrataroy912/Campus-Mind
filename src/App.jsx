@@ -61,6 +61,11 @@ function App() {
     },
     {
       "id": "12",
+      "name": "Campus Assignment",
+      "path": "/dashboard/assignment"
+    },
+    {
+      "id": "13",
       "name": "System Settings",
       "path": "/dashboard/settings"
     }

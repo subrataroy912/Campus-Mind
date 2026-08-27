@@ -28,7 +28,11 @@ function DashboardHeader() {
           <ul className="p-3 space-y-1">
             {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
               <li key={to}>
-                <NavLink to={to} className={({ isActive }) => getNavLinkStyles(isActive)}>
+                <NavLink
+                  to={to}
+                  end={to === "/dashboard"}
+                  className={({ isActive }) => getNavLinkStyles(isActive)}
+                  onClick={() => setIsMenuBarOpen(!isMenuBarOpen)}>
                   <Icon size={20} className="shrink-0" />
                   <span>{label}</span>
                 </NavLink>
