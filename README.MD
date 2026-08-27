@@ -84,24 +84,55 @@ The included `render.yaml` captures those settings. If the app is deployed as a 
 
 ## 📚 Table of Contents
 
-- [📖 Project Overview](#-project-overview)
-- [✨ Main Features](#-main-features)
-- [🛠️ Technology Stack](#️-technology-stack)
-- [🏗️ Application Architecture](#️-application-architecture)
-- [📱 Main Pages](#-main-pages)
-- [🖥️ Core UI Screens](#️-core-ui-screens)
-- [👥 User Roles](#-user-roles)
-- [🗄️ Database Entities](#️-database-entities)
-- [🔌 REST API Structure](#-rest-api-structure)
-- [💬 Real-Time Chat](#-real-time-chat)
-- [🎨 UI/UX Principles](#-uiux-principles)
-- [⚛️ Frontend Structure](#️-frontend-structure)
-- [☕ Backend Structure](#-backend-structure)
-- [🔐 Security Requirements](#-security-requirements)
-- [📏 Important Development Rules](#-important-development-rules)
-- [🚀 MVP Scope](#-mvp-scope)
-- [🔮 Future Features](#-future-features)
-- [🎯 Project Goal](#-project-goal)
+- [🎓 Classroom Chat Platform](#-classroom-chat-platform)
+    - [A modern classroom, assignment, study material, grading \& real-time communication platform.](#a-modern-classroom-assignment-study-material-grading--real-time-communication-platform)
+  - [🌐 Live Demo](#-live-demo)
+  - [🧪 Local Run \& White Screen Troubleshooting](#-local-run--white-screen-troubleshooting)
+    - [Run locally](#run-locally)
+    - [Build and preview production output](#build-and-preview-production-output)
+    - [Environment variables](#environment-variables)
+    - [Render/static hosting deployment](#renderstatic-hosting-deployment)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [📖 Project Overview](#-project-overview)
+    - [🎯 Main Goal](#-main-goal)
+  - [✨ Main Features](#-main-features)
+    - [🔐 Authentication](#-authentication)
+    - [👨‍🏫 Teacher Features](#-teacher-features)
+    - [👨‍🎓 Student Features](#-student-features)
+    - [💬 Chat System](#-chat-system)
+    - [🔔 Notifications](#-notifications)
+  - [🛠️ Technology Stack](#️-technology-stack)
+    - [⚛️ Frontend](#️-frontend)
+    - [☕ Backend](#-backend)
+    - [🗄️ Database](#️-database)
+    - [📦 File Storage](#-file-storage)
+  - [🏗️ Application Architecture](#️-application-architecture)
+  - [📱 Main Pages](#-main-pages)
+    - [🌍 Public Pages](#-public-pages)
+    - [🏠 Main Application](#-main-application)
+    - [🏫 Class](#-class)
+    - [💬 Communication](#-communication)
+    - [👤 User](#-user)
+    - [❌ Other](#-other)
+  - [🖥️ Core UI Screens](#️-core-ui-screens)
+    - [Core Entities](#core-entities)
+  - [🔌 REST API Structure](#-rest-api-structure)
+    - [Main Resources](#main-resources)
+    - [🔐 Authentication Endpoints](#-authentication-endpoints)
+  - [💬 Real-Time Chat](#-real-time-chat)
+    - [🔄 Example Flow](#-example-flow)
+  - [🎨 UI/UX Principles](#-uiux-principles)
+    - [🧹 Clean](#-clean)
+    - [✨ Simple](#-simple)
+    - [📱 Responsive](#-responsive)
+    - [🎯 Consistent](#-consistent)
+    - [☀️ Light Mode](#️-light-mode)
+  - [📏 Important Development Rules](#-important-development-rules)
+  - [🚀 MVP Scope](#-mvp-scope)
+  - [🔮 Future Features](#-future-features)
+  - [🎯 Project Goal](#-project-goal)
+    - [💡 Most Important Technical Areas](#-most-important-technical-areas)
+    - [🚀 Built to make digital classrooms simpler.](#-built-to-make-digital-classrooms-simpler)
 
 ---
 
@@ -196,7 +227,7 @@ Create a **clean, simple, responsive, and easy-to-use educational platform**.
 | Tailwind CSS | Styling |
 | Axios | HTTP requests |
 | JavaScript/TypeScript | Programming |
-| WebSocket/STOMP Client | Real-time communication |
+| STOMP.js & sockjs | WebSocket/STOMP Client |
 
 ### ☕ Backend
 
@@ -214,7 +245,7 @@ Create a **clean, simple, responsive, and easy-to-use educational platform**.
 
 ### 🗄️ Database
 
-- PostgreSQL / MySQL
+- Mongodb,RabbitMQ & Redis
 
 ### 📦 File Storage
 
@@ -224,7 +255,7 @@ Create a **clean, simple, responsive, and easy-to-use educational platform**.
 
 **Production**
 
-- Cloud Object Storage
+- AWS S3
 
 ---
 
@@ -333,50 +364,10 @@ The major screens are:
 
 ---
 
-## 👥 User Roles
-
-### 👨‍🏫 Teacher
-
-```text
-TEACHER
-   │
-   ├── Create Class
-   ├── Manage Class
-   ├── Create Assignment
-   ├── Upload Material
-   ├── Post Announcement
-   ├── Review Submission
-   ├── Give Grade
-   ├── Give Feedback
-   └── Chat
-```
-
-### 👨‍🎓 Student
-
-```text
-STUDENT
-   │
-   ├── Join Class
-   ├── View Class
-   ├── View Materials
-   ├── View Assignments
-   ├── Submit Assignment
-   ├── View Grade
-   ├── View Feedback
-   └── Chat
-```
-
----
-
-## 🗄️ Database Entities
-
-The backend should use a **relational database**.
-
 ### Core Entities
 
 ```text
 User
-Role
 Classroom
 ClassMember
 Announcement
@@ -513,101 +504,6 @@ The primary design should use a modern light interface with:
 
 ---
 
-## ⚛️ Frontend Structure
-
-Recommended React structure:
-
-```text
-src/
-│
-├── assets/
-│
-├── components/
-│   ├── common/
-│   ├── layout/
-│   ├── classroom/
-│   ├── assignment/
-│   ├── chat/
-│   └── notification/
-│
-├── pages/
-│   ├── auth/
-│   ├── dashboard/
-│   ├── classroom/
-│   ├── assignment/
-│   ├── chat/
-│   ├── profile/
-│   └── settings/
-│
-├── routes/
-│
-├── services/
-│   ├── api/
-│   └── websocket/
-│
-├── hooks/
-├── context/
-├── utils/
-│
-├── App.jsx
-└── main.jsx
-```
-
----
-
-## ☕ Backend Structure
-
-Recommended Spring Boot structure:
-
-```text
-src/main/java/com/example/classroom/
-
-├── config/
-├── controller/
-├── service/
-├── repository/
-├── entity/
-├── dto/
-├── mapper/
-├── security/
-├── exception/
-├── websocket/
-└── ClassroomApplication.java
-```
-
-### 🧱 Layered Architecture
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Database
-```
-
----
-
-## 🔐 Security Requirements
-
-The application should implement:
-
-- JWT authentication
-- Password hashing
-- Spring Security
-- Role-based authorization
-- Protected APIs
-- Input validation
-- File validation
-- Secure file access
-- Authentication expiration
-- Proper error handling
-
-> 🔒 **Passwords must never be stored as plain text.**
-
----
-
 ## 📏 Important Development Rules
 
 The AI/developer working on this project should follow these rules:
@@ -701,7 +597,6 @@ REST API
     +
 JWT Authentication
     +
-Role-Based Authorization
     +
 SQL Database
     +
