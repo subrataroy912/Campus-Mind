@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BrandLogo from './components/common/BrandLogo'
 
@@ -56,13 +56,13 @@ function App() {
     },
     {
       "id": "11",
-      "name": "Campus Chat",
-      "path": "/dashboard/chat"
+      "name": "Campus Messages",
+      "path": "/dashboard/messages"
     },
     {
       "id": "12",
-      "name": "Campus Assignment",
-      "path": "/dashboard/assignment"
+      "name": "Campus Assignments",
+      "path": "/dashboard/assignments"
     },
     {
       "id": "13",

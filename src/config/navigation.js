@@ -1,8 +1,5 @@
-// src/config/navigation.js
-import { IoBookOutline, IoHomeOutline } from 'react-icons/io5';
-import { BsChat } from 'react-icons/bs';
-import { GoGear } from 'react-icons/go';
-import { MdAssignment } from 'react-icons/md';
+import { IoBookOutline, IoHomeOutline, IoPeopleSharp } from 'react-icons/io5';
+import { MessageCircleIcon, NotebookIcon, SaveIcon } from 'lucide-react';
 
 export const SIDEBAR_NAV_ITEMS = [
   {
@@ -11,23 +8,28 @@ export const SIDEBAR_NAV_ITEMS = [
     Icon: IoHomeOutline,
   },
   {
-    label: 'Classes',
+    label: 'My Classes',
     to: '/dashboard/classes',
     Icon: IoBookOutline,
   },
   {
-    label: 'Chat',
-    to: '/dashboard/chat',
-    Icon: BsChat,
+    label: 'Community',
+    to: '/dashboard/community',
+    Icon: IoPeopleSharp,
   },
   {
-    label: 'Assignment',
+    label: 'Messages',
+    to: '/dashboard/messages',
+    Icon: MessageCircleIcon,
+  },
+  {
+    label: 'Assignments',
     to: '/dashboard/Assignment',
-    Icon: MdAssignment,
+    Icon: NotebookIcon,
   },
   {
-    label: 'Settings',
-    to: '/dashboard/settings',
-    Icon: GoGear,
+    label: 'Saved',
+    to: '/dashboard/saved',
+    Icon: SaveIcon ,
   },
 ];

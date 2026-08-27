@@ -9,9 +9,10 @@ import NotFoundPage from '../pages/NotFoundPage.jsx'
 import PracticsPage from '../pages/PracticsPage.jsx'
 import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx'
 import DashboardClassesPage from '../pages/dashboard/DashboardClassesPage.jsx'
-import DashboardChatPage from '../pages/dashboard/DashboardChatPage.jsx'
-import DashboardSettingsPage from '../pages/dashboard/DashboardSettingsPage.jsx'
+import DashboardMessagesPage from '../pages/dashboard/DashboardMessagesPage.jsx'
+import SettingsPage from '../pages/settings/SettingsPage.jsx'
 import DashboardAssignmentPage from '../pages/dashboard/DashboardAssignmentPage.jsx'
+import DashboardCommunityPage from '../pages/dashboard/DashboardCommunityPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
 import NotificationPage from "../pages/notification/NotificationsPage.jsx"
 
@@ -25,6 +26,7 @@ function AppRoutes() {
       {/** Protected routes: Have to protect */}
       <Route element={<ProfilePage />} path="/profile" />
       <Route element={<NotificationPage />} path="/notification" />
+      <Route element={<SettingsPage />} path="/settings" />
 
 
 
@@ -41,9 +43,10 @@ function AppRoutes() {
 
         <Route index element={<DashboardHomePage />} />
         <Route element={<DashboardClassesPage />} path="classes" />
-        <Route element={<DashboardChatPage />} path="chat" />
+        <Route element={<DashboardCommunityPage />} path="community" />
+        <Route element={<DashboardMessagesPage />} path="messages" />
         <Route element={<DashboardAssignmentPage />} path="assignment" />
-        <Route element={<DashboardSettingsPage />} path="settings" />
+        <Route element={< h1>saved page</h1>} path="saved" />
       </Route>
 
       <Route element={<NotFoundPage />} path="/404" />

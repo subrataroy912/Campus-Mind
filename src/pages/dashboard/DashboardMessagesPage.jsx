@@ -1,9 +1,9 @@
 import React from 'react'
 
-function DashboardChatPage() {
+function DashboardMessagesPage() {
   return (
     <div>DashboardChatPage</div>
   )
 }
 
-export default DashboardChatPage
+export default DashboardMessagesPage
