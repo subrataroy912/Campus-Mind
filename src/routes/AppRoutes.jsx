@@ -14,7 +14,6 @@ import SettingsPage from '../pages/settings/SettingsPage.jsx'
 import DashboardAssignmentPage from '../pages/dashboard/DashboardAssignmentPage.jsx'
 import DashboardCommunityPage from '../pages/dashboard/DashboardCommunityPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
-import NotificationPage from "../pages/notification/NotificationsPage.jsx"
 
 function AppRoutes() {
   return (
@@ -25,7 +24,6 @@ function AppRoutes() {
 
       {/** Protected routes: Have to protect */}
       <Route element={<ProfilePage />} path="/profile" />
-      <Route element={<NotificationPage />} path="/notification" />
       <Route element={<SettingsPage />} path="/settings" />
 
 

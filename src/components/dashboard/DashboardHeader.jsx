@@ -1,16 +1,16 @@
-import { MenuIcon, Plus, SearchIcon, UploadIcon } from 'lucide-react';
-import { FaAngleDown } from "react-icons/fa";
-import { Link, NavLink } from 'react-router-dom';
-import { IoIosNotificationsOutline } from 'react-icons/io';
 import { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import avatarImage from "../../assets/avatar.png";
+import { BsGear } from 'react-icons/bs';
+import { IoIosNotificationsOutline } from 'react-icons/io';
+import { MenuIcon, Plus, SearchIcon, UploadIcon } from 'lucide-react';
 import { SIDEBAR_NAV_ITEMS } from "../../config/navigation"
 import { getNavLinkStyles } from "../../utils/routeHelpers"
-import { BsGear } from 'react-icons/bs';
+import NotificationCard from '../notification/NotificationCard';
 function DashboardHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuBarOpen, setIsMenuBarOpen] = useState(false);
-
+  const [isNotificationCard, setIsNotificationCard] = useState(false);
   return (
     <section className="relative shadow-sm flex items-center justify-between gap-5 rounded-lg bg-white px-2 py-2 text-gray-950">
 
@@ -84,17 +84,18 @@ function DashboardHeader() {
           </li>
 
           {/* Notifications */}
-          <li>
-            <Link
-              to="/notification"
+          <li className=''>
+            <button
               className="relative flex items-center justify-center p-1 text-gray-700 hover:text-gray-900 transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Notifications"
+              onClick={() => setIsNotificationCard(true)}
             >
               <IoIosNotificationsOutline size={30} />
               <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full border border-white">
                 1
               </span>
-            </Link>
+            </button>
+
           </li>
 
           {/* Profile Dropdown */}
@@ -113,34 +114,42 @@ function DashboardHeader() {
               />
             </button>
 
-            {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white py-1 z-50 border border-gray-100 rounded-md shadow-lg">
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  Profile
-                </Link>
-                <Link
-                  to="/dashboard/settings"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  Settings
-                </Link>
-                <hr className="my-1 border-gray-200" />
-                <button
-                  className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus:bg-red-50"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  Log out
-                </button>
-              </div>
-            )}
+
+
           </li>
         </ul>
+        {isDropdownOpen && (
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white py-1 z-50 border border-gray-100 rounded-md shadow-lg">
+            <Link
+              to="/profile"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Profile
+            </Link>
+            <Link
+              to="/dashboard/settings"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Settings
+            </Link>
+            <hr className="my-1 border-gray-200" />
+            <button
+              className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus:bg-red-50"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              Log out
+            </button>
+          </div>
+        )}
+        {
+          isNotificationCard && (
+            <NotificationCard onClose={() => setIsNotificationCard(false)} />
+          )
+        }
       </div>
+
     </section >
   );
 }
