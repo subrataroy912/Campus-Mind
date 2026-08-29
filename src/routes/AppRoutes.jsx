@@ -14,6 +14,8 @@ import SettingsPage from '../pages/settings/SettingsPage.jsx'
 import DashboardAssignmentPage from '../pages/dashboard/DashboardAssignmentPage.jsx'
 import DashboardCommunityPage from '../pages/dashboard/DashboardCommunityPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
+import CreateClass from '../pages/classroom/CreateClass.jsx'
+import JoinClass from '../pages/classroom/JoinClass.jsx'
 
 function AppRoutes() {
   return (
@@ -25,6 +27,8 @@ function AppRoutes() {
       {/** Protected routes: Have to protect */}
       <Route element={<ProfilePage />} path="/profile" />
       <Route element={<SettingsPage />} path="/settings" />
+      <Route element={<CreateClass />} path="/create-class" />
+      <Route element={<JoinClass />} path="/join-class" />
 
 
 
