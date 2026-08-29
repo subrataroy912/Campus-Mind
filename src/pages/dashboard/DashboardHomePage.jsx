@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRightCircle } from 'lucide-react';
 import ClassCard from "../../components/dashboard/ClassCard";
 import Classes from "../../utils/data.js";
+import { it } from 'date-fns/locale';
 
 function DashboardHome() {
   return (
@@ -29,7 +30,7 @@ function DashboardHome() {
                 + Create New Class
               </Link >
               <Link
-              to={"/join-class"}
+                to={"/join-class"}
                 className="bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg border border-gray-200 shadow-sm transition-colors text-center">
                 Join with class code
               </Link >
@@ -50,9 +51,34 @@ function DashboardHome() {
               </Link>
             </div>
 
+            {/* title = "Algebra II",
+            subtitle = "Period 3",
+            theme = "bg-indigo-500",
+            coverImage = null,
+            teacher = {name: "Ms. Patel", avatar: null, initials: "MP" },
+            unreadCount = 0,
+            deadline = null,
+            memberCount = 0,
+            onlineCount = 0,
+            onAction,
+            onOpen, */}
+
             <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 sm:gap-5">
-              {Classes.slice(0, 4).map((item) => (
-                <ClassCard key={item.id} classItem={item} />
+              {Classes.slice(0, 4).map((item, index) => (
+                <ClassCard
+                  key={index}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  theme={item.theme}
+                  coverImage={item.coverImage}
+                  teacher={item.teacher}
+                  unreadCount={item.unreadCount}
+                  deadline={item.deadline}
+                  memberCount={item.memberCount}
+                  onlineCount={item.onlineCount}
+                  onAction={item.onAction}
+                  onOpen={item.onOpen}
+                />
               ))}
             </div>
           </div>

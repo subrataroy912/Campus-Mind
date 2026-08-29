@@ -1,78 +1,133 @@
 const Classes = [
     {
-        "id": "651abc123def456001111111",
-        "name": "Physics-1",
-        "description": "Introduction to classical mechanics, kinematics, and Newton's laws of motion.",
-        "created_by_user_id": "usr_889900aabbcc",
-        "member_ids": [
-            "usr_112233",
-            "usr_445566",
-            "usr_778899"
-        ],
-        "created_at": "2026-08-25T09:00:00.000Z",
-        "updated_at": "2026-08-26T14:30:00.000Z"
+        "title": "Algebra II",
+        "subtitle": "Period 3",
+        "theme": "bg-indigo-500",
+        "coverImage": null,
+        "teacher": { "name": "Ms. Patel", "avatar": null, "initials": "MP" },
+        "unreadCount": 0,
+        "deadline": null,
+        "memberCount": 24,
+        "onlineCount": 3,
+        "onAction": null,
+        "onOpen": null
     },
     {
-        "id": "651abc123def456002222222",
-        "name": "Computer Science & Technology",
-        "description": "Core operating systems concepts, process management, and memory architecture.",
-        "created_by_user_id": "usr_889900aabbcc",
-        "member_ids": [
-            "usr_112233",
-            "usr_990011"
-        ],
-        "created_at": "2026-08-26T10:15:00.000Z",
-        "updated_at": "2026-08-26T10:15:00.000Z"
+        "title": "World History",
+        "subtitle": "Period 1",
+        "theme": "bg-rose-500",
+        "coverImage": null,
+        "teacher": { "name": "Mr. Davis", "avatar": null, "initials": "MD" },
+        "unreadCount": 2,
+        "deadline": "2026-09-02T23:59:00Z",
+        "memberCount": 28,
+        "onlineCount": 5,
+        "onAction": null,
+        "onOpen": null
     },
     {
-        "id": "651abc123def456003333333",
-        "name": "Advanced Mathematics",
-        "description": null,
-        "created_by_user_id": "usr_445566",
-        "member_ids": [],
-        "created_at": "2026-08-27T08:00:00.000Z",
-        "updated_at": "2026-08-27T08:00:00.000Z"
+        "title": "AP Physics",
+        "subtitle": "Period 4",
+        "theme": "bg-blue-600",
+        "coverImage": "https://example.com/physics-bg.jpg",
+        "teacher": { "name": "Dr. Chen", "avatar": null, "initials": "LC" },
+        "unreadCount": 5,
+        "deadline": "2026-08-30T17:00:00Z",
+        "memberCount": 18,
+        "onlineCount": 12,
+        "onAction": null,
+        "onOpen": null
     },
     {
-        "id": "651abc123def456004444444",
-        "name": "Modern Web Development",
-        "description": "Full-stack development using React, Node, and cloud deployments on Render and Netlify.",
-        "created_by_user_id": "usr_889900aabbcc",
-        "member_ids": [
-            "usr_112233",
-            "usr_445566",
-            "usr_778899",
-            "usr_990011",
-            "usr_334455"
-        ],
-        "created_at": "2026-08-20T11:00:00.000Z",
-        "updated_at": "2026-08-22T16:45:00.000Z"
+        "title": "English Literature",
+        "subtitle": "Period 2",
+        "theme": "bg-emerald-600",
+        "coverImage": null,
+        "teacher": { "name": "Mrs. Smith", "avatar": "https://example.com/smith.jpg", "initials": "SS" },
+        "unreadCount": 0,
+        "deadline": null,
+        "memberCount": 30,
+        "onlineCount": 1,
+        "onAction": null,
+        "onOpen": null
     },
     {
-        "id": "651abc123def456005555555",
-        "name": "Generative AI Mastermind",
-        "description": "Exploring LLMs, prompt engineering, and API integration with Google AI Studio and Gemini.",
-        "created_by_user_id": "usr_778899",
-        "member_ids": [
-            "usr_889900aabbcc",
-            "usr_112233",
-            "usr_223344",
-            "usr_556677"
-        ],
-        "created_at": "2026-08-22T09:30:00.000Z",
-        "updated_at": "2026-08-27T08:00:00.000Z"
+        "title": "Physical Education",
+        "subtitle": "Period 6",
+        "theme": "bg-orange-500",
+        "coverImage": null,
+        "teacher": { "name": "Coach Johnson", "avatar": null, "initials": "CJ" },
+        "unreadCount": 0,
+        "deadline": null,
+        "memberCount": 45,
+        "onlineCount": 0,
+        "onAction": null,
+        "onOpen": null
     },
     {
-        "id": "651abc123def456006666666",
-        "name": "Systems Programming with Rust",
-        "description": "Deep dive into Rust networking primitives, std::net, and low-level system design.",
-        "created_by_user_id": "usr_889900aabbcc",
-        "member_ids": [
-            "usr_445566",
-            "usr_990011"
-        ],
-        "created_at": "2026-08-24T14:20:00.000Z",
-        "updated_at": "2026-08-25T10:10:00.000Z"
+        "title": "Chemistry Honors",
+        "subtitle": "Period 5",
+        "theme": "bg-cyan-600",
+        "coverImage": null,
+        "teacher": { "name": "Mr. White", "avatar": null, "initials": "MW" },
+        "unreadCount": 12,
+        "deadline": "2026-09-05T08:00:00Z",
+        "memberCount": 22,
+        "onlineCount": 8,
+        "onAction": null,
+        "onOpen": null
+    },
+    {
+        "title": "Spanish II",
+        "subtitle": "Period 7",
+        "theme": "bg-yellow-500",
+        "coverImage": null,
+        "teacher": { "name": "Sra. Garcia", "avatar": null, "initials": "EG" },
+        "unreadCount": 1,
+        "deadline": null,
+        "memberCount": 26,
+        "onlineCount": 4,
+        "onAction": null,
+        "onOpen": null
+    },
+    {
+        "title": "Computer Science",
+        "subtitle": "Period 8",
+        "theme": "bg-slate-700",
+        "coverImage": null,
+        "teacher": { "name": "Ms. Turing", "avatar": null, "initials": "AT" },
+        "unreadCount": 0,
+        "deadline": "2026-09-01T23:59:00Z",
+        "memberCount": 20,
+        "onlineCount": 18,
+        "onAction": null,
+        "onOpen": null
+    },
+    {
+        "title": "Art Fundamentals",
+        "subtitle": "Period 1",
+        "theme": "bg-pink-500",
+        "coverImage": "https://example.com/art-bg.jpg",
+        "teacher": { "name": "Mr. Ross", "avatar": null, "initials": "BR" },
+        "unreadCount": 0,
+        "deadline": null,
+        "memberCount": 32,
+        "onlineCount": 2,
+        "onAction": null,
+        "onOpen": null
+    },
+    {
+        "title": "Symphony Orchestra",
+        "subtitle": "Period 2",
+        "theme": "bg-purple-600",
+        "coverImage": null,
+        "teacher": { "name": "Ms. Melody", "avatar": null, "initials": "MM" },
+        "unreadCount": 4,
+        "deadline": "2026-09-10T15:30:00Z",
+        "memberCount": 55,
+        "onlineCount": 0,
+        "onAction": null,
+        "onOpen": null
     }
 ];
 
