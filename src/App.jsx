@@ -11,61 +11,66 @@ function App() {
     },
     {
       "id": "2",
+      "name": "Get Started",
+      "path": "/get-started"
+    },
+    {
+      "id": "3",
       "name": "Practice Hub",
       "path": "/practics"
     },
     {
-      "id": "3",
+      "id": "4",
       "name": "User Profile",
       "path": "/profile"
     },
     {
-      "id": "4",
+      "id": "5",
       "name": "Notifications",
       "path": "/notification"
     },
     {
-      "id": "5",
+      "id": "6",
       "name": "Login Portal",
       "path": "/auth/login"
     },
     {
-      "id": "6",
+      "id": "7",
       "name": "Register Account",
       "path": "/auth/register"
     },
     {
-      "id": "7",
+      "id": "8",
       "name": "Forgot Password",
       "path": "/auth/forgot-password"
     },
     {
-      "id": "8",
+      "id": "9",
       "name": "Reset Password",
       "path": "/auth/reset-password"
     },
     {
-      "id": "9",
+      "id": "10",
       "name": "Dashboard Home",
       "path": "/dashboard"
     },
     {
-      "id": "10",
+      "id": "11",
       "name": "Academic Classes",
       "path": "/dashboard/classes"
     },
     {
-      "id": "11",
+      "id": "12",
       "name": "Campus Messages",
       "path": "/dashboard/messages"
     },
     {
-      "id": "12",
+      "id": "13",
       "name": "Campus Assignments",
       "path": "/dashboard/assignments"
     },
     {
-      "id": "13",
+      "id": "14",
       "name": "System Settings",
       "path": "/dashboard/settings"
     }
