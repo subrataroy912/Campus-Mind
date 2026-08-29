@@ -13,6 +13,7 @@ import DashboardMessagesPage from '../pages/dashboard/DashboardMessagesPage.jsx'
 import SettingsPage from '../pages/settings/SettingsPage.jsx'
 import DashboardAssignmentPage from '../pages/dashboard/DashboardAssignmentPage.jsx'
 import DashboardCommunityPage from '../pages/dashboard/DashboardCommunityPage.jsx'
+import DashboardSavedPage from '../pages/dashboard/DashboardSavedPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
 import CreateClass from '../pages/classroom/CreateClass.jsx'
 import JoinClass from '../pages/classroom/JoinClass.jsx'
@@ -48,7 +49,7 @@ function AppRoutes() {
         <Route element={<DashboardCommunityPage />} path="community" />
         <Route element={<DashboardMessagesPage />} path="messages" />
         <Route element={<DashboardAssignmentPage />} path="assignment" />
-        <Route element={< h1>saved page</h1>} path="saved" />
+        <Route element={<DashboardSavedPage/>} path="saved" />
       </Route>
 
       <Route element={<NotFoundPage />} path="/404" />
