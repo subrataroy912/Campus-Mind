@@ -17,6 +17,7 @@ import DashboardSavedPage from '../pages/dashboard/DashboardSavedPage.jsx'
 import ProfilePage from "../pages/profile/ProfilePage.jsx"
 import CreateClass from '../pages/classroom/CreateClass.jsx'
 import JoinClass from '../pages/classroom/JoinClass.jsx'
+import ClassPage from '../pages/classroom/ClassPage.jsx'
 
 function AppRoutes() {
   return (
@@ -30,6 +31,8 @@ function AppRoutes() {
       <Route element={<SettingsPage />} path="/settings" />
       <Route element={<CreateClass />} path="/create-class" />
       <Route element={<JoinClass />} path="/join-class" />
+      <Route element={<JoinClass />} path="/join-class" />
+      <Route path="/class/:userId" element={<ClassPage />} />
 
 
 
@@ -49,7 +52,7 @@ function AppRoutes() {
         <Route element={<DashboardCommunityPage />} path="community" />
         <Route element={<DashboardMessagesPage />} path="messages" />
         <Route element={<DashboardAssignmentPage />} path="assignment" />
-        <Route element={<DashboardSavedPage/>} path="saved" />
+        <Route element={<DashboardSavedPage />} path="saved" />
       </Route>
 
       <Route element={<NotFoundPage />} path="/404" />

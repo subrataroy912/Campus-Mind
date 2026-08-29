@@ -3,8 +3,14 @@ import Classes from '../../utils/data.js';
 import ClassCard from '../../components/dashboard/ClassCard';
 // Optional: import an icon for a modern UI touch if you use lucide-react
 import { BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function DashboardClasses() {
+  const navigate = useNavigate();
+
+  const handleRedirect = (userId) => {
+    navigate(`/class/${userId}`);
+  };
   return (
     <div className="min-h-screen bg-gray-50/30 p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1600px] mx-auto flex flex-col gap-6 lg:gap-8">
@@ -39,8 +45,8 @@ function DashboardClasses() {
                 deadline={item.deadline}
                 memberCount={item.memberCount}
                 onlineCount={item.onlineCount}
-                onAction={item.onAction}
-                onOpen={item.onOpen}
+                onOpen={()=>handleRedirect(item.id)}
+                onAction={() => { }}
               />
             ))}
           </div>

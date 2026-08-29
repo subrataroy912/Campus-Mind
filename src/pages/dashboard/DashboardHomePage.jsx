@@ -1,11 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRightCircle } from 'lucide-react';
 import ClassCard from "../../components/dashboard/ClassCard";
 import Classes from "../../utils/data.js";
-import { it } from 'date-fns/locale';
 
 function DashboardHome() {
+
+  const navigate = useNavigate();
+
+  const handleRedirect = (userId) => {
+    // Navigates to e.g., "/profile/123"
+    navigate(`/class/${userId}`); 
+  };
   return (
     <div className="min-h-screen bg-gray-50/30 p-4 sm:p-6">
 
@@ -76,8 +82,8 @@ function DashboardHome() {
                   deadline={item.deadline}
                   memberCount={item.memberCount}
                   onlineCount={item.onlineCount}
-                  onAction={item.onAction}
-                  onOpen={item.onOpen}
+                  onOpen={()=>handleRedirect(item.id)}
+                  onAction={()=>{}}
                 />
               ))}
             </div>

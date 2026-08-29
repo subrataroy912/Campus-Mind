@@ -1,5 +1,6 @@
 const Classes = [
     {
+        "id": "1",
         "title": "Algebra II",
         "subtitle": "Period 3",
         "theme": "bg-indigo-500",
@@ -13,6 +14,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "2",
         "title": "World History",
         "subtitle": "Period 1",
         "theme": "bg-rose-500",
@@ -26,6 +28,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "3",
         "title": "AP Physics",
         "subtitle": "Period 4",
         "theme": "bg-blue-600",
@@ -39,6 +42,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "4",
         "title": "English Literature",
         "subtitle": "Period 2",
         "theme": "bg-emerald-600",
@@ -52,6 +56,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "5",
         "title": "Physical Education",
         "subtitle": "Period 6",
         "theme": "bg-orange-500",
@@ -65,6 +70,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "6",
         "title": "Chemistry Honors",
         "subtitle": "Period 5",
         "theme": "bg-cyan-600",
@@ -78,6 +84,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "7",
         "title": "Spanish II",
         "subtitle": "Period 7",
         "theme": "bg-yellow-500",
@@ -91,6 +98,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "8",
         "title": "Computer Science",
         "subtitle": "Period 8",
         "theme": "bg-slate-700",
@@ -104,6 +112,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "9",
         "title": "Art Fundamentals",
         "subtitle": "Period 1",
         "theme": "bg-pink-500",
@@ -117,6 +126,7 @@ const Classes = [
         "onOpen": null
     },
     {
+        "id": "10",
         "title": "Symphony Orchestra",
         "subtitle": "Period 2",
         "theme": "bg-purple-600",
