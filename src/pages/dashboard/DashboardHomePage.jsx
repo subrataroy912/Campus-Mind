@@ -1,10 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRightCircle } from 'lucide-react';
 import ClassCard from "../../components/dashboard/ClassCard";
 import Classes from "../../utils/data.js";
 
 function DashboardHome() {
+
+  const navigate = useNavigate();
+
+  const handleRedirect = (userId) => {
+    // Navigates to e.g., "/profile/123"
+    navigate(`/class/${userId}`); 
+  };
   return (
     <div className="min-h-screen bg-gray-50/30 p-4 sm:p-6">
 
@@ -23,12 +30,16 @@ function DashboardHome() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-5">
-              <button className="bg-teal-500 hover:bg-teal-600 text-white font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg shadow-sm transition-colors text-center">
+              <Link
+                to={'/create-class'}
+                className="bg-teal-500 hover:bg-teal-600 text-white font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg shadow-sm transition-colors text-center">
                 + Create New Class
-              </button>
-              <button className="bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg border border-gray-200 shadow-sm transition-colors text-center">
+              </Link >
+              <Link
+                to={"/join-class"}
+                className="bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg border border-gray-200 shadow-sm transition-colors text-center">
                 Join with class code
-              </button>
+              </Link >
             </div>
           </div>
 
@@ -46,9 +57,34 @@ function DashboardHome() {
               </Link>
             </div>
 
+            {/* title = "Algebra II",
+            subtitle = "Period 3",
+            theme = "bg-indigo-500",
+            coverImage = null,
+            teacher = {name: "Ms. Patel", avatar: null, initials: "MP" },
+            unreadCount = 0,
+            deadline = null,
+            memberCount = 0,
+            onlineCount = 0,
+            onAction,
+            onOpen, */}
+
             <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 sm:gap-5">
-              {Classes.slice(0, 4).map((item) => (
-                <ClassCard key={item.id} classItem={item} />
+              {Classes.slice(0, 4).map((item, index) => (
+                <ClassCard
+                  key={index}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  theme={item.theme}
+                  coverImage={item.coverImage}
+                  teacher={item.teacher}
+                  unreadCount={item.unreadCount}
+                  deadline={item.deadline}
+                  memberCount={item.memberCount}
+                  onlineCount={item.onlineCount}
+                  onOpen={()=>handleRedirect(item.id)}
+                  onAction={()=>{}}
+                />
               ))}
             </div>
           </div>
