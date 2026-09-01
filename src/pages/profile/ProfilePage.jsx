@@ -1,13 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { logoutUser } from '../../services/api/authService'
-import {
-  getProfile,
-  updateProfile,
-  getUserStats,
-  getUserActivity,
-  getUserAchievements,
-} from '../../services/api/profileService'
 import ProfileHero from './components/ProfileHero'
 import ProfileInformation from './components/ProfileInformation'
 import AcademicOverview from './components/AcademicOverview'
@@ -16,6 +10,52 @@ import Achievements from './components/Achievements'
 import AccountSettings from './components/AccountSettings'
 import LogoutAction from './components/LogoutAction'
 import EditProfileModal from './components/EditProfileModal'
+
+function getMockUser() {
+  return {
+    name: 'Nabojeet Biswas',
+    username: 'nabojeet',
+    email: 'nabojeet@example.com',
+    department: 'Computer Engineering',
+    institution: 'CampusMind University',
+    bio: 'Passionate computer engineering student exploring the intersection of technology and education.',
+    phone: '+1 (555) 123-4567',
+    joinedAt: '2024-09-01',
+    avatar: null,
+  }
+}
+
+function getMockStats() {
+  return {
+    practiceSessions: 42,
+    assignmentsCompleted: 18,
+    learningStreak: 12,
+    averageScore: 87,
+    completedTasks: 156,
+    achievementsUnlocked: 8,
+  }
+}
+
+function getMockActivities() {
+  return [
+    { id: '1', type: 'practice', title: 'Completed Mathematics Practice', description: 'Calculus - Derivatives and Integrals', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), metadata: { score: 95 } },
+    { id: '2', type: 'assignment', title: 'Submitted Database Assignment', description: 'SQL Queries and Normalization', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), metadata: { className: 'CS301 - Database Systems' } },
+    { id: '3', type: 'class', title: 'Joined Computer Engineering Class', description: 'CS301 - Database Systems', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: '4', type: 'achievement', title: 'Unlocked "Practice Master"', description: 'Completed 50 practice sessions', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), metadata: { tier: 'gold' } },
+    { id: '5', type: 'practice', title: 'Completed Physics Practice', description: 'Mechanics - Newton Laws', timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), metadata: { score: 88 } },
+  ]
+}
+
+function getMockAchievements() {
+  return [
+    { id: '1', name: 'Practice Master', description: 'Complete 50 practice sessions', icon: 'trophy', tier: 'gold', unlockedAt: '2024-10-15', progress: 50, maxProgress: 50 },
+    { id: '2', name: '7 Day Streak', description: 'Practice for 7 consecutive days', icon: 'zap', tier: 'silver', unlockedAt: '2024-10-10', progress: 7, maxProgress: 7 },
+    { id: '3', name: 'Assignment Finisher', description: 'Complete 10 assignments', icon: 'target', tier: 'bronze', unlockedAt: '2024-09-28', progress: 10, maxProgress: 10 },
+    { id: '4', name: 'Perfect Score', description: 'Get 100% on any practice', icon: 'star', tier: 'gold', unlockedAt: '2024-10-20', progress: 1, maxProgress: 1 },
+    { id: '5', name: 'Early Bird', description: 'Complete a practice before 8 AM', icon: 'medal', tier: 'silver', unlockedAt: null, progress: 3, maxProgress: 5 },
+    { id: '6', name: 'Night Owl', description: 'Complete a practice after 10 PM', icon: 'crown', tier: 'bronze', unlockedAt: null, progress: 1, maxProgress: 3 },
+  ]
+}
 
 function ProfilePage() {
   const navigate = useNavigate()
@@ -31,114 +71,14 @@ function ProfilePage() {
 
   const [editModalOpen, setEditModalOpen] = useState(false)
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const data = await getProfile()
-      setUser(data)
-    } catch (error) {
-      console.error('Failed to fetch profile:', error)
-      const token = localStorage.getItem('token')
-      if (token) {
-        try {
-          const response = await fetch('/api/profile', {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          if (response.ok) {
-            const data = await response.json()
-            setUser(data)
-          }
-        } catch {
-          setUser({
-            name: 'Nabojeet Biswas',
-            username: 'nabojeet',
-            email: 'nabojeet@example.com',
-            department: 'Computer Engineering',
-            institution: 'CampusMind University',
-            bio: 'Passionate computer engineering student exploring the intersection of technology and education.',
-            phone: '+1 (555) 123-4567',
-            joinedAt: '2024-09-01',
-            avatar: null,
-          })
-        }
-      } else {
-        setUser({
-          name: 'Nabojeet Biswas',
-          username: 'nabojeet',
-          email: 'nabojeet@example.com',
-          department: 'Computer Engineering',
-          institution: 'CampusMind University',
-          bio: 'Passionate computer engineering student exploring the intersection of technology and education.',
-          phone: '+1 (555) 123-4567',
-          joinedAt: '2024-09-01',
-          avatar: null,
-        })
-      }
-    }
-  }, [])
-
-  const fetchStats = useCallback(async () => {
-    try {
-      const data = await getUserStats()
-      setStats(data)
-    } catch (error) {
-      console.error('Failed to fetch stats:', error)
-      setStats({
-        practiceSessions: 42,
-        assignmentsCompleted: 18,
-        learningStreak: 12,
-        averageScore: 87,
-        completedTasks: 156,
-        achievementsUnlocked: 8,
-      })
-    }
-  }, [])
-
-  const fetchActivities = useCallback(async () => {
-    try {
-      const data = await getUserActivity({ limit: 20 })
-      setActivities(data || [])
-    } catch (error) {
-      console.error('Failed to fetch activities:', error)
-      setActivities([
-        { id: '1', type: 'practice', title: 'Completed Mathematics Practice', description: 'Calculus - Derivatives and Integrals', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), metadata: { score: 95 } },
-        { id: '2', type: 'assignment', title: 'Submitted Database Assignment', description: 'SQL Queries and Normalization', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), metadata: { className: 'CS301 - Database Systems' } },
-        { id: '3', type: 'class', title: 'Joined Computer Engineering Class', description: 'CS301 - Database Systems', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: '4', type: 'achievement', title: 'Unlocked "Practice Master"', description: 'Completed 50 practice sessions', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), metadata: { tier: 'gold' } },
-        { id: '5', type: 'practice', title: 'Completed Physics Practice', description: 'Mechanics - Newton Laws', timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), metadata: { score: 88 } },
-      ])
-    }
-  }, [])
-
-  const fetchAchievements = useCallback(async () => {
-    try {
-      const data = await getUserAchievements()
-      setAchievements(data || [])
-    } catch (error) {
-      console.error('Failed to fetch achievements:', error)
-      setAchievements([
-        { id: '1', name: 'Practice Master', description: 'Complete 50 practice sessions', icon: 'trophy', tier: 'gold', unlockedAt: '2024-10-15', progress: 50, maxProgress: 50 },
-        { id: '2', name: '7 Day Streak', description: 'Practice for 7 consecutive days', icon: 'zap', tier: 'silver', unlockedAt: '2024-10-10', progress: 7, maxProgress: 7 },
-        { id: '3', name: 'Assignment Finisher', description: 'Complete 10 assignments', icon: 'target', tier: 'bronze', unlockedAt: '2024-09-28', progress: 10, maxProgress: 10 },
-        { id: '4', name: 'Perfect Score', description: 'Get 100% on any practice', icon: 'star', tier: 'gold', unlockedAt: '2024-10-20', progress: 1, maxProgress: 1 },
-        { id: '5', name: 'Early Bird', description: 'Complete a practice before 8 AM', icon: 'medal', tier: 'silver', unlockedAt: null, progress: 3, maxProgress: 5 },
-        { id: '6', name: 'Night Owl', description: 'Complete a practice after 10 PM', icon: 'crown', tier: 'bronze', unlockedAt: null, progress: 1, maxProgress: 3 },
-      ])
-    }
-  }, [])
-
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      await Promise.all([
-        fetchProfile(),
-        fetchStats(),
-        fetchActivities(),
-        fetchAchievements(),
-      ])
-      setIsLoading(false)
-    }
-    loadData()
-  }, [fetchProfile, fetchStats, fetchActivities, fetchAchievements])
+    // Load mock data immediately - no API calls that can fail
+    setUser(getMockUser())
+    setStats(getMockStats())
+    setActivities(getMockActivities())
+    setAchievements(getMockAchievements())
+    setIsLoading(false)
+  }, [])
 
   const handleEditClick = () => {
     setEditModalOpen(true)
@@ -151,8 +91,9 @@ function ProfilePage() {
   const handleSaveProfile = async (payload) => {
     setIsSaving(true)
     try {
-      await updateProfile(payload)
-      await fetchProfile()
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setUser(prev => ({ ...prev, ...payload }))
     } catch (error) {
       console.error('Failed to update profile:', error)
       throw error
