@@ -1,13 +1,29 @@
 import { MenuIcon } from "lucide-react";
 import PracticsNavbar from "../components/practics/PracticsNavbar";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { CgClose, CgProfile } from "react-icons/cg";
+import ProductCard from "../components/practics/ProductCard";
 
 
 const DrawerContext = createContext(null);
 
 export default function PracticsPage() {
     const [drawer, setDrawer] = useState(false);
+    const [data, setData] = useState({ products: [], total: 0 });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch("https://dummyjson.com/products")
+            .then((res) => res.json())
+            .then((json) => {
+                setData(json); // Stores the full object: { products: [...], total: 194, ... }
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Fetch error:", err);
+                setLoading(false);
+            });
+    }, []);
     return (
         <div className='min-h-screen w-full relative'>
             <PracticsNavbar />
@@ -24,6 +40,14 @@ export default function PracticsPage() {
                     )
                 }
             </div>
+
+            {loading ? (
+                <div className="flex h-64 items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+                </div>
+            ) : (
+                <ProductList data={data} />
+            )}
         </div>
     )
 }
@@ -138,6 +162,37 @@ function SideBar() {
                         </button>
 
                     </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+function ProductList({ data }) {
+    // Safe fallbacks to prevent crashes
+    const productItems = data?.products || [];
+    const totalCount = data?.total || 0;
+
+    return (
+        <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 dark:bg-gray-950">
+            <div className="mx-auto max-w-7xl">
+                {/* Header */}
+                <div className="mb-8 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                        Featured Products
+                    </h2>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Showing {productItems.length} of {totalCount} items
+                    </span>
+                </div>
+
+                {/* Responsive Grid */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-8">
+                    {productItems.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
                 </div>
             </div>
         </div>
