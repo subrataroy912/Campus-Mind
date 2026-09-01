@@ -8,9 +8,9 @@ import AppErrorBoundary from './components/common/AppErrorBoundary.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-          <AppErrorBoundary>
-            <AppRoutes />
-          </AppErrorBoundary>
+      <AppErrorBoundary>
+        <AppRoutes />
+      </AppErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 )

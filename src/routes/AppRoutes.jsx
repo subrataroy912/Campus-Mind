@@ -7,6 +7,7 @@ import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
 import DashboardLayout from '../components/layout/DashboardLayout.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 import PracticsPage from '../pages/PracticsPage.jsx'
+import GetStartedPage from '../pages/GetStartedPage.jsx'
 import DashboardHomePage from '../pages/dashboard/DashboardHomePage.jsx'
 import DashboardClassesPage from '../pages/dashboard/DashboardClassesPage.jsx'
 import DashboardMessagesPage from '../pages/dashboard/DashboardMessagesPage.jsx'
@@ -25,6 +26,7 @@ function AppRoutes() {
       {/* Root public routes */}
       <Route element={<App />} path="/" />
       <Route element={<PracticsPage />} path="/practics" />
+      <Route element={<GetStartedPage />} path="/get-started" />
 
       {/** Protected routes: Have to protect */}
       <Route element={<ProfilePage />} path="/profile" />
