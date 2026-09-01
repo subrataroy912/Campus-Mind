@@ -209,7 +209,7 @@ export default function GetStartedPage() {
                 <Button 
                   ref={magneticButtonRef}
                   size="lg" 
-                  className="w-full sm:w-auto px-8 py-3 text-lg flex items-center gap-2 magnetic-btn relative overflow-hidden"
+                  className="w-full sm:w-auto px-8 py-3 text-lg flex items-center gap-2 magnetic-btn relative overflow-hidden group"
                   style={{ background: '#0A0A0A', borderColor: '#0A0A0A', color: '#F5F3EF' }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
@@ -217,48 +217,45 @@ export default function GetStartedPage() {
                     <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                   </span>
                   <span className="absolute inset-0 bg-white/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
-                </Button>
-              </Link>
-              <Link to="/auth/login">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8 py-3 text-lg">
-                  Sign In
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
+</Button>
+               </Link>
+               <Link to="/auth/login">
+                 <Button variant="secondary" size="lg" className="w-full sm:w-auto px-8 py-3 text-lg">
+                   Sign In
+                 </Button>
+               </Link>
+             </motion.div>
 
-          {/* Scroll indicator */}
-          <motion.div 
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-400"
-            animate={{ 
-              y: [0, 10, 0],
-              opacity: 1
-            }}
-            transition={{ 
-              duration: 2, 
-              repeat: Infinity, 
-              ease: "easeInOut",
-              delay: 1.5,
-              duration: 0.5
-            }}
-            initial={{ opacity: 0 }}
-          >
-            <motion.div 
-              className="w-6 h-10 border-2 border-current rounded-full flex justify-center pt-2"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <motion.div 
-                className="w-1.5 h-1.5 bg-current rounded-full"
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.div>
-            <span className="text-xs font-medium">Scroll to explore</span>
-          </motion.div>
-        </section>
+             {/* Scroll indicator - smaller and closer to buttons */}
+             <motion.div 
+               className="mt-8 flex flex-col items-center gap-1.5 text-gray-400"
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.8, delay: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+             >
+               <motion.div 
+                 className="w-5 h-9 border-2 border-current rounded-full flex justify-center pt-2 group"
+                 animate={{ opacity: [1, 0.3, 1] }}
+                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+               >
+                 <motion.div 
+                   className="w-1 h-1 bg-current rounded-full"
+                   animate={{ y: [0, 6, 0] }}
+                   transition={{ duration: 2, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+                 />
+               </motion.div>
+               <motion.span 
+                 className="text-[10px] font-medium tracking-wider uppercase text-gray-400"
+                 animate={{ opacity: [1, 0.4, 1] }}
+                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+               >
+                 Scroll
+               </motion.span>
+</motion.div>
+            </div>
+          </section>
 
-        {/* Features Section */}
+         {/* Features Section */}
         <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative">
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
           <div className="max-w-7xl mx-auto relative">
