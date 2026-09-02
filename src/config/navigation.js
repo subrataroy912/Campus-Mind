@@ -8,11 +8,6 @@ export const SIDEBAR_NAV_ITEMS = [
     Icon: IoHomeOutline,
   },
   {
-    label: 'My Classes',
-    to: '/dashboard/classes',
-    Icon: IoBookOutline,
-  },
-  {
     label: 'Community',
     to: '/dashboard/community',
     Icon: IoPeopleSharp,
@@ -30,6 +25,6 @@ export const SIDEBAR_NAV_ITEMS = [
   {
     label: 'Saved',
     to: '/dashboard/saved',
-    Icon: SaveIcon ,
+    Icon: SaveIcon,
   },
 ];

@@ -1,17 +1,9 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router';
-import { ArrowRightCircle } from 'lucide-react';
-import ClassCard from "../../components/dashboard/ClassCard";
-import Classes from "../../utils/data.js";
+import { Link } from 'react-router';
 
 function DashboardHome() {
 
-  const navigate = useNavigate();
 
-  const handleRedirect = (classId) => {
-
-    navigate(`/dashboard/classes/${classId}`);
-  };
   return (
     <div className="min-h-screen bg-canvas/30 p-4 sm:p-6">
 
@@ -43,51 +35,6 @@ function DashboardHome() {
             </div>
           </div>
 
-          {/* Classes Section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg sm:text-xl text-text-heading tracking-tight">My Classes</h2>
-              <Link
-                to="/dashboard/classes"
-                className="flex items-center justify-center gap-1.5 text-primary hover:text-primary-hover font-medium text-sm transition-colors group"
-              >
-                <span className="hidden sm:inline">View all classes</span>
-                <span className="sm:hidden">View all</span>
-                <ArrowRightCircle className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            {/* title = "Algebra II",
-            subtitle = "Period 3",
-            theme = "bg-primary",
-            coverImage = null,
-            teacher = {name: "Ms. Patel", avatar: null, initials: "MP" },
-            unreadCount = 0,
-            deadline = null,
-            memberCount = 0,
-            onlineCount = 0,
-            onAction,
-            onOpen, */}
-
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 sm:gap-5">
-              {Classes.slice(0, 4).map((item, index) => (
-                <ClassCard
-                  key={index}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  theme={item.theme}
-                  coverImage={item.coverImage}
-                  teacher={item.teacher}
-                  unreadCount={item.unreadCount}
-                  deadline={item.deadline}
-                  memberCount={item.memberCount}
-                  onlineCount={item.onlineCount}
-                  onOpen={() => handleRedirect(item.id)}
-                  onAction={() => { }}
-                />
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Right Sidebar Area */}
@@ -102,9 +49,7 @@ function DashboardHome() {
             <h2 className="font-semibold text-text-heading text-sm sm:text-base mb-3">Online Classmates (10)</h2>
             <div className="grow flex items-center justify-center text-text-muted text-sm">List goes here...</div>
           </div>
-
         </div>
-
       </div>
     </div>
   );

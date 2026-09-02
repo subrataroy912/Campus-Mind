@@ -1,183 +1,78 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router";
+import React from 'react';
+import { useNavigate } from 'react-router';
 
-function KebabMenu({ onAction }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const actions = [
-    { id: "mute", label: "Mute notifications" },
-    { id: "copy", label: "Copy invite link" },
-    { id: "leave", label: "Leave class", danger: true },
-  ];
+function ClassCard({ classroom }) {
+  const isCreatedByMe = classroom.role === "Created";
+  // TODO: 
+  // HAVE TO ADJUST PROPS TO MATCH THE MOCK DATA/REAL ENTITY STRUCTURE.
+  const navigate = useNavigate();
 
   return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((o) => !o);
-        }}
-        aria-label="Quick actions"
-        aria-haspopup="true"
-        aria-expanded={open}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-surface/90 transition hover:bg-surface/20"
-      >
-        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="1.75" />
-          <circle cx="12" cy="12" r="1.75" />
-          <circle cx="12" cy="19" r="1.75" />
-        </svg>
-      </button>
-
-      {open && (
+    <div className="group flex flex-col justify-between bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition duration-200 overflow-hidden">
+      {/* Card Header & Banner */}
+      <div>
         <div
-          onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 top-9 z-10 w-48 overflow-hidden rounded-lg bg-surface py-1 shadow-lg ring-1 ring-border"
+          className={`h-24 w-full bg-linear-to-r ${classroom.theme || 'from-gray-700 to-gray-900'} p-3.5 flex justify-between items-start relative`}
         >
-          {actions.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => {
-                onAction?.(a.id);
-                setOpen(false);
-              }}
-              className={`block w-full px-3.5 py-2 text-left text-sm transition hover:bg-canvas ${a.danger ? "text-secondary" : "text-text-main"
-                }`}
-            >
-              {a.label}
-            </button>
-          ))}
+          {/* Role Badge */}
+          <span
+            className={`text-[11px] font-semibold tracking-wide uppercase px-2.5 py-0.5 rounded shadow-sm ${isCreatedByMe
+              ? 'bg-black/40 text-white backdrop-blur-md border border-white/20'
+              : 'bg-white/90 text-gray-800'
+              }`}
+          >
+            {classroom.role || 'Member'}
+          </span>
+
+          {/* Real-time Online Indicator */}
+          {classroom.onlineCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-black/40 text-emerald-300 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              {classroom.onlineCount} online
+            </span>
+          )}
         </div>
-      )}
+
+        {/* Classroom Info */}
+        <div className="p-4 pb-3">
+          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition truncate text-base">
+            {classroom.name}
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5 truncate">
+            {classroom.section}
+          </p>
+
+          <div className="mt-3 flex items-center justify-between text-xs text-gray-600 pt-2 border-t border-gray-100">
+            <span>By <span className="font-medium text-gray-800">{classroom.instructor.name}</span></span>
+            <span>{classroom.memberCount} members</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Card Footer Actions */}
+      <div className="px-4 py-3 bg-gray-50/70 border-t border-gray-100 flex items-center justify-between gap-2">
+        {/* Unread badge indicator */}
+        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          {classroom.unreadMessages > 0 ? (
+            <span className="text-blue-600 font-semibold">{classroom.unreadMessages} new</span>
+          ) : (
+            <span>No new msgs</span>
+          )}
+        </div>
+
+        {/* Enter Room Action */}
+        <button
+          onClick={() => navigate(`/dashboard/classes/${classroom.id}`)}
+          className="px-3 py-1.5 bg-gray-900 hover:bg-black text-white text-xs font-semibold rounded-lg shadow-sm transition active:scale-95"
+        >
+          Enter Room
+        </button>
+      </div>
     </div>
   );
 }
 
-export default function ClassCard({
-  title = "Algebra II",
-  subtitle = "Period 3",
-  theme = "bg-primary",
-  coverImage = null,
-  teacher = { name: "Ms. Patel", avatar: null, initials: "MP" },
-  unreadCount = 0,
-  deadline = null,
-  memberCount = 0,
-  onlineCount = 0,
-  onAction,
-  onOpen,
-}) {
-  return (
-      <div
-        onClick={onOpen}
-        className="group flex w-full max-w-sm cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border transition hover:-translate-y-0.5 hover:shadow-md"
-      >
-        {/* Cover / theme banner */}
-        <div
-          className={`relative flex h-24 items-start justify-between p-3 sm:h-28 ${coverImage ? "" : theme
-            }`}
-          style={
-            coverImage
-              ? {
-                backgroundImage: `url(${coverImage})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-              : undefined
-          }
-        >
-          {/* Notification badge */}
-          {unreadCount > 0 ? (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[11px] font-semibold text-surface ring-2 ring-surface/80">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          ) : (
-            <span />
-          )}
-
-          {/* Kebab menu */}
-          <KebabMenu onAction={(action) => onAction?.(action)} />
-        </div>
-
-        {/* Body */}
-        <div className="flex flex-1 flex-col p-4">
-          {/* Title + subtitle */}
-          <h3 className="truncate text-lg font-semibold leading-tight text-text-heading sm:text-xl">
-            {title}
-          </h3>
-          <p className="mt-0.5 text-sm text-text-muted">{subtitle}</p>
-
-          {/* Teacher info */}
-          <div className="mt-3 flex items-center gap-2">
-            {teacher.avatar ? (
-              <img
-                src={teacher.avatar}
-                alt={teacher.name}
-                className="h-6 w-6 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-canvas text-[10px] font-medium text-text-main">
-                {teacher.initials}
-              </div>
-            )}
-            <span className="text-sm text-text-main">{teacher.name}</span>
-          </div>
-
-          {/* Deadline alert */}
-          {deadline && (
-            <div className="mt-3 flex items-start gap-1.5 rounded-lg bg-canvas px-2.5 py-1.5 text-xs font-medium text-secondary-hover">
-              <svg
-                className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m0 3.75h.008M10.29 3.86L1.82 18a1.5 1.5 0 001.29 2.25h17.78a1.5 1.5 0 001.29-2.25L13.71 3.86a1.5 1.5 0 00-2.42 0z"
-                />
-              </svg>
-              <span className="line-clamp-1">{deadline}</span>
-            </div>
-          )}
-
-          {/* Footer: member count + online */}
-          <div className="mt-auto flex items-center justify-between pt-3.5">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.8}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M18 18.72a9.09 9.09 0 003.741-.479 3 3 0 00-4.682-2.72M18 18.72a8.986 8.986 0 01-6 0m6 0v-.234a3.75 3.75 0 00-1.5-3.01m-5.5 3.244a8.986 8.986 0 01-6 0m6 0v-.234a3.75 3.75 0 011.5-3.01m-7 3.235a3 3 0 013.742-2.72M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-                />
-              </svg>
-              <span>{memberCount} students</span>
-            </div>
-
-            {onlineCount > 0 && (
-              <div className="flex items-center gap-1.5 text-xs text-success">
-                <span className="h-2 w-2 rounded-full bg-success" />
-                <span>{onlineCount} online</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-  );
-}
+export default ClassCard;

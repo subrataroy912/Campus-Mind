@@ -506,7 +506,7 @@ html {
 }
 
 .animate-blink {
-  animation: blink 1.5s ease-in-out infinite.
+  animation: blink 1.5s ease-in-out infinite;
 }
 
 .stagger-1 { animation-delay: 100ms; }
