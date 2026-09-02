@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router';
 import DashboardHeader from '../dashboard/DashboardHeader';
 import SidebarNav from '../common/SidebarNav';
 import BrandLogo from "../common/BrandLogo";
@@ -17,7 +17,7 @@ function DashboardLayout() {
         </div>
         <div className='border-t border-zinc-300/50 p-2 sm:p-3'>
           <Link
-            to={"/settings"}
+            to={"/dashboard/settings"}
             className='flex items-center justify-center sm:justify-start space-x-0 sm:space-x-2 px-2 sm:px-4 pb-2'>
             <BsGear className="text-xl sm:text-base" />
             <span className='hidden sm:inline-block'>Settings</span>

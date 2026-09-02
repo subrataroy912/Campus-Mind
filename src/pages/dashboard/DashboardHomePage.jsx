@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { ArrowRightCircle } from 'lucide-react';
 import ClassCard from "../../components/dashboard/ClassCard";
 import Classes from "../../utils/data.js";
@@ -8,9 +8,9 @@ function DashboardHome() {
 
   const navigate = useNavigate();
 
-  const handleRedirect = (userId) => {
-    // Navigates to e.g., "/profile/123"
-    navigate(`/class/${userId}`); 
+  const handleRedirect = (classId) => {
+
+    navigate(`/dashboard/classes/${classId}`);
   };
   return (
     <div className="min-h-screen bg-gray-50/30 p-4 sm:p-6">
@@ -31,12 +31,12 @@ function DashboardHome() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-5">
               <Link
-                to={'/create-class'}
+                to={'/dashboard/class/create'}
                 className="bg-teal-500 hover:bg-teal-600 text-white font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg shadow-sm transition-colors text-center">
                 + Create New Class
               </Link >
               <Link
-                to={"/join-class"}
+                to={"/dashboard/class/join"}
                 className="bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg border border-gray-200 shadow-sm transition-colors text-center">
                 Join with class code
               </Link >
@@ -82,8 +82,8 @@ function DashboardHome() {
                   deadline={item.deadline}
                   memberCount={item.memberCount}
                   onlineCount={item.onlineCount}
-                  onOpen={()=>handleRedirect(item.id)}
-                  onAction={()=>{}}
+                  onOpen={() => handleRedirect(item.id)}
+                  onAction={() => { }}
                 />
               ))}
             </div>

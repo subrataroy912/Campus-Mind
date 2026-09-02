@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react'
 import { BiCaretDown, BiSearch } from 'react-icons/bi'
 import { IoCartOutline } from 'react-icons/io5'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import NavbarItems from "../practics/NavbarItems"
 export default function PracticsNavbar() {
     const isLogined = false;

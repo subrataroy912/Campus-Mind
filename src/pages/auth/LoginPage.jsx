@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
 import AuthInput from '../../components/auth/AuthInput.jsx'
-import AuthLayout from '../../components/auth/AuthLayout.jsx'
 import BrandLogo from '../../components/common/BrandLogo.jsx'
 import Button from '../../components/common/Button.jsx'
 import Card from '../../components/common/Card.jsx'
@@ -69,7 +68,7 @@ function LoginPage() {
   }
 
   return (
-    <AuthLayout>
+    <div>
       <Card className="mx-auto w-full max-w-xl p-8 shadow-2xl shadow-gray-200/80 sm:p-12">
         <div className="mb-8"><BrandLogo /></div>
         <h1 className="text-5xl font-black tracking-tight">Welcome Back!</h1>
@@ -148,7 +147,7 @@ function LoginPage() {
           Don&apos;t have an account? <Link className="font-bold text-purple-700 hover:underline" to="/auth/register">Sign up</Link>
         </p>
       </Card>
-    </AuthLayout>
+    </div>
   )
 }
 

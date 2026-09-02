@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 function PageShell({ title, eyebrow, description, actions = [], children }) {
   const hasActions = actions.length > 0

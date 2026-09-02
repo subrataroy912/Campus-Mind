@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import Classes from "../../utils/data"
 // ---- Mock data -------------------------------------------------------
 
@@ -349,8 +349,8 @@ function SidePanel() {
 
 export default function ClassPage() {
   const [activeTab, setActiveTab] = useState("home");
-  const { userId } = useParams();
-  const currentClass = Classes.find((item) => item.id === String(userId));
+  const { classId } = useParams();
+  const currentClass = Classes.find((item) => item.id === String(classId));
 
   if (!currentClass) {
     return <div>Class not found!</div>;

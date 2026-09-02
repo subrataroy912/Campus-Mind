@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router';
 import avatarImage from "../../assets/avatar.png";
 import { BsGear } from 'react-icons/bs';
 import { IoIosNotificationsOutline } from 'react-icons/io';
-import { MenuIcon, Plus, SearchIcon, UploadIcon } from 'lucide-react';
+import { MenuIcon, Plus, SearchIcon } from 'lucide-react';
 import { SIDEBAR_NAV_ITEMS } from "../../config/navigation"
 import { getNavLinkStyles } from "../../utils/routeHelpers"
 import NotificationCard from '../notification/NotificationCard';
@@ -47,7 +47,7 @@ function DashboardHeader() {
 
           <div className="border-t border-zinc-200 p-3">
             <Link
-              to="/settings"
+              to="/dashboard/settings"
               className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <BsGear className="text-xl" />
@@ -75,7 +75,7 @@ function DashboardHeader() {
           {/* Upload */}
           <li>
             <Link
-              to="/upload"
+              to="#"
               className="relative flex items-center justify-center p-1 text-gray-700 hover:text-gray-900 transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Upload"
             >
@@ -121,7 +121,7 @@ function DashboardHeader() {
         {isDropdownOpen && (
           <div className="absolute right-0 top-full mt-2 w-48 bg-white py-1 z-50 border border-gray-100 rounded-md shadow-lg">
             <Link
-              to="/profile"
+              to="/dashboard/profile"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >

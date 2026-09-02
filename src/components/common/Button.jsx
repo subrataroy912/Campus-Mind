@@ -1,5 +1,8 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import clsx from 'clsx'
+import { motion } from 'framer-motion' 
+
+const MotionLink = motion.create(Link) 
 
 const variants = {
   primary: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/20 hover:from-blue-600 hover:to-purple-700',
@@ -15,10 +18,10 @@ function Button({ children, className, to, type = 'button', variant = 'primary',
   )
 
   if (to) {
-    return <Link className={classes} to={to} {...props}>{children}</Link>
+    return <MotionLink className={classes} to={to} {...props}>{children}</MotionLink>
   }
 
-  return <button className={classes} type={type} {...props}>{children}</button>
+  return <motion.button className={classes} type={type} {...props}>{children}</motion.button>
 }
 
 export default Button

@@ -1,16 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { BrowserRouter } from 'react-router-dom'
-import AppRoutes from './routes/AppRoutes.jsx'
-import AppErrorBoundary from './components/common/AppErrorBoundary.jsx'
+import { RouterProvider } from 'react-router'
+import { AppRouter } from './routes/AppRouter.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <AppErrorBoundary>
-        <AppRoutes />
-      </AppErrorBoundary>
-    </BrowserRouter>
+      <RouterProvider router={AppRouter} />
   </StrictMode>,
 )
