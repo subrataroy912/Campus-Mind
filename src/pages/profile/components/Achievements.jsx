@@ -12,10 +12,10 @@ const ACHIEVEMENT_ICONS = {
 }
 
 const ACHIEVEMENT_COLORS = {
-  gold: 'text-amber-500 bg-amber-50 border-amber-100',
-  silver: 'text-neutral-400 bg-neutral-100 border-neutral-200',
-  bronze: 'text-amber-700 bg-amber-50 border-amber-100',
-  default: 'text-blue-600 bg-blue-50 border-blue-100',
+  gold: 'text-secondary bg-canvas border-border',
+  silver: 'text-text-muted bg-canvas border-border',
+  bronze: 'text-secondary-hover bg-canvas border-border',
+  default: 'text-primary bg-canvas border-border',
 }
 
 function AchievementCard({ achievement, index }) {
@@ -28,8 +28,8 @@ function AchievementCard({ achievement, index }) {
   return (
     <motion.article
       className={clsx(
-        'group relative bg-white border rounded-2xl p-5 transition-all duration-300',
-        'hover:shadow-lg hover:shadow-black/5 hover:border-neutral-300',
+        'group relative bg-surface border rounded-2xl p-5 transition-all duration-300',
+        'hover:shadow-lg hover:shadow-text-heading/5 hover:border-border',
         isLocked ? 'opacity-60' : '',
         colorClass.replace('bg-', 'border-').replace('text-', 'border-')
       )}
@@ -55,16 +55,16 @@ function AchievementCard({ achievement, index }) {
           <div className="flex items-center justify-between gap-3">
             <h3 className={clsx(
               'font-serif text-lg font-medium',
-              isLocked ? 'text-neutral-500' : 'text-neutral-950'
+              isLocked ? 'text-text-muted' : 'text-text-heading'
             )}>
               {name}
             </h3>
             {tier && !isLocked && (
               <span className={clsx(
                 'font-sans text-xs font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider',
-                tier === 'gold' && 'bg-amber-100 text-amber-700',
-                tier === 'silver' && 'bg-neutral-100 text-neutral-700',
-                tier === 'bronze' && 'bg-amber-50 text-amber-700',
+                tier === 'gold' && 'bg-border text-secondary-hover',
+                tier === 'silver' && 'bg-canvas text-text-main',
+                tier === 'bronze' && 'bg-canvas text-secondary-hover',
               )}>
                 {tier}
               </span>
@@ -73,7 +73,7 @@ function AchievementCard({ achievement, index }) {
 
           <p className={clsx(
             'mt-1.5 font-sans text-sm leading-relaxed',
-            isLocked ? 'text-neutral-400' : 'text-neutral-600'
+            isLocked ? 'text-text-muted' : 'text-text-main'
           )}>
             {description}
           </p>
@@ -81,10 +81,10 @@ function AchievementCard({ achievement, index }) {
           {isLocked && maxProgress && (
             <div className="mt-3" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100} aria-label={`${name} progress`}>
               <div className="flex items-center justify-between text-xs font-sans mb-1">
-                <span className="text-neutral-500">Progress</span>
-                <span className="font-medium text-neutral-700">{progressPercent}%</span>
+                <span className="text-text-muted">Progress</span>
+                <span className="font-medium text-text-main">{progressPercent}%</span>
               </div>
-              <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-canvas rounded-full overflow-hidden">
                 <motion.div
                   className={clsx('h-full rounded-full transition-all duration-500', colorClass.replace('bg-', 'bg-').replace('text-', 'bg-'))}
                   initial={{ width: 0 }}
@@ -96,7 +96,7 @@ function AchievementCard({ achievement, index }) {
           )}
 
           {unlockedAt && !isLocked && (
-            <p className="mt-3 font-sans text-xs text-neutral-500">
+            <p className="mt-3 font-sans text-xs text-text-muted">
               Unlocked {new Date(unlockedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           )}
@@ -104,12 +104,12 @@ function AchievementCard({ achievement, index }) {
 
         {isLocked && (
           <motion.div
-            className="absolute top-4 right-4 w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center"
+            className="absolute top-4 right-4 w-6 h-6 rounded-full bg-canvas flex items-center justify-center"
             initial={{ scale: 0, rotate: -90 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: index * 0.08 + 0.3, type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <svg className="w-3.5 h-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg className="w-3.5 h-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
@@ -125,10 +125,10 @@ function Achievements({ achievements, isLoading = false }) {
     return (
       <section className="py-8 px-4 sm:px-6 lg:px-8" aria-busy="true">
         <div className="mx-auto max-w-4xl">
-          <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded-lg mb-6" />
+          <div className="h-8 w-48 bg-border animate-pulse rounded-lg mb-6" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-40 bg-neutral-200 animate-pulse rounded-2xl border border-neutral-200" />
+              <div key={i} className="h-40 bg-border animate-pulse rounded-2xl border border-border" />
             ))}
           </div>
         </div>
@@ -154,11 +154,11 @@ function Achievements({ achievements, isLoading = false }) {
         >
           <h2
             id="achievements-heading"
-            className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 tracking-tight"
+            className="font-serif text-2xl sm:text-3xl font-medium text-text-heading tracking-tight"
           >
             Achievements
           </h2>
-          <div className="font-sans text-sm text-neutral-500">
+          <div className="font-sans text-sm text-text-muted">
             {unlocked.length} / {achievements.length} unlocked
           </div>
         </motion.div>

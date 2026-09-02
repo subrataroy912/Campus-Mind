@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createClassroom } from "../../features/classroom/api/classroomService";
 
 const SUBJECTS = [
   "Mathematics", "Science", "English", "History", "Art",
@@ -11,12 +12,12 @@ const GRADE_LEVELS = [
 ];
 
 const THEME_COLORS = [
-  { name: "Indigo", value: "bg-indigo-500" },
-  { name: "Emerald", value: "bg-emerald-500" },
-  { name: "Rose", value: "bg-rose-500" },
-  { name: "Amber", value: "bg-amber-500" },
-  { name: "Sky", value: "bg-sky-500" },
-  { name: "Violet", value: "bg-violet-500" },
+  { name: "Indigo", value: "bg-primary" },
+  { name: "Emerald", value: "bg-success" },
+  { name: "Rose", value: "bg-secondary" },
+  { name: "Amber", value: "bg-secondary" },
+  { name: "Sky", value: "bg-accent" },
+  { name: "Violet", value: "bg-primary" },
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -72,35 +73,36 @@ export default function CreateClass() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
       setSubmitted(false);
       return;
     }
+    await createClassroom(form);
     setSubmitted(true);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">
             Create a class
           </h1>
-          <p className="mt-1 text-sm text-slate-500 sm:text-base">
+          <p className="mt-1 text-sm text-text-muted sm:text-base">
             Set up a new class for your students to join.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-6 lg:p-8"
+          className="space-y-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6 lg:p-8"
         >
           {/* Cover image / theme */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-text-main">
               Class theme / cover image
             </label>
             <div
@@ -115,11 +117,11 @@ export default function CreateClass() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="text-lg font-semibold text-white/90 sm:text-xl">
+                <span className="text-lg font-semibold text-surface/90 sm:text-xl">
                   {form.className || "Your class name"}
                 </span>
               )}
-              <label className="absolute bottom-2 right-2 cursor-pointer rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow hover:bg-white">
+              <label className="absolute bottom-2 right-2 cursor-pointer rounded-lg bg-surface/90 px-3 py-1.5 text-xs font-medium text-text-main shadow hover:bg-surface">
                 Upload image
                 <input
                   type="file"
@@ -138,8 +140,8 @@ export default function CreateClass() {
                     onClick={() => update("theme", c.value)}
                     className={`h-7 w-7 rounded-full ${c.value} ring-offset-2 transition ${
                       form.theme === c.value
-                        ? "ring-2 ring-slate-900"
-                        : "ring-1 ring-slate-200"
+                        ? "ring-2 ring-text-heading"
+                        : "ring-1 ring-border"
                     }`}
                     aria-label={c.name}
                   />
@@ -151,24 +153,24 @@ export default function CreateClass() {
           {/* Class name + Section */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Class name <span className="text-rose-500">*</span>
+              <label className="mb-1 block text-sm font-medium text-text-main">
+                Class name <span className="text-secondary">*</span>
               </label>
               <input
                 type="text"
                 value={form.className}
                 onChange={(e) => update("className", e.target.value)}
                 placeholder="e.g. Algebra II"
-                className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-                  errors.className ? "border-rose-400" : "border-slate-300"
+                className={`w-full rounded-lg border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus ${
+                  errors.className ? "border-secondary" : "border-border"
                 }`}
               />
               {errors.className && (
-                <p className="mt-1 text-xs text-rose-500">{errors.className}</p>
+                <p className="mt-1 text-xs text-secondary">{errors.className}</p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
+              <label className="mb-1 block text-sm font-medium text-text-main">
                 Section
               </label>
               <input
@@ -176,7 +178,7 @@ export default function CreateClass() {
                 value={form.section}
                 onChange={(e) => update("section", e.target.value)}
                 placeholder="e.g. Period 3"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
               />
             </div>
           </div>
@@ -184,14 +186,14 @@ export default function CreateClass() {
           {/* Subject + Grade level */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Subject <span className="text-rose-500">*</span>
+              <label className="mb-1 block text-sm font-medium text-text-main">
+                Subject <span className="text-secondary">*</span>
               </label>
               <select
                 value={form.subject}
                 onChange={(e) => update("subject", e.target.value)}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-                  errors.subject ? "border-rose-400" : "border-slate-300"
+                className={`w-full rounded-lg border bg-surface px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus ${
+                  errors.subject ? "border-secondary" : "border-border"
                 }`}
               >
                 <option value="">Select subject</option>
@@ -202,18 +204,18 @@ export default function CreateClass() {
                 ))}
               </select>
               {errors.subject && (
-                <p className="mt-1 text-xs text-rose-500">{errors.subject}</p>
+                <p className="mt-1 text-xs text-secondary">{errors.subject}</p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Grade level <span className="text-rose-500">*</span>
+              <label className="mb-1 block text-sm font-medium text-text-main">
+                Grade level <span className="text-secondary">*</span>
               </label>
               <select
                 value={form.gradeLevel}
                 onChange={(e) => update("gradeLevel", e.target.value)}
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-                  errors.gradeLevel ? "border-rose-400" : "border-slate-300"
+                className={`w-full rounded-lg border bg-surface px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus ${
+                  errors.gradeLevel ? "border-secondary" : "border-border"
                 }`}
               >
                 <option value="">Select grade level</option>
@@ -224,14 +226,14 @@ export default function CreateClass() {
                 ))}
               </select>
               {errors.gradeLevel && (
-                <p className="mt-1 text-xs text-rose-500">{errors.gradeLevel}</p>
+                <p className="mt-1 text-xs text-secondary">{errors.gradeLevel}</p>
               )}
             </div>
           </div>
 
           {/* Room / Location */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-text-main">
               Room / location
             </label>
             <input
@@ -239,13 +241,13 @@ export default function CreateClass() {
               value={form.room}
               onChange={(e) => update("room", e.target.value)}
               placeholder="e.g. Room 204 or https://zoom.us/j/..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-text-main">
               Description
             </label>
             <textarea
@@ -253,13 +255,13 @@ export default function CreateClass() {
               value={form.description}
               onChange={(e) => update("description", e.target.value)}
               placeholder="A brief overview of the course, syllabus, or a welcome message"
-              className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+              className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
             />
           </div>
 
           {/* Schedule */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-text-main">
               Schedule / meeting times
             </label>
             <div className="mb-3 flex flex-wrap gap-2">
@@ -270,8 +272,8 @@ export default function CreateClass() {
                   onClick={() => toggleDay(day)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
                     form.days.includes(day)
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-primary text-surface"
+                      : "bg-canvas text-text-main hover:bg-border"
                   }`}
                 >
                   {day}
@@ -280,25 +282,25 @@ export default function CreateClass() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-xs text-slate-500">
+                <label className="mb-1 block text-xs text-text-muted">
                   Start time
                 </label>
                 <input
                   type="time"
                   value={form.startTime}
                   onChange={(e) => update("startTime", e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-500">
+                <label className="mb-1 block text-xs text-text-muted">
                   End time
                 </label>
                 <input
                   type="time"
                   value={form.endTime}
                   onChange={(e) => update("endTime", e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
                 />
               </div>
             </div>
@@ -306,7 +308,7 @@ export default function CreateClass() {
 
           {/* Access type */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-text-main">
               Access type
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -319,8 +321,8 @@ export default function CreateClass() {
                   key={opt.value}
                   className={`cursor-pointer rounded-lg border p-3 text-sm transition ${
                     form.accessType === opt.value
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-slate-300 hover:border-slate-400"
+                      ? "border-primary bg-canvas"
+                      : "border-border hover:border-text-muted"
                   }`}
                 >
                   <input
@@ -331,15 +333,15 @@ export default function CreateClass() {
                     onChange={(e) => update("accessType", e.target.value)}
                     className="sr-only"
                   />
-                  <p className="font-medium text-slate-800">{opt.label}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{opt.desc}</p>
+                  <p className="font-medium text-text-heading">{opt.label}</p>
+                  <p className="mt-0.5 text-xs text-text-muted">{opt.desc}</p>
                 </label>
               ))}
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={() =>
@@ -358,20 +360,20 @@ export default function CreateClass() {
                   coverImage: null,
                 })
               }
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
             >
               Reset
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover"
             >
               Create class
             </button>
           </div>
 
           {submitted && (
-            <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <div className="rounded-lg bg-canvas px-4 py-3 text-sm text-success">
               Class created successfully.
             </div>
           )}

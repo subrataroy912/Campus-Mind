@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { User, Bell, Shield, Key, Moon, Globe, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
-// eslint-disable-next-line no-unused-vars
 const _motion = motion
 
 const SETTINGS_ITEMS = [
@@ -63,29 +62,29 @@ function SettingsRow({ item, index, onClick }) {
         onClick={onClick}
         className={clsx(
           'w-full flex items-center gap-4 p-4 rounded-xl',
-          'bg-white border border-neutral-200',
-          'hover:bg-neutral-50 hover:border-neutral-300',
-          'focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2',
+          'bg-surface border border-border',
+          'hover:bg-canvas hover:border-border',
+          'focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2',
           'transition-all duration-200',
           'text-left'
         )}
         aria-label={item.title}
       >
-        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-600 transition-colors group-hover:text-neutral-900">
+        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-canvas flex items-center justify-center text-text-main transition-colors group-hover:text-text-heading">
           <Icon className="w-5 h-5" aria-hidden="true" />
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-serif text-base font-medium text-neutral-950">
+          <h3 className="font-serif text-base font-medium text-text-heading">
             {item.title}
           </h3>
-          <p className="mt-0.5 font-sans text-sm text-neutral-500 truncate">
+          <p className="mt-0.5 font-sans text-sm text-text-muted truncate">
             {item.description}
           </p>
         </div>
 
         <motion.div
-          className="flex-shrink-0 w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-500 transition-colors group-hover:bg-neutral-200 group-hover:text-neutral-700"
+          className="flex-shrink-0 w-8 h-8 rounded-xl bg-canvas flex items-center justify-center text-text-muted transition-colors group-hover:bg-border group-hover:text-text-main"
           whileHover={{ x: 3 }}
         >
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -113,11 +112,11 @@ function AccountSettings({ onNavigate }) {
         >
           <h2
             id="settings-heading"
-            className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 tracking-tight"
+            className="font-serif text-2xl sm:text-3xl font-medium text-text-heading tracking-tight"
           >
             Account Settings
           </h2>
-          <p className="mt-1.5 font-sans text-sm text-neutral-500">
+          <p className="mt-1.5 font-sans text-sm text-text-muted">
             Manage your account preferences and settings
           </p>
         </motion.div>

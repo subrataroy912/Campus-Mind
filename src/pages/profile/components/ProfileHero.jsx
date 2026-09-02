@@ -3,7 +3,6 @@ import { MapPin, Calendar, Briefcase, GraduationCap } from 'lucide-react'
 import ProfileAvatar from './ProfileAvatar'
 import Button from '../../../components/common/Button'
 import clsx from 'clsx'
-// eslint-disable-next-line no-unused-vars
 const _motion = motion
 
 function ProfileHero({
@@ -32,13 +31,13 @@ function ProfileHero({
     return (
       <div className="space-y-6" aria-busy="true">
         <div className="flex justify-center">
-          <div className="w-32 h-32 rounded-[2rem] bg-neutral-200 animate-pulse border-2 border-white shadow-lg shadow-black/10" />
+          <div className="w-32 h-32 rounded-[2rem] bg-border animate-pulse border-2 border-surface shadow-lg shadow-text-heading/10" />
         </div>
-        <div className="h-10 w-48 bg-neutral-200 animate-pulse rounded-lg mx-auto" />
-        <div className="h-6 w-32 bg-neutral-200 animate-pulse rounded mx-auto" />
-        <div className="h-5 w-40 bg-neutral-200 animate-pulse rounded mx-auto" />
-        <div className="h-5 w-48 bg-neutral-200 animate-pulse rounded mx-auto" />
-        <div className="h-11 w-36 bg-neutral-200 animate-pulse rounded-lg mx-auto mt-4" />
+        <div className="h-10 w-48 bg-border animate-pulse rounded-lg mx-auto" />
+        <div className="h-6 w-32 bg-border animate-pulse rounded mx-auto" />
+        <div className="h-5 w-40 bg-border animate-pulse rounded mx-auto" />
+        <div className="h-5 w-48 bg-border animate-pulse rounded mx-auto" />
+        <div className="h-11 w-36 bg-border animate-pulse rounded-lg mx-auto mt-4" />
       </div>
     )
   }
@@ -65,7 +64,7 @@ function ProfileHero({
               id="profile-heading"
               className={clsx(
                 'font-serif text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight',
-                'text-neutral-950'
+                'text-text-heading'
               )}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -77,7 +76,7 @@ function ProfileHero({
             {username && (
               <motion.p
                 className={clsx(
-                  'text-lg sm:text-xl font-medium text-neutral-500',
+                  'text-lg sm:text-xl font-medium text-text-muted',
                   'font-sans'
                 )}
                 initial={{ opacity: 0, y: 15 }}
@@ -91,7 +90,7 @@ function ProfileHero({
             {email && !username && (
               <motion.p
                 className={clsx(
-                  'text-lg sm:text-xl font-medium text-neutral-500',
+                  'text-lg sm:text-xl font-medium text-text-muted',
                   'font-sans'
                 )}
                 initial={{ opacity: 0, y: 15 }}
@@ -105,26 +104,26 @@ function ProfileHero({
 
           {(department || institution) && (
             <motion.div
-              className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-neutral-600 font-sans"
+              className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-text-main font-sans"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               {department && (
                 <div className="flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+                  <GraduationCap className="w-4 h-4 text-text-muted" aria-hidden="true" />
                   <span className="font-medium">{department}</span>
                 </div>
               )}
               {institution && (
                 <div className="flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+                  <Briefcase className="w-4 h-4 text-text-muted" aria-hidden="true" />
                   <span className="font-medium">{institution}</span>
                 </div>
               )}
               {joinDate && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+                  <Calendar className="w-4 h-4 text-text-muted" aria-hidden="true" />
                   <span className="font-medium">Joined {joinDate}</span>
                 </div>
               )}
@@ -134,7 +133,7 @@ function ProfileHero({
           {bio && (
             <motion.p
               className={clsx(
-                'max-w-2xl mx-auto text-base sm:text-lg text-neutral-700 leading-relaxed',
+                'max-w-2xl mx-auto text-base sm:text-lg text-text-main leading-relaxed',
                 'font-sans'
               )}
               initial={{ opacity: 0, y: 15 }}
@@ -157,9 +156,9 @@ function ProfileHero({
               className={clsx(
                 'w-full sm:w-auto min-h-12 px-8',
                 'font-sans text-sm font-semibold rounded-xl',
-                'bg-neutral-950 text-white',
-                'hover:bg-neutral-800',
-                'focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2',
+                'bg-text-heading text-surface',
+                'hover:bg-text-heading',
+                'focus:ring-2 focus:ring-focus focus:ring-offset-2',
                 'transition-colors duration-200'
               )}
             >

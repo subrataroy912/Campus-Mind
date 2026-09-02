@@ -12,11 +12,11 @@ const ACTIVITY_ICONS = {
 }
 
 const ACTIVITY_COLORS = {
-  practice: 'text-blue-600 bg-blue-50',
-  assignment: 'text-green-600 bg-green-50',
-  class: 'text-purple-600 bg-purple-50',
-  achievement: 'text-amber-600 bg-amber-50',
-  default: 'text-neutral-600 bg-neutral-100',
+  practice: 'text-primary bg-canvas',
+  assignment: 'text-success bg-canvas',
+  class: 'text-primary bg-canvas',
+  achievement: 'text-secondary bg-canvas',
+  default: 'text-text-main bg-canvas',
 }
 
 function formatRelativeTime(dateString) {
@@ -41,13 +41,13 @@ function ActivityItem({ activity, index }) {
       transition={{ delay: index * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div className="absolute left-0 top-1">
-        <div className={clsx('w-3 h-3 rounded-full border-2 border-white', colorClass.split(' ')[1].replace('bg-', 'bg-'))} />
+        <div className={clsx('w-3 h-3 rounded-full border-2 border-surface', colorClass.split(' ')[1].replace('bg-', 'bg-'))} />
         {index !== 0 && (
-          <div className="absolute left-1.5 top-4 bottom-0 w-0.5 bg-neutral-100" aria-hidden="true" />
+          <div className="absolute left-1.5 top-4 bottom-0 w-0.5 bg-canvas" aria-hidden="true" />
         )}
       </div>
 
-      <article className="bg-white border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 transition-colors duration-200">
+      <article className="bg-surface border border-border rounded-2xl p-5 hover:border-border transition-colors duration-200">
         <div className="flex items-start gap-4">
           <div className={clsx('flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center', colorClass)}>
             <Icon className="w-5 h-5" aria-hidden="true" />
@@ -55,9 +55,9 @@ function ActivityItem({ activity, index }) {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-serif text-lg font-medium text-neutral-950">{title}</h3>
+              <h3 className="font-serif text-lg font-medium text-text-heading">{title}</h3>
               <time
-                className="font-sans text-xs text-neutral-500 whitespace-nowrap"
+                className="font-sans text-xs text-text-muted whitespace-nowrap"
                 dateTime={timestamp}
               >
                 {formatRelativeTime(timestamp)}
@@ -65,7 +65,7 @@ function ActivityItem({ activity, index }) {
             </div>
 
             {description && (
-              <p className="mt-1.5 font-sans text-sm text-neutral-600 leading-relaxed">
+              <p className="mt-1.5 font-sans text-sm text-text-main leading-relaxed">
                 {description}
               </p>
             )}
@@ -73,12 +73,12 @@ function ActivityItem({ activity, index }) {
             {metadata && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {metadata.className && (
-                  <span className="font-sans text-xs px-2.5 py-1 bg-neutral-100 text-neutral-700 rounded-full">
+                  <span className="font-sans text-xs px-2.5 py-1 bg-canvas text-text-main rounded-full">
                     {metadata.className}
                   </span>
                 )}
                 {metadata.score !== undefined && (
-                  <span className="font-sans text-xs px-2.5 py-1 bg-green-50 text-green-700 rounded-full font-medium">
+                  <span className="font-sans text-xs px-2.5 py-1 bg-canvas text-success rounded-full font-medium">
                     Score: {metadata.score}%
                   </span>
                 )}
@@ -97,11 +97,11 @@ function RecentActivity({ activities, isLoading = false, onViewAll }) {
       <section className="py-8 px-4 sm:px-6 lg:px-8" aria-busy="true">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center justify-between mb-6">
-            <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded-lg" />
+            <div className="h-8 w-48 bg-border animate-pulse rounded-lg" />
           </div>
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 bg-neutral-200 animate-pulse rounded-2xl border border-neutral-200 pl-8" />
+              <div key={i} className="h-24 bg-border animate-pulse rounded-2xl border border-border pl-8" />
             ))}
           </div>
         </div>
@@ -121,21 +121,21 @@ function RecentActivity({ activities, isLoading = false, onViewAll }) {
           >
             <h2
               id="activity-heading"
-              className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 tracking-tight"
+              className="font-serif text-2xl sm:text-3xl font-medium text-text-heading tracking-tight"
             >
               Recent Activity
             </h2>
           </motion.div>
 
           <motion.div
-            className="text-center py-12 border border-neutral-200 rounded-2xl bg-neutral-50"
+            className="text-center py-12 border border-border rounded-2xl bg-canvas"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
           >
-            <Clock className="w-12 h-12 text-neutral-300 mx-auto mb-4" aria-hidden="true" />
-            <p className="text-neutral-500 font-sans mb-2">No recent activity</p>
-            <p className="text-sm text-neutral-400 font-sans">Your activity will appear here as you use CampusMind</p>
+            <Clock className="w-12 h-12 text-border mx-auto mb-4" aria-hidden="true" />
+            <p className="text-text-muted font-sans mb-2">No recent activity</p>
+            <p className="text-sm text-text-muted font-sans">Your activity will appear here as you use CampusMind</p>
           </motion.div>
         </div>
       </section>
@@ -155,14 +155,14 @@ function RecentActivity({ activities, isLoading = false, onViewAll }) {
         >
           <h2
             id="activity-heading"
-            className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 tracking-tight"
+            className="font-serif text-2xl sm:text-3xl font-medium text-text-heading tracking-tight"
           >
             Recent Activity
           </h2>
           {onViewAll && activities.length > 5 && (
             <button
               onClick={onViewAll}
-              className="font-sans text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors flex items-center gap-1"
+              className="font-sans text-sm font-medium text-text-main hover:text-text-heading transition-colors flex items-center gap-1"
             >
               View all
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -183,12 +183,12 @@ function RecentActivity({ activities, isLoading = false, onViewAll }) {
 
         {activities.length > 5 && (
           <motion.div
-            className="text-center mt-6 pt-4 border-t border-neutral-100"
+            className="text-center mt-6 pt-4 border-t border-border"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
           >
-            <p className="font-sans text-sm text-neutral-500">
+            <p className="font-sans text-sm text-text-muted">
               Showing 5 of {activities.length} activities
             </p>
           </motion.div>

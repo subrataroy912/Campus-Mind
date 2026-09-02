@@ -1,34 +1,24 @@
-<div align="center">
+# Campus Mind
 
-# 🎓 Classroom Chat Platform
+Campus Mind is a standalone React + Vite interface. It runs entirely in the browser with local mock fixtures and localStorage-backed interactions—no backend, API server, WebSocket, or environment configuration is required.
 
-### A modern classroom, assignment, study material, grading & real-time communication platform.
+## Run locally
 
-<p>
-  <a href="https://campus-mind-ev1s.onrender.com">
-    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Campus%20Mind-4285F4?style=for-the-badge" alt="Live Demo"/>
-  </a>
-</p>
+```bash
+npm install
+npm run dev
+```
 
-<p>
-  <img src="https://img.shields.io/badge/React.js-Frontend-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React.js"/>
-  <img src="https://img.shields.io/badge/Spring%20Boot-Backend-6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot"/>
-  <img src="https://img.shields.io/badge/WebSocket-Realtime-FF6B6B?style=flat-square" alt="WebSocket"/>
-  <img src="https://img.shields.io/badge/STOMP-Messaging-8B5CF6?style=flat-square" alt="STOMP"/>
-</p>
+## Demo sign-in
 
-<p>
-  <strong>Clean UI • Real-Time Chat • Assignments • Materials • Grading • Notifications</strong>
-</p>
+Use `student@campusmind.local` and `password123`, or create a local account. Authentication and classroom mutations persist in browser localStorage.
 
-</div>
+## Architecture
 
----
-
-## 🌐 Live Demo
-
-<div align="center">
-  <a href="https://campus-mind-ev1s.onrender.com">
-    <img src="src/assets/page-view.png" alt="Try Campus Mind" width="600">
-  </a>
-</div>
+- `src/components/common` contains reusable, domain-agnostic UI primitives.
+- `src/components/layout` contains app-wide layouts.
+- `src/features` owns domain services and feature-local boundaries.
+- `src/mock` provides deterministic frontend fixtures.
+- `src/context` contains client-wide providers.
+- `src/pages` remains route composition only.
+- `src/routes` centralizes route definitions and client-side guards.

@@ -79,9 +79,9 @@ const SAVED_ITEMS = [
 ];
 
 const TYPE_META = {
-  post: { label: "Post", color: "bg-sky-100 text-sky-700" },
-  resource: { label: "Resource", color: "bg-emerald-100 text-emerald-700" },
-  assignment: { label: "Assignment", color: "bg-amber-100 text-amber-700" },
+  post: { label: "Post", color: "bg-canvas text-accent" },
+  resource: { label: "Resource", color: "bg-canvas text-success" },
+  assignment: { label: "Assignment", color: "bg-border text-secondary-hover" },
 };
 
 const FILTERS = [
@@ -133,14 +133,14 @@ export default function DashboardSavedPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-2 px-2 sm:py-4 sm:px-3 lg:px-4">
+    <div className="min-h-screen bg-canvas py-2 px-2 sm:py-4 sm:px-3 lg:px-4">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">
             Saved
           </h1>
-          <p className="mt-1 text-sm text-slate-500 sm:text-base">
+          <p className="mt-1 text-sm text-text-muted sm:text-base">
             Posts, resources, and assignments you've bookmarked for later.
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function DashboardSavedPage() {
         <div className="mb-5">
           <div className="relative">
             <svg
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -166,12 +166,12 @@ export default function DashboardSavedPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search your saved items…"
-              className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
                 aria-label="Clear search"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -185,8 +185,8 @@ export default function DashboardSavedPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
           {/* Collections sidebar */}
           <aside className="lg:sticky lg:top-6 lg:self-start">
-            <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200">
-              <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+            <div className="rounded-xl bg-surface p-3 shadow-sm ring-1 ring-border">
+              <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-text-muted">
                 Collections
               </p>
               <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
@@ -196,13 +196,13 @@ export default function DashboardSavedPage() {
                     onClick={() => setActiveCollection(c.id)}
                     className={`flex shrink-0 items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition lg:w-full ${
                       activeCollection === c.id
-                        ? "bg-indigo-50 text-indigo-700"
-                        : "text-slate-600 hover:bg-slate-50"
+                        ? "bg-canvas text-primary-hover"
+                        : "text-text-main hover:bg-canvas"
                     }`}
                   >
                     <span>{c.name}</span>
                     {c.count !== null && (
-                      <span className="text-xs text-slate-400">{c.count}</span>
+                      <span className="text-xs text-text-muted">{c.count}</span>
                     )}
                   </button>
                 ))}
@@ -216,19 +216,19 @@ export default function DashboardSavedPage() {
                     value={newCollectionName}
                     onChange={(e) => setNewCollectionName(e.target.value)}
                     placeholder="Collection name"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-focus"
                   />
                   <div className="mt-2 flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 rounded-lg bg-indigo-600 px-2 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+                      className="flex-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-medium text-surface hover:bg-primary-hover"
                     >
                       Create
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowNewCollection(false)}
-                      className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg border border-border px-2 py-1.5 text-xs font-medium text-text-main hover:bg-canvas"
                     >
                       Cancel
                     </button>
@@ -237,7 +237,7 @@ export default function DashboardSavedPage() {
               ) : (
                 <button
                   onClick={() => setShowNewCollection(true)}
-                  className="mt-2 flex w-full items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+                  className="mt-2 flex w-full items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-canvas"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -258,8 +258,8 @@ export default function DashboardSavedPage() {
                   onClick={() => setActiveFilter(f.id)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition sm:text-sm ${
                     activeFilter === f.id
-                      ? "bg-slate-900 text-white"
-                      : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+                      ? "bg-text-heading text-surface"
+                      : "bg-surface text-text-main ring-1 ring-border hover:bg-canvas"
                   }`}
                 >
                   {f.label}
@@ -269,11 +269,11 @@ export default function DashboardSavedPage() {
 
             {/* Items list */}
             {filteredItems.length === 0 ? (
-              <div className="rounded-xl bg-white py-16 text-center shadow-sm ring-1 ring-slate-200">
-                <p className="text-sm font-medium text-slate-700">
+              <div className="rounded-xl bg-surface py-16 text-center shadow-sm ring-1 ring-border">
+                <p className="text-sm font-medium text-text-main">
                   No saved items match your search.
                 </p>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-text-muted">
                   Try a different keyword or filter.
                 </p>
               </div>
@@ -282,7 +282,7 @@ export default function DashboardSavedPage() {
                 {filteredItems.map((item) => (
                   <li
                     key={item.id}
-                    className="group rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md sm:p-5"
+                    className="group rounded-xl bg-surface p-4 shadow-sm ring-1 ring-border transition hover:shadow-md sm:p-5"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -292,14 +292,14 @@ export default function DashboardSavedPage() {
                           >
                             {TYPE_META[item.type].label}
                           </span>
-                          <span className="truncate text-xs text-slate-400">
+                          <span className="truncate text-xs text-text-muted">
                             {item.meta}
                           </span>
                         </div>
-                        <h3 className="text-sm font-medium text-slate-900 sm:text-base">
+                        <h3 className="text-sm font-medium text-text-heading sm:text-base">
                           {item.title}
                         </h3>
-                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                        <p className="mt-1 line-clamp-2 text-sm text-text-muted">
                           {item.snippet}
                         </p>
                       </div>
@@ -307,7 +307,7 @@ export default function DashboardSavedPage() {
                       <button
                         onClick={() => handleUnsave(item.id)}
                         aria-label="Remove from saved"
-                        className="shrink-0 rounded-lg p-1.5 text-indigo-500 transition hover:bg-indigo-50"
+                        className="shrink-0 rounded-lg p-1.5 text-primary transition hover:bg-canvas"
                         title="Remove from saved"
                       >
                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
