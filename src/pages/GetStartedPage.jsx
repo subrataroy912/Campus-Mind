@@ -205,20 +205,6 @@ export default function GetStartedPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <Link to="/dashboard">
-                <Button
-                  ref={magneticButtonRef}
-                  size="lg"
-                  className="w-full sm:w-auto px-8 py-3 text-lg flex items-center gap-2 magnetic-btn relative overflow-hidden group"
-                  style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'var(--color-surface)' }}
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Go to Dashboard
-                    <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
-                  </span>
-                  <span className="absolute inset-0 bg-surface/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
-                </Button>
-              </Link>
               <Link to="/auth/register">
                 <Button
                   ref={magneticButtonRef}
@@ -401,9 +387,9 @@ export default function GetStartedPage() {
                 >
                   <Link to="/auth/register">
                     <Button
-                      variant="secondary"
+                      variant="ghost"
                       size="lg"
-                      className="w-full sm:w-auto px-8 py-3 text-lg bg-surface text-primary hover:bg-canvas flex items-center gap-2 group relative overflow-hidden"
+                      className="w-full sm:w-auto px-8 py-3 text-lg border border-text-muted bg-text-muted text-white hover:bg-text-heading hover:border-text-heading hover:text-white active:bg-text-heading active:border-text-heading active:text-white transition-colors duration-200 flex items-center gap-2 group relative overflow-hidden"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -418,11 +404,9 @@ export default function GetStartedPage() {
                   </Link>
                   <Link to="/auth/login">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="lg"
-                      className="w-full sm:w-auto px-8 py-3 text-lg border-surface text-surface hover:bg-surface/10"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      className="w-full sm:w-auto px-8 py-3 text-lg border border-surface bg-transparent text-surface hover:bg-primary-hover hover:border-primary-hover hover:text-surface transition-colors duration-300"
                     >
                       Already have an account? Sign In
                     </Button>
