@@ -5,12 +5,12 @@ import clsx from 'clsx'
 const _motion = motion
 
 const STAT_CONFIG = [
-  { key: 'practiceSessions', label: 'Practice Sessions', icon: BookOpen, color: 'text-blue-600' },
-  { key: 'assignmentsCompleted', label: 'Assignments', icon: ClipboardCheck, color: 'text-green-600' },
-  { key: 'learningStreak', label: 'Learning Streak', icon: Flame, color: 'text-orange-500' },
-  { key: 'averageScore', label: 'Avg Score', icon: TrendingUp, color: 'text-purple-600', suffix: '%' },
-  { key: 'completedTasks', label: 'Completed Tasks', icon: Target, color: 'text-indigo-600' },
-  { key: 'achievementsUnlocked', label: 'Achievements', icon: Award, color: 'text-amber-600' },
+  { key: 'practiceSessions', label: 'Practice Sessions', icon: BookOpen, color: 'text-primary' },
+  { key: 'assignmentsCompleted', label: 'Assignments', icon: ClipboardCheck, color: 'text-success' },
+  { key: 'learningStreak', label: 'Learning Streak', icon: Flame, color: 'text-secondary' },
+  { key: 'averageScore', label: 'Avg Score', icon: TrendingUp, color: 'text-primary', suffix: '%' },
+  { key: 'completedTasks', label: 'Completed Tasks', icon: Target, color: 'text-primary' },
+  { key: 'achievementsUnlocked', label: 'Achievements', icon: Award, color: 'text-secondary' },
 ]
 
 function StatCard({ label, value, Icon, color, suffix = '', delay = 0 }) {
@@ -23,9 +23,9 @@ function StatCard({ label, value, Icon, color, suffix = '', delay = 0 }) {
   return (
     <motion.article
       className={clsx(
-        'bg-white border border-neutral-200 rounded-2xl p-6',
+        'bg-surface border border-border rounded-2xl p-6',
         'transition-all duration-300',
-        'hover:border-neutral-300 hover:shadow-lg hover:shadow-black/5',
+        'hover:border-border hover:shadow-lg hover:shadow-text-heading/5',
         'group'
       )}
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -34,21 +34,21 @@ function StatCard({ label, value, Icon, color, suffix = '', delay = 0 }) {
       whileHover={{ y: -4, scale: 1.01 }}
     >
       <div className="flex items-center justify-between mb-3">
-        <div className={clsx('p-2.5 rounded-xl bg-neutral-50', color)}>
+        <div className={clsx('p-2.5 rounded-xl bg-canvas', color)}>
           <Icon className="w-5 h-5" aria-hidden="true" />
         </div>
       </div>
       <div className="space-y-1">
         <motion.div
-          className="font-serif text-3xl sm:text-4xl font-medium text-neutral-950 tabular-nums"
+          className="font-serif text-3xl sm:text-4xl font-medium text-text-heading tabular-nums"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: delay + 0.1, duration: 0.4 }}
         >
           {typeof value === 'number' ? value.toLocaleString() : value}
-          <span className="font-sans text-lg sm:text-xl font-normal text-neutral-500">{suffix}</span>
+          <span className="font-sans text-lg sm:text-xl font-normal text-text-muted">{suffix}</span>
         </motion.div>
-        <p className="font-sans text-sm text-neutral-600 font-medium">{label}</p>
+        <p className="font-sans text-sm text-text-main font-medium">{label}</p>
       </div>
     </motion.article>
   )
@@ -59,10 +59,10 @@ function AcademicOverview({ stats, isLoading = false }) {
     return (
       <section className="py-8 px-4 sm:px-6 lg:px-8" aria-busy="true">
         <div className="mx-auto max-w-4xl">
-          <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded-lg mb-6" />
+          <div className="h-8 w-48 bg-border animate-pulse rounded-lg mb-6" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-36 bg-neutral-200 animate-pulse rounded-2xl border border-neutral-200" />
+              <div key={i} className="h-36 bg-border animate-pulse rounded-2xl border border-border" />
             ))}
           </div>
         </div>
@@ -90,7 +90,7 @@ function AcademicOverview({ stats, isLoading = false }) {
         >
           <h2
             id="stats-heading"
-            className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 tracking-tight"
+            className="font-serif text-2xl sm:text-3xl font-medium text-text-heading tracking-tight"
           >
             Academic Overview
           </h2>

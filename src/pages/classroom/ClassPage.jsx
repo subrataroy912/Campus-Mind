@@ -72,7 +72,7 @@ function Avatar({ name, size = "h-9 w-9" }) {
     .join("");
   return (
     <div
-      className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-600`}
+      className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-medium text-text-main`}
     >
       {initials}
     </div>
@@ -115,7 +115,7 @@ function ClassHeader({ currentClass }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
       {/* Cover banner */}
       <div className={`relative h-28 sm:h-36 ${currentClass.theme}`}>
         <div className="absolute right-3 top-3">
@@ -123,18 +123,18 @@ function ClassHeader({ currentClass }) {
             <button
               onClick={() => setMenuOpen((o) => !o)}
               aria-label="Class settings"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/15 text-surface transition hover:bg-surface/25"
             >
               <Icon name="settings" className="h-5 w-5" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-11 z-10 w-52 overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-slate-200">
+              <div className="absolute right-0 top-11 z-10 w-52 overflow-hidden rounded-lg bg-surface py-1 shadow-lg ring-1 ring-border">
                 {["Edit class details", "Change theme", "Notification preferences"].map(
                   (label) => (
                     <button
                       key={label}
                       onClick={() => setMenuOpen(false)}
-                      className="block w-full px-3.5 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                      className="block w-full px-3.5 py-2 text-left text-sm text-text-main hover:bg-canvas"
                     >
                       {label}
                     </button>
@@ -149,19 +149,19 @@ function ClassHeader({ currentClass }) {
       {/* Identity + invite */}
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">
+          <h1 className="text-xl font-semibold text-text-heading sm:text-2xl">
             {currentClass?.title}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-text-muted">
             {currentClass?.section || currentClass?.subtitle} · {currentClass?.teacher?.name}
           </p>
         </div>
 
         <button
           onClick={handleCopy}
-          className="flex items-center justify-center gap-2 self-start rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:self-auto"
+          className="flex items-center justify-center gap-2 self-start rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-text-main transition hover:bg-canvas sm:self-auto"
         >
-          <Icon name={copied ? "check" : "copy"} className={`h-4 w-4 ${copied ? "text-emerald-600" : ""}`} />
+          <Icon name={copied ? "check" : "copy"} className={`h-4 w-4 ${copied ? "text-success" : ""}`} />
           {copied ? "Copied" : `Invite code: ${currentClass?.inviteCode}`}
         </button>
       </div>
@@ -173,14 +173,14 @@ function ClassHeader({ currentClass }) {
 
 function TabNav({ active, onChange }) {
   return (
-    <div className="mt-4 flex gap-1 overflow-x-auto rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200 sm:gap-2">
+    <div className="mt-4 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-sm ring-1 ring-border sm:gap-2">
       {TABS.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
           className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition ${active === tab.id
-            ? "bg-indigo-600 text-white"
-            : "text-slate-600 hover:bg-slate-50"
+            ? "bg-primary text-surface"
+            : "text-text-main hover:bg-canvas"
             }`}
         >
           {tab.label}
@@ -196,7 +196,7 @@ function PostBox() {
   const [text, setText] = useState("");
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
       <div className="flex gap-3">
         <Avatar name="You" />
         <textarea
@@ -204,24 +204,24 @@ function PostBox() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Share an announcement or ask a question…"
-          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-indigo-500"
+          className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
         />
       </div>
-      <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+      <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
         <div className="flex gap-1">
-          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 sm:text-sm">
+          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-canvas sm:text-sm">
             <Icon name="image" className="h-4 w-4" /> Attach
           </button>
-          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 sm:text-sm">
+          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-canvas sm:text-sm">
             <Icon name="video" className="h-4 w-4" /> Video
           </button>
-          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 sm:text-sm">
+          <button className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-canvas sm:text-sm">
             <Icon name="poll" className="h-4 w-4" /> Poll
           </button>
         </div>
         <button
           disabled={!text.trim()}
-          className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           Post
         </button>
@@ -243,11 +243,11 @@ function FeedPost({ post, pinned = false }) {
 
   return (
     <div
-      className={`rounded-2xl bg-white p-4 shadow-sm ring-1 sm:p-5 ${pinned ? "ring-amber-200" : "ring-slate-200"
+      className={`rounded-2xl bg-surface p-4 shadow-sm ring-1 sm:p-5 ${pinned ? "ring-border" : "ring-border"
         }`}
     >
       {pinned && (
-        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-amber-600">
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-secondary">
           <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M16 3l5 5-5.5 5.5L17 16l-5 5-2-5-5-2 5-2.5L8.5 8 13 3l3 3z" />
           </svg>
@@ -258,22 +258,22 @@ function FeedPost({ post, pinned = false }) {
         <Avatar name={post.author} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-sm font-medium text-slate-900">{post.author}</span>
-            <span className="text-xs text-slate-400">{post.time}</span>
+            <span className="text-sm font-medium text-text-heading">{post.author}</span>
+            <span className="text-xs text-text-muted">{post.time}</span>
           </div>
-          <p className="mt-1 text-sm text-slate-700">{post.content}</p>
+          <p className="mt-1 text-sm text-text-main">{post.content}</p>
 
           {!pinned && (
-            <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+            <div className="mt-3 flex items-center gap-4 text-xs text-text-muted">
               <button
                 onClick={toggleLike}
-                className={`flex items-center gap-1.5 transition hover:text-indigo-600 ${liked ? "text-indigo-600" : ""
+                className={`flex items-center gap-1.5 transition hover:text-primary ${liked ? "text-primary" : ""
                   }`}
               >
                 <Icon name="like" className="h-4 w-4" />
                 {likeCount}
               </button>
-              <button className="flex items-center gap-1.5 transition hover:text-indigo-600">
+              <button className="flex items-center gap-1.5 transition hover:text-primary">
                 <Icon name="comment" className="h-4 w-4" />
                 {post.comments}
               </button>
@@ -291,17 +291,17 @@ function SidePanel() {
   return (
     <div className="space-y-4">
       {/* To-do list */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <h3 className="mb-3 text-sm font-semibold text-slate-900">
+      <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
+        <h3 className="mb-3 text-sm font-semibold text-text-heading">
           Upcoming (next 7 days)
         </h3>
         <ul className="space-y-2.5">
           {TODO_ITEMS.map((item) => (
             <li key={item.id} className="flex items-start gap-2.5">
-              <Icon name="clock" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <Icon name="clock" className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
               <div className="min-w-0">
-                <p className="truncate text-sm text-slate-700">{item.title}</p>
-                <p className="text-xs text-slate-400">{item.due}</p>
+                <p className="truncate text-sm text-text-main">{item.title}</p>
+                <p className="text-xs text-text-muted">{item.due}</p>
               </div>
             </li>
           ))}
@@ -309,9 +309,9 @@ function SidePanel() {
       </div>
 
       {/* Active now */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+      <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
+        <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-text-heading">
+          <span className="h-2 w-2 rounded-full bg-success" />
           Active now
         </h3>
         <ul className="space-y-2.5">
@@ -319,22 +319,22 @@ function SidePanel() {
             <li key={person.id} className="flex items-center gap-2.5">
               <div className="relative">
                 <Avatar name={person.name} size="h-7 w-7" />
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
               </div>
-              <span className="text-sm text-slate-700">{person.name}</span>
+              <span className="text-sm text-text-main">{person.name}</span>
             </li>
           ))}
         </ul>
       </div>
 
       {/* Quick links */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <h3 className="mb-3 text-sm font-semibold text-slate-900">Quick links</h3>
+      <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
+        <h3 className="mb-3 text-sm font-semibold text-text-heading">Quick links</h3>
         <ul className="space-y-1">
           {QUICK_LINKS.map((link) => (
             <li key={link.id}>
-              <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm text-slate-600 transition hover:bg-slate-50">
-                <Icon name={link.icon} className="h-4 w-4 text-slate-400" />
+              <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm text-text-main transition hover:bg-canvas">
+                <Icon name={link.icon} className="h-4 w-4 text-text-muted" />
                 {link.label}
               </button>
             </li>
@@ -356,7 +356,7 @@ export default function ClassPage() {
     return <div>Class not found!</div>;
   }
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-canvas py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <ClassHeader currentClass={currentClass} />
@@ -382,7 +382,7 @@ export default function ClassPage() {
             </div>
           </div>
         ) : (
-          <div className="mt-4 flex items-center justify-center rounded-2xl bg-white py-20 text-sm text-slate-400 shadow-sm ring-1 ring-slate-200">
+          <div className="mt-4 flex items-center justify-center rounded-2xl bg-surface py-20 text-sm text-text-muted shadow-sm ring-1 ring-border">
             {TABS.find((t) => t.id === activeTab)?.label} view coming soon.
           </div>
         )}

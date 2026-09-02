@@ -5,10 +5,10 @@ export default function NavbarItems({ name, to }) {
         <li>
             <NavLink
                 to={to}
-                className={({ isActive }) => `pb-1 transition-all border-b-2 hover:text-red-500 hover:border-red-500 ${isActive
+                className={({ isActive }) => `pb-1 transition-all border-b-2 hover:text-secondary hover:border-secondary ${isActive
                     ?
-                    "border-red-500 text-red-500 font-semibold"
-                    : "border-transparent text-white"} 
+                    "border-secondary text-secondary font-semibold"
+                    : "border-transparent text-surface"}
                     cursor-pointer`}>
                 {name}
             </NavLink>

@@ -7,7 +7,7 @@
 export const getNavLinkStyles = ({ isActive }) => {
   return `flex items-center gap-3 p-3 rounded-lg transition-all w-full text-sm font-medium ${
     isActive
-      ? 'bg-indigo-50 text-indigo-600 font-semibold'
-      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+      ? 'bg-canvas text-primary font-semibold'
+      : 'text-text-main hover:bg-canvas hover:text-text-heading'
   }`;
 };

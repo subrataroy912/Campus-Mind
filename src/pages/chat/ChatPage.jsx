@@ -9,13 +9,13 @@ function ChatPage() {
       title="Chat"
     >
       <section className="grid gap-4 lg:grid-cols-[280px_1fr]">
-        <aside className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Conversations</h2>
-          <p className="mt-3 text-sm text-gray-700">Direct messages and classroom channels will appear here.</p>
+        <aside className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text-heading">Conversations</h2>
+          <p className="mt-3 text-sm text-text-main">Direct messages and classroom channels will appear here.</p>
         </aside>
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Message thread</h2>
-          <p className="mt-3 text-sm text-gray-700">Select a conversation to load text messages and shared assets.</p>
+        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text-heading">Message thread</h2>
+          <p className="mt-3 text-sm text-text-main">Select a conversation to load text messages and shared assets.</p>
         </div>
       </section>
       <PlaceholderStates

@@ -8,7 +8,7 @@ import {
 
 export default function Navbar() {
     return (
-        <nav className=" flex items-center justify-between w-full px-4 py-3 bg-gray-900 text-gray-100 shadow-md sm:px-6">
+        <nav className=" flex items-center justify-between w-full px-4 py-3 bg-text-heading text-canvas shadow-md sm:px-6">
             
             {/* Left Section: Logo */}
             <div className="flex items-center shrink-0 cursor-pointer">
@@ -20,7 +20,7 @@ export default function Navbar() {
                 <li>
                     <button 
                         aria-label="Notifications"
-                        className="flex items-center gap-2 px-3 py-2 text-sm transition-all duration-200 rounded-lg hover:bg-gray-800 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex items-center gap-2 px-3 py-2 text-sm transition-all duration-200 rounded-lg hover:bg-text-heading hover:text-primary focus:outline-none focus:ring-2 focus:ring-focus"
                     >
                         <IoIosNotificationsOutline className="w-6 h-6" />
                         <span className="hidden md:block">Notifications</span>
@@ -29,7 +29,7 @@ export default function Navbar() {
                 <li>
                     <button 
                         aria-label="Profile"
-                        className="flex items-center gap-2 px-3 py-2 text-sm transition-all duration-200 rounded-lg hover:bg-gray-800 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex items-center gap-2 px-3 py-2 text-sm transition-all duration-200 rounded-lg hover:bg-text-heading hover:text-primary focus:outline-none focus:ring-2 focus:ring-focus"
                     >
                         <IoIosPerson className="w-5 h-5" />
                         <span className="hidden md:block">Profile</span>
@@ -38,7 +38,7 @@ export default function Navbar() {
                 <li>
                     <button 
                         aria-label="Logout"
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-400 transition-all duration-200 rounded-lg hover:bg-red-950 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary transition-all duration-200 rounded-lg hover:bg-secondary-hover hover:text-border focus:outline-none focus:ring-2 focus:ring-focus"
                     >
                         <IoIosLogOut className="w-5 h-5" />
                         <span className="hidden md:block">Logout</span>
