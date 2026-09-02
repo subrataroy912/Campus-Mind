@@ -24,7 +24,7 @@ export const SIDEBAR_NAV_ITEMS = [
   },
   {
     label: 'Assignments',
-    to: '/dashboard/Assignment',
+    to: '/dashboard/Assignments',
     Icon: NotebookIcon,
   },
   {

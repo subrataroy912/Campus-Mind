@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 import { SIDEBAR_NAV_ITEMS } from "../../config/navigation";
 import { getNavLinkStyles } from "../../utils/routeHelpers";
 

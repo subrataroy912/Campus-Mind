@@ -1,15 +1,14 @@
 import React from 'react';
 import Classes from '../../utils/data.js';
 import ClassCard from '../../components/dashboard/ClassCard';
-// Optional: import an icon for a modern UI touch if you use lucide-react
 import { BookOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 function DashboardClasses() {
   const navigate = useNavigate();
 
-  const handleRedirect = (userId) => {
-    navigate(`/class/${userId}`);
+  const handleRedirect = (classId) => {
+    navigate(`/dashboard/classes/${classId}`);
   };
   return (
     <div className="min-h-screen bg-gray-50/30 p-4 sm:p-6 lg:p-8">
