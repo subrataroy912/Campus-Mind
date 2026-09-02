@@ -58,15 +58,15 @@ function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-md">
+    <div className="flex min-h-[80vh] items-center justify-center bg-canvas px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-xl bg-surface p-8 shadow-md">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-text-heading">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-text-main">
             Or{' '}
-            <a href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <a href="/auth/login" className="font-medium text-primary hover:text-primary">
               sign in to your existing account
             </a>
           </p>
@@ -75,19 +75,19 @@ function RegisterPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Status Messages */}
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 border border-red-200">
+            <div className="rounded-md bg-canvas p-3 text-sm text-secondary-hover border border-border">
               {error}
             </div>
           )}
           {success && (
-            <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 border border-green-200">
+            <div className="rounded-md bg-canvas p-3 text-sm text-success border border-border">
               Registration successful! You can now log in.
             </div>
           )}
 
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-text-main">
                 Full Name
               </label>
               <input
@@ -97,14 +97,14 @@ function RegisterPage() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-border px-3 py-2 text-text-heading placeholder:text-muted focus:border-primary focus:outline-none focus:ring-focus sm:text-sm"
                 placeholder="John Doe"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-text-main">
                 Email address
               </label>
               <input
@@ -115,14 +115,14 @@ function RegisterPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-border px-3 py-2 text-text-heading placeholder:text-muted focus:border-primary focus:outline-none focus:ring-focus sm:text-sm"
                 placeholder="you@example.com"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-text-main">
                 Password
               </label>
               <input
@@ -133,7 +133,7 @@ function RegisterPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border border-border px-3 py-2 text-text-heading placeholder:text-muted focus:border-primary focus:outline-none focus:ring-focus sm:text-sm"
                 placeholder="••••••••"
                 disabled={loading}
               />
@@ -144,7 +144,7 @@ function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-surface hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 disabled:bg-primary disabled:cursor-not-allowed"
             >
               {loading ? 'Registering...' : 'Register'}
             </button>

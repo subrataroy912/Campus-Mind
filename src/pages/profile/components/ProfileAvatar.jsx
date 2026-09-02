@@ -36,16 +36,16 @@ function ProfileAvatar({
             src={src}
             alt={`${name}'s profile`}
             className={clsx(
-              'rounded-[2rem] object-cover border-2 border-white shadow-lg',
-              'shadow-black/10',
+              'rounded-[2rem] object-cover border-2 border-surface shadow-lg',
+              'shadow-text-heading/10',
               `w-${size / 4} h-${size / 4}`
             )}
           />
         ) : (
           <div
             className={clsx(
-              'rounded-[2rem] flex items-center justify-center border-2 border-white shadow-lg',
-              'shadow-black/10 bg-neutral-200 text-neutral-600',
+              'rounded-[2rem] flex items-center justify-center border-2 border-surface shadow-lg',
+              'shadow-text-heading/10 bg-border text-text-main',
               'font-serif text-2xl font-medium select-none',
               `w-${size / 4} h-${size / 4}`
             )}
@@ -60,10 +60,10 @@ function ProfileAvatar({
             onClick={onEditClick}
             disabled={isEditing}
             className={clsx(
-              'absolute bottom-0 right-0 rounded-full bg-white border-2 border-neutral-200',
-              'p-1.5 text-neutral-600 transition-all duration-200',
-              'hover:bg-neutral-100 hover:border-neutral-300 hover:text-neutral-900',
-              'focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2',
+              'absolute bottom-0 right-0 rounded-full bg-surface border-2 border-border',
+              'p-1.5 text-text-main transition-all duration-200',
+              'hover:bg-canvas hover:border-border hover:text-text-heading',
+              'focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               size >= 120 ? 'w-10 h-10' : 'w-8 h-8'
             )}
@@ -77,7 +77,7 @@ function ProfileAvatar({
       </div>
 
       <motion.div
-        className="absolute -bottom-2 -right-2 w-4 h-4 rounded-full bg-green-500 border-3 border-white"
+        className="absolute -bottom-2 -right-2 w-4 h-4 rounded-full bg-success border-3 border-surface"
         aria-hidden="true"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}

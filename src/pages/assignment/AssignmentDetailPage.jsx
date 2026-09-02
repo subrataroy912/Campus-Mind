@@ -9,13 +9,13 @@ function AssignmentDetailPage() {
       title="Assignment details"
     >
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Instructions</h2>
-          <p className="mt-3 text-sm leading-6 text-gray-700">Assignment instructions, attachments, submission status, and teacher feedback will render here once `/api/assignments/:assignmentId` responds.</p>
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text-heading">Instructions</h2>
+          <p className="mt-3 text-sm leading-6 text-text-main">Assignment instructions, attachments, submission status, and teacher feedback will render here once `/api/assignments/:assignmentId` responds.</p>
         </section>
-        <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Submission summary</h2>
-          <button className="mt-5 min-h-11 w-full rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700" type="button">
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text-heading">Submission summary</h2>
+          <button className="mt-5 min-h-11 w-full rounded-lg bg-primary px-4 text-sm font-semibold text-surface shadow-sm hover:bg-primary-hover" type="button">
             Upload work
           </button>
         </section>

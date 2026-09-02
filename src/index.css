@@ -55,12 +55,26 @@ button {
   font-display: swap;
 }
 
+@theme {
+  --color-primary: #007BFF;
+  --color-primary-hover: #0056B3;
+  --color-secondary: #6C757D;
+  --color-secondary-hover: #495057;
+  --color-accent: #17A2B9;
+  --color-success: #28A745;
+  --color-text-main: #495057;
+  --color-text-muted: #6C757D;
+  --color-text-heading: #212529;
+  --color-border: #CED4DA;
+  --color-surface: #FFFFFF;
+  --color-canvas: #F8F9FA;
+  --color-focus: #007BFF;
+  --color-overlay: #212529;
+}
+
 :root {
-  --bg: #F5F3EF;
-  --bg-secondary: #EAE7E1;
-  --fg: #0A0A0A;
-  --muted: #8E8E8E;
-  --accent: #1A1A2E;
+  color: var(--color-text-main);
+  background-color: var(--color-canvas);
 }
 
 * {
@@ -105,8 +119,8 @@ html {
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 10, 0.15) 100%),
-    linear-gradient(180deg, rgba(10, 10, 10, 0.05) 0%, transparent 50%, rgba(10, 10, 10, 0.05) 100%);
+    radial-gradient(ellipse at center, transparent 0%, color-mix(in srgb, var(--color-overlay) 15%, transparent) 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-overlay) 5%, transparent) 0%, transparent 50%, color-mix(in srgb, var(--color-overlay) 5%, transparent) 100%);
   z-index: 1;
 }
 
@@ -141,7 +155,7 @@ html {
   z-index: 1;
   pointer-events: none;
   opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='3' cy='3' r='1.5' fill='%230A0A0A'/%3E%3Ccircle cx='13' cy='13' r='1.5' fill='%230A0A0A'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='3' cy='3' r='1.5' fill='%23212529'/%3E%3Ccircle cx='13' cy='13' r='1.5' fill='%23212529'/%3E%3C/svg%3E");
   background-size: 40px 40px;
   mix-blend-mode: multiply;
 }
@@ -151,7 +165,7 @@ html {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(10, 10, 10, 0.25) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, var(--color-overlay) 25%, transparent) 100%);
 }
 
 .scroll-content {
@@ -168,7 +182,7 @@ html {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--fg);
+  background: var(--color-primary);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -186,7 +200,7 @@ html {
 }
 
 .magnetic-btn:hover span {
-  color: var(--bg);
+  color: var(--color-surface);
 }
 
 .section-reveal {
@@ -222,13 +236,13 @@ html {
 .text-reveal.stagger-4 > span { transition-delay: 0.4s; }
 
 .feature-card {
-  border: 1px solid rgba(10, 10, 10, 0.08);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
 }
 
 .feature-card:hover {
-  border-color: rgba(10, 10, 10, 0.2);
-  box-shadow: 0 20px 40px -15px rgba(10, 10, 10, 0.1);
+  border-color: var(--color-border);
+  box-shadow: 0 20px 40px -15px color-mix(in srgb, var(--color-overlay) 10%, transparent);
   transform: translateY(-4px);
 }
 
@@ -324,10 +338,10 @@ html {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
   50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 0 60px rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--color-primary) 60%, transparent), 0 0 60px color-mix(in srgb, var(--color-accent) 40%, transparent);
   }
 }
 
@@ -486,7 +500,7 @@ html {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-surface) 20%, transparent), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -516,4 +530,31 @@ html {
 
 .backface-hidden {
   backface-visibility: hidden;
+}
+@layer base {
+  body {
+    min-width: 320px;
+    color: var(--color-text-main);
+    background-color: var(--color-canvas);
+  }
+
+  input,
+  textarea,
+  select {
+    color: var(--color-text-main);
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+
+  :where(button, a, input, textarea, select):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 25%, transparent);
+  }
 }

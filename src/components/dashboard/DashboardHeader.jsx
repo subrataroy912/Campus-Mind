@@ -12,17 +12,17 @@ function DashboardHeader() {
   const [isMenuBarOpen, setIsMenuBarOpen] = useState(false);
   const [isNotificationCard, setIsNotificationCard] = useState(false);
   return (
-    <section className="relative shadow-sm flex items-center justify-between gap-5 rounded-lg bg-white px-2 py-2 text-gray-950">
+    <section className="relative shadow-sm flex items-center justify-between gap-5 rounded-lg bg-surface px-2 py-2 text-text-heading">
 
       {/* MOBILE HAMBURGER MENU */}
       <div className='md:hidden flex items-center'>
-        <button className='cursor-pointer text-gray-700 hover:text-gray-900 transition-colors' onClick={() => setIsMenuBarOpen(!isMenuBarOpen)}>
+        <button className='cursor-pointer text-text-main hover:text-text-heading transition-colors' onClick={() => setIsMenuBarOpen(!isMenuBarOpen)}>
           <MenuIcon size={24} />
         </button>
         {/* TODO: useClickOutsideHide */}
 
         <div
-          className={`absolute top-16 left-0 z-50 flex h-[calc(100vh-4.5rem)] w-64 flex-col justify-between border-r border-gray-200 bg-white shadow-xl transition-all duration-300 ease-in-out ${isMenuBarOpen
+          className={`absolute top-16 left-0 z-50 flex h-[calc(100vh-4.5rem)] w-64 flex-col justify-between border-r border-border bg-surface shadow-xl transition-all duration-300 ease-in-out ${isMenuBarOpen
             ? 'translate-x-0 opacity-100'
             : '-translate-x-full opacity-0 pointer-events-none'
             }`}
@@ -45,10 +45,10 @@ function DashboardHeader() {
             </ul>
           </div>
 
-          <div className="border-t border-zinc-200 p-3">
+          <div className="border-t border-border p-3">
             <Link
               to="/dashboard/settings"
-              className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 hover:bg-canvas rounded-lg transition-colors"
             >
               <BsGear className="text-xl" />
               <span>Settings</span>
@@ -59,10 +59,10 @@ function DashboardHeader() {
       </div>
 
       {/* SEARCH BAR */}
-      <div className='flex justify-start items-center gap-2 bg-[#F1F3F4] rounded-md py-2 px-4 w-72 lg:w-96'>
-        <SearchIcon className="text-[#5F6368]" size={20} />
+      <div className='flex justify-start items-center gap-2 bg-canvas rounded-md py-2 px-4 w-72 lg:w-96'>
+        <SearchIcon className="text-muted" size={20} />
         <input
-          className='outline-none bg-transparent placeholder:text-[#5F6368] w-full text-gray-800'
+          className='outline-none bg-transparent placeholder:text-muted w-full text-text-heading'
           type='search'
           placeholder='Search'
           aria-label='Search content'
@@ -76,7 +76,7 @@ function DashboardHeader() {
           <li>
             <Link
               to="#"
-              className="relative flex items-center justify-center p-1 text-gray-700 hover:text-gray-900 transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="relative flex items-center justify-center p-1 text-text-main hover:text-text-heading transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
               aria-label="Upload"
             >
               <Plus size={30} />
@@ -86,12 +86,12 @@ function DashboardHeader() {
           {/* Notifications */}
           <li className=''>
             <button
-              className="relative flex items-center justify-center p-1 text-gray-700 hover:text-gray-900 transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="relative flex items-center justify-center p-1 text-text-main hover:text-text-heading transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
               aria-label="Notifications"
               onClick={() => setIsNotificationCard(true)}
             >
               <IoIosNotificationsOutline size={30} />
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full border border-white">
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-surface bg-secondary rounded-full border border-surface">
                 1
               </span>
             </button>
@@ -102,7 +102,7 @@ function DashboardHeader() {
           <li className="relative flex items-center w-10 shrink-0">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className=" rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className=" rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               aria-expanded={isDropdownOpen}
               aria-haspopup="true"
               aria-label="Open profile menu"
@@ -110,7 +110,7 @@ function DashboardHeader() {
               <img
                 src={avatarImage}
                 alt="Profile"
-                className="w-8 h-8  rounded-full object-cover border border-gray-200 hover:border-gray-400 transition-colors"
+                className="w-8 h-8  rounded-full object-cover border border-border hover:border-text-muted transition-colors"
               />
             </button>
 
@@ -119,24 +119,24 @@ function DashboardHeader() {
           </li>
         </ul>
         {isDropdownOpen && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white py-1 z-50 border border-gray-100 rounded-md shadow-lg">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-surface py-1 z-50 border border-border rounded-md shadow-lg">
             <Link
               to="/dashboard/profile"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="block px-4 py-2 text-sm text-text-main hover:bg-canvas transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
               Profile
             </Link>
             <Link
               to="/dashboard/settings"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="block px-4 py-2 text-sm text-text-main hover:bg-canvas transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
               Settings
             </Link>
-            <hr className="my-1 border-gray-200" />
+            <hr className="my-1 border-border" />
             <button
-              className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus:bg-red-50"
+              className="block w-full text-left px-4 py-2 text-sm font-medium text-secondary hover:bg-canvas transition-colors focus:outline-none focus:bg-canvas"
               onClick={() => setIsDropdownOpen(false)}
             >
               Log out

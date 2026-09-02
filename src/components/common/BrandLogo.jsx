@@ -13,9 +13,9 @@ function BrandLogo({ compact = false }) {
         />
 
         {!compact && (
-          <span className="text-xl  md:text-xl font-black tracking-tight text-gray-900 transition-all whitespace-nowrap">
+          <span className="text-xl  md:text-xl font-black tracking-tight text-text-heading transition-all whitespace-nowrap">
             Campus
-            <span className="text-purple-600">Mind</span>
+            <span className="text-primary">Mind</span>
           </span>
         )}
       </div>

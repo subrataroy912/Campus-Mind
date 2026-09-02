@@ -99,7 +99,7 @@ export default function GetStartedPage() {
   }, [scrollY]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 relative overflow-x-hidden">
+    <div className="min-h-screen bg-linear-to-br from-canvas via-surface to-canvas relative overflow-x-hidden">
       {/* Fixed Background Video Layer - Z-0 */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <video
@@ -117,13 +117,13 @@ export default function GetStartedPage() {
           <source src="/hero_bg_animation_hand.mp4" type="video/mp4" />
         </video>
         {/* Subtle overlay for readability */}
-        <div className="absolute inset-0 bg-linear-to-b from-neutral-900/10 via-transparent to-neutral-900/10" />
+        <div className="absolute inset-0 bg-linear-to-b from-text-heading/10 via-transparent to-text-heading/10" />
         {/* Subtle vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.15)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,color-mix(in_srgb,var(--color-text-heading)_15%,transparent)_100%)]" />
 
         {/* Floating decorative elements */}
         <motion.div
-          className="absolute top-20 left-10 w-20 h-20 bg-linear-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl"
+          className="absolute top-20 left-10 w-20 h-20 bg-linear-to-br from-primary/20 to-primary/20 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             borderRadius: ["50%", "30%", "50%"],
@@ -131,7 +131,7 @@ export default function GetStartedPage() {
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-32 h-32 bg-linear-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-32 h-32 bg-linear-to-br from-primary/20 to-primary/20 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.15, 1],
             rotate: [0, 180, 360],
@@ -139,7 +139,7 @@ export default function GetStartedPage() {
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute top-1/2 left-1/4 w-16 h-16 bg-linear-to-br from-indigo-400/15 to-purple-400/15 rounded-full blur-2xl"
+          className="absolute top-1/2 left-1/4 w-16 h-16 bg-linear-to-br from-primary/15 to-primary/15 rounded-full blur-2xl"
           animate={{
             y: [-20, 20, -20],
             x: [-10, 10, -10],
@@ -152,19 +152,19 @@ export default function GetStartedPage() {
       <main className="relative z-10">
         {/* Hero Section */}
         <section className="relative overflow-hidden py-20 lg:py-32">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-indigo-100/50 via-transparent to-purple-100/50" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-canvas/50 via-transparent to-canvas/50" />
 
           {/* Parallax floating elements in hero */}
           <motion.div
             style={{ y: floatingY }}
-            className="absolute top-1/4 right-10 w-40 h-40 bg-linear-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-3xl"
+            className="absolute top-1/4 right-10 w-40 h-40 bg-linear-to-br from-primary/10 to-primary/10 rounded-full blur-3xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             transition={{ delay: 1, duration: 1 }}
           />
           <motion.div
             style={{ y: floatingY }}
-            className="absolute bottom-1/4 left-10 w-24 h-24 bg-linear-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+            className="absolute bottom-1/4 left-10 w-24 h-24 bg-linear-to-br from-primary/10 to-primary/10 rounded-full blur-3xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             transition={{ delay: 1.2, duration: 1 }}
@@ -180,17 +180,17 @@ export default function GetStartedPage() {
             </motion.div>
 
             <motion.h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-[-0.03em] leading-[0.9] text-gray-900"
+              className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-[-0.03em] leading-[0.9] text-text-heading"
               style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', fontWeight: 500, letterSpacing: '-0.03em' }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              Welcome to <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">CampusMind</span>
+              Welcome to <span className="bg-linear-to-r from-primary to-primary bg-clip-text text-transparent">CampusMind</span>
             </motion.h1>
 
             <motion.p
-              className="mt-6 text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+              className="mt-6 text-lg sm:text-xl text-text-main max-w-3xl mx-auto leading-relaxed"
               style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', letterSpacing: '-0.01em', lineHeight: 1.7 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -210,13 +210,13 @@ export default function GetStartedPage() {
                   ref={magneticButtonRef}
                   size="lg"
                   className="w-full sm:w-auto px-8 py-3 text-lg flex items-center gap-2 magnetic-btn relative overflow-hidden group"
-                  style={{ background: '#0A0A0A', borderColor: '#0A0A0A', color: '#F5F3EF' }}
+                  style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'var(--color-surface)' }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Go to Dashboard
                     <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                   </span>
-                  <span className="absolute inset-0 bg-white/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
+                  <span className="absolute inset-0 bg-surface/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
                 </Button>
               </Link>
               <Link to="/auth/register">
@@ -224,13 +224,13 @@ export default function GetStartedPage() {
                   ref={magneticButtonRef}
                   size="lg"
                   className="w-full sm:w-auto px-8 py-3 text-lg flex items-center gap-2 magnetic-btn relative overflow-hidden group"
-                  style={{ background: '#0A0A0A', borderColor: '#0A0A0A', color: '#F5F3EF' }}
+                  style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'var(--color-surface)' }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Get Started
                     <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                   </span>
-                  <span className="absolute inset-0 bg-white/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
+                  <span className="absolute inset-0 bg-surface/10 scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
                 </Button>
               </Link>
               <Link to="/auth/login">
@@ -243,7 +243,7 @@ export default function GetStartedPage() {
 
             {/* Scroll indicator - smaller and closer to buttons */}
             <motion.div
-              className="mt-8 flex flex-col items-center gap-1.5 text-gray-400"
+              className="mt-8 flex flex-col items-center gap-1.5 text-text-muted"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -260,7 +260,7 @@ export default function GetStartedPage() {
                 />
               </motion.div>
               <motion.span
-                className="text-[10px] font-medium tracking-wider uppercase text-gray-400"
+                className="text-[10px] font-medium tracking-wider uppercase text-text-muted"
                 animate={{ opacity: [1, 0.4, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
@@ -272,7 +272,7 @@ export default function GetStartedPage() {
 
         {/* Features Section */}
         <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative">
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
           <div className="max-w-7xl mx-auto relative">
             <motion.div
               className="text-center mb-16"
@@ -282,18 +282,18 @@ export default function GetStartedPage() {
               transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               <motion.span
-                className="inline-block text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-3"
+                className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-3"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
               >
                 Key Features
               </motion.span>
-              <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-[-0.02em] leading-[1.1]"
+              <h2 className="text-3xl sm:text-4xl font-semibold text-text-heading tracking-[-0.02em] leading-[1.1]"
                 style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', fontWeight: 600, letterSpacing: '-0.02em' }}>
-                Everything you need to <span className="text-indigo-600">succeed</span>
+                Everything you need to <span className="text-primary">succeed</span>
               </h2>
-              <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="mt-4 text-lg text-text-main max-w-2xl mx-auto">
                 Powerful features designed to help you learn faster and achieve your academic goals.
               </p>
             </motion.div>
@@ -302,7 +302,7 @@ export default function GetStartedPage() {
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
-                  className="group relative p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-indigo-100 transition-all duration-300"
+                  className="group relative p-6 bg-surface rounded-2xl shadow-sm border border-border hover:shadow-xl hover:border-border transition-all duration-300"
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-100px' }}
@@ -310,20 +310,20 @@ export default function GetStartedPage() {
                   whileHover={{ y: -8, scale: 1.02 }}
                 >
                   <motion.div
-                    className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
+                    className="w-12 h-12 bg-gradient-to-br from-canvas to-canvas rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
                     whileHover={{ rotate: 10, scale: 1.1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <feature.icon className="w-6 h-6 text-indigo-600" />
+                    <feature.icon className="w-6 h-6 text-primary" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2" style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', fontWeight: 600, letterSpacing: '-0.01em' }}>
+                  <h3 className="text-xl font-semibold text-text-heading mb-2" style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', fontWeight: 600, letterSpacing: '-0.01em' }}>
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <p className="text-text-main leading-relaxed">{feature.description}</p>
 
                   {/* Hover glow effect */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl opacity-0"
+                    className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/10 rounded-2xl opacity-0"
                     whileHover={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                   />
@@ -335,10 +335,10 @@ export default function GetStartedPage() {
 
         {/* CTA Section */}
         <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative">
-          <div className="absolute inset-0 bg-gradient-to-t from-indigo-50 via-transparent to-purple-50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas" />
           <div className="max-w-4xl mx-auto text-center relative">
             <motion.div
-              className="relative bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 sm:p-12 lg:p-16 overflow-hidden"
+              className="relative bg-gradient-to-r from-primary to-primary rounded-3xl p-8 sm:p-12 lg:p-16 overflow-hidden"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
@@ -355,7 +355,7 @@ export default function GetStartedPage() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <motion.div
                   key={i}
-                  className="absolute w-2 h-2 bg-white/50 rounded-full"
+                  className="absolute w-2 h-2 bg-surface/50 rounded-full"
                   style={{
                     top: `${15 + i * 15}%`,
                     left: `${10 + i * 18}%`,
@@ -375,7 +375,7 @@ export default function GetStartedPage() {
 
               <div className="relative z-10">
                 <motion.h2
-                  className="text-3xl sm:text-4xl font-semibold text-white mb-4"
+                  className="text-3xl sm:text-4xl font-semibold text-surface mb-4"
                   style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', fontWeight: 600, letterSpacing: '-0.02em' }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -384,7 +384,7 @@ export default function GetStartedPage() {
                   Ready to start your journey?
                 </motion.h2>
                 <motion.p
-                  className="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto"
+                  className="text-canvas text-lg mb-8 max-w-2xl mx-auto"
                   style={{ fontFamily: '"Calisto MT", "Book Antiqua", Georgia, serif', letterSpacing: '-0.01em', lineHeight: 1.7 }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -403,14 +403,14 @@ export default function GetStartedPage() {
                     <Button
                       variant="secondary"
                       size="lg"
-                      className="w-full sm:w-auto px-8 py-3 text-lg bg-white text-indigo-600 hover:bg-indigo-50 flex items-center gap-2 group relative overflow-hidden"
+                      className="w-full sm:w-auto px-8 py-3 text-lg bg-surface text-primary hover:bg-canvas flex items-center gap-2 group relative overflow-hidden"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       <span className="relative z-10">Create Free Account</span>
                       <ArrowRight size={20} className="relative z-10 transition-transform group-hover:translate-x-1" />
                       <motion.span
-                        className="absolute inset-0 bg-indigo-600 scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
+                        className="absolute inset-0 bg-primary scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: 0 }}
                       />
@@ -420,7 +420,7 @@ export default function GetStartedPage() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full sm:w-auto px-8 py-3 text-lg border-white text-white hover:bg-white/10"
+                      className="w-full sm:w-auto px-8 py-3 text-lg border-surface text-surface hover:bg-surface/10"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -434,37 +434,37 @@ export default function GetStartedPage() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-transparent text-gray-600 py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
+        <footer className="bg-transparent text-text-main py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
               <div className="md:col-span-2">
                 <BrandLogo className="mb-4" />
-                <p className="text-gray-600 max-w-xs">
+                <p className="text-text-main max-w-xs">
                   CampusMind - Empowering students to achieve academic excellence through
                   practice, collaboration, and smart learning tools.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-4">Platform</h4>
+                <h4 className="font-semibold text-text-heading mb-4">Platform</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><Link to="/practics" className="hover:text-indigo-600 transition-colors text-gray-600">Practice Hub</Link></li>
-                  <li><Link to="/dashboard" className="hover:text-indigo-600 transition-colors text-gray-600">Dashboard</Link></li>
-                  <li><Link to="/dashboard/community" className="hover:text-indigo-600 transition-colors text-gray-600">Community</Link></li>
-                  <li><Link to="/profile" className="hover:text-indigo-600 transition-colors text-gray-600">Profile</Link></li>
+                  <li><Link to="/practics" className="hover:text-primary transition-colors text-text-main">Practice Hub</Link></li>
+                  <li><Link to="/dashboard" className="hover:text-primary transition-colors text-text-main">Dashboard</Link></li>
+                  <li><Link to="/dashboard/community" className="hover:text-primary transition-colors text-text-main">Community</Link></li>
+                  <li><Link to="/profile" className="hover:text-primary transition-colors text-text-main">Profile</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
+                <h4 className="font-semibold text-text-heading mb-4">Support</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><Link href="#" className="hover:text-indigo-600 transition-colors text-gray-600">Help Center</Link></li>
-                  <li><Link href="#" className="hover:text-indigo-600 transition-colors text-gray-600">Contact Us</Link></li>
-                  <li><Link href="#" className="hover:text-indigo-600 transition-colors text-gray-600">Privacy Policy</Link></li>
-                  <li><Link href="#" className="hover:text-indigo-600 transition-colors text-gray-600">Terms of Service</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors text-text-main">Help Center</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors text-text-main">Contact Us</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors text-text-main">Privacy Policy</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors text-text-main">Terms of Service</Link></li>
                 </ul>
               </div>
             </div>
-            <div className="border-t border-gray-200 pt-8 text-center text-sm">
-              <p className="text-gray-500">© 2027 CampusMind. All rights reserved.</p>
+            <div className="border-t border-border pt-8 text-center text-sm">
+              <p className="text-text-muted">© 2027 CampusMind. All rights reserved.</p>
             </div>
           </div>
         </footer>

@@ -154,26 +154,26 @@ function EditProfileModal({
         aria-labelledby="modal-title"
       >
         <motion.div
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-text-heading/50 backdrop-blur-sm"
           aria-hidden="true"
         />
 
         <motion.div
           ref={modalRef}
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-xl border border-neutral-200"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface rounded-2xl shadow-xl border border-border"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="sticky top-0 z-10 bg-white border-b border-neutral-200 rounded-t-2xl px-6 py-4 flex items-center justify-between">
-            <h2 id="modal-title" className="font-serif text-xl font-medium text-neutral-950">
+          <div className="sticky top-0 z-10 bg-surface border-b border-border rounded-t-2xl px-6 py-4 flex items-center justify-between">
+            <h2 id="modal-title" className="font-serif text-xl font-medium text-text-heading">
               Edit Profile
             </h2>
             <motion.button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 transition-colors"
+              className="w-10 h-10 rounded-xl bg-canvas flex items-center justify-center text-text-muted hover:bg-border hover:text-text-heading transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Close modal"
@@ -189,16 +189,16 @@ function EditProfileModal({
                   <img
                     src={avatarPreview}
                     alt={`${formData.name || 'User'}'s profile`}
-                    className="w-24 h-24 rounded-[2rem] object-cover border-2 border-white shadow-lg shadow-black/10"
+                    className="w-24 h-24 rounded-[2rem] object-cover border-2 border-surface shadow-lg shadow-text-heading/10"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center border-2 border-white shadow-lg shadow-black/10 bg-neutral-200 text-neutral-600 font-serif text-3xl font-medium">
+                  <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center border-2 border-surface shadow-lg shadow-text-heading/10 bg-border text-text-main font-serif text-3xl font-medium">
                     {getInitials(formData.name)}
                   </div>
                 )}
                 <label
                   htmlFor="avatar-upload"
-                  className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-white border-2 border-neutral-200 p-0 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 hover:border-neutral-300 cursor-pointer transition-all"
+                  className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-surface border-2 border-border p-0 flex items-center justify-center text-text-main hover:bg-canvas hover:border-border cursor-pointer transition-all"
                 >
                   <input
                     id="avatar-upload"
@@ -212,7 +212,7 @@ function EditProfileModal({
                   <Camera className="w-5 h-5" aria-hidden="true" />
                 </label>
               </div>
-              <p className="font-sans text-xs text-neutral-500">Click to change photo</p>
+              <p className="font-sans text-xs text-text-muted">Click to change photo</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -220,10 +220,10 @@ function EditProfileModal({
                 <div key={field.key} className={field.key === 'email' ? 'sm:col-span-2' : ''}>
                   <label
                     htmlFor={field.key}
-                    className="block font-sans text-sm font-medium text-neutral-700 mb-1.5 flex items-center gap-1.5"
+                    className="block font-sans text-sm font-medium text-text-main mb-1.5 flex items-center gap-1.5"
                   >
-                    <field.icon className="w-4 h-4 text-neutral-400" aria-hidden="true" />
-                    {field.label} {field.required && <span className="text-red-500" aria-hidden="true">*</span>}
+                    <field.icon className="w-4 h-4 text-text-muted" aria-hidden="true" />
+                    {field.label} {field.required && <span className="text-secondary" aria-hidden="true">*</span>}
                   </label>
                   <input
                     id={field.key}
@@ -235,17 +235,17 @@ function EditProfileModal({
                     disabled={isLoading}
                     className={clsx(
                       'w-full px-4 py-3 rounded-xl border font-sans text-base',
-                      'bg-white transition-colors duration-200',
-                      'focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent',
+                      'bg-surface transition-colors duration-200',
+                      'focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent',
                       errors[field.key]
-                        ? 'border-red-300 bg-red-50 text-red-900 placeholder-red-300'
-                        : 'border-neutral-200 hover:border-neutral-300'
+                        ? 'border-border bg-canvas text-secondary-hover placeholder:text-muted'
+                        : 'border-border hover:border-border'
                     )}
                     aria-invalid={!!errors[field.key]}
                     aria-describedby={errors[field.key] ? `${field.key}-error` : undefined}
                   />
                   {errors[field.key] && (
-                    <p id={`${field.key}-error`} className="mt-1.5 font-sans text-sm text-red-600" role="alert">
+                    <p id={`${field.key}-error`} className="mt-1.5 font-sans text-sm text-secondary" role="alert">
                       {errors[field.key]}
                     </p>
                   )}
@@ -253,7 +253,7 @@ function EditProfileModal({
               ))}
             </div>
 
-            <div className="pt-4 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-end gap-3">
+            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3">
               <Button
                 type="button"
                 onClick={onClose}

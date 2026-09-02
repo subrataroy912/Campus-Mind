@@ -69,14 +69,14 @@ function LoginPage() {
 
   return (
     <div>
-      <Card className="mx-auto w-full max-w-xl p-8 shadow-2xl shadow-gray-200/80 sm:p-12">
+      <Card className="mx-auto w-full max-w-xl p-8 shadow-2xl shadow-border/80 sm:p-12">
         <div className="mb-8"><BrandLogo /></div>
         <h1 className="text-5xl font-black tracking-tight">Welcome Back!</h1>
-        <p className="mt-4 text-xl text-gray-600">Login to continue to your account.</p>
+        <p className="mt-4 text-xl text-text-main">Login to continue to your account.</p>
         
         {/* Render precise backend or network errors */}
         {errorMessage && (
-          <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 border border-red-100">
+          <p className="mt-5 rounded-xl bg-canvas px-4 py-3 text-sm font-semibold text-secondary-hover border border-border">
             {errorMessage}
           </p>
         )}
@@ -104,7 +104,7 @@ function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="text-text-muted hover:text-text-main focus:outline-none"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
@@ -126,7 +126,7 @@ function LoginPage() {
               />
               Remember me
             </label>
-            <Link className="text-purple-700 hover:underline" to="/auth/forgot-password">Forgot Password?</Link>
+            <Link className="text-primary-hover hover:underline" to="/auth/forgot-password">Forgot Password?</Link>
           </div>
 
           <Button className="w-full text-lg flex items-center justify-center gap-2" type="submit" disabled={isLoading}>
@@ -134,17 +134,17 @@ function LoginPage() {
           </Button>
         </form>
         
-        <div className="my-7 flex items-center gap-4 text-gray-500">
-          <span className="h-px flex-1 bg-gray-200" />
+        <div className="my-7 flex items-center gap-4 text-text-muted">
+          <span className="h-px flex-1 bg-border" />
           or continue with
-          <span className="h-px flex-1 bg-gray-200" />
+          <span className="h-px flex-1 bg-border" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Button variant="secondary" disabled={isLoading}>Google</Button>
           <Button variant="secondary" disabled={isLoading}>Microsoft</Button>
         </div>
-        <p className="mt-8 text-center text-gray-600">
-          Don&apos;t have an account? <Link className="font-bold text-purple-700 hover:underline" to="/auth/register">Sign up</Link>
+        <p className="mt-8 text-center text-text-main">
+          Don&apos;t have an account? <Link className="font-bold text-primary-hover hover:underline" to="/auth/register">Sign up</Link>
         </p>
       </Card>
     </div>

@@ -34,7 +34,7 @@ function InfoRow({ label, value, Icon, isLast = false }) {
     <motion.div
       className={clsx(
         'grid grid-cols-[auto_1fr] gap-x-6 gap-y-4 items-start',
-        'border-t border-neutral-100 pt-4',
+        'border-t border-border pt-4',
         'first:border-0 first:pt-0',
         isLast ? 'pb-0' : 'pb-4'
       )}
@@ -43,16 +43,16 @@ function InfoRow({ label, value, Icon, isLast = false }) {
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <dt className={clsx(
-        'text-sm font-medium text-neutral-500 font-sans',
+        'text-sm font-medium text-text-muted font-sans',
         'w-32 shrink-0 pt-0.5'
       )}>
         <span className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-neutral-300" aria-hidden="true" />
+          <Icon className="w-4 h-4 text-border" aria-hidden="true" />
           {label}
         </span>
       </dt>
       <dd className={clsx(
-        'text-base font-normal text-neutral-900 font-sans',
+        'text-base font-normal text-text-heading font-sans',
         'leading-relaxed break-words'
       )}>
         {value}
@@ -66,10 +66,10 @@ function ProfileInformation({ user, isLoading = false }) {
     return (
       <section className="py-8 px-4 sm:px-6 lg:px-8" aria-busy="true">
         <div className="mx-auto max-w-4xl">
-          <div className="h-8 w-48 bg-neutral-200 animate-pulse rounded-lg mb-6" />
+          <div className="h-8 w-48 bg-border animate-pulse rounded-lg mb-6" />
           <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-14 bg-neutral-200 animate-pulse rounded-lg border-t border-neutral-100" />
+              <div key={i} className="h-14 bg-border animate-pulse rounded-lg border-t border-border" />
             ))}
           </div>
         </div>
@@ -94,11 +94,11 @@ function ProfileInformation({ user, isLoading = false }) {
       <section className="py-8 px-4 sm:px-6 lg:px-8" aria-labelledby="info-heading">
         <div className="mx-auto max-w-4xl">
           <motion.div
-            className="text-center py-12 border border-neutral-200 rounded-2xl"
+            className="text-center py-12 border border-border rounded-2xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <p className="text-neutral-500 font-sans">No profile information available.</p>
+            <p className="text-text-muted font-sans">No profile information available.</p>
           </motion.div>
         </div>
       </section>
@@ -110,7 +110,7 @@ function ProfileInformation({ user, isLoading = false }) {
       <div className="mx-auto max-w-4xl">
         <motion.h2
           id="info-heading"
-          className="font-serif text-2xl sm:text-3xl font-medium text-neutral-950 mb-6 tracking-tight"
+          className="font-serif text-2xl sm:text-3xl font-medium text-text-heading mb-6 tracking-tight"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -119,7 +119,7 @@ function ProfileInformation({ user, isLoading = false }) {
         </motion.h2>
 
         <motion.dl
-          className="bg-white border border-neutral-200 rounded-2xl p-6 sm:p-8"
+          className="bg-surface border border-border rounded-2xl p-6 sm:p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
