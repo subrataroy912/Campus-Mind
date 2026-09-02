@@ -23,7 +23,7 @@ export default function PracticsPage() {
             <PracticsNavbar />
             <div className="flex items-center w-full bg-text-heading h-10">
                 <div className="flex items-center pl-1 gap-1">
-                    <MenuIcon className="text-surface" onClick={() => setDrawer(!drawer)} />
+                    <MenuIcon color="white" onClick={() => setDrawer(!drawer)} />
                     <span className="text-surface">All</span>
                 </div>
                 {
@@ -63,7 +63,7 @@ function SideBar() {
                 <button
                     onClick={() => { setDrawer(!drawer) }}
                     className="p-1 bg-surface rounded-lg hover:bg-border transition-colors focus:outline-none">
-                    <CgClose className="text-text-heading" />
+                    <CgClose color="black" />
                 </button>
             </div>
             <div className="bg-surface flex flex-col flex-1 items-start text-text-heading pl-7 py-4">

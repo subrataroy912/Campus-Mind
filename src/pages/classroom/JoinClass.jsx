@@ -10,7 +10,23 @@ const THEME_COLORS = [
   "bg-primary",
 ];
 
-
+// Mock "database" of joinable classes, keyed by class code
+const MOCK_CLASSES = {
+  "ALG2-7X9K": {
+    className: "Algebra II",
+    section: "Period 3",
+    teacher: "Ms. Patel",
+    subject: "Mathematics",
+    theme: "bg-primary",
+  },
+  "BIO1-4M2P": {
+    className: "Biology I",
+    section: "Period 5",
+    teacher: "Mr. Alvarez",
+    subject: "Science",
+    theme: "bg-success",
+  },
+};
 
 export default function JoinClass() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);

@@ -51,6 +51,23 @@ button {
   --color-overlay: #212529;
 }
 
+@theme {
+  --color-primary: #007BFF;
+  --color-primary-hover: #0056B3;
+  --color-secondary: #6C757D;
+  --color-secondary-hover: #495057;
+  --color-accent: #17A2B9;
+  --color-success: #28A745;
+  --color-text-main: #495057;
+  --color-text-muted: #6C757D;
+  --color-text-heading: #212529;
+  --color-border: #CED4DA;
+  --color-surface: #FFFFFF;
+  --color-canvas: #F8F9FA;
+  --color-focus: #007BFF;
+  --color-overlay: #212529;
+}
+
 :root {
   color: var(--color-text-main);
   background-color: var(--color-canvas);
@@ -97,7 +114,7 @@ html {
 .video-overlay {
   position: absolute;
   inset: 0;
-  background:
+  background: 
     radial-gradient(ellipse at center, transparent 0%, color-mix(in srgb, var(--color-overlay) 15%, transparent) 100%),
     linear-gradient(180deg, color-mix(in srgb, var(--color-overlay) 5%, transparent) 0%, transparent 50%, color-mix(in srgb, var(--color-overlay) 5%, transparent) 100%);
   z-index: 1;

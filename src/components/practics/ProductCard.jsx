@@ -24,7 +24,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-text-heading dark:bg-text-heading">
-
+      
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-canvas dark:bg-text-heading">
         <img

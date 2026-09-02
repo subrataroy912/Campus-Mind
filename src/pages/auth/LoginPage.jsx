@@ -44,7 +44,7 @@ function LoginPage() {
         <div className="mb-8"><BrandLogo /></div>
         <h1 className="text-5xl font-black tracking-tight">Welcome Back!</h1>
         <p className="mt-4 text-xl text-text-main">Login to continue to your account.</p>
-
+        
         {/* Render precise backend or network errors */}
         {errorMessage && (
           <p className="mt-5 rounded-xl bg-canvas px-4 py-3 text-sm font-semibold text-secondary-hover border border-border">
@@ -104,7 +104,7 @@ function LoginPage() {
             {isLoading ? 'Logging in...' : 'Login'} <ArrowRight size={24} />
           </Button>
         </form>
-
+        
         <div className="my-7 flex items-center gap-4 text-text-muted">
           <span className="h-px flex-1 bg-border" />
           or continue with
