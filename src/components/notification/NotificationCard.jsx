@@ -1,7 +1,7 @@
 import { MenuIcon } from "lucide-react";
 import { BsThreeDots } from "react-icons/bs";
 import { CgClose } from "react-icons/cg";
-import avatar from "../../assets/avatar.png"
+const avatar = "/images/avatar.png"
 function NotificationCard({ onClose }) {
   return (
     <div

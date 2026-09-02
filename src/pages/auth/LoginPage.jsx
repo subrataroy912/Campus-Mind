@@ -1,25 +1,20 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
 import AuthInput from '../../components/auth/AuthInput.jsx'
 import BrandLogo from '../../components/common/BrandLogo.jsx'
 import Button from '../../components/common/Button.jsx'
 import Card from '../../components/common/Card.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false })
   const [errorMessage, setErrorMessage] = useState('') // Replaced boolean with string for dynamic messages
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false) // State to toggle password visibility
 
-  // 1. Redirect if token exists
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      navigate('/dashboard', { replace: true })
-    }
-  }, [navigate])
 
   const updateField = (e) => {
     const { name, value, type, checked } = e.target
@@ -29,39 +24,15 @@ function LoginPage() {
     }))
   }
 
-  // 2. Updated submit handler with fetch request to backend API
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     setErrorMessage('')
-    
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'We could not sign you in. Check your email and password, then try again.')
-      }
-
-      // 3. Save token to local storage on success
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-      }
-      
-      // 4. Navigate to dashboard
+      await login(formData)
       navigate('/dashboard', { replace: true })
-    } catch (err) {
-      setErrorMessage(err.message)
+    } catch (error) {
+      setErrorMessage(error.message)
     } finally {
       setIsLoading(false)
     }
@@ -80,26 +51,26 @@ function LoginPage() {
             {errorMessage}
           </p>
         )}
-        
+
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <AuthInput 
-            icon={Mail} 
-            label="Email" 
-            name="email" 
-            onChange={updateField} 
-            placeholder="you@example.com" 
-            required 
-            type="email" 
-            value={formData.email} 
+          <AuthInput
+            icon={Mail}
+            label="Email"
+            name="email"
+            onChange={updateField}
+            placeholder="you@example.com"
+            required
+            type="email"
+            value={formData.email}
             disabled={isLoading}
           />
-          <AuthInput 
-            icon={Lock} 
-            label="Password" 
-            name="password" 
+          <AuthInput
+            icon={Lock}
+            label="Password"
+            name="password"
             onChange={updateField}
-            placeholder="Enter your password" 
-            required 
+            placeholder="Enter your password"
+            required
             rightIcon={
               <button
                 type="button"
@@ -109,18 +80,18 @@ function LoginPage() {
               >
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
-            } 
-            type={showPassword ? 'text' : 'password'} 
-            value={formData.password} 
+            }
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
             disabled={isLoading}
           />
           <div className="flex items-center justify-between gap-4 text-sm font-bold">
             <label className="flex min-h-11 items-center gap-3 cursor-pointer select-none">
-              <input 
-                className="h-5 w-5 accent-purple-600 rounded cursor-pointer" 
-                name="rememberMe" 
-                onChange={updateField} 
-                type="checkbox" 
+              <input
+                className="h-5 w-5 accent-primary rounded cursor-pointer"
+                name="rememberMe"
+                onChange={updateField}
+                type="checkbox"
                 checked={formData.rememberMe}
                 disabled={isLoading}
               />

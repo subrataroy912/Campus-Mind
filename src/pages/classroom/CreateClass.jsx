@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createClassroom } from "../../features/classroom/api/classroomService";
 
 const SUBJECTS = [
   "Mathematics", "Science", "English", "History", "Art",
@@ -72,12 +73,13 @@ export default function CreateClass() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
       setSubmitted(false);
       return;
     }
+    await createClassroom(form);
     setSubmitted(true);
   };
 

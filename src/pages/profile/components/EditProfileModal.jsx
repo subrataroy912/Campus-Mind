@@ -58,9 +58,7 @@ function EditProfileModal({
         institution: user.institution || '',
         phone: user.phone || '',
       })
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarPreview(user.avatar || null)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrors({})
       isInitialized.current = true
 

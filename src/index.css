@@ -34,25 +34,21 @@ button {
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Inter';
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/files/inter-latin-400-normal.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/files/inter-latin-500-normal.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/files/inter-latin-600-normal.woff2') format('woff2');
-  font-weight: 600;
-  font-display: swap;
+@theme {
+  --color-primary: #007BFF;
+  --color-primary-hover: #0056B3;
+  --color-secondary: #6C757D;
+  --color-secondary-hover: #495057;
+  --color-accent: #17A2B9;
+  --color-success: #28A745;
+  --color-text-main: #495057;
+  --color-text-muted: #6C757D;
+  --color-text-heading: #212529;
+  --color-border: #CED4DA;
+  --color-surface: #FFFFFF;
+  --color-canvas: #F8F9FA;
+  --color-focus: #007BFF;
+  --color-overlay: #212529;
 }
 
 @theme {

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 function RegisterPage() {
-  const navigate = useNavigate(); // Initialize navigate
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,13 +12,6 @@ function RegisterPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Redirect to dashboard if already logged in
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,28 +23,12 @@ function RegisterPage() {
     setLoading(true);
     setError(null);
     setSuccess(false);
-
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong during registration.');
-      }
-
+      await register(formData);
       setSuccess(true);
-      setFormData({ name: '', email: '', password: '' }); // Clear form on success
-
-
-    } catch (err) {
-      setError(err.message);
+      setFormData({ name: '', email: '', password: '' });
+    } catch (submissionError) {
+      setError(submissionError.message);
     } finally {
       setLoading(false);
     }

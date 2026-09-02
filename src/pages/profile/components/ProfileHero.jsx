@@ -3,7 +3,6 @@ import { MapPin, Calendar, Briefcase, GraduationCap } from 'lucide-react'
 import ProfileAvatar from './ProfileAvatar'
 import Button from '../../../components/common/Button'
 import clsx from 'clsx'
-// eslint-disable-next-line no-unused-vars
 const _motion = motion
 
 function ProfileHero({

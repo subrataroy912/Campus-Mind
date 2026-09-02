@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { User, Bell, Shield, Key, Moon, Globe, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
-// eslint-disable-next-line no-unused-vars
 const _motion = motion
 
 const SETTINGS_ITEMS = [

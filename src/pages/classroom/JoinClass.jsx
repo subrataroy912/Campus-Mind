@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { findClassroomByCode, joinClassroom } from "../../features/classroom/api/classroomService";
 
 const THEME_COLORS = [
   "bg-primary",
@@ -33,7 +34,7 @@ export default function JoinClass() {
   const [foundClass, setFoundClass] = useState(null);
   const inputsRef = useRef([]);
 
-  const rawCode = code.join("");
+
 
   const formatForLookup = (chars) =>
     chars.slice(0, 4).join("") + "-" + chars.slice(4, 6).join("");
@@ -71,27 +72,17 @@ export default function JoinClass() {
     if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
   };
 
-  const handleFindClass = (e) => {
+  const handleFindClass = async (e) => {
     e.preventDefault();
-    if (code.some((c) => !c)) {
-      setStatus("incomplete");
-      return;
-    }
+    if (code.some((character) => !character)) { setStatus("incomplete"); return; }
     setStatus("loading");
-    setTimeout(() => {
-      const key = formatForLookup(code);
-      const match = MOCK_CLASSES[key];
-      if (match) {
-        setFoundClass(match);
-        setStatus("found");
-      } else {
-        setFoundClass(null);
-        setStatus("not-found");
-      }
-    }, 500);
+    const match = await findClassroomByCode(formatForLookup(code));
+    setFoundClass(match);
+    setStatus(match ? "found" : "not-found");
   };
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
+    await joinClassroom(formatForLookup(code));
     setStatus("joined");
   };
 

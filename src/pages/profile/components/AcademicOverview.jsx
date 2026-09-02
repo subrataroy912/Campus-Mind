@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { BookOpen, ClipboardCheck, Flame, Award, TrendingUp, Target } from 'lucide-react'
 import clsx from 'clsx'
-// eslint-disable-next-line no-unused-vars
 const _motion = motion
 
 const STAT_CONFIG = [
@@ -14,7 +13,6 @@ const STAT_CONFIG = [
 ]
 
 function StatCard({ label, value, Icon, color, suffix = '', delay = 0 }) {
-  // eslint-disable-next-line no-unused-vars
   const _Icon = Icon
   if (value === undefined || value === null) {
     return null

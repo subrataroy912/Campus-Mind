@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router';
-import avatarImage from "../../assets/avatar.png";
+const avatarImage = "/images/avatar.png";
 import { BsGear } from 'react-icons/bs';
 import { IoIosNotificationsOutline } from 'react-icons/io';
 import { MenuIcon, Plus, SearchIcon } from 'lucide-react';

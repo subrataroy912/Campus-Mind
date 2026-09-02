@@ -28,7 +28,7 @@ export default function ProductCard({ product }) {
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-canvas dark:bg-text-heading">
         <img
-          src={thumbnail || "https://placehold.co/400"}
+          src={thumbnail || "/images/om-image.png"}
           alt={title}
           className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
@@ -55,7 +55,7 @@ export default function ProductCard({ product }) {
 
       {/* Product Details */}
       <div className="flex flex-1 flex-col p-5">
-        
+
         {/* Category & Rating Row */}
         <div className="flex items-center justify-between gap-2 text-xs font-medium text-text-muted dark:text-text-muted">
           <span className="uppercase tracking-wider text-primary dark:text-primary">

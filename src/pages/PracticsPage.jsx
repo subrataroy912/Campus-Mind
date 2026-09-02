@@ -3,6 +3,7 @@ import PracticsNavbar from "../components/practics/PracticsNavbar";
 import { createContext, useContext, useEffect, useState } from "react";
 import { CgClose, CgProfile } from "react-icons/cg";
 import ProductCard from "../components/practics/ProductCard";
+import { fetchProducts } from "../features/practics/api/practicsService";
 
 
 const DrawerContext = createContext(null);
@@ -13,16 +14,9 @@ export default function PracticsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("https://dummyjson.com/products")
-            .then((res) => res.json())
-            .then((json) => {
-                setData(json); // Stores the full object: { products: [...], total: 194, ... }
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Fetch error:", err);
-                setLoading(false);
-            });
+        fetchProducts()
+            .then(setData)
+            .finally(() => setLoading(false));
     }, []);
     return (
         <div className='min-h-screen w-full relative'>
