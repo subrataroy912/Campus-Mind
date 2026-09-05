@@ -3,7 +3,14 @@ import { exploreClassrooms } from '../../../mock/exploreClassrooms'
 
 const STORAGE_KEY = 'campus-mind.classrooms'
 const delay = (value) => new Promise((resolve) => setTimeout(() => resolve(value), 300))
-const read = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || mockClassrooms
+const read = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
+    return Array.isArray(stored) ? stored : mockClassrooms
+  } catch {
+    return mockClassrooms
+  }
+}
 const write = (classrooms) => localStorage.setItem(STORAGE_KEY, JSON.stringify(classrooms))
 const findAvailableClassroom = (code) => [...read(), ...exploreClassrooms].find((item) => item.code === code) || null
 
