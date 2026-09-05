@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import Button from '../../../components/common/Button.jsx'
-import Input from '../../../components/common/Input.jsx'
+import { Button } from '../../../components/ui/button.jsx'
+import { Input } from '../../../components/ui/input.jsx'
 
 export default function EditProfileForm({ profile, onCancel, onSave }) {
   const [form, setForm] = useState(profile)
