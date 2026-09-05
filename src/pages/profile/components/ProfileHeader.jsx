@@ -1,5 +1,5 @@
 import { Pencil } from 'lucide-react'
-import Button from '../../../components/common/Button.jsx'
+import { Button } from '../../../components/ui/button.jsx'
 
 function initials(name) {
   return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()

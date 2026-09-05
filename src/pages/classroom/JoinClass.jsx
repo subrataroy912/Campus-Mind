@@ -1,35 +1,11 @@
 import { useState, useRef } from "react";
+import { useSearchParams } from "react-router";
 import { findClassroomByCode, joinClassroom } from "../../features/classroom/api/classroomService";
 
-const THEME_COLORS = [
-  "bg-primary",
-  "bg-success",
-  "bg-secondary",
-  "bg-secondary",
-  "bg-accent",
-  "bg-primary",
-];
-
-// Mock "database" of joinable classes, keyed by class code
-const MOCK_CLASSES = {
-  "ALG2-7X9K": {
-    className: "Algebra II",
-    section: "Period 3",
-    teacher: "Ms. Patel",
-    subject: "Mathematics",
-    theme: "bg-primary",
-  },
-  "BIO1-4M2P": {
-    className: "Biology I",
-    section: "Period 5",
-    teacher: "Mr. Alvarez",
-    subject: "Science",
-    theme: "bg-success",
-  },
-};
-
 export default function JoinClass() {
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [searchParams] = useSearchParams();
+  const initialCode = (searchParams.get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8);
+  const [code, setCode] = useState(() => Array.from({ length: 8 }, (_, index) => initialCode[index] || ""));
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
   const inputsRef = useRef([]);
@@ -37,7 +13,7 @@ export default function JoinClass() {
 
 
   const formatForLookup = (chars) =>
-    chars.slice(0, 4).join("") + "-" + chars.slice(4, 6).join("");
+    chars.slice(0, 4).join("") + "-" + chars.slice(4, 8).join("");
 
   const handleChange = (index, value) => {
     const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 1);
@@ -46,7 +22,7 @@ export default function JoinClass() {
     setCode(next);
     setStatus("idle");
     setFoundClass(null);
-    if (clean && index < 5) {
+    if (clean && index < 7) {
       inputsRef.current[index + 1]?.focus();
     }
   };
@@ -63,12 +39,12 @@ export default function JoinClass() {
       .getData("text")
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
-      .slice(0, 6)
+      .slice(0, 8)
       .split("");
     const next = [...code];
     pasted.forEach((ch, i) => (next[i] = ch));
     setCode(next);
-    const lastIndex = Math.min(pasted.length, 6) - 1;
+    const lastIndex = Math.min(pasted.length, 8) - 1;
     if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
   };
 
@@ -87,7 +63,7 @@ export default function JoinClass() {
   };
 
   const handleReset = () => {
-    setCode(["", "", "", "", "", ""]);
+    setCode(["", "", "", "", "", "", "", ""]);
     setStatus("idle");
     setFoundClass(null);
     inputsRef.current[0]?.focus();
@@ -151,7 +127,7 @@ export default function JoinClass() {
 
               {status === "incomplete" && (
                 <p className="mt-3 text-center text-xs text-secondary">
-                  Enter all 6 characters of the class code.
+                  Enter all 8 characters of the class code.
                 </p>
               )}
               {status === "not-found" && (
@@ -172,7 +148,7 @@ export default function JoinClass() {
                 Try{" "}
                 <button
                   type="button"
-                  onClick={() => setCode(["A", "L", "G", "2", "7", "X"].concat("K").slice(0,6))}
+                  onClick={() => setCode(["A", "L", "G", "2", "7", "X", "9", "K"])}
                   className="font-medium text-primary hover:underline"
                 >
                   ALG2-7X9K
@@ -189,15 +165,15 @@ export default function JoinClass() {
                 className={`flex h-24 items-center justify-center rounded-xl ${foundClass.theme} sm:h-28`}
               >
                 <span className="text-lg font-semibold text-surface/90 sm:text-xl">
-                  {foundClass.className}
+                  {foundClass.title}
                 </span>
               </div>
               <div className="mt-4 space-y-1 text-center">
                 <p className="text-base font-medium text-text-heading">
-                  {foundClass.className} · {foundClass.section}
+                  {foundClass.title} · {foundClass.subtitle}
                 </p>
                 <p className="text-sm text-text-muted">
-                  {foundClass.subject} · Taught by {foundClass.teacher}
+                  {foundClass.subject} · Taught by {foundClass.instructor?.name || foundClass.teacher?.name || 'CampusMind teacher'}
                 </p>
               </div>
               <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row">
@@ -238,10 +214,10 @@ export default function JoinClass() {
                 </svg>
               </div>
               <h2 className="text-lg font-semibold text-text-heading">
-                You've joined {foundClass.className}
+                You've joined {foundClass.title}
               </h2>
               <p className="mt-1 text-sm text-text-muted">
-                {foundClass.section} with {foundClass.teacher}
+                {foundClass.subtitle} with {foundClass.instructor?.name || foundClass.teacher?.name || 'CampusMind teacher'}
               </p>
               <button
                 type="button"

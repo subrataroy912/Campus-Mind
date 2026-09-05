@@ -20,102 +20,23 @@ const CreateClassPage = lazy(() => import('../pages/classroom/CreateClass.jsx'))
 const JoinClassPage = lazy(() => import('../pages/classroom/JoinClass.jsx'))
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage.jsx'))
 const SettingsPage = lazy(() => import('../pages/settings/SettingsPage.jsx'))
-const PracticsPage = lazy(() => import('../pages/PracticsPage.jsx'))
 const NotFound = lazy(() => import('../pages/NotFoundPage.jsx'))
 
 export const AppRoutes = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    children: [{
-      index: true,
-      element: <GetStartedPage />
-
-    },
-    {
-      path: 'practics',
-      element: <PracticsPage />
-    }]
-  },
-  {
-    path: '/auth',
-    element: <AuthLayout />,
-    children: [{
-      index: true,
-      element: <Navigate to="login" replace />
-
-    },
-    {
-      path: 'login',
-      element: <LoginPage />
-    },
-    {
-      path: 'register',
-      element: <RegisterPage />
-    },
-    {
-      path: 'forgot-password',
-      element: <ForgotPasswordPage />
-    },
-
-    {
-      path: 'reset-password',
-      element: <ResetPasswordPage />
-    }]
-  },
-  {
-    path: '/login',
-    element: <Navigate to="/auth/login" replace />
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/dashboard',
-        element: <DashboardLayout />,
-        children: [{
-          index: true,
-          element: <DashboardHome />
-
-        },
-        {
-          path: 'community',
-          element: <DashboardCommunityPage />
-        },
-        {
-          path: 'messages',
-          element: <DashboardMessagesPage />
-        },
-        {
-          path: 'assignments',
-          element: <DashboardAssignmentPage />
-        },
-        {
-          path: 'saved',
-          element: <DashboardSavedPage />
-        }]
-      },
-      {
-        path: '/dashboard/classes/:classId',
-        element: <ClassPage />
-      },
-      {
-        path: '/dashboard/class/create',
-        element: <CreateClassPage />
-      },
-      {
-        path: '/dashboard/class/join',
-        element: <JoinClassPage />
-      },
-      {
-        path: '/dashboard/profile',
-        element: <ProfilePage />
-      },
-      {
-        path: '/dashboard/settings',
-        element: <SettingsPage />
-      },
-    ]
-  },
+  { path: '/', element: <RootLayout />, children: [{ index: true, element: <GetStartedPage /> }] },
+  { path: '/auth', element: <AuthLayout />, children: [{ index: true, element: <Navigate to="login" replace /> }, { path: 'login', element: <LoginPage /> }, { path: 'register', element: <RegisterPage /> }, { path: 'forgot-password', element: <ForgotPasswordPage /> }, { path: 'reset-password', element: <ResetPasswordPage /> }] },
+  { path: '/login', element: <Navigate to="/auth/login" replace /> },
+  { element: <ProtectedRoute />, children: [{ path: '/dashboard', element: <DashboardLayout />, children: [
+    { index: true, element: <DashboardHome /> },
+    { path: 'community', element: <DashboardCommunityPage /> },
+    { path: 'messages', element: <DashboardMessagesPage /> },
+    { path: 'assignments', element: <DashboardAssignmentPage /> },
+    { path: 'saved', element: <DashboardSavedPage /> },
+    { path: 'classes/:classId', element: <ClassPage /> },
+    { path: 'class/create', element: <CreateClassPage /> },
+    { path: 'class/join', element: <JoinClassPage /> },
+    { path: 'profile', element: <ProfilePage /> },
+    { path: 'settings', element: <SettingsPage /> },
+  ] }] },
   { path: '*', element: <NotFound /> },
 ])
