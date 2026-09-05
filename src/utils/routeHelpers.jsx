@@ -1,13 +1,1 @@
-/**
- * Generates consistent Tailwind CSS classes for NavLinks based on active state.
- * @param {Object} navState - The state object provided by React Router's NavLink
- * @param {boolean} navState.isActive - Whether the link matches the current URL
- * @returns {string} Tailwind CSS class string
- */
-export const getNavLinkStyles = ({ isActive }) => {
-  return `flex items-center gap-3 p-3 rounded-lg transition-all w-full text-sm font-medium ${
-    isActive
-      ? 'bg-canvas text-primary font-semibold'
-      : 'text-text-main hover:bg-canvas hover:text-text-heading'
-  }`;
-};
+export const getNavLinkStyles = ({ isActive }) => `flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-canvas text-primary' : 'text-text-main hover:bg-canvas hover:text-text-heading'}`

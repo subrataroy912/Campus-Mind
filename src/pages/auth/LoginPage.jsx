@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
 import AuthInput from '../../components/auth/AuthInput.jsx'
-import Button from '../../components/common/Button.jsx'
+import { Button } from '../../components/ui/button.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 
 function LoginPage() {

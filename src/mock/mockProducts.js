@@ -1,4 +1,0 @@
-export const mockProducts = [
-  { id: 'product-1', title: 'Calculus Workbook', description: 'Practice problems and worked examples for independent study.', category: 'Books', price: 18.99, discountPercentage: 10, rating: 4.7, stock: 18, tags: ['math', 'study'], brand: 'Campus Mind', availabilityStatus: 'In stock', warrantyInformation: '30-day returns', shippingInformation: 'Digital delivery', thumbnail: '/images/page-view.png', reviews: [{ id: 1 }] },
-  { id: 'product-2', title: 'Study Planner', description: 'A structured planner for classes, deadlines, and weekly goals.', category: 'Stationery', price: 12.5, discountPercentage: 0, rating: 4.5, stock: 9, tags: ['planning'], brand: 'Campus Mind', availabilityStatus: 'In stock', warrantyInformation: '30-day returns', shippingInformation: 'Ships in 2 days', thumbnail: '/images/classes-page.png', reviews: [{ id: 1 }, { id: 2 }] },
-]

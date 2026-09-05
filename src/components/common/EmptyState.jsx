@@ -1,5 +1,5 @@
 import { Inbox } from 'lucide-react'
-import Button from './Button.jsx'
+import { Button } from '../ui/button.jsx'
 
 export default function EmptyState({ title = 'Nothing here yet', description, action }) {
   return <div className="rounded-2xl border border-dashed border-border bg-surface px-6 py-12 text-center">
