@@ -20,7 +20,6 @@ const CreateClassPage = lazy(() => import('../pages/classroom/CreateClass.jsx'))
 const JoinClassPage = lazy(() => import('../pages/classroom/JoinClass.jsx'))
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage.jsx'))
 const SettingsPage = lazy(() => import('../pages/settings/SettingsPage.jsx'))
-const PracticsPage = lazy(() => import('../pages/PracticsPage.jsx'))
 const NotFound = lazy(() => import('../pages/NotFoundPage.jsx'))
 
 export const AppRoutes = createBrowserRouter([
@@ -31,10 +30,6 @@ export const AppRoutes = createBrowserRouter([
       index: true,
       element: <GetStartedPage />
 
-    },
-    {
-      path: 'practics',
-      element: <PracticsPage />
     }]
   },
   {
