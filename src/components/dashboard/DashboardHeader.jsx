@@ -5,8 +5,7 @@ import { SIDEBAR_NAV_ITEMS } from '../../config/navigation.js'
 import { getNavLinkStyles } from '../../utils/routeHelpers.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 
-export default function DashboardHeader() {
-  const [menuOpen, setMenuOpen] = useState(false)
+export default function DashboardHeader({ isSidebarOpen, onSidebarToggle }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const leave = () => { logout(); navigate('/', { replace: true }) }
