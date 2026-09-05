@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 
@@ -10,6 +10,29 @@ export default function DashboardHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const sidebarRef = useRef(null);
+  const buttonRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    // Attach the event listener to the document
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const leave = () => {
     logout();
@@ -23,6 +46,7 @@ export default function DashboardHeader() {
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle navigation"
         aria-expanded={menuOpen}
+        ref={buttonRef}
       >
         {menuOpen ? <X /> : <Menu />}
       </button>
@@ -50,18 +74,12 @@ export default function DashboardHeader() {
 
       {/* Mobile Sidebar Dropdown */}
       {menuOpen && (
-        <>
-          <div
-            className="fixed inset-0 top-16 z-40 bg-black/20 md:hidden"
-            onClick={() => setMenuOpen(false)}
-            aria-hidden="true"
-          />
-
+        <div ref={sidebarRef}>
           <Sidebar
             isAbsolute="absolute left-0 top-16 h-[calc(100vh-4rem)] shadow-lg"
             onNavigate={() => setMenuOpen(false)}
           />
-        </>
+        </div>
       )}
     </header>
   );
