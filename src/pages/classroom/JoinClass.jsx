@@ -4,8 +4,8 @@ import { findClassroomByCode, joinClassroom } from "../../features/classroom/api
 
 export default function JoinClass() {
   const [searchParams] = useSearchParams();
-  const initialCode = (searchParams.get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8);
-  const [code, setCode] = useState(() => Array.from({ length: 8 }, (_, index) => initialCode[index] || ""));
+  const initialCode = (searchParams.get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6);
+  const [code, setCode] = useState(() => Array.from({ length: 6 }, (_, index) => initialCode[index] || ""));
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
   const inputsRef = useRef([]);
