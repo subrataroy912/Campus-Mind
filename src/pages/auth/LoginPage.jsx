@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
 import AuthInput from '../../components/auth/AuthInput.jsx'
-import BrandLogo from '../../components/common/BrandLogo.jsx'
 import Button from '../../components/common/Button.jsx'
-import Card from '../../components/common/Card.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
   const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false })
   const [errorMessage, setErrorMessage] = useState('') // Replaced boolean with string for dynamic messages
@@ -40,14 +39,13 @@ function LoginPage() {
 
   return (
     <div>
-      <Card className="mx-auto w-full max-w-xl p-8 shadow-2xl shadow-border/80 sm:p-12">
-        <div className="mb-8"><BrandLogo /></div>
-        <h1 className="text-5xl font-black tracking-tight">Welcome Back!</h1>
-        <p className="mt-4 text-xl text-text-main">Login to continue to your account.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-text-heading">Welcome back</h1>
+        <p className="mt-2 text-text-main">Sign in to see what is happening in your classes.</p>
+        {location.state?.registered && <p className="mt-5 rounded-xl border border-success/25 bg-success/10 px-4 py-3 text-sm font-medium text-text-main" role="status">Account created. You can sign in now.</p>}
         
         {/* Render precise backend or network errors */}
         {errorMessage && (
-          <p className="mt-5 rounded-xl bg-canvas px-4 py-3 text-sm font-semibold text-secondary-hover border border-border">
+          <p className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main" role="alert">
             {errorMessage}
           </p>
         )}
@@ -105,19 +103,9 @@ function LoginPage() {
           </Button>
         </form>
         
-        <div className="my-7 flex items-center gap-4 text-text-muted">
-          <span className="h-px flex-1 bg-border" />
-          or continue with
-          <span className="h-px flex-1 bg-border" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Button variant="secondary" disabled={isLoading}>Google</Button>
-          <Button variant="secondary" disabled={isLoading}>Microsoft</Button>
-        </div>
-        <p className="mt-8 text-center text-text-main">
-          Don&apos;t have an account? <Link className="font-bold text-primary-hover hover:underline" to="/auth/register">Sign up</Link>
+        <p className="mt-7 text-center text-text-main">
+          New here? <Link className="font-bold text-primary hover:underline" to="/auth/register">Create an account</Link>
         </p>
-      </Card>
     </div>
   )
 }

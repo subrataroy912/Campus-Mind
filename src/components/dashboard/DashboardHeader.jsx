@@ -1,157 +1,19 @@
-import { useState } from 'react';
-import { Link, NavLink } from 'react-router';
-const avatarImage = "/images/avatar.png";
-import { BsGear } from 'react-icons/bs';
-import { IoIosNotificationsOutline } from 'react-icons/io';
-import { MenuIcon, Plus, SearchIcon } from 'lucide-react';
-import { SIDEBAR_NAV_ITEMS } from "../../config/navigation"
-import { getNavLinkStyles } from "../../utils/routeHelpers"
-import NotificationCard from '../notification/NotificationCard';
-function DashboardHeader() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMenuBarOpen, setIsMenuBarOpen] = useState(false);
-  const [isNotificationCard, setIsNotificationCard] = useState(false);
-  return (
-    <section className="relative shadow-sm flex items-center justify-between gap-5 rounded-lg bg-surface px-2 py-2 text-text-heading">
+import { useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router'
+import { LogOut, Menu, Settings, UserRound, X } from 'lucide-react'
+import { SIDEBAR_NAV_ITEMS } from '../../config/navigation.js'
+import { getNavLinkStyles } from '../../utils/routeHelpers.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
 
-      {/* MOBILE HAMBURGER MENU */}
-      <div className='md:hidden flex items-center'>
-        <button className='cursor-pointer text-text-main hover:text-text-heading transition-colors' onClick={() => setIsMenuBarOpen(!isMenuBarOpen)}>
-          <MenuIcon size={24} />
-        </button>
-        {/* TODO: useClickOutsideHide */}
-
-        <div
-          className={`absolute top-16 left-0 z-50 flex h-[calc(100vh-4.5rem)] w-64 flex-col justify-between border-r border-border bg-surface shadow-xl transition-all duration-300 ease-in-out ${isMenuBarOpen
-            ? 'translate-x-0 opacity-100'
-            : '-translate-x-full opacity-0 pointer-events-none'
-            }`}
-        >
-          <div>
-            <ul className="p-2 space-y-1">
-              {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    end={to === "/dashboard"}
-                    className={({ isActive }) => getNavLinkStyles(isActive)}
-                    onClick={() => setIsMenuBarOpen(false)} // Fixed toggle bug
-                  >
-                    <Icon size={20} className="shrink-0" />
-                    <span>{label}</span>
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="border-t border-border p-3">
-            <Link
-              to="/dashboard/settings"
-              className="flex items-center space-x-2 px-4 py-2 hover:bg-canvas rounded-lg transition-colors"
-            >
-              <BsGear className="text-xl" />
-              <span>Settings</span>
-            </Link>
-          </div>
-        </div>
-
-      </div>
-
-      {/* SEARCH BAR */}
-      <div className='flex justify-start items-center gap-2 bg-canvas rounded-md py-2 px-4 w-72 lg:w-96'>
-        <SearchIcon className="text-muted" size={20} />
-        <input
-          className='outline-none bg-transparent placeholder:text-muted w-full text-text-heading'
-          type='search'
-          placeholder='Search'
-          aria-label='Search content'
-        />
-      </div>
-
-      {/* RIGHT NAVIGATION */}
-      <div className=''>
-        <ul className="flex justify-center items-center gap-2">
-          {/* Upload */}
-          <li>
-            <Link
-              to="#"
-              className="relative flex items-center justify-center p-1 text-text-main hover:text-text-heading transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
-              aria-label="Upload"
-            >
-              <Plus size={30} />
-            </Link>
-          </li>
-
-          {/* Notifications */}
-          <li className=''>
-            <button
-              className="relative flex items-center justify-center p-1 text-text-main hover:text-text-heading transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-focus"
-              aria-label="Notifications"
-              onClick={() => setIsNotificationCard(true)}
-            >
-              <IoIosNotificationsOutline size={30} />
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-surface bg-secondary rounded-full border border-surface">
-                1
-              </span>
-            </button>
-
-          </li>
-
-          {/* Profile Dropdown */}
-          <li className="relative flex items-center w-10 shrink-0">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className=" rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
-              aria-expanded={isDropdownOpen}
-              aria-haspopup="true"
-              aria-label="Open profile menu"
-            >
-              <img
-                src={avatarImage}
-                alt="Profile"
-                className="w-8 h-8  rounded-full object-cover border border-border hover:border-text-muted transition-colors"
-              />
-            </button>
-
-
-
-          </li>
-        </ul>
-        {isDropdownOpen && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-surface py-1 z-50 border border-border rounded-md shadow-lg">
-            <Link
-              to="/dashboard/profile"
-              className="block px-4 py-2 text-sm text-text-main hover:bg-canvas transition-colors"
-              onClick={() => setIsDropdownOpen(false)}
-            >
-              Profile
-            </Link>
-            <Link
-              to="/dashboard/settings"
-              className="block px-4 py-2 text-sm text-text-main hover:bg-canvas transition-colors"
-              onClick={() => setIsDropdownOpen(false)}
-            >
-              Settings
-            </Link>
-            <hr className="my-1 border-border" />
-            <button
-              className="block w-full text-left px-4 py-2 text-sm font-medium text-secondary hover:bg-canvas transition-colors focus:outline-none focus:bg-canvas"
-              onClick={() => setIsDropdownOpen(false)}
-            >
-              Log out
-            </button>
-          </div>
-        )}
-        {
-          isNotificationCard && (
-            <NotificationCard onClose={() => setIsNotificationCard(false)} />
-          )
-        }
-      </div>
-
-    </section >
-  );
+export default function DashboardHeader() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const leave = () => { logout(); navigate('/', { replace: true }) }
+  return <header className="flex min-h-16 items-center justify-between border-b border-border bg-surface px-3 sm:px-6">
+    <button className="rounded-lg p-2 text-text-main hover:bg-canvas md:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation" aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
+    <p className="hidden text-sm text-text-muted md:block">A thoughtful place to learn together.</p>
+    <div className="flex items-center gap-2"><Link to="/dashboard/profile" className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main hover:bg-canvas"><span className="grid h-8 w-8 place-items-center rounded-full bg-accent/20 text-primary"><UserRound size={17} /></span><span className="hidden sm:inline">{user?.name || 'Profile'}</span></Link><button onClick={leave} className="rounded-lg p-2 text-text-muted hover:bg-canvas hover:text-primary" aria-label="Log out"><LogOut size={18} /></button></div>
+    {menuOpen && <nav className="absolute left-0 top-16 z-30 w-72 border-b border-r border-border bg-surface p-3 shadow-lg md:hidden"><ul className="space-y-1">{SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => <li key={to}><NavLink to={to} end={to === '/dashboard'} className={getNavLinkStyles} onClick={() => setMenuOpen(false)}><Icon size={20} />{label}</NavLink></li>)}</ul><Link to="/dashboard/settings" onClick={() => setMenuOpen(false)} className="mt-3 flex items-center gap-3 rounded-lg p-3 text-sm font-medium text-text-main hover:bg-canvas"><Settings size={20} />Settings</Link></nav>}
+  </header>
 }
-
-export default DashboardHeader;
