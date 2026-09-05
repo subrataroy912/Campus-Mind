@@ -1,35 +1,11 @@
 import { useState, useRef } from "react";
+import { useSearchParams } from "react-router";
 import { findClassroomByCode, joinClassroom } from "../../features/classroom/api/classroomService";
 
-const THEME_COLORS = [
-  "bg-primary",
-  "bg-success",
-  "bg-secondary",
-  "bg-secondary",
-  "bg-accent",
-  "bg-primary",
-];
-
-// Mock "database" of joinable classes, keyed by class code
-const MOCK_CLASSES = {
-  "ALG2-7X9K": {
-    className: "Algebra II",
-    section: "Period 3",
-    teacher: "Ms. Patel",
-    subject: "Mathematics",
-    theme: "bg-primary",
-  },
-  "BIO1-4M2P": {
-    className: "Biology I",
-    section: "Period 5",
-    teacher: "Mr. Alvarez",
-    subject: "Science",
-    theme: "bg-success",
-  },
-};
-
 export default function JoinClass() {
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [searchParams] = useSearchParams();
+  const initialCode = (searchParams.get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6);
+  const [code, setCode] = useState(() => Array.from({ length: 6 }, (_, index) => initialCode[index] || ""));
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
   const inputsRef = useRef([]);

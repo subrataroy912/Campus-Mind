@@ -1,6 +1,6 @@
 import { ArrowRight, BookOpen, HeartHandshake, Users } from 'lucide-react'
 import BrandLogo from '../components/common/BrandLogo.jsx'
-import Button from '../components/common/Button.jsx'
+import { Button } from '../components/ui/button.jsx'
 
 const features = [
   { icon: BookOpen, title: 'Keep classwork together', text: 'Find class updates, assignments, and useful resources in one calm place.' },
