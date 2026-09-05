@@ -1,6 +1,6 @@
-import { NavLink } from "react-router";
-import { SIDEBAR_NAV_ITEMS } from "../../config/navigation";
-import { getNavLinkStyles } from "../../utils/routeHelpers";
+import { NavLink } from 'react-router'
+import { SIDEBAR_NAV_ITEMS } from '../../config/navigation'
+import { getNavLinkStyles } from '../../utils/routeHelpers'
 
 export default function SidebarNav({ compact = false, onNavigate }) {
   return (
