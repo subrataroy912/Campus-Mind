@@ -1,6 +1,14 @@
 export const mockUsers =
   [
     {
+      "id": "demo-student",
+      "name": "Sam Taylor",
+      "email": "student@campusmind.local",
+      "password": "password123",
+      "avatar": "/images/avatar.png",
+      "role": "student"
+    },
+    {
       "id": "usr_98234jksd83",
       "name": "Jane Doe",
       "email": "jane.doe@example.com",

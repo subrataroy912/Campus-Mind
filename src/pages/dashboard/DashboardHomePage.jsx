@@ -1,58 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router';
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
+import { Plus, Ticket } from 'lucide-react'
+import { fetchClassrooms } from '../../features/classroom/api/classroomService.js'
+import { useAuth } from '../../context/AuthContext.jsx'
+import ClassCard from '../../components/dashboard/ClassCard.jsx'
+import EmptyState from '../../components/common/EmptyState.jsx'
 
-function DashboardHome() {
-
-
-  return (
-    <div className="min-h-screen bg-canvas/30 p-4 sm:p-6">
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 max-w-[1600px] mx-auto">
-
-        {/* Main Content Area */}
-        <div className="flex flex-col gap-8 lg:col-span-9">
-
-          {/* Header Section */}
-          <div>
-            <h1 className="font-semibold text-xl sm:text-2xl text-text-heading tracking-tight">
-              Welcome back, Subrata Roy
-            </h1>
-            <p className="font-light text-sm sm:text-base text-text-muted mt-1">
-              Here's what's happening in your classes today.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-5">
-              <Link
-                to={'/dashboard/class/create'}
-                className="bg-accent hover:bg-accent text-surface font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg shadow-sm transition-colors text-center">
-                + Create New Class
-              </Link >
-              <Link
-                to={"/dashboard/class/join"}
-                className="bg-surface hover:bg-canvas text-text-main font-medium text-sm sm:text-base px-4 py-2.5 rounded-lg border border-border shadow-sm transition-colors text-center">
-                Join with class code
-              </Link >
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Sidebar Area */}
-        <div className="hidden  md:flex flex-col gap-4 sm:gap-6 lg:col-span-3 mt-2 lg:mt-0">
-
-          <div className="flex flex-col bg-surface p-4 sm:p-5 rounded-xl border border-border shadow-sm min-h-52 sm:min-h-64">
-            <h2 className="font-semibold text-text-heading text-sm sm:text-base mb-3">Recent Activities</h2>
-            <div className="grow flex items-center justify-center text-text-muted text-sm">No recent activity.</div>
-          </div>
-
-          <div className="flex flex-col bg-surface p-4 sm:p-5 rounded-xl border border-border shadow-sm min-h-52 sm:min-h-64">
-            <h2 className="font-semibold text-text-heading text-sm sm:text-base mb-3">Online Classmates (10)</h2>
-            <div className="grow flex items-center justify-center text-text-muted text-sm">List goes here...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export default function DashboardHomePage() {
+  const { user } = useAuth()
+  const [classrooms, setClassrooms] = useState([])
+  const [status, setStatus] = useState('loading')
+  useEffect(() => { fetchClassrooms().then((data) => { setClassrooms(data); setStatus('ready') }).catch(() => setStatus('error')) }, [])
+  return <div className="mx-auto max-w-7xl p-3 sm:p-6">
+    <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold text-primary">Your learning space</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">Welcome back, {user?.name?.split(' ')[0] || 'there'}.</h1><p className="mt-2 text-text-muted">Pick up where you left off or bring a new class together.</p></div><div className="flex flex-wrap gap-3"><Link to="/dashboard/class/join" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-bold text-text-main hover:bg-canvas"><Ticket size={17} />Join with code</Link><Link to="/dashboard/class/create" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-surface hover:bg-primary-hover"><Plus size={17} />Create class</Link></div></header>
+    <section className="mt-8"><div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-text-heading">My classes</h2><span className="text-sm text-text-muted">{status === 'ready' ? `${classrooms.length} classes` : 'Loading classes…'}</span></div>{status === 'ready' && classrooms.length > 0 && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{classrooms.map((classroom) => <ClassCard classroom={classroom} key={classroom.id} />)}</div>}{status === 'ready' && !classrooms.length && <EmptyState title="Your class list is ready for you" description="Create a class for your group or join one with a code." action={{ to: '/dashboard/class/join', label: 'Join a class' }} />}{status === 'error' && <EmptyState title="We could not load your classes" description="Please refresh the page and try again." />}</section>
+  </div>
 }
-
-export default DashboardHome;
