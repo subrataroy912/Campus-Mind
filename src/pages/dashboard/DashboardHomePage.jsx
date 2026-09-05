@@ -128,7 +128,7 @@ export default function DashboardHomePage() {
             </p>
           </div>
           <div
-            className="flex flex-wrap"
+            className="flex flex-nowrap items-center gap-0.5"
             role="tablist"
             aria-label="Explore classes"
           >
