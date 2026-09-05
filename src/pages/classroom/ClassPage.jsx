@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import Classes from "../../utils/data"
+import { findClassroomById } from "../../features/classroom/api/classroomService.js"
 // ---- Mock data -------------------------------------------------------
 
 const TABS = [
@@ -109,7 +109,7 @@ function ClassHeader({ currentClass }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(currentClass?.inviteCode).catch(() => { });
+    navigator.clipboard?.writeText(currentClass?.code).catch(() => { });
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -153,7 +153,7 @@ function ClassHeader({ currentClass }) {
             {currentClass?.title}
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            {currentClass?.section || currentClass?.subtitle} · {currentClass?.teacher?.name}
+            {currentClass?.section || currentClass?.subtitle} · {(currentClass?.teacher || currentClass?.instructor)?.name}
           </p>
         </div>
 
@@ -162,7 +162,7 @@ function ClassHeader({ currentClass }) {
           className="flex items-center justify-center gap-2 self-start rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-text-main transition hover:bg-canvas sm:self-auto"
         >
           <Icon name={copied ? "check" : "copy"} className={`h-4 w-4 ${copied ? "text-success" : ""}`} />
-          {copied ? "Copied" : `Invite code: ${currentClass?.inviteCode}`}
+          {copied ? "Copied" : `Invite code: ${currentClass?.code}`}
         </button>
       </div>
     </div>
@@ -350,11 +350,11 @@ function SidePanel() {
 export default function ClassPage() {
   const [activeTab, setActiveTab] = useState("home");
   const { classId } = useParams();
-  const currentClass = Classes.find((item) => item.id === String(classId));
+  const [currentClass, setCurrentClass] = useState(undefined)
+  useEffect(() => { findClassroomById(classId).then(setCurrentClass) }, [classId])
 
-  if (!currentClass) {
-    return <div>Class not found!</div>;
-  }
+  if (currentClass === undefined) return <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">Loading class…</div>
+  if (!currentClass) return <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">Class not found.</div>
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">

@@ -1,13 +1,10 @@
 import { Link } from 'react-router'
 import clsx from 'clsx'
-import { motion } from 'framer-motion' 
-
-const MotionLink = motion.create(Link) 
 
 const variants = {
   primary: 'border border-primary bg-primary text-surface shadow-sm hover:border-primary-hover hover:bg-primary-hover active:bg-primary-hover',
   secondary: 'border border-secondary bg-secondary text-surface shadow-sm hover:border-secondary-hover hover:bg-secondary-hover active:bg-secondary-hover',
-  outline: 'border border-success bg-surface text-success hover:bg-success hover:text-surface',
+  outline: 'border border-primary bg-surface text-primary hover:bg-primary hover:text-surface',
   ghost: 'text-text-main hover:bg-canvas hover:text-primary',
 }
 
@@ -19,10 +16,10 @@ function Button({ children, className, to, type = 'button', variant = 'primary',
   )
 
   if (to) {
-    return <MotionLink className={classes} to={to} {...props}>{children}</MotionLink>
+    return <Link className={classes} to={to} {...props}>{children}</Link>
   }
 
-  return <motion.button className={classes} type={type} {...props}>{children}</motion.button>
+  return <button className={classes} type={type} {...props}>{children}</button>
 }
 
 export default Button

@@ -2,37 +2,37 @@ import { Link, Outlet } from 'react-router';
 import DashboardHeader from '../dashboard/DashboardHeader';
 import SidebarNav from '../common/SidebarNav';
 import BrandLogo from "../common/BrandLogo";
-import { BsGear } from 'react-icons/bs';
+import { Settings } from 'lucide-react'
 
 function DashboardLayout() {
   return (
 
-    <div className="flex h-screen w-full bg-canvas/50 overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-canvas">
 
 
-      <aside className="hidden md:flex w-46 lg:w-54 flex-col border-r border-border bg-surface shadow-sm z-20 shrink-0">
+      <aside className="z-20 hidden w-56 shrink-0 flex-col border-r border-border bg-surface md:flex">
         <BrandLogo />
         <div className="flex-1 overflow-y-auto scrollbar-none">
           <SidebarNav />
         </div>
-        <div className='border-t border-border/50 p-2 sm:p-3'>
+        <div className="border-t border-border p-3">
           <Link
             to={"/dashboard/settings"}
-            className='flex items-center justify-center sm:justify-start space-x-0 sm:space-x-2 px-2 sm:px-4 pb-2'>
-            <BsGear className="text-xl sm:text-base" />
-            <span className='hidden sm:inline-block'>Settings</span>
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-main hover:bg-canvas">
+            <Settings size={19} />
+            <span>Settings</span>
           </Link>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
 
-        <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-md">
+        <div className="z-10 bg-surface">
           <DashboardHeader />
         </div>
 
 
-        <main className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
 
