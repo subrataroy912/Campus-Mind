@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user),
     async login(credentials) { const nextUser = await loginRequest(credentials); setUser(nextUser); return nextUser },
     async register(details) { return registerRequest(details) },
+    updateProfile(details) { setUser((currentUser) => ({ ...currentUser, ...details })) },
     logout() { setUser(null) },
   }), [user, setUser])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,83 +1,32 @@
-export function ProfileHeader({
-    user = {
-        name: "Subrata Roy",
-        handle: "Subrata001",
-        isVerified: true,
-        bio: "Product Designer & Frontend Tinkerer. Building thoughtful web experiences and design systems.",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-        banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80"
-    }
-}) {
-    return (
-        <div className="relative pb-4 border-b border-gray-200">
-            {/* Banner */}
-            <div className="h-48 w-full overflow-hidden bg-gray-100">
-                <img
-                    src={user.banner}
-                    alt="Profile cover banner"
-                    className="w-full h-full object-cover"
-                />
+import { Pencil } from 'lucide-react'
+import Button from '../../../components/common/Button.jsx'
+
+function initials(name) {
+  return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
+}
+
+export default function ProfileHeader({ profile, onEdit }) {
+  return (
+    <header className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+      <div className="h-20 bg-accent/25 sm:h-24" aria-hidden="true" />
+      <div className="px-5 pb-6 sm:px-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="-mt-10 flex items-end gap-4">
+            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-surface bg-primary text-xl font-bold text-surface shadow-sm">
+              {profile.avatar ? <img className="h-full w-full object-cover" src={profile.avatar} alt="" /> : initials(profile.name)}
             </div>
-
-            <div className="px-6">
-                {/* Avatar & Action Buttons */}
-                <div className="flex justify-between items-end -mt-16 mb-4">
-                    <div className="relative">
-                        <img
-                            src={user.avatar}
-                            alt={user.name}
-                            className="w-32 h-32 rounded-full border-4 border-white bg-gray-200 object-cover shadow-sm"
-                        />
-                        {/* Edit / Status Badge */}
-                        <button
-                            aria-label="Change avatar"
-                            className="absolute bottom-1 right-1 w-7 h-7 rounded-full bg-blue-600 hover:bg-blue-700 text-white border-2 border-white flex items-center justify-center transition"
-                        >
-                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <button className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-800 text-sm font-semibold rounded-full transition">
-                            Message
-                        </button>
-                        <button
-                            aria-label="More options"
-                            className="w-9 h-9 border border-gray-300 hover:bg-gray-50 rounded-full flex items-center justify-center text-gray-700 transition"
-                        >
-                            •••
-                        </button>
-                    </div>
-                </div>
-
-                {/* Identity */}
-                <div>
-                    <div className="flex items-center gap-1.5">
-                        <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                            {user.name}
-                        </h1>
-                        {user.isVerified && (
-                            <svg
-                                className="w-4 h-4 text-blue-500 fill-current"
-                                viewBox="0 0 20 20"
-                                aria-label="Verified account"
-                            >
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                    <p className="text-sm text-gray-500 font-normal">
-                        @{user.handle}
-                    </p>
-                </div>
-
-                {/* Bio */}
-                <p className="mt-3 text-sm leading-relaxed text-gray-700 max-w-xl">
-                    {user.bio}
-                </p>
+            <div className="pb-1">
+              <p className="text-sm font-semibold text-primary">{profile.role === 'teacher' ? 'Teacher' : 'Student'}</p>
+              <h1 className="text-2xl font-bold tracking-tight text-text-heading">{profile.name}</h1>
             </div>
+          </div>
+          <Button variant="outline" onClick={onEdit} className="sm:mb-1"><Pencil size={16} aria-hidden="true" />Edit profile</Button>
         </div>
-    );
+        <div className="mt-5 max-w-2xl space-y-2">
+          <p className="text-sm font-medium text-text-main">{profile.headline}</p>
+          <p className="text-sm leading-6 text-text-muted">{profile.bio}</p>
+        </div>
+      </div>
+    </header>
+  )
 }
