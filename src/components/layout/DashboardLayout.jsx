@@ -1,51 +1,30 @@
-import { Link, Outlet } from "react-router";
-import { Plus, Settings, Ticket } from "lucide-react";
+import { Outlet } from "react-router";
+import { useState } from "react";
 import DashboardHeader from "../dashboard/DashboardHeader";
-import SidebarNav from "../common/SidebarNav";
-import BrandLogo from "../common/BrandLogo";
-import { Button } from "../ui/button.jsx";
-
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Sidebar from "../dashboard/Sidebar";
 function DashboardLayout() {
+  const [isCompact, setIsCompact] = useState(true);
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-canvas">
-      <aside className="z-20 hidden w-64 shrink-0 flex-col border-r border-border bg-surface md:flex">
-        <div className="border-b border-border py-2">
-          <BrandLogo />
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <SidebarNav />
-        </div>
-        <div className="space-y-2 border-t border-border p-3">
-          <p className="px-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            Classroom
-          </p>
-          <Button
-            to="/dashboard/class/join"
-            variant="outline"
-            className="w-full justify-start"
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-canvas">
+      <DashboardHeader />
+      <div className="relative flex min-w-0 flex-1 overflow-hidden">
+        {/* Container for sidebar and its floating toggle button */}
+        <div className="relative flex shrink-0">
+          <Sidebar compact={isCompact} />
+
+          {/* 2. Floating Toggle Button */}
+          <button
+            onClick={() => setIsCompact(!isCompact)}
+            className="absolute -right-3 top-6 z-30 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-sm hover:bg-canvas md:flex"
+            aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <Ticket size={17} aria-hidden="true" />
-            Join with code
-          </Button>
-          <Button to="/dashboard/class/create" className="w-full justify-start">
-            <Plus size={17} aria-hidden="true" />
-            Create a class
-          </Button>
+            {isCompact ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
         </div>
-        <div className="border-t border-border p-3">
-          <Link
-            to="/dashboard/settings"
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-canvas"
-          >
-            <Settings size={19} />
-            <span>Settings</span>
-          </Link>
-        </div>
-      </aside>
-      <div className="relative flex h-full min-w-0 flex-1 flex-col">
-        <div className="z-10 bg-surface">
-          <DashboardHeader />
-        </div>
+
+        <div className="z-10 bg-surface"></div>
+
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
@@ -54,4 +33,4 @@ function DashboardLayout() {
   );
 }
 
-export default DashboardLayout
+export default DashboardLayout;

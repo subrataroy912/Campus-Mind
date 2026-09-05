@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/button.jsx";
 import ClassCard from "../../components/dashboard/ClassCard.jsx";
 import ExploreClassCard from "../../components/dashboard/ExploreClassCard.jsx";
 import EmptyState from "../../components/common/EmptyState.jsx";
+import { Link } from "react-router";
 
 export default function DashboardHomePage() {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export default function DashboardHomePage() {
   }, [classrooms, exploreClassrooms, feedFilter]);
 
   return (
-    <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl p-3 sm:p-3 lg:p-4">
       <header>
         <p className="text-sm font-semibold text-primary">
           Your learning space
@@ -76,15 +77,18 @@ export default function DashboardHomePage() {
             </p>
           </div>
           <span className="text-sm text-text-muted">
-            {status === "ready"
-              ? `${classrooms.length} classes`
-              : "Loading classes…"}
+            <Link to="/dashboard/classes">See all</Link>
           </span>
         </div>
         {status === "ready" && classrooms.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {classrooms.map((classroom) => (
-              <ClassCard classroom={classroom} key={classroom.id} />
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scroll-smooth snap-x snap-mandatory">
+            {classrooms.slice(0, 4).map((classroom) => (
+              <div
+                key={classroom.id}
+                className="w-70 shrink-0 snap-start sm:w-[320px]"
+              >
+                <ClassCard classroom={classroom} />
+              </div>
             ))}
           </div>
         )}
@@ -124,7 +128,7 @@ export default function DashboardHomePage() {
             </p>
           </div>
           <div
-            className="flex flex-wrap gap-2"
+            className="flex flex-wrap"
             role="tablist"
             aria-label="Explore classes"
           >
@@ -158,7 +162,7 @@ export default function DashboardHomePage() {
           </div>
         </div>
         {status === "ready" && feedClasses.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
             {feedClasses.map((classroom) => (
               <ExploreClassCard classroom={classroom} key={classroom.id} />
             ))}
