@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { LogOut, Menu, UserRound, X } from "lucide-react";
 
-import { useAuth } from "../../context/AuthContext.jsx";
-import BrandLogo from "./../common/BrandLogo.jsx";
+import { useAuth } from "../../../context/AuthContext";
+import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
 
 export default function DashboardHeader() {
@@ -56,16 +56,28 @@ export default function DashboardHeader() {
       <div className="flex items-center gap-2">
         <Link
           to="/dashboard/profile"
-          className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main hover:bg-canvas"
+          className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main hover:bg-canvas transition-colors"
         >
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-accent/20 text-primary">
-            <UserRound size={17} />
+          <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-accent/20 text-primary">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={`${user?.name || "User"}'s avatar`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              // Fallback: Show the first letter of their name if no image exists
+              <span className="font-bold text-sm uppercase">
+                {user?.name ? user.name.charAt(0) : "U"}
+              </span>
+            )}
           </span>
           <span className="hidden sm:inline">{user?.name || "Profile"}</span>
         </Link>
+
         <button
           onClick={leave}
-          className="rounded-lg p-2 text-text-muted hover:bg-canvas hover:text-primary"
+          className="rounded-lg p-2 text-text-muted hover:bg-canvas hover:text-primary transition-colors"
           aria-label="Log out"
         >
           <LogOut size={18} />

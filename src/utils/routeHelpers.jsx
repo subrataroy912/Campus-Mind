@@ -1,1 +1,2 @@
-export const getNavLinkStyles = ({ isActive }) => `flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-canvas text-primary' : 'text-text-main hover:bg-canvas hover:text-text-heading'}`
+export const getNavLinkStyles = ({ isActive }) =>
+  `flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive ? "bg-canvas text-primary" : "text-text-main hover:bg-canvas hover:text-text-heading"}`;

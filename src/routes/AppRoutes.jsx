@@ -131,7 +131,7 @@ export const AppRoutes = createBrowserRouter([
       },
       {
         path: "/dashboard/classes",
-        element: <h1>/dashboard/classes</h1>,
+            element: <Navigate to="/dashboard" replace />,
       },
       {
         path: "/dashboard/profile",

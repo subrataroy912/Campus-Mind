@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, XCircle } from "lucide-react";
-import AuthInput from "../../components/auth/AuthInput.jsx";
+import AuthInput from "../../pages/auth/components/AuthInput";
 import { Button } from "../../components/ui/button.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { mockUsers } from "../../mock/mockUsers.js";
@@ -148,32 +148,50 @@ function LoginPage() {
           Take Dummy email to login
         </Button>
       </div>
+
       {openDummyEmailCard && (
-        <div className="absolute z-100 w-full h-full bg-primary top-0 rounded-lg">
-          <h1 className="text-center text-white font-extrabold font-sans">
-            Use These Given Gmail ids to Login
-          </h1>
-          <h1
-            onClick={() => setOpenDummyEmailCard(false)}
-            className="absolute right-2 top-2 z-10 text-white cursor-pointer text-lg  hover:text-secondary-hover hover:text-2xl"
-          >
-            <XCircle />
-          </h1>
-          {mockUsers.map((items, index) => (
-            <div
-              key={index}
-              className="flex flex-col text-white p-3 m-2 rounded-sm hover:bg-secondary-hover"
+        <div className="absolute inset-0 z-50 flex flex-col bg-surface rounded-lg shadow-lg border border-border overflow-hidden">
+          {/* Header Section */}
+          <div className="relative flex items-center justify-center p-4 bg-primary">
+            <h2 className="text-white font-bold text-lg">
+              Use These Given Gmail IDs to Login
+            </h2>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setOpenDummyEmailCard(false)}
+              className="absolute right-3 text-white/80 hover:text-white transition-transform hover:scale-110 focus:outline-none"
+              aria-label="Close"
             >
-              <div className="flex items-center gap-1">
-                <h1 className="font-bold">Email:</h1>
-                <p>{items.email}</p>
+              <XCircle size={24} />
+            </button>
+          </div>
+
+          {/* Scrollable List Section */}
+          <div className="flex-1 p-4 overflow-y-auto bg-canvas space-y-3">
+            {mockUsers.map((item, index) => (
+              <div
+                key={index}
+                className="flex flex-col p-3 rounded-md bg-surface border border-border shadow-sm hover:border-primary/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-text-heading text-sm uppercase tracking-wide">
+                    Email:
+                  </span>
+                  <span className="text-text-main">{item.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-text-heading text-sm uppercase tracking-wide">
+                    Password:
+                  </span>
+                  {/* Using a mono font and canvas background makes passwords easier to read */}
+                  <span className="text-text-muted font-mono bg-canvas px-1.5 py-0.5 rounded text-sm">
+                    {item.password}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <h1 className="font-bold">password:</h1>
-                <p>{items.password}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

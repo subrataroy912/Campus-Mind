@@ -1,52 +1,50 @@
-import { useEffect, useMemo, useState } from "react";
-import { Compass } from "lucide-react";
-import {
-  fetchClassrooms,
-  fetchExploreClassrooms,
-} from "../../features/classroom/api/classroomService.js";
-import { useAuth } from "../../context/AuthContext.jsx";
-import { Button } from "../../components/ui/button.jsx";
-import ClassCard from "../../components/dashboard/ClassCard.jsx";
-import ExploreClassCard from "../../components/dashboard/ExploreClassCard.jsx";
-import EmptyState from "../../components/common/EmptyState.jsx";
+import { useMemo, useState } from "react";
+import { Compass, Loader2 } from "lucide-react";
 import { Link } from "react-router";
+
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useDashboardData } from "../../features/dashboard/useDashboardData.js";
+import { Button } from "../../components/ui/button";
+import EmptyState from "../../components/common/EmptyState.jsx";
+import { ContentList } from "../../components/common/ContentList.jsx";
+import ClassCard from "../../pages/classroom/ClassCard.jsx";
+import ExploreClassCard from "./components/ExploreClassCard.jsx";
 
 export default function DashboardHomePage() {
   const { user } = useAuth();
-  const [classrooms, setClassrooms] = useState([]);
-  const [exploreClassrooms, setExploreClassrooms] = useState([]);
-  const [status, setStatus] = useState("loading");
   const [feedFilter, setFeedFilter] = useState("all");
 
-  useEffect(() => {
-    let active = true;
-    Promise.all([fetchClassrooms(), fetchExploreClassrooms()])
-      .then(([joined, explore]) => {
-        if (active) {
-          setClassrooms(joined);
-          setExploreClassrooms(explore);
-          setStatus("ready");
-        }
-      })
-      .catch(() => {
-        if (active) setStatus("error");
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const {
+    classrooms = [],
+    exploreClassrooms = [],
+    status,
+  } = useDashboardData();
 
   const feedClasses = useMemo(() => {
     const joinedCodes = new Set(classrooms.map((classroom) => classroom.code));
+
     const available = exploreClassrooms.filter(
       (classroom) => !joinedCodes.has(classroom.code),
     );
-    if (feedFilter === "popular")
+
+    if (feedFilter === "popular") {
       return [...available].sort((a, b) => b.popularity - a.popularity);
-    if (feedFilter === "recommended")
+    }
+    if (feedFilter === "recommended") {
       return available.filter((classroom) => classroom.recommended);
+    }
+
     return available;
   }, [classrooms, exploreClassrooms, feedFilter]);
+
+  // Handle global loading state to prevent UI jumping
+  if (status === "loading" || status === "idle") {
+    return (
+      <div className="flex h-64 w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl p-3 sm:p-3 lg:p-4">
@@ -80,29 +78,23 @@ export default function DashboardHomePage() {
             <Link to="/dashboard/classes">See all</Link>
           </span>
         </div>
-        {status === "ready" && classrooms.length > 0 && (
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scroll-smooth snap-x snap-mandatory">
-            {classrooms.slice(0, 4).map((classroom) => (
-              <div
-                key={classroom.id}
-                className="w-70 shrink-0 snap-start sm:w-[320px]"
-              >
-                <ClassCard classroom={classroom} />
-              </div>
-            ))}
-          </div>
-        )}
-        {status === "ready" && !classrooms.length && (
+
+        {status === "error" ? (
+          <EmptyState
+            title="We could not load your classes"
+            description="Please refresh the page and try again."
+          />
+        ) : classrooms.length > 0 ? (
+          <ContentList
+            layout="carousel"
+            items={classrooms}
+            renderItem={(classroom) => <ClassCard classroom={classroom} />}
+          />
+        ) : (
           <EmptyState
             title="Your class list is ready for you"
             description="Create a class for your group or join one with a code."
             action={{ to: "/dashboard/class/join", label: "Join a class" }}
-          />
-        )}
-        {status === "error" && (
-          <EmptyState
-            title="We could not load your classes"
-            description="Please refresh the page and try again."
           />
         )}
       </section>
@@ -161,18 +153,29 @@ export default function DashboardHomePage() {
             </Button>
           </div>
         </div>
-        {status === "ready" && feedClasses.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
+
+        {status === "error" ? (
+          <div className="mt-6">
+            <EmptyState
+              title="We could not load the class feed"
+              description="Please check your connection or try again later."
+            />
+          </div>
+        ) : feedClasses.length > 0 ? (
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feedClasses.map((classroom) => (
-              <ExploreClassCard classroom={classroom} key={classroom.id} />
+              <div key={classroom.code || classroom.id}>
+                <ExploreClassCard classroom={classroom} />
+              </div>
             ))}
           </div>
-        )}
-        {status === "ready" && !feedClasses.length && (
-          <EmptyState
-            title="You are all caught up"
-            description="There are no more classes to show in this part of the feed."
-          />
+        ) : (
+          <div className="mt-6">
+            <EmptyState
+              title="You are all caught up"
+              description="There are no more classes to show in this part of the feed."
+            />
+          </div>
         )}
       </section>
     </div>

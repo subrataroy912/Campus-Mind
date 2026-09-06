@@ -16,9 +16,7 @@ export async function login({ email, password }) {
       candidate.password === password,
   );
   if (!user)
-    throw new Error(
-      "Use Dummy email ids , or create a local account.",
-    );
+    throw new Error("Use Dummy email ids , or create a local account.");
   return wait({ ...user, password: undefined });
 }
 
@@ -41,4 +39,3 @@ export async function register({ name, email, password }) {
   localStorage.setItem(USERS_KEY, JSON.stringify([...existingUsers, user]));
   return wait({ ...user, password: undefined });
 }
-

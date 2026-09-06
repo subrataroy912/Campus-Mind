@@ -1,10 +1,14 @@
 import { Link, NavLink } from "react-router";
-import { Button } from "../ui/button.jsx";
-import { SIDEBAR_NAV_ITEMS } from "../../config/navigation.js";
-import { getNavLinkStyles } from "../../utils/routeHelpers.jsx";
+import {Button} from "@/components/ui/button.jsx";
+import { SIDEBAR_NAV_ITEMS } from "../../../config/navigation";
+import { getNavLinkStyles } from "../../../utils/routeHelpers";
 import { Plus, Settings, Ticket } from "lucide-react";
 
-export default function Sidebar({ compact = false, onNavigate, isAbsolute = "" }) {
+export default function Sidebar({
+  compact = false,
+  onNavigate,
+  isAbsolute = "",
+}) {
   return (
     <aside
       className={`${
@@ -75,9 +79,7 @@ export default function Sidebar({ compact = false, onNavigate, isAbsolute = "" }
 
       {/* Settings Footer Section */}
       <div
-        className={`w-full border-t border-border ${
-          compact ? "p-2" : "p-3"
-        }`}
+        className={`w-full border-t border-border ${compact ? "p-2" : "p-3"}`}
       >
         <Link
           to="/dashboard/settings"
