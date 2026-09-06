@@ -1,136 +1,24 @@
-import { useState, useMemo } from "react";
-
-// ---- Mock data -------------------------------------------------------
-
-const COLLECTIONS = [
-  { id: "all", name: "All saved", count: null },
-  { id: "midterm", name: "Midterm prep", count: 4 },
-  { id: "group-project", name: "Group project ideas", count: 2 },
-  { id: "unsorted", name: "Unsorted", count: 3 },
-];
-
-const SAVED_ITEMS = [
-  {
-    id: 1,
-    type: "post",
-    title: "Clarification on Thursday's lab report format",
-    meta: "Community feed · Ms. Patel · 2 days ago",
-    snippet:
-      "Quick answer on whether we need a hypothesis section — yes, and here's the rubric breakdown...",
-    collection: "midterm",
-  },
-  {
-    id: 2,
-    type: "post",
-    title: "Best study strategies for the unit 3 exam",
-    meta: "Community feed · 14 replies · 5 days ago",
-    snippet:
-      "Thread with tips from classmates on flashcards, practice sets, and study group times.",
-    collection: "midterm",
-  },
-  {
-    id: 3,
-    type: "resource",
-    title: "Chapter 7 – Chemical Reactions (PDF)",
-    meta: "Resource library · 2.4 MB · PDF",
-    snippet: "Full chapter reading with annotated diagrams and practice problems.",
-    collection: "midterm",
-  },
-  {
-    id: 4,
-    type: "resource",
-    title: "Khan Academy: Balancing equations",
-    meta: "Resource library · External link",
-    snippet: "Video walkthrough referenced during Tuesday's lecture.",
-    collection: "unsorted",
-  },
-  {
-    id: 5,
-    type: "resource",
-    title: "Group project rubric and timeline",
-    meta: "Resource library · DOCX",
-    snippet: "Grading criteria and milestone dates for the semester project.",
-    collection: "group-project",
-  },
-  {
-    id: 6,
-    type: "assignment",
-    title: "Quiz: Periodic table trends",
-    meta: "Due tomorrow · 10 questions",
-    snippet: "Covers atomic radius, ionization energy, and electronegativity.",
-    collection: "midterm",
-  },
-  {
-    id: 7,
-    type: "assignment",
-    title: "Lab module: Titration simulation",
-    meta: "Learning module · Not started",
-    snippet: "Interactive simulation with a short reflection write-up at the end.",
-    collection: "unsorted",
-  },
-  {
-    id: 8,
-    type: "assignment",
-    title: "Group project proposal draft",
-    meta: "Due in 6 days · Group task",
-    snippet: "Outline your topic, roles, and a rough timeline for the final presentation.",
-    collection: "group-project",
-  },
-];
-
-const TYPE_META = {
-  post: { label: "Post", color: "bg-canvas text-accent" },
-  resource: { label: "Resource", color: "bg-canvas text-success" },
-  assignment: { label: "Assignment", color: "bg-border text-secondary-hover" },
-};
-
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "post", label: "Posts" },
-  { id: "resource", label: "Resources" },
-  { id: "assignment", label: "Assignments" },
-];
-
-// ---- Component ---------------------------------------------------------
+import { useSavedItems } from "../hooks/useSavedItems.js";
 
 export default function DashboardSavedPage() {
-  const [activeCollection, setActiveCollection] = useState("all");
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [query, setQuery] = useState("");
-  const [items, setItems] = useState(SAVED_ITEMS);
-  const [showNewCollection, setShowNewCollection] = useState(false);
-  const [newCollectionName, setNewCollectionName] = useState("");
-  const [collections, setCollections] = useState(COLLECTIONS);
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchesCollection =
-        activeCollection === "all" || item.collection === activeCollection;
-      const matchesFilter = activeFilter === "all" || item.type === activeFilter;
-      const q = query.trim().toLowerCase();
-      const matchesQuery =
-        !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.snippet.toLowerCase().includes(q) ||
-        item.meta.toLowerCase().includes(q);
-      return matchesCollection && matchesFilter && matchesQuery;
-    });
-  }, [items, activeCollection, activeFilter, query]);
-
-  const handleUnsave = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleCreateCollection = (e) => {
-    e.preventDefault();
-    const name = newCollectionName.trim();
-    if (!name) return;
-    const id = name.toLowerCase().replace(/\s+/g, "-");
-    setCollections((prev) => [...prev, { id, name, count: 0 }]);
-    setNewCollectionName("");
-    setShowNewCollection(false);
-    setActiveCollection(id);
-  };
+  const {
+    activeCollection,
+    activeFilter,
+    collections,
+    filteredItems,
+    filters,
+    newCollectionName,
+    query,
+    showNewCollection,
+    typeMeta,
+    handleCreateCollection,
+    handleUnsave,
+    setActiveCollection,
+    setActiveFilter,
+    setNewCollectionName,
+    setQuery,
+    setShowNewCollection,
+  } = useSavedItems();
 
   return (
     <div className="min-h-screen bg-canvas py-2 px-2 sm:py-4 sm:px-3 lg:px-4">
@@ -252,7 +140,7 @@ export default function DashboardSavedPage() {
           <div>
             {/* Content filters */}
             <div className="mb-4 flex flex-wrap gap-2">
-              {FILTERS.map((f) => (
+              {filters.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => setActiveFilter(f.id)}
@@ -288,9 +176,9 @@ export default function DashboardSavedPage() {
                       <div className="min-w-0 flex-1">
                         <div className="mb-1.5 flex items-center gap-2">
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${TYPE_META[item.type].color}`}
+                            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${typeMeta[item.type].color}`}
                           >
-                            {TYPE_META[item.type].label}
+                            {typeMeta[item.type].label}
                           </span>
                           <span className="truncate text-xs text-text-muted">
                             {item.meta}

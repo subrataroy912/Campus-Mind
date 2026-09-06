@@ -2,16 +2,17 @@ import { useMemo, useState } from "react";
 import { Heart, Megaphone, MessageCircle, MessageCircleQuestion, MessagesSquare, Pin, Send } from "lucide-react";
 
 import { useDashboardData } from "../useDashboardData.js";
+import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import { COMMUNITY_FILTERS, COMMUNITY_POSTS } from "@/mock/mockCommunityPosts.js";
 
 const TYPE_META = {
   announcement: { label: "Announcement", icon: Megaphone, className: "bg-canvas text-secondary" },
   question: { label: "Question", icon: MessageCircleQuestion, className: "bg-canvas text-accent" },
   discussion: { label: "Discussion", icon: MessagesSquare, className: "bg-canvas text-primary" },
 };
+const EMPTY_FEED = [];
 
 function CommunityPost({ post }) {
   const [liked, setLiked] = useState(false);
@@ -65,15 +66,34 @@ function CommunityPost({ post }) {
 
 export default function DashboardCommunityPage() {
   const { classrooms = [] } = useDashboardData();
+  const { data, isLoading, error } = useCommunityFeed();
   const [activeFilter, setActiveFilter] = useState("all");
   const [draft, setDraft] = useState("");
 
+  const posts = data?.posts ?? EMPTY_FEED;
+  const filters = data?.filters ?? EMPTY_FEED;
+
   const filteredPosts = useMemo(() => {
-    if (activeFilter === "all") return COMMUNITY_POSTS;
-    return COMMUNITY_POSTS.filter((post) => post.type === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === "all") return posts;
+    return posts.filter((post) => post.type === activeFilter);
+  }, [activeFilter, posts]);
 
   const hasClasses = classrooms.length > 0;
+
+  if (isLoading) {
+    return <div className="grid min-h-64 place-items-center text-sm text-text-muted">Loading community…</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-3xl p-3 sm:p-6">
+        <EmptyState
+          title="We could not load the community"
+          description="Please try again later."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl p-3 sm:p-6">
@@ -119,7 +139,7 @@ export default function DashboardCommunityPage() {
           </div>
 
           <div className="-mx-1 mt-6 flex max-w-full gap-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Filter community feed">
-            {COMMUNITY_FILTERS.map((filter) => (
+            {filters.map((filter) => (
               <Button
                 key={filter.id}
                 variant={activeFilter === filter.id ? "default" : "outline"}

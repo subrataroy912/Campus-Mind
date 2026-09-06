@@ -45,6 +45,21 @@ export async function register({ name, email, password }) {
   return wait({ ...user, password: undefined });
 }
 
+export async function updateProfile(userId, details) {
+  const existingUsers = users();
+  const userIndex = existingUsers.findIndex((user) => user.id === userId);
+
+  if (userIndex === -1) throw new Error("User account could not be found.");
+
+  const updatedUser = { ...existingUsers[userIndex], ...details };
+  const nextUsers = existingUsers.map((user, index) =>
+    index === userIndex ? updatedUser : user,
+  );
+
+  window.localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers));
+  return wait({ ...updatedUser, password: undefined });
+}
+
 export async function deleteAccount(userId) {
   const remainingUsers = users().filter((user) => user.id !== userId);
   window.localStorage.setItem(USERS_KEY, JSON.stringify(remainingUsers));

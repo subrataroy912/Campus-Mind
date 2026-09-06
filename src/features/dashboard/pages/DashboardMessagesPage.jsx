@@ -2,9 +2,11 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Search, Send } from "lucide-react";
 
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
+import { useMessages } from "../hooks/useMessages.js";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import { CONVERSATIONS } from "@/mock/mockMessages.js";
+
+const EMPTY_CONVERSATIONS = [];
 
 function ConversationListItem({ conversation, active, onSelect }) {
   return (
@@ -113,22 +115,39 @@ function ChatThread({ conversation, onBack }) {
 }
 
 export default function DashboardMessagesPage() {
+  const { data, isLoading, error } = useMessages();
   const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState(null);
+  const conversations = data?.conversations ?? EMPTY_CONVERSATIONS;
 
   const filteredConversations = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return CONVERSATIONS;
-    return CONVERSATIONS.filter(
+    if (!q) return conversations;
+    return conversations.filter(
       (conversation) =>
         conversation.name.toLowerCase().includes(q) ||
         conversation.classroom.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [conversations, query]);
 
-  const activeConversation = CONVERSATIONS.find((conversation) => conversation.id === activeId);
+  const activeConversation = conversations.find((conversation) => conversation.id === activeId);
 
-  if (CONVERSATIONS.length === 0) {
+  if (isLoading) {
+    return <div className="grid min-h-64 place-items-center text-sm text-text-muted">Loading messages…</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl p-3 sm:p-6">
+        <EmptyState
+          title="We could not load messages"
+          description="Please try again later."
+        />
+      </div>
+    );
+  }
+
+  if (conversations.length === 0) {
     return (
       <div className="mx-auto max-w-4xl p-3 sm:p-6">
         <header>

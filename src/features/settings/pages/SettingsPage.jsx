@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Switch } from "@/components/ui/switch.jsx";
 import ProfileSection from "@/features/profile/components/ProfileSection.jsx";
+import { useSettings } from "../hooks/useSettings.js";
 import { initials } from "@/utils/initials.js";
 
 function SettingRow({ title, description, checked, onChange }) {
@@ -35,11 +36,17 @@ const DEFAULT_PRIVACY = {
 
 export default function SettingsPage() {
   const { user, logout, deleteAccount } = useAuth();
+  const {
+    theme,
+    isLoading: isThemeLoading,
+    isSaving: isThemeSaving,
+    error: themeError,
+    updateTheme,
+  } = useSettings();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
   const [privacy, setPrivacy] = useState(DEFAULT_PRIVACY);
-  const [theme, setTheme] = useState(() => window.localStorage.getItem("campus-mind.theme") || "light");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const toggleNotification = (key) =>
@@ -55,8 +62,15 @@ export default function SettingsPage() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem("campus-mind.theme", theme);
   }, [theme]);
+
+  const handleThemeChange = async (nextTheme) => {
+    try {
+      await updateTheme(nextTheme);
+    } catch {
+      // The hook exposes the save error for the page to render.
+    }
+  };
 
   const handleDeleteAccount = async () => {
     await deleteAccount();
@@ -170,7 +184,8 @@ export default function SettingsPage() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setTheme("light")}
+                  onClick={() => handleThemeChange("light")}
+                  disabled={isThemeLoading || isThemeSaving}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                     theme === "light"
                       ? "border-primary bg-primary/10 text-primary"
@@ -182,7 +197,8 @@ export default function SettingsPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setTheme("dark")}
+                  onClick={() => handleThemeChange("dark")}
+                  disabled={isThemeLoading || isThemeSaving}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
                     theme === "dark"
                       ? "border-primary bg-primary/10 text-primary"
@@ -193,6 +209,11 @@ export default function SettingsPage() {
                   Dark
                 </button>
               </div>
+              {themeError && (
+                <p className="mt-3 text-xs text-destructive" role="alert">
+                  Unable to save your theme preference.
+                </p>
+              )}
               <p className="mt-3 text-xs text-text-muted">Theme preference is saved on this device.</p>
             </ProfileSection>
           </div>

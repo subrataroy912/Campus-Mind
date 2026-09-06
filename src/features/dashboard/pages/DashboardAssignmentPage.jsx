@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { CheckCircle2, Circle, ClipboardList, FlaskConical, Users2 } from "lucide-react";
 
 import { useDashboardData } from "../useDashboardData.js";
+import { useAssignments } from "../hooks/useAssignments.js";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import { ASSIGNMENTS, ASSIGNMENT_FILTERS } from "@/mock/mockAssignments.js";
 
 const TYPE_ICON = {
   quiz: ClipboardList,
@@ -18,6 +18,7 @@ const STATUS_META = {
   upcoming: { label: "Upcoming", className: "bg-canvas text-text-main" },
   completed: { label: "Completed", className: "bg-success/10 text-success" },
 };
+const EMPTY_ITEMS = [];
 
 function AssignmentCard({ item, onToggleComplete }) {
   const Icon = TYPE_ICON[item.type] || ClipboardList;
@@ -58,8 +59,12 @@ function AssignmentCard({ item, onToggleComplete }) {
 
 export default function DashboardAssignmentPage() {
   const { classrooms = [] } = useDashboardData();
+  const { data, isLoading, error } = useAssignments();
   const [activeFilter, setActiveFilter] = useState("all");
-  const [items, setItems] = useState(ASSIGNMENTS);
+  const [items, setItems] = useState(null);
+
+  const assignmentItems = items ?? data?.items ?? EMPTY_ITEMS;
+  const assignmentFilters = data?.filters ?? EMPTY_ITEMS;
 
   const toggleComplete = (id) => {
     setItems((previous) =>
@@ -72,12 +77,27 @@ export default function DashboardAssignmentPage() {
   };
 
   const filteredItems = useMemo(() => {
-    if (activeFilter === "all") return items;
-    return items.filter((item) => item.status === activeFilter);
-  }, [items, activeFilter]);
+    if (activeFilter === "all") return assignmentItems;
+    return assignmentItems.filter((item) => item.status === activeFilter);
+  }, [assignmentItems, activeFilter]);
 
-  const dueSoonCount = items.filter((item) => item.status === "due-soon").length;
+  const dueSoonCount = assignmentItems.filter((item) => item.status === "due-soon").length;
   const hasClasses = classrooms.length > 0;
+
+  if (isLoading) {
+    return <div className="grid min-h-64 place-items-center text-sm text-text-muted">Loading assignments…</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl p-3 sm:p-6">
+        <EmptyState
+          title="We could not load assignments"
+          description="Please try again later."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl p-3 sm:p-6">
@@ -104,7 +124,7 @@ export default function DashboardAssignmentPage() {
       ) : (
         <>
           <div className="-mx-1 mt-6 flex max-w-full gap-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Filter assignments">
-            {ASSIGNMENT_FILTERS.map((filter) => (
+            {assignmentFilters.map((filter) => (
               <Button
                 key={filter.id}
                 variant={activeFilter === filter.id ? "default" : "outline"}

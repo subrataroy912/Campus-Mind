@@ -1,105 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { createClassroom } from "../api/classroomService";
-import { useAuth } from "@/context/AuthContext.jsx";
-
-const SUBJECTS = [
-  "Mathematics", "Science", "English", "History", "Art",
-  "Music", "Physical Education", "Computer Science", "Foreign Language", "Other",
-];
-
-const GRADE_LEVELS = [
-  "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5",
-  "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "College / Adult",
-];
-
-const THEME_COLORS = [
-  { name: "Indigo", value: "bg-primary" },
-  { name: "Emerald", value: "bg-success" },
-  { name: "Rose", value: "bg-secondary" },
-  { name: "Amber", value: "bg-secondary" },
-  { name: "Sky", value: "bg-accent" },
-  { name: "Violet", value: "bg-primary" },
-];
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
+import { DAYS, GRADE_LEVELS, SUBJECTS, THEME_COLORS } from "../model/createClassForm.js";
 
 export default function CreateClass() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [form, setForm] = useState({
-    className: "",
-    section: "",
-    subject: "",
-    room: "",
-    description: "",
-    gradeLevel: "",
-    days: [],
-    startTime: "",
-    endTime: "",
-    accessType: "invite",
-    theme: THEME_COLORS[0].value,
-    coverImage: null,
-  });
-  const [preview, setPreview] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [submissionError, setSubmissionError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const update = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-  };
-
-  const toggleDay = (day) => {
-    setForm((prev) => ({
-      ...prev,
-      days: prev.days.includes(day)
-        ? prev.days.filter((d) => d !== day)
-        : [...prev.days, day],
-    }));
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    update("coverImage", file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
-    reader.readAsDataURL(file);
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!form.className.trim()) newErrors.className = "Class name is required.";
-    if (!form.subject) newErrors.subject = "Select a subject.";
-    if (!form.gradeLevel) newErrors.gradeLevel = "Select a grade level.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) {
-      setSubmitted(false);
-      return;
-    }
-    setIsSubmitting(true);
-    setSubmissionError("");
-    try {
-      const classroom = await createClassroom(user?.id, {
-        ...form,
-        coverImage: preview,
-      });
-      setSubmitted(true);
-      navigate(`/dashboard/classes/${classroom.id}`);
-    } catch (error) {
-      setSubmissionError(error.message || "Unable to create this class.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    form,
+    preview,
+    errors,
+    submitted,
+    submissionError,
+    isSubmitting,
+    update,
+    toggleDay,
+    handleImageUpload,
+    reset,
+    submit,
+  } = useCreateClassForm();
 
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
@@ -115,7 +30,7 @@ export default function CreateClass() {
         </div>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={submit}
           className="space-y-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6 lg:p-8"
         >
           {/* Cover image / theme */}
@@ -362,22 +277,7 @@ export default function CreateClass() {
           <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
             <button
               type="button"
-              onClick={() =>
-                setForm({
-                  className: "",
-                  section: "",
-                  subject: "",
-                  room: "",
-                  description: "",
-                  gradeLevel: "",
-                  days: [],
-                  startTime: "",
-                  endTime: "",
-                  accessType: "invite",
-                  theme: THEME_COLORS[0].value,
-                  coverImage: null,
-                })
-              }
+              onClick={reset}
               className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas sm:w-auto"
             >
               Reset

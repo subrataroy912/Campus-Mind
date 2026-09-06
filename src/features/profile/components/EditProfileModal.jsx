@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import { Image, UserRound } from "lucide-react";
 import { Button } from "../../../components/ui/button.jsx";
 import { Input } from "../../../components/ui/input.jsx";
@@ -14,28 +13,7 @@ import {
   CoverImageUploader,
   ProfileImageUploader,
 } from "./ProfileImageUploader.jsx";
-
-const FORM_FIELDS = [
-  "name",
-  "handle",
-  "bio",
-  "department",
-  "batchYear",
-  "avatar",
-  "banner",
-];
-
-function getInitialFormData(profile) {
-  return {
-    name: profile?.name || "",
-    handle: profile?.handle || "",
-    bio: profile?.bio || "",
-    department: profile?.department || "",
-    batchYear: profile?.batchYear || "",
-    avatar: profile?.avatar || "",
-    banner: profile?.banner || "",
-  };
-}
+import { useProfileForm } from "../hooks/useProfileForm.js";
 
 function FieldError({ id, message }) {
   return message ? (
@@ -52,56 +30,17 @@ export function EditProfileModal({
   onSave,
   isSaving,
 }) {
-  const initialFormData = useMemo(() => getInitialFormData(profile), [profile]);
-  const [formData, setFormData] = useState(initialFormData);
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [activeTab, setActiveTab] = useState("profile");
-
-  const handleChange = (name, value) => {
-    setFormData((current) => ({ ...current, [name]: value }));
-    if (touched[name]) {
-      setErrors((current) => ({
-        ...current,
-        [name]: ValidateField(name, value),
-      }));
-    }
-  };
-
-  const handleBlur = (name) => {
-    setTouched((current) => ({ ...current, [name]: true }));
-    setErrors((current) => ({
-      ...current,
-      [name]: ValidateField(name, formData[name]),
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const nextErrors = Object.fromEntries(
-      FORM_FIELDS.map((field) => [
-        field,
-        ValidateField(field, formData[field]),
-      ]).filter(([, error]) => error),
-    );
-    setErrors(nextErrors);
-    setTouched(Object.fromEntries(FORM_FIELDS.map((field) => [field, true])));
-    if (Object.keys(nextErrors).length > 0) return;
-    await onSave(formData);
-    onClose();
-  };
-
-  const handleCancel = () => {
-    if (
-      JSON.stringify(formData) !== JSON.stringify(initialFormData) &&
-      !window.confirm(
-        "You have unsaved changes. Are you sure you want to cancel?",
-      )
-    ) {
-      return;
-    }
-    onClose();
-  };
+  const {
+    activeTab,
+    setActiveTab,
+    formData,
+    initialFormData,
+    errors,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    handleCancel,
+  } = useProfileForm({ profile, isOpen, onClose, onSave });
 
   if (!isOpen) return null;
 

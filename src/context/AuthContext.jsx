@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo } from "react";
 import {
   login as loginRequest,
   register as registerRequest,
+  updateProfile as updateProfileRequest,
   deleteAccount as deleteAccountRequest,
 } from "../features/auth/api/authService";
 import { useLocalStorage } from "../hooks/useLocalStorage";
@@ -23,8 +24,10 @@ export function AuthProvider({ children }) {
       async register(details) {
         return registerRequest(details);
       },
-      updateProfile(details) {
-        setUser((currentUser) => ({ ...currentUser, ...details }));
+      async updateProfile(details) {
+        const nextUser = await updateProfileRequest(user?.id, details);
+        setUser(nextUser);
+        return nextUser;
       },
       async deleteAccount() {
         if (user?.id) await deleteAccountRequest(user.id);
