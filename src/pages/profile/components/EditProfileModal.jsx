@@ -108,10 +108,10 @@ export function EditProfileModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
       <DialogContent
-        className="max-h-[90vh] max-w-2xl md:max-w-4xl overflow-y-auto bg-surface p-0"
+        className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto bg-surface p-0 md:max-w-4xl"
         showCloseButton={false}
       >
-        <DialogHeader className="border-b border-border px-6 py-5 sm:px-8">
+        <DialogHeader className="border-b border-border px-4 py-5 sm:px-8">
           <DialogTitle className="text-xl font-semibold text-text-heading">
             Edit profile
           </DialogTitle>
@@ -122,7 +122,7 @@ export function EditProfileModal({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 px-6 pb-6 sm:px-8 sm:pb-8"
+          className="space-y-6 px-4 pb-4 sm:px-8 sm:pb-8"
         >
           <div
             className="flex gap-1 rounded-lg bg-canvas p-1"

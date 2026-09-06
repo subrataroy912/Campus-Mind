@@ -175,3 +175,16 @@ button:not(:disabled) {
     @apply font-sans;
   }
 }
+
+html {
+  min-width: 320px;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}

@@ -360,13 +360,13 @@ export default function CreateClass() {
                   coverImage: null,
                 })
               }
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
+              className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas sm:w-auto"
             >
               Reset
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover"
+              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover sm:w-auto"
             >
               Create class
             </button>

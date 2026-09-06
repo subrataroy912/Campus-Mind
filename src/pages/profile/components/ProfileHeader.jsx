@@ -34,8 +34,8 @@ export default function ProfileHeader({ profile = null, onEdit }) {
         )}
       </div>
 
-      <div className="px-5 pb-6 sm:px-7">
-        <div className="flex  justify-between items-center ">
+      <div className="px-4 pb-6 sm:px-7">
+        <div className="flex items-center justify-between gap-3">
           {/* Avatar container */}
           <div className="-mt-10 flex items-end gap-4">
             <div className="z-10 grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-card bg-primary text-xl font-bold text-primary-foreground shadow-sm">
@@ -52,7 +52,7 @@ export default function ProfileHeader({ profile = null, onEdit }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             {profile ? (
               <>
                 <Button
@@ -61,7 +61,7 @@ export default function ProfileHeader({ profile = null, onEdit }) {
                   className="flex items-center gap-1 sm:mb-1"
                 >
                   <Pencil size={16} aria-hidden="true" />
-                  Edit profile
+                  <span className="hidden min-[380px]:inline">Edit profile</span>
                 </Button>
                 <Button variant="outline" className="sm:mb-1" aria-label="Menu">
                   <Menu size={16} aria-hidden="true" />
