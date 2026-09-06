@@ -2,6 +2,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-1",
     name: "Ms. Patel",
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
     classroom: "Algebra II",
     lastMessage: "Sure — bring your worked-out steps to office hours tomorrow.",
     time: "2m",
@@ -42,6 +43,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-2",
     name: "Priya S.",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
     classroom: "World History",
     lastMessage: "See you at the library Thursday!",
     time: "1h",
@@ -71,6 +73,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-3",
     name: "Wei L.",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
     classroom: "AP Physics",
     lastMessage: "Thanks, that clears it up.",
     time: "Yesterday",
@@ -99,6 +102,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-4",
     name: "Mr. Davis",
+    avatar: "https://randomuser.me/api/portraits/men/46.jpg",
     classroom: "World History",
     lastMessage: "Great work on the essay draft.",
     time: "Mon",
@@ -121,6 +125,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-5",
     name: "Mrs. Smith",
+    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
     classroom: "Algebra II",
     lastMessage: "Don't forget the practice test tomorrow!",
     time: "Yesterday",
@@ -143,6 +148,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-6",
     name: "Alex Johnson",
+    avatar: "https://randomuser.me/api/portraits/men/22.jpg",
     classroom: "AP Biology",
     lastMessage: "Just finished my half of the slides.",
     time: "10:30 AM",
@@ -171,6 +177,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-7",
     name: "Ms. Ramirez",
+    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
     classroom: "Studio Art",
     lastMessage: "Your ceramic piece is out of the kiln.",
     time: "Oct 12",
@@ -193,6 +200,7 @@ export const CONVERSATIONS = [
   {
     id: "conv-8",
     name: "Coach Miller",
+    avatar: "https://randomuser.me/api/portraits/men/60.jpg",
     classroom: "Varsity Track",
     lastMessage: "Practice moved to the indoor gym.",
     time: "8:15 AM",
