@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { Heart, Megaphone, MessageCircle, MessageCircleQuestion, MessagesSquare, Pin, Send } from "lucide-react";
+import {
+  Heart,
+  Megaphone,
+  MessageCircle,
+  MessageCircleQuestion,
+  MessagesSquare,
+  Pin,
+  Send,
+} from "lucide-react";
 
 import { useDashboardData } from "../useDashboardData.js";
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
@@ -8,9 +16,21 @@ import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 
 const TYPE_META = {
-  announcement: { label: "Announcement", icon: Megaphone, className: "bg-canvas text-secondary" },
-  question: { label: "Question", icon: MessageCircleQuestion, className: "bg-canvas text-accent" },
-  discussion: { label: "Discussion", icon: MessagesSquare, className: "bg-canvas text-primary" },
+  announcement: {
+    label: "Announcement",
+    icon: Megaphone,
+    className: "bg-canvas text-secondary",
+  },
+  question: {
+    label: "Question",
+    icon: MessageCircleQuestion,
+    className: "bg-canvas text-accent",
+  },
+  discussion: {
+    label: "Discussion",
+    icon: MessagesSquare,
+    className: "bg-canvas text-primary",
+  },
 };
 const EMPTY_FEED = [];
 
@@ -37,14 +57,20 @@ function CommunityPost({ post }) {
         <ClassroomAvatar name={post.author} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-sm font-semibold text-text-heading">{post.author}</span>
+            <span className="text-sm font-semibold text-text-heading">
+              {post.author}
+            </span>
             <span className="text-xs text-text-muted">· {post.classroom}</span>
             <span className="text-xs text-text-muted">· {post.time}</span>
           </div>
-          <p className="mt-1.5 text-sm leading-6 text-text-main">{post.content}</p>
+          <p className="mt-1.5 text-sm leading-6 text-text-main">
+            {post.content}
+          </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.className}`}>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.className}`}
+            >
               <Icon size={12} aria-hidden="true" />
               {meta.label}
             </span>
@@ -81,7 +107,11 @@ export default function DashboardCommunityPage() {
   const hasClasses = classrooms.length > 0;
 
   if (isLoading) {
-    return <div className="grid min-h-64 place-items-center text-sm text-text-muted">Loading community…</div>;
+    return (
+      <div className="grid min-h-64 place-items-center text-sm text-text-muted">
+        Loading community…
+      </div>
+    );
   }
 
   if (error) {
@@ -99,11 +129,12 @@ export default function DashboardCommunityPage() {
     <div className="mx-auto max-w-3xl p-3 sm:p-6">
       <header>
         <p className="text-sm font-semibold text-primary">Community</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
+        {/* <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
           Learn better together.
-        </h1>
+        </h1> */}
         <p className="mt-2 text-text-muted">
-          Announcements, questions, and discussions from every class you're part of.
+          Announcements, questions, and discussions from every class you're part
+          of.
         </p>
       </header>
 
@@ -129,7 +160,11 @@ export default function DashboardCommunityPage() {
                   className="w-full resize-none rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-4 focus:ring-focus"
                 />
                 <div className="mt-2 flex justify-end">
-                  <Button size="sm" disabled={!draft.trim()} className="gap-1.5">
+                  <Button
+                    size="sm"
+                    disabled={!draft.trim()}
+                    className="gap-1.5"
+                  >
                     <Send size={14} aria-hidden="true" />
                     Post
                   </Button>
@@ -138,7 +173,11 @@ export default function DashboardCommunityPage() {
             </div>
           </div>
 
-          <div className="-mx-1 mt-6 flex max-w-full gap-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Filter community feed">
+          <div
+            className="-mx-1 mt-6 flex max-w-full gap-1 overflow-x-auto px-1 pb-1"
+            role="tablist"
+            aria-label="Filter community feed"
+          >
             {filters.map((filter) => (
               <Button
                 key={filter.id}
@@ -155,7 +194,9 @@ export default function DashboardCommunityPage() {
 
           <div className="mt-4 space-y-4">
             {filteredPosts.length > 0 ? (
-              filteredPosts.map((post) => <CommunityPost key={post.id} post={post} />)
+              filteredPosts.map((post) => (
+                <CommunityPost key={post.id} post={post} />
+              ))
             ) : (
               <EmptyState
                 title="Nothing in this filter yet"

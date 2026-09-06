@@ -7,11 +7,36 @@ export const CONVERSATIONS = [
     time: "2m",
     unread: 2,
     messages: [
-      { id: 1, from: "them", text: "Hi! I saw your question on problem 14.", time: "10:02 AM" },
-      { id: 2, from: "me", text: "Yes, I keep getting a negative discriminant, so no real solutions?", time: "10:04 AM" },
-      { id: 3, from: "them", text: "That's actually correct for that one — double check problem 15 though.", time: "10:05 AM" },
-      { id: 4, from: "me", text: "Oh good, I thought I was missing something. Can I show you my work for 15?", time: "10:06 AM" },
-      { id: 5, from: "them", text: "Sure — bring your worked-out steps to office hours tomorrow.", time: "10:07 AM" },
+      {
+        id: 1,
+        from: "them",
+        text: "Hi! I saw your question on problem 14.",
+        time: "10:02 AM",
+      },
+      {
+        id: 2,
+        from: "me",
+        text: "Yes, I keep getting a negative discriminant, so no real solutions?",
+        time: "10:04 AM",
+      },
+      {
+        id: 3,
+        from: "them",
+        text: "That's actually correct for that one — double check problem 15 though.",
+        time: "10:05 AM",
+      },
+      {
+        id: 4,
+        from: "me",
+        text: "Oh good, I thought I was missing something. Can I show you my work for 15?",
+        time: "10:06 AM",
+      },
+      {
+        id: 5,
+        from: "them",
+        text: "Sure — bring your worked-out steps to office hours tomorrow.",
+        time: "10:07 AM",
+      },
     ],
   },
   {
@@ -22,10 +47,25 @@ export const CONVERSATIONS = [
     time: "1h",
     unread: 0,
     messages: [
-      { id: 1, from: "them", text: "Are you free to study for the unit 3 exam Thursday?", time: "9:10 AM" },
+      {
+        id: 1,
+        from: "them",
+        text: "Are you free to study for the unit 3 exam Thursday?",
+        time: "9:10 AM",
+      },
       { id: 2, from: "me", text: "Yes! What time works?", time: "9:15 AM" },
-      { id: 3, from: "them", text: "4pm at the library, second floor.", time: "9:16 AM" },
-      { id: 4, from: "them", text: "See you at the library Thursday!", time: "9:16 AM" },
+      {
+        id: 3,
+        from: "them",
+        text: "4pm at the library, second floor.",
+        time: "9:16 AM",
+      },
+      {
+        id: 4,
+        from: "them",
+        text: "See you at the library Thursday!",
+        time: "9:16 AM",
+      },
     ],
   },
   {
@@ -36,9 +76,24 @@ export const CONVERSATIONS = [
     time: "Yesterday",
     unread: 0,
     messages: [
-      { id: 1, from: "them", text: "Do you know if the lab report is due Friday or the following Monday?", time: "Yesterday" },
-      { id: 2, from: "me", text: "Friday — the makeup session doesn't change the due date.", time: "Yesterday" },
-      { id: 3, from: "them", text: "Thanks, that clears it up.", time: "Yesterday" },
+      {
+        id: 1,
+        from: "them",
+        text: "Do you know if the lab report is due Friday or the following Monday?",
+        time: "Yesterday",
+      },
+      {
+        id: 2,
+        from: "me",
+        text: "Friday — the makeup session doesn't change the due date.",
+        time: "Yesterday",
+      },
+      {
+        id: 3,
+        from: "them",
+        text: "Thanks, that clears it up.",
+        time: "Yesterday",
+      },
     ],
   },
   {
@@ -49,8 +104,112 @@ export const CONVERSATIONS = [
     time: "Mon",
     unread: 0,
     messages: [
-      { id: 1, from: "them", text: "Great work on the essay draft. A couple of comments left inline.", time: "Mon" },
-      { id: 2, from: "me", text: "Thank you! I'll revise by Wednesday.", time: "Mon" },
+      {
+        id: 1,
+        from: "them",
+        text: "Great work on the essay draft. A couple of comments left inline.",
+        time: "Mon",
+      },
+      {
+        id: 2,
+        from: "me",
+        text: "Thank you! I'll revise by Wednesday.",
+        time: "Mon",
+      },
+    ],
+  },
+  {
+    id: "conv-5",
+    name: "Mrs. Smith",
+    classroom: "Algebra II",
+    lastMessage: "Don't forget the practice test tomorrow!",
+    time: "Yesterday",
+    unread: 1,
+    messages: [
+      {
+        id: 1,
+        from: "me",
+        text: "Are we allowed to bring calculators for chapter 4?",
+        time: "Yesterday",
+      },
+      {
+        id: 2,
+        from: "them",
+        text: "Yes, graphing calculators are permitted. Don't forget the practice test tomorrow!",
+        time: "Yesterday",
+      },
+    ],
+  },
+  {
+    id: "conv-6",
+    name: "Alex Johnson",
+    classroom: "AP Biology",
+    lastMessage: "Just finished my half of the slides.",
+    time: "10:30 AM",
+    unread: 0,
+    messages: [
+      {
+        id: 1,
+        from: "them",
+        text: "Hey, what time are we meeting in the library?",
+        time: "Tue",
+      },
+      {
+        id: 2,
+        from: "me",
+        text: "Right after 4th period.",
+        time: "Tue",
+      },
+      {
+        id: 3,
+        from: "them",
+        text: "Just finished my half of the slides.",
+        time: "10:30 AM",
+      },
+    ],
+  },
+  {
+    id: "conv-7",
+    name: "Ms. Ramirez",
+    classroom: "Studio Art",
+    lastMessage: "Your ceramic piece is out of the kiln.",
+    time: "Oct 12",
+    unread: 2,
+    messages: [
+      {
+        id: 1,
+        from: "them",
+        text: "Hello everyone, reminder that the studio will be open until 5 PM today.",
+        time: "Oct 12",
+      },
+      {
+        id: 2,
+        from: "them",
+        text: "Also, your ceramic piece is out of the kiln. You can pick it up anytime.",
+        time: "Oct 12",
+      },
+    ],
+  },
+  {
+    id: "conv-8",
+    name: "Coach Miller",
+    classroom: "Varsity Track",
+    lastMessage: "Practice moved to the indoor gym.",
+    time: "8:15 AM",
+    unread: 0,
+    messages: [
+      {
+        id: 1,
+        from: "them",
+        text: "Looks like rain today. Practice moved to the indoor gym.",
+        time: "8:15 AM",
+      },
+      {
+        id: 2,
+        from: "me",
+        text: "Got it, I'll let the sprinters know.",
+        time: "8:20 AM",
+      },
     ],
   },
 ];

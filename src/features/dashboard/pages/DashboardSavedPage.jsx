@@ -25,7 +25,7 @@ export default function DashboardSavedPage() {
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">
+          <h1 className="text-sm font-semibold text-primary">
             Saved
           </h1>
           <p className="mt-1 text-sm text-text-muted sm:text-base">
