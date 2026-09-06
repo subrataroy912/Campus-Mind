@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { LogOut, Menu, X } from "lucide-react"; // Removed unused UserRound
+import { LogOut, Menu, X } from "lucide-react"; 
 
 import { useAuth } from "../../../context/AuthContext";
 import BrandLogo from "../../../components/common/BrandLogo";
@@ -106,7 +106,7 @@ export default function DashboardHeader() {
         <>
           {/* Backdrop/Overlay */}
           <div 
-            className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 top-2 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
