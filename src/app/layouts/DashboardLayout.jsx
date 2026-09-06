@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
 import { useState } from "react";
-import DashboardHeader from "../../pages/dashboard/components/DashboardHeader";
+import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Sidebar from "../../pages/dashboard/components/Sidebar";
+import Sidebar from "../../features/dashboard/components/Sidebar";
 function DashboardLayout() {
   const [isCompact, setIsCompact] = useState(true);
   return (

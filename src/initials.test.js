@@ -1,25 +1,6 @@
 import { describe, it, expect } from "vitest";
-
-function initials(name) {
-  if (!name || typeof name !== "string") return "";
-
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter((part) => part.length > 0);
-
-  // Handle single-word names by grabbing the first two letters
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  // Handle multi-word names by grabbing the first letter of the first two words
-  return parts
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { initials } from "./utils/initials.js";
+import { formatClassCode, normalizeClassCode } from "./utils/classCode.js";
 
 describe("initials() utility test suite", () => {
   it("should extract two uppercase initials from a full name", () => {
@@ -32,5 +13,10 @@ describe("initials() utility test suite", () => {
 
   it("should extract initials correctly for another full name", () => {
     expect(initials("Campus Mind")).toBe("CM"); 
+  });
+
+  it("should normalize and format eight-character class codes", () => {
+    expect(normalizeClassCode("alg2-7x9k-extra")).toBe("ALG27X9K");
+    expect(formatClassCode(["A", "L", "G", "2", "7", "X", "9", "K"])).toBe("ALG2-7X9K");
   });
 });

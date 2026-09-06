@@ -1,18 +1,6 @@
 import { Menu, MessageCircle, Pencil } from "lucide-react";
 import { Button } from "../../../components/ui/button.jsx";
-
-function initials(name) {
-  if (!name || typeof name !== "string") return "";
-
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter((part) => part.length > 0)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { initials } from "../../../utils/initials.js";
 
 export default function ProfileHeader({ profile = null, onEdit }) {
   return (

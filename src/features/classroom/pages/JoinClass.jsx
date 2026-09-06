@@ -1,22 +1,23 @@
 import { useState, useRef } from "react";
 import { useSearchParams } from "react-router";
-import { findClassroomByCode, joinClassroom } from "../../features/classroom/api/classroomService";
+import { findClassroomByCode, joinClassroom } from "../api/classroomService";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { CLASS_CODE_LENGTH, formatClassCode, normalizeClassCode } from "@/utils/classCode.js";
 
 export default function JoinClass() {
   const [searchParams] = useSearchParams();
-  const initialCode = (searchParams.get("code") || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6);
-  const [code, setCode] = useState(() => Array.from({ length: 6 }, (_, index) => initialCode[index] || ""));
+  const { user } = useAuth();
+  const initialCode = normalizeClassCode(searchParams.get("code") || "");
+  const [code, setCode] = useState(() => Array.from({ length: CLASS_CODE_LENGTH }, (_, index) => initialCode[index] || ""));
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
+  const [error, setError] = useState("");
   const inputsRef = useRef([]);
 
 
 
-  const formatForLookup = (chars) =>
-    chars.slice(0, 4).join("") + "-" + chars.slice(4, 8).join("");
-
   const handleChange = (index, value) => {
-    const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 1);
+    const clean = normalizeClassCode(value).slice(0, 1);
     const next = [...code];
     next[index] = clean;
     setCode(next);
@@ -44,6 +45,7 @@ export default function JoinClass() {
     const next = [...code];
     pasted.forEach((ch, i) => (next[i] = ch));
     setCode(next);
+    setError("");
     const lastIndex = Math.min(pasted.length, 8) - 1;
     if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
   };
@@ -52,20 +54,32 @@ export default function JoinClass() {
     e.preventDefault();
     if (code.some((character) => !character)) { setStatus("incomplete"); return; }
     setStatus("loading");
-    const match = await findClassroomByCode(formatForLookup(code));
-    setFoundClass(match);
-    setStatus(match ? "found" : "not-found");
+    setError("");
+    try {
+      const match = await findClassroomByCode(user?.id, formatClassCode(code));
+      setFoundClass(match);
+      setStatus(match ? "found" : "not-found");
+    } catch (requestError) {
+      setError(requestError.message || "Unable to look up this class.");
+      setStatus("idle");
+    }
   };
 
   const handleJoin = async () => {
-    await joinClassroom(formatForLookup(code));
-    setStatus("joined");
+    setError("");
+    try {
+      await joinClassroom(user?.id, formatClassCode(code));
+      setStatus("joined");
+    } catch (requestError) {
+      setError(requestError.message || "Unable to join this class.");
+    }
   };
 
   const handleReset = () => {
-    setCode(["", "", "", "", "", "", "", ""]);
+    setCode(Array.from({ length: CLASS_CODE_LENGTH }, () => ""));
     setStatus("idle");
     setFoundClass(null);
+    setError("");
     inputsRef.current[0]?.focus();
   };
 
@@ -126,15 +140,14 @@ export default function JoinClass() {
               </div>
 
               {status === "incomplete" && (
-                <p className="mt-3 text-center text-xs text-secondary">
-                  Enter all 8 characters of the class code.
-                </p>
+                <p className="mt-3 text-center text-xs text-secondary">Enter all 8 characters of the class code.</p>
               )}
               {status === "not-found" && (
                 <p className="mt-3 text-center text-xs text-secondary">
                   No class found with that code. Check it and try again.
                 </p>
               )}
+              {error && <p className="mt-3 text-center text-xs text-secondary" role="alert">{error}</p>}
 
               <button
                 type="submit"

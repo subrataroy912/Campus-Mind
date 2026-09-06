@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router'
-import BrandLogo from '../common/BrandLogo.jsx'
+import BrandLogo from '@/components/common/BrandLogo.jsx'
 
 function AuthLayout() {
     return (

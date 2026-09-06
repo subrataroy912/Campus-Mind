@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from "lucide-react";
-import AuthInput from "../../pages/auth/components/AuthInput";
-import { Button } from "../../components/ui/button.jsx";
-import { useAuth } from "../../context/AuthContext.jsx";
-import { mockUsers } from "../../mock/mockUsers.js";
+import AuthInput from "../components/AuthInput";
+import { Button } from "@/components/ui/button.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { mockUsers } from "@/mock/mockUsers.js";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../components/ui/dialog.jsx";
+} from "@/components/ui/dialog.jsx";
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();

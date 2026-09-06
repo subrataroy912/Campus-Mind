@@ -1,24 +1,28 @@
 import { useState } from "react";
 import { useParams } from "react-router";
-import ClassFeedPost from "../../features/classroom/components/ClassFeedPost.jsx";
-import ClassHeader from "../../features/classroom/components/ClassHeader.jsx";
-import ClassPostBox from "../../features/classroom/components/ClassPostBox.jsx";
-import ClassSidePanel from "../../features/classroom/components/ClassSidePanel.jsx";
-import ClassTabs from "../../features/classroom/components/ClassTabs.jsx";
+import ClassFeedPost from "../components/ClassFeedPost.jsx";
+import ClassHeader from "../components/ClassHeader.jsx";
+import ClassPostBox from "../components/ClassPostBox.jsx";
+import ClassSidePanel from "../components/ClassSidePanel.jsx";
+import ClassTabs from "../components/ClassTabs.jsx";
 import {
   CLASS_TABS,
   FEED_POSTS,
   PINNED_ANNOUNCEMENT,
-} from "../../features/classroom/data/classPageData.js";
-import { useClassroom } from "../../features/classroom/hooks/useClassroom.js";
+} from "../data/classPageData.js";
+import { useClassroom } from "../hooks/useClassroom.js";
 
 export default function ClassPage() {
   const [activeTab, setActiveTab] = useState("home");
   const { classId } = useParams();
-  const classroom = useClassroom(classId);
+  const { classroom, error } = useClassroom(classId);
 
   if (classroom === undefined) {
     return <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">Loading class…</div>;
+  }
+
+  if (error) {
+    return <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">Unable to load this class.</div>;
   }
 
   if (!classroom) {

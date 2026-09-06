@@ -5,8 +5,13 @@ const wait = (value) =>
 const USERS_KEY = "campus-mind.mock-users";
 
 function users() {
-  const stored = localStorage.getItem(USERS_KEY);
-  return stored ? JSON.parse(stored) : mockUsers;
+  try {
+    const stored = window.localStorage.getItem(USERS_KEY);
+    const parsed = stored ? JSON.parse(stored) : null;
+    return Array.isArray(parsed) ? parsed : mockUsers;
+  } catch {
+    return mockUsers;
+  }
 }
 
 export async function login({ email, password }) {
@@ -36,6 +41,11 @@ export async function register({ name, email, password }) {
     role: "student",
     avatar: "/images/avatar.png",
   };
-  localStorage.setItem(USERS_KEY, JSON.stringify([...existingUsers, user]));
+  window.localStorage.setItem(USERS_KEY, JSON.stringify([...existingUsers, user]));
   return wait({ ...user, password: undefined });
+}
+
+export async function deleteAccount(userId) {
+  const remainingUsers = users().filter((user) => user.id !== userId);
+  window.localStorage.setItem(USERS_KEY, JSON.stringify(remainingUsers));
 }

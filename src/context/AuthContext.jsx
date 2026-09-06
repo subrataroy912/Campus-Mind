@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo } from "react";
 import {
   login as loginRequest,
   register as registerRequest,
+  deleteAccount as deleteAccountRequest,
 } from "../features/auth/api/authService";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
@@ -24,6 +25,10 @@ export function AuthProvider({ children }) {
       },
       updateProfile(details) {
         setUser((currentUser) => ({ ...currentUser, ...details }));
+      },
+      async deleteAccount() {
+        if (user?.id) await deleteAccountRequest(user.id);
+        setUser(null);
       },
       logout() {
         setUser(null);

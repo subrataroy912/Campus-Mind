@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext.jsx";
-import { Card } from "../../components/ui/card.jsx";
-import ProfileHeader from "./components/ProfileHeader.jsx";
-import { EditProfileModal } from "./components/EditProfileModal.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { Card } from "@/components/ui/card.jsx";
+import ProfileHeader from "../components/ProfileHeader.jsx";
+import { EditProfileModal } from "../components/EditProfileModal.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import RenderTabContent from "../../utils/RenderTabContent.jsx";
-import { useDashboardData } from "../../features/dashboard/useDashboardData.js";
+import RenderTabContent from "@/utils/RenderTabContent.jsx";
+import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 
 function getProfile(user) {
   return {

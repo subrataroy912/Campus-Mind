@@ -1,5 +1,5 @@
 import { ContentList } from "@/components/common/ContentList";
-import ClassCard from "@/pages/classroom/ClassCard";
+import ClassCard from "@/features/classroom/components/ClassCard";
 
 const RenderTabContent = ({ activeTab, classrooms= [] }) => {
   switch (activeTab) {

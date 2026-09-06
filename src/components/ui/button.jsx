@@ -48,11 +48,17 @@ function Button({
   render,
   ...props
 }) {
+  const classes = cn(buttonVariants({ variant, size, className }));
+
+  if (to && !render) {
+    return <Link data-slot="button" className={classes} to={to} {...props} />;
+  }
+
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      render={render || (to ? <Link to={to} /> : undefined)}
+      className={classes}
+      render={render}
       {...props}
     />
   )

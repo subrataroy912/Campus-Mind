@@ -1,0 +1,56 @@
+export const CONVERSATIONS = [
+  {
+    id: "conv-1",
+    name: "Ms. Patel",
+    classroom: "Algebra II",
+    lastMessage: "Sure — bring your worked-out steps to office hours tomorrow.",
+    time: "2m",
+    unread: 2,
+    messages: [
+      { id: 1, from: "them", text: "Hi! I saw your question on problem 14.", time: "10:02 AM" },
+      { id: 2, from: "me", text: "Yes, I keep getting a negative discriminant, so no real solutions?", time: "10:04 AM" },
+      { id: 3, from: "them", text: "That's actually correct for that one — double check problem 15 though.", time: "10:05 AM" },
+      { id: 4, from: "me", text: "Oh good, I thought I was missing something. Can I show you my work for 15?", time: "10:06 AM" },
+      { id: 5, from: "them", text: "Sure — bring your worked-out steps to office hours tomorrow.", time: "10:07 AM" },
+    ],
+  },
+  {
+    id: "conv-2",
+    name: "Priya S.",
+    classroom: "World History",
+    lastMessage: "See you at the library Thursday!",
+    time: "1h",
+    unread: 0,
+    messages: [
+      { id: 1, from: "them", text: "Are you free to study for the unit 3 exam Thursday?", time: "9:10 AM" },
+      { id: 2, from: "me", text: "Yes! What time works?", time: "9:15 AM" },
+      { id: 3, from: "them", text: "4pm at the library, second floor.", time: "9:16 AM" },
+      { id: 4, from: "them", text: "See you at the library Thursday!", time: "9:16 AM" },
+    ],
+  },
+  {
+    id: "conv-3",
+    name: "Wei L.",
+    classroom: "AP Physics",
+    lastMessage: "Thanks, that clears it up.",
+    time: "Yesterday",
+    unread: 0,
+    messages: [
+      { id: 1, from: "them", text: "Do you know if the lab report is due Friday or the following Monday?", time: "Yesterday" },
+      { id: 2, from: "me", text: "Friday — the makeup session doesn't change the due date.", time: "Yesterday" },
+      { id: 3, from: "them", text: "Thanks, that clears it up.", time: "Yesterday" },
+    ],
+  },
+  {
+    id: "conv-4",
+    name: "Mr. Davis",
+    classroom: "World History",
+    lastMessage: "Great work on the essay draft.",
+    time: "Mon",
+    unread: 0,
+    messages: [
+      { id: 1, from: "them", text: "Great work on the essay draft. A couple of comments left inline.", time: "Mon" },
+      { id: 2, from: "me", text: "Thank you! I'll revise by Wednesday.", time: "Mon" },
+    ],
+  },
+];

@@ -1,0 +1,63 @@
+export const ASSIGNMENTS = [
+  {
+    id: "asg-1",
+    title: "Quiz 1: Chapters 1–3",
+    classroom: "Algebra II",
+    type: "quiz",
+    status: "due-soon",
+    due: "Due tomorrow, 11:59 PM",
+    detail: "10 questions covering factoring and quadratic equations.",
+  },
+  {
+    id: "asg-2",
+    title: "Lab report: Titration simulation",
+    classroom: "AP Physics",
+    type: "assignment",
+    status: "due-soon",
+    due: "Due in 2 days",
+    detail: "Interactive simulation with a short reflection write-up at the end.",
+  },
+  {
+    id: "asg-3",
+    title: "Group project proposal",
+    classroom: "World History",
+    type: "project",
+    status: "upcoming",
+    due: "Due in 6 days",
+    detail: "Outline your topic, roles, and a rough timeline for the final presentation.",
+  },
+  {
+    id: "asg-4",
+    title: "Homework set 4",
+    classroom: "Algebra II",
+    type: "homework",
+    status: "upcoming",
+    due: "Due in 3 days",
+    detail: "Problems 1–20 from the end of chapter 4.",
+  },
+  {
+    id: "asg-5",
+    title: "Essay draft: Causes of the revolution",
+    classroom: "World History",
+    type: "assignment",
+    status: "completed",
+    due: "Submitted Monday",
+    detail: "Feedback posted — a couple of comments left inline.",
+  },
+  {
+    id: "asg-6",
+    title: "Reading response: Chapter 7",
+    classroom: "AP Physics",
+    type: "homework",
+    status: "completed",
+    due: "Submitted last week",
+    detail: "Chemical reactions reading with annotated diagrams.",
+  },
+];
+
+export const ASSIGNMENT_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "due-soon", label: "Due soon" },
+  { id: "upcoming", label: "Upcoming" },
+  { id: "completed", label: "Completed" },
+];

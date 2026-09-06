@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Lock, Mail, UserRound } from 'lucide-react'
-import AuthInput from './components/AuthInput.jsx'
-import { Button } from '../../components/ui/button.jsx'
-import { useAuth } from '../../context/AuthContext.jsx'
+import AuthInput from '../components/AuthInput.jsx'
+import { Button } from '@/components/ui/button.jsx'
+import { useAuth } from '@/context/AuthContext.jsx'
 
 export default function RegisterPage() {
   const { register } = useAuth()

@@ -2,28 +2,35 @@ import { mockClassrooms } from "../../../mock/mockClassrooms";
 import { exploreClassrooms } from "../../../mock/exploreClassrooms";
 
 const STORAGE_KEY = "campus-mind.classrooms";
+const storageKeyForUser = (userId) => `${STORAGE_KEY}.${userId}`;
 const delay = (value) =>
   new Promise((resolve) => setTimeout(() => resolve(value), 300));
-const read = () => {
+const read = (userId) => {
+  if (!userId) return [];
   try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const stored = JSON.parse(
+      window.localStorage.getItem(storageKeyForUser(userId)) || "null",
+    );
     return Array.isArray(stored) ? stored : mockClassrooms;
   } catch {
     return mockClassrooms;
   }
 };
-const write = (classrooms) =>
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(classrooms));
-const findAvailableClassroom = (code) =>
-  [...read(), ...exploreClassrooms].find((item) => item.code === code) || null;
+const write = (userId, classrooms) =>
+  window.localStorage.setItem(
+    storageKeyForUser(userId),
+    JSON.stringify(classrooms),
+  );
+const findAvailableClassroom = (userId, code) =>
+  [...read(userId), ...exploreClassrooms].find((item) => item.code === code) || null;
 
-export const fetchClassrooms = async () => delay([...read()]);
+export const fetchClassrooms = async (userId) => delay([...read(userId)]);
 export const fetchExploreClassrooms = async () => delay([...exploreClassrooms]);
-export const findClassroomById = async (id) =>
-  delay(read().find((item) => item.id === id) || null);
-export const findClassroomByCode = async (code) =>
-  delay(findAvailableClassroom(code));
-export const createClassroom = async (details) => {
+export const findClassroomById = async (userId, id) =>
+  delay(read(userId).find((item) => item.id === id) || null);
+export const findClassroomByCode = async (userId, code) =>
+  delay(findAvailableClassroom(userId, code));
+export const createClassroom = async (userId, details) => {
   const classroom = {
     ...details,
     id: `class-${Date.now()}`,
@@ -37,11 +44,11 @@ export const createClassroom = async (details) => {
     unreadCount: 0,
     deadline: null,
   };
-  write([...read(), classroom]);
+  write(userId, [...read(userId), classroom]);
   return delay(classroom);
 };
-export const joinClassroom = async (code) => {
-  const classrooms = read();
+export const joinClassroom = async (userId, code) => {
+  const classrooms = read(userId);
   const existing = classrooms.find((item) => item.code === code);
   if (existing) return delay(existing);
   const classroom = exploreClassrooms.find((item) => item.code === code);
@@ -52,6 +59,6 @@ export const joinClassroom = async (code) => {
     unreadCount: 0,
     deadline: null,
   };
-  write([...classrooms, joinedClassroom]);
+  write(userId, [...classrooms, joinedClassroom]);
   return delay(joinedClassroom);
 };

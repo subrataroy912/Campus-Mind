@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { createClassroom } from "../../features/classroom/api/classroomService";
+import { useNavigate } from "react-router";
+import { createClassroom } from "../api/classroomService";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 const SUBJECTS = [
   "Mathematics", "Science", "English", "History", "Art",
@@ -23,6 +25,8 @@ const THEME_COLORS = [
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function CreateClass() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     className: "",
     section: "",
@@ -40,6 +44,8 @@ export default function CreateClass() {
   const [preview, setPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -79,8 +85,20 @@ export default function CreateClass() {
       setSubmitted(false);
       return;
     }
-    await createClassroom(form);
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setSubmissionError("");
+    try {
+      const classroom = await createClassroom(user?.id, {
+        ...form,
+        coverImage: preview,
+      });
+      setSubmitted(true);
+      navigate(`/dashboard/classes/${classroom.id}`);
+    } catch (error) {
+      setSubmissionError(error.message || "Unable to create this class.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -366,15 +384,21 @@ export default function CreateClass() {
             </button>
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover sm:w-auto"
             >
-              Create class
+              {isSubmitting ? "Creating class…" : "Create class"}
             </button>
           </div>
 
           {submitted && (
             <div className="rounded-lg bg-canvas px-4 py-3 text-sm text-success">
               Class created successfully.
+            </div>
+          )}
+          {submissionError && (
+            <div className="rounded-lg bg-secondary/10 px-4 py-3 text-sm text-secondary" role="alert">
+              {submissionError}
             </div>
           )}
         </form>

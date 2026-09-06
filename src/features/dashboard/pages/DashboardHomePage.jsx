@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { Compass, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 
-import { useAuth } from "../../context/AuthContext.jsx";
-import { useDashboardData } from "../../features/dashboard/useDashboardData.js";
-import { Button } from "../../components/ui/button";
-import EmptyState from "../../components/common/EmptyState.jsx";
-import { ContentList } from "../../components/common/ContentList.jsx";
-import ClassCard from "../../pages/classroom/ClassCard.jsx";
-import ExploreClassCard from "./components/ExploreClassCard.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { useDashboardData } from "../useDashboardData.js";
+import { Button } from "@/components/ui/button";
+import EmptyState from "@/components/common/EmptyState.jsx";
+import { ContentList } from "@/components/common/ContentList.jsx";
+import ClassCard from "@/features/classroom/components/ClassCard.jsx";
+import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 
 export default function DashboardHomePage() {
   const { user } = useAuth();
