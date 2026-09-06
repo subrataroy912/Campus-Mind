@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { LogOut, Menu, UserRound, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react"; // Removed unused UserRound
 
 import { useAuth } from "../../../context/AuthContext";
 import BrandLogo from "../../../components/common/BrandLogo";
@@ -13,7 +13,14 @@ export default function DashboardHeader() {
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
 
+  
   useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
     const handleClickOutside = (event) => {
       if (
         menuOpen &&
@@ -25,12 +32,13 @@ export default function DashboardHeader() {
         setMenuOpen(false);
       }
     };
-    // Attach the event listener to the document
+    
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Cleanup the event listener when the component unmounts
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      // Cleanup scroll lock on unmount
+      document.body.style.overflow = "unset"; 
     };
   }, [menuOpen]);
 
@@ -40,12 +48,12 @@ export default function DashboardHeader() {
   };
 
   return (
-    <header className="relative flex min-h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6">
+    <header className="relative flex min-h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6 z-40">
       
-      {/* 1. Grouped Menu Button and Logos */}
+      {/* Grouped Menu Button and Logos */}
       <div className="flex items-center gap-1 sm:gap-2">
         <button
-          className="rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
+          className="relative z-50 rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
@@ -62,7 +70,7 @@ export default function DashboardHeader() {
         </div>
       </div>
 
-      {/* 2. User Profile and Logout */}
+      {/* User Profile and Logout */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <Link
           to="/dashboard/profile"
@@ -76,7 +84,6 @@ export default function DashboardHeader() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              // Fallback: Show the first letter of their name if no image exists
               <span className="font-bold text-sm uppercase">
                 {user?.name ? user.name.charAt(0) : "U"}
               </span>
@@ -94,15 +101,25 @@ export default function DashboardHeader() {
         </button>
       </div>
 
-      {/* Mobile Sidebar Dropdown */}
+      
       {menuOpen && (
-        <div ref={sidebarRef} className="absolute">
-          <Sidebar
-            isAbsolute="absolute left-0 top-16 h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg"
-            onNavigate={() => setMenuOpen(false)}
+        <>
+          {/* Backdrop/Overlay */}
+          <div 
+            className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
           />
-        </div>
+          
+          {/* Sidebar Container */}
+          <div ref={sidebarRef} className="absolute z-50">
+            <Sidebar
+              isAbsolute="absolute left-0 top-16 h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg"
+              onNavigate={() => setMenuOpen(false)}
+            />
+          </div>
+        </>
       )}
     </header>
   );
-      }
+}
