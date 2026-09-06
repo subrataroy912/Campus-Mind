@@ -67,13 +67,16 @@ export default function DashboardAssignmentPage() {
   const assignmentFilters = data?.filters ?? EMPTY_ITEMS;
 
   const toggleComplete = (id) => {
-    setItems((previous) =>
-      previous.map((item) =>
+    setItems((previous) => {
+      
+      const currentList = previous ?? data?.items ?? EMPTY_ITEMS;
+      
+      return currentList.map((item) =>
         item.id === id
           ? { ...item, status: item.status === "completed" ? "upcoming" : "completed" }
-          : item,
-      ),
-    );
+          : item
+      );
+    });
   };
 
   const filteredItems = useMemo(() => {
