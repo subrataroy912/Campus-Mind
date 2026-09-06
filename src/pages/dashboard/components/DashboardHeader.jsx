@@ -51,8 +51,12 @@ export default function DashboardHeader() {
         {menuOpen ? <X /> : <Menu />}
       </button>
 
-      <BrandLogo compact className="sm:hidden" />
-      <BrandLogo className="hidden sm:inline-flex" />
+      <div className="sm:hidden">
+      <BrandLogo compact />
+      </div>
+      <div className="hidden sm:inline-flex">
+      <BrandLogo />
+      </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <Link
