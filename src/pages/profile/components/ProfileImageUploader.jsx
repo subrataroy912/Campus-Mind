@@ -96,7 +96,7 @@ export function ProfileImageUploader({ currentImage, onChange }) {
         id="profile-image-upload"
       />
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -226,7 +226,7 @@ export function CoverImageUploader({ currentImage, onChange }) {
         id="cover-image-upload"
       />
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}

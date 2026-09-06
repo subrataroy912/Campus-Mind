@@ -35,7 +35,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-3 py-1 sm:px-6 lg:py-3 min-h-screen">
+    <div className="mx-auto min-h-dvh max-w-6xl px-3 py-3 sm:px-6 lg:py-6">
       <div className="space-y-6">
         <ProfileHeader profile={profile} onEdit={() => setIsEditing(true)} />
 
@@ -44,13 +44,13 @@ export default function ProfilePage() {
           {/* Main Content Column */}
           <div className="space-y-4">
             <Card className="overflow-hidden">
-              <div className="flex border-b border-gray-200 px-2 sm:px-4 pt-2">
+              <div className="flex gap-1 overflow-x-auto border-b border-border px-2 pt-2 sm:px-4">
                 {tabsData.map((tab, index) => (
                   <Button
                     key={index}
                     variant="outline"
                     onClick={() => setActiveTab(index)}
-                    className={`${activeTab === index ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"}`}
+                    className={`shrink-0 ${activeTab === index ? "border-primary text-primary" : "border-transparent text-text-muted hover:border-border hover:text-text-main"}`}
                   >
                     {tab.label}
                   </Button>

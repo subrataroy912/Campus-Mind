@@ -6,7 +6,7 @@ import Sidebar from "../../pages/dashboard/components/Sidebar";
 function DashboardLayout() {
   const [isCompact, setIsCompact] = useState(true);
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-canvas">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-canvas">
       <DashboardHeader />
       <div className="relative flex min-w-0 flex-1 overflow-hidden">
         {/* Container for sidebar and its floating toggle button */}
@@ -25,7 +25,7 @@ function DashboardLayout() {
 
         <div className="z-10 bg-surface"></div>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-w-0 flex-1 overflow-y-auto overscroll-contain">
           <Outlet />
         </main>
       </div>
