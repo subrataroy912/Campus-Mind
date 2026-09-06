@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, XCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from "lucide-react";
 import AuthInput from "../../pages/auth/components/AuthInput";
 import { Button } from "../../components/ui/button.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { mockUsers } from "../../mock/mockUsers.js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog.jsx";
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,6 +25,17 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [openDummyEmailCard, setOpenDummyEmailCard] = useState(false);
+
+  const selectDemoAccount = (account) => {
+    setFormData((previous) => ({
+      ...previous,
+      email: account.email,
+      password: account.password,
+    }));
+    setErrorMessage("");
+    setOpenDummyEmailCard(false);
+  };
+
   const updateField = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -101,7 +119,7 @@ function LoginPage() {
           value={formData.password}
           disabled={isLoading}
         />
-        <div className="flex items-center justify-between gap-4 text-sm font-bold">
+        <div className="flex flex-col gap-2 text-sm font-bold min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between min-[400px]:gap-4">
           <label className="flex min-h-11 items-center gap-3 cursor-pointer select-none">
             <input
               className="h-5 w-5 accent-primary rounded cursor-pointer"
@@ -139,61 +157,58 @@ function LoginPage() {
           Create an account
         </Link>
       </p>
-      <div className="flex items-center justify-center">
+      <div className="mt-5 flex justify-center">
         <Button
-          onClick={() => {
-            setOpenDummyEmailCard(true);
-          }}
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={() => setOpenDummyEmailCard(true)}
         >
-          Take Dummy email to login
+          Use a demo account
         </Button>
       </div>
 
-      {openDummyEmailCard && (
-        <div className="absolute inset-0 z-50 flex flex-col bg-surface rounded-lg shadow-lg border border-border overflow-hidden">
-          {/* Header Section */}
-          <div className="relative flex items-center justify-center p-4 bg-primary">
-            <h2 className="text-white font-bold text-lg">
-              Use These Given Gmail IDs to Login
-            </h2>
+      <Dialog open={openDummyEmailCard} onOpenChange={setOpenDummyEmailCard}>
+        <DialogContent
+          className="grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden bg-surface p-0"
+          showCloseButton
+        >
+          <DialogHeader className="border-b border-border px-4 py-4 sm:px-6">
+            <DialogTitle className="text-lg font-bold text-text-heading">
+              Choose a demo account
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-5 text-text-muted">
+              Select an account to fill in its email and password automatically.
+            </DialogDescription>
+          </DialogHeader>
 
-            {/* Close Button */}
-            <button
-              onClick={() => setOpenDummyEmailCard(false)}
-              className="absolute right-3 text-white/80 hover:text-white transition-transform hover:scale-110 focus:outline-none"
-              aria-label="Close"
-            >
-              <XCircle size={24} />
-            </button>
-          </div>
-
-          {/* Scrollable List Section */}
-          <div className="flex-1 p-4 overflow-y-auto bg-canvas space-y-3">
-            {mockUsers.map((item, index) => (
-              <div
-                key={index}
-                className="flex flex-col p-3 rounded-md bg-surface border border-border shadow-sm hover:border-primary/40 transition-colors"
+          <div className="min-h-0 space-y-2 overflow-y-auto bg-canvas p-3 sm:p-4">
+            {mockUsers.map((account) => (
+              <button
+                key={account.id}
+                type="button"
+                onClick={() => selectDemoAccount(account)}
+                className="group flex w-full flex-col gap-2 rounded-xl border border-border bg-surface p-3 text-left shadow-sm transition hover:border-primary/50 hover:bg-primary/5 focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-focus sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-text-heading text-sm uppercase tracking-wide">
-                    Email:
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-text-heading">
+                    {account.name}
                   </span>
-                  <span className="text-text-main">{item.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-text-heading text-sm uppercase tracking-wide">
-                    Password:
+                  <span className="block break-all text-sm text-text-muted">
+                    {account.email}
                   </span>
-                  {/* Using a mono font and canvas background makes passwords easier to read */}
-                  <span className="text-text-muted font-mono bg-canvas px-1.5 py-0.5 rounded text-sm">
-                    {item.password}
+                  <span className="mt-1 inline-block rounded bg-canvas px-1.5 py-0.5 font-mono text-xs text-text-muted">
+                    {account.password}
                   </span>
-                </div>
-              </div>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary">
+                  Use account <Check size={16} aria-hidden="true" />
+                </span>
+              </button>
             ))}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
