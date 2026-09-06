@@ -17,7 +17,7 @@ function ConversationListItem({ conversation, active, onSelect }) {
         active ? "bg-canvas" : "hover:bg-canvas"
       }`}
     >
-      <ClassroomAvatar name={conversation.name} size="h-10 w-10" />
+      <ClassroomAvatar avatar={conversation.avatar} name={conversation.name} size="h-10 w-10" />
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
           <span className="truncate text-sm font-semibold text-text-heading">
@@ -70,7 +70,7 @@ function ChatThread({ conversation, onBack }) {
         >
           <ArrowLeft size={18} />
         </button>
-        <ClassroomAvatar name={conversation.name} size="h-9 w-9" />
+        <ClassroomAvatar avatar={conversation.avatar} name={conversation.name} size="h-9 w-9" />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-text-heading">
             {conversation.name}
