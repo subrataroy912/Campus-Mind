@@ -41,23 +41,28 @@ export default function DashboardHeader() {
 
   return (
     <header className="relative flex min-h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6">
-      <button
-        className="rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle navigation"
-        aria-expanded={menuOpen}
-        ref={buttonRef}
-      >
-        {menuOpen ? <X /> : <Menu />}
-      </button>
+      
+      {/* 1. Grouped Menu Button and Logos */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        <button
+          className="rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+          ref={buttonRef}
+        >
+          {menuOpen ? <X /> : <Menu />}
+        </button>
 
-      <div className="sm:hidden">
-      <BrandLogo compact />
-      </div>
-      <div className="hidden sm:inline-flex">
-      <BrandLogo />
+        <div className="sm:hidden">
+          <BrandLogo compact />
+        </div>
+        <div className="hidden sm:inline-flex">
+          <BrandLogo />
+        </div>
       </div>
 
+      {/* 2. User Profile and Logout */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <Link
           to="/dashboard/profile"
@@ -100,4 +105,4 @@ export default function DashboardHeader() {
       )}
     </header>
   );
-}
+      }
