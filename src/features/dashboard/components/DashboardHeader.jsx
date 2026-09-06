@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { LogOut, Menu, X } from "lucide-react"; 
+import { LogOut, Menu, X } from "lucide-react";
 
 import { useAuth } from "../../../context/AuthContext";
 import BrandLogo from "../../../components/common/BrandLogo";
@@ -13,7 +13,6 @@ export default function DashboardHeader() {
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
 
-  
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -37,7 +36,6 @@ export default function DashboardHeader() {
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      // Cleanup scroll lock on unmount
       document.body.style.overflow = "unset"; 
     };
   }, [menuOpen]);
@@ -48,7 +46,8 @@ export default function DashboardHeader() {
   };
 
   return (
-    <header className="relative flex min-h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6 z-40">
+   
+    <header className="relative flex h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6 z-40">
       
       {/* Grouped Menu Button and Logos */}
       <div className="flex items-center gap-1 sm:gap-2">
@@ -106,15 +105,17 @@ export default function DashboardHeader() {
         <>
           {/* Backdrop/Overlay */}
           <div 
-            className="fixed inset-0 top-2 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
           
           {/* Sidebar Container */}
-          <div ref={sidebarRef} className="absolute z-50">
+          
+          <div ref={sidebarRef} className="fixed left-0 top-16 z-50 md:hidden">
             <Sidebar
-              isAbsolute="absolute left-0 top-16 h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg"
+              
+              isAbsolute="h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg overflow-y-auto bg-surface"
               onNavigate={() => setMenuOpen(false)}
             />
           </div>
@@ -122,4 +123,4 @@ export default function DashboardHeader() {
       )}
     </header>
   );
-}
+                }
