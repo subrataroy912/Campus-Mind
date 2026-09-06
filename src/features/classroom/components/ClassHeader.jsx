@@ -84,7 +84,7 @@ export default function ClassHeader({ classroom }) {
         {/* Action Button (Invite Code) */}
         <button
           onClick={handleCopy}
-          className="flex items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:self-auto"
+          className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:w-auto sm:self-auto"
         >
           <ClassroomIcon
             name={copied ? "check" : "copy"}

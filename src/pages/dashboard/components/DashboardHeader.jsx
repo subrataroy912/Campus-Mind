@@ -40,7 +40,7 @@ export default function DashboardHeader() {
   };
 
   return (
-    <header className="relative flex min-h-16 items-center justify-between border-b border-border bg-surface px-3 sm:px-6">
+    <header className="relative flex min-h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6">
       <button
         className="rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -51,9 +51,10 @@ export default function DashboardHeader() {
         {menuOpen ? <X /> : <Menu />}
       </button>
 
-      <BrandLogo />
+      <BrandLogo compact className="sm:hidden" />
+      <BrandLogo className="hidden sm:inline-flex" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <Link
           to="/dashboard/profile"
           className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main hover:bg-canvas transition-colors"
@@ -88,7 +89,7 @@ export default function DashboardHeader() {
       {menuOpen && (
         <div ref={sidebarRef}>
           <Sidebar
-            isAbsolute="absolute left-0 top-16 h-[calc(100vh-4rem)] shadow-lg"
+            isAbsolute="absolute left-0 top-16 h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg"
             onNavigate={() => setMenuOpen(false)}
           />
         </div>

@@ -47,7 +47,7 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-3 lg:p-4">
+    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-6">
       <header>
         <p className="text-sm font-semibold text-primary">
           Your learning space
@@ -120,7 +120,7 @@ export default function DashboardHomePage() {
             </p>
           </div>
           <div
-            className="flex flex-nowrap items-center gap-0.5"
+            className="-mx-1 flex max-w-full items-center gap-1 overflow-x-auto px-1 pb-1"
             role="tablist"
             aria-label="Explore classes"
           >

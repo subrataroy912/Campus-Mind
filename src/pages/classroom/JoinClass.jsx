@@ -104,7 +104,7 @@ export default function JoinClass() {
                 Class code
               </label>
 
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+              <div className="flex items-center justify-center gap-1 sm:gap-2">
                 {code.map((char, i) => (
                   <div key={i} className="flex items-center">
                     <input
@@ -116,10 +116,10 @@ export default function JoinClass() {
                       onChange={(e) => handleChange(i, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(i, e)}
                       onPaste={handlePaste}
-                      className="h-11 w-9 rounded-lg border border-border text-center text-lg font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-2 focus:ring-focus sm:h-12 sm:w-11 sm:text-xl"
+                      className="h-10 w-7 rounded-md border border-border text-center text-base font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-2 focus:ring-focus sm:h-12 sm:w-11 sm:rounded-lg sm:text-xl"
                     />
                     {i === 3 && (
-                      <span className="mx-1 text-border sm:mx-1.5">–</span>
+                      <span className="mx-0.5 text-border sm:mx-1.5">–</span>
                     )}
                   </div>
                 ))}

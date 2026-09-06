@@ -17,8 +17,8 @@ export default function ClassPostBox() {
           className="w-full resize-none rounded-lg border border-border px-3 py-2 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
         />
       </div>
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-        <div className="flex gap-1">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+        <div className="flex flex-wrap gap-1">
           {[['image', 'Attach'], ['video', 'Video'], ['poll', 'Poll']].map(([icon, label]) => (
             <button key={label} className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-canvas sm:text-sm">
               <ClassroomIcon name={icon} className="h-4 w-4" /> {label}
