@@ -6,35 +6,37 @@ This document describes the current runtime data flow of Campus Mind. It reflect
 
 ```mermaid
 flowchart LR
-  Browser["Browser"] --> App["React application"]
-  App --> Router["React Router"]
-  App --> Context["AuthContext"]
-  App --> Hooks["Feature hooks"]
-  App --> Services["Feature services"]
-  App --> Fixtures["src/mock fixtures"]
-  App --> Storage["Browser localStorage"]
+    Browser["Browser"] --> App["React application"]
+    App --> Router["React Router"]
+    App --> Context["AuthContext"]
+    App --> Hooks["Feature hooks"]
+    App --> Services["Feature services"]
+    App --> Fixtures["src/mock fixtures"]
+    App --> Storage["Browser localStorage"]
     Services --> Storage
     Services --> Fixtures
     Context --> Storage
-  Pages["Feature pages"] --> Hooks
+    Pages["Feature pages"] --> Hooks
     Pages --> Services
-  Components["Feature/shared components"] --> Pages
+    Components["Feature/shared components"] --> Pages
+
 ```
 
 There is currently no backend server, HTTP client, API endpoint, database, WebSocket connection, or environment-based API configuration.
 
 ## Application Startup
 
-```text
-index.html
-  -> src/main.jsx
-    -> StrictMode
-    -> TooltipProvider
-    -> AuthProvider
-      -> useLocalStorage("campus-mind.session", null)
-      -> RouterProvider(AppRoutes)
-        -> lazy route module loading
-        -> Suspense fallback while lazy modules load
+```mermaid
+flowchart LR
+    Root["Entry"] --> Main["src/main.jsx"]
+    Main --> Strict["StrictMode"]
+    Strict --> Tooltip["TooltipProvider"]
+    Tooltip --> Auth["AuthProvider"]
+    Auth --> Storage["useLocalStorage('campus-mind.session', null)"]
+    Auth --> Router["RouterProvider(AppRoutes)"]
+    Router --> Lazy["Lazy route module loading"]
+    Lazy --> Suspense["Suspense fallback while lazy modules load"]
+
 ```
 
 `AuthProvider` is the main application-wide state provider. Route guards consume it before rendering public or protected route content.
@@ -43,15 +45,16 @@ index.html
 
 ```mermaid
 flowchart TD
-  Main["src/main.jsx"] --> Router["AppRoutes"]
-  Router --> Public["PublicRoute"]
-  Router --> Protected["ProtectedRoute"]
-  Public -->|authenticated| DashboardRedirect["/dashboard"]
-  Public -->|not authenticated| PublicPages["Landing and auth pages"]
-  Protected -->|authenticated| AppPages["Dashboard and feature pages"]
-  Protected -->|not authenticated| LoginRedirect["/auth/login"]
-  AppPages --> Layouts["App layouts"]
-  Layouts --> FeaturePages["Feature pages"]
+    Main["src/main.jsx"] --> Router["AppRoutes"]
+    Router --> Public["PublicRoute"]
+    Router --> Protected["ProtectedRoute"]
+    Public -->|authenticated| DashboardRedirect["/dashboard"]
+    Public -->|not authenticated| PublicPages["Landing and auth pages"]
+    Protected -->|authenticated| AppPages["Dashboard and feature pages"]
+    Protected -->|not authenticated| LoginRedirect["/auth/login"]
+    AppPages --> Layouts["App layouts"]
+    Layouts --> FeaturePages["Feature pages"]
+
 ```
 
 The session object in `campus-mind.session` is treated as the authentication authority. There is no server validation or token refresh.
@@ -86,12 +89,13 @@ sequenceDiagram
     AuthContext-->>LoginPage: Updated user
     LoginPage->>Router: Navigate to /dashboard
     Router-->>User: Render protected dashboard
+
 ```
 
 ### Login ownership
 
 | Layer | Current responsibility |
-|---|---|
+| --- | --- |
 | View | Collects credentials, displays loading/errors, navigates after success |
 | Context | Exposes `login`, stores the current user, derives `isAuthenticated` |
 | Service | Reads users, validates credentials, removes password from returned session object, simulates 300 ms latency |
@@ -100,26 +104,27 @@ sequenceDiagram
 
 Relevant files:
 
-- [LoginPage.jsx](../src/features/auth/pages/LoginPage.jsx)
-- [AuthContext.jsx](../src/context/AuthContext.jsx)
-- [authService.js](../src/features/auth/api/authService.js)
-- [useLocalStorage.js](../src/hooks/useLocalStorage.js)
-- [mockUsers.js](../src/mock/mockUsers.js)
+* [LoginPage.jsx](https://www.google.com/search?q=../src/features/auth/pages/LoginPage.jsx)
+* [AuthContext.jsx](https://www.google.com/search?q=../src/context/AuthContext.jsx)
+* [authService.js](https://www.google.com/search?q=../src/features/auth/api/authService.js)
+* [useLocalStorage.js](https://www.google.com/search?q=../src/hooks/useLocalStorage.js)
+* [mockUsers.js](https://www.google.com/search?q=../src/mock/mockUsers.js)
 
 ## Registration
 
-```text
-RegisterPage
-  -> AuthContext.register(details)
-    -> authService.register(details)
-      -> users()
-        -> localStorage["campus-mind.mock-users"]
-        -> fallback mockUsers
-      -> check duplicate email
-      -> create user object with plaintext password
-      -> write updated user list to localStorage
-      -> wait 300 ms
-    -> navigate to /auth/login with location.state.registered = true
+```mermaid
+flowchart TD
+    RegisterPage["RegisterPage"] --> AuthReg["AuthContext.register(details)"]
+    AuthReg --> ServiceReg["authService.register(details)"]
+    ServiceReg --> Users["users()"]
+    Users --> StorageUsers["localStorage['campus-mind.mock-users']"]
+    Users --> FallbackUsers["fallback mockUsers"]
+    ServiceReg --> CheckDup["check duplicate email"]
+    CheckDup --> CreateUser["create user object with plaintext password"]
+    CreateUser --> WriteUsers["write updated user list to localStorage"]
+    WriteUsers --> Delay["wait 300 ms"]
+    Delay --> NavLogin["navigate to /auth/login with location.state.registered = true"]
+
 ```
 
 The registration result excludes the password, but the stored user record includes it in plaintext because this is a local demo implementation.
@@ -128,22 +133,23 @@ The registration result excludes the password, but the stored user record includ
 
 ```mermaid
 flowchart TD
-  SessionStorage["localStorage: campus-mind.session"] --> UseStorage["useLocalStorage hook"]
-  UseStorage --> AuthContext["AuthContext"]
-  AuthContext --> Guards["PublicRoute and ProtectedRoute"]
-  AuthContext --> Header["DashboardHeader"]
-  AuthContext --> Profile["ProfilePage"]
-  AuthContext --> Settings["SettingsPage"]
+    SessionStorage["localStorage: campus-mind.session"] --> UseStorage["useLocalStorage hook"]
+    UseStorage --> AuthContext["AuthContext"]
+    AuthContext --> Guards["PublicRoute and ProtectedRoute"]
+    AuthContext --> Header["DashboardHeader"]
+    AuthContext --> Profile["ProfilePage"]
+    AuthContext --> Settings["SettingsPage"]
 
-  Profile --> Update["updateProfile(details)"]
+    Profile --> Update["updateProfile(details)"]
     Update --> SessionStorage
 
-  Settings --> Logout["logout()"]
-  Logout --> ClearSession["Write null to session storage"]
+    Settings --> Logout["logout()"]
+    Logout --> ClearSession["Write null to session storage"]
 
-  Settings --> Delete["deleteAccount()"]
-  Delete --> UserStorage["localStorage: campus-mind.mock-users"]
+    Settings --> Delete["deleteAccount()"]
+    Delete --> UserStorage["localStorage: campus-mind.mock-users"]
     Delete --> ClearSession
+
 ```
 
 Profile updates currently change only the active session object. They do not update the matching record in `campus-mind.mock-users`, so the change can be lost after a fresh login.
@@ -176,46 +182,47 @@ sequenceDiagram
     ClassroomService-->>DashboardHook: Promise results after delay
     DashboardHook->>DashboardHook: Set classrooms, exploreClassrooms, status
     DashboardHook-->>Page: Render loading, ready, or error state
+
 ```
 
 `useDashboardData()` is not globally cached. Each component that calls the hook creates its own state and starts its own requests.
 
 Relevant files:
 
-- [useDashboardData.js](../src/features/dashboard/useDashboardData.js)
-- [classroomService.js](../src/features/classroom/api/classroomService.js)
-- [DashboardHomePage.jsx](../src/features/dashboard/pages/DashboardHomePage.jsx)
-- [ProfilePage.jsx](../src/features/profile/pages/ProfilePage.jsx)
-- [DashboardCommunityPage.jsx](../src/features/dashboard/pages/DashboardCommunityPage.jsx)
-- [DashboardAssignmentPage.jsx](../src/features/dashboard/pages/DashboardAssignmentPage.jsx)
+* [useDashboardData.js](https://www.google.com/search?q=../src/features/dashboard/useDashboardData.js)
+* [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
+* [DashboardHomePage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardHomePage.jsx)
+* [ProfilePage.jsx](https://www.google.com/search?q=../src/features/profile/pages/ProfilePage.jsx)
+* [DashboardCommunityPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardCommunityPage.jsx)
+* [DashboardAssignmentPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardAssignmentPage.jsx)
 
 ## Opening a classroom
 
-```text
-ClassPage
-  -> useParams()
-    -> classId from /dashboard/classes/:classId
-  -> useClassroom(classId)
-    -> useAuth()
-      -> user.id
-    -> findClassroomById(user.id, classId)
-      -> read(user.id)
-        -> localStorage["campus-mind.classrooms.<userId>"]
-        -> fallback mockClassrooms
-      -> delay 300 ms
-  -> classroom/error state
-  -> render classroom components
+```mermaid
+flowchart TD
+    ClassPage["ClassPage"] --> Params["useParams()"]
+    Params --> ExtractId["classId from /dashboard/classes/:classId"]
+    ExtractId --> Hook["useClassroom(classId)"]
+    Hook --> Auth["useAuth() -> user.id"]
+    Hook --> Find["findClassroomById(user.id, classId)"]
+    Find --> Read["read(user.id)"]
+    Read --> LocalStore["localStorage['campus-mind.classrooms.<userId>']"]
+    Read --> Fallback["fallback mockClassrooms"]
+    Find --> Delay["delay 300 ms"]
+    Hook --> State["classroom/error state"]
+    State --> Render["render classroom components"]
+
 ```
 
 The classroom record is service-loaded, but the classroom home content is fixture-driven:
 
-- `PINNED_ANNOUNCEMENT`
-- `FEED_POSTS`
-- `TODO_ITEMS`
-- `ACTIVE_NOW`
-- `QUICK_LINKS`
+* `PINNED_ANNOUNCEMENT`
+* `FEED_POSTS`
+* `TODO_ITEMS`
+* `ACTIVE_NOW`
+* `QUICK_LINKS`
 
-These are defined in [classPageData.js](../src/features/classroom/data/classPageData.js).
+These are defined in [classPageData.js](https://www.google.com/search?q=../src/features/classroom/data/classPageData.js).
 
 ## Creating a classroom
 
@@ -238,6 +245,7 @@ sequenceDiagram
     ClassroomService-->>Page: Promise of created classroom after delay
     Page->>Router: Navigate to /dashboard/classes/:id
     Router-->>User: Render ClassPage
+
 ```
 
 The selected cover image is converted to a data URL in the page and passed to the service. The original `File` object is not a backend upload.
@@ -275,14 +283,15 @@ sequenceDiagram
     ClassroomService->>Storage: Write joined classroom to user list
     ClassroomService-->>Page: Promise result after delay
     Page-->>User: Render joined confirmation
+
 ```
 
 Relevant files:
 
-- [ExploreClassCard.jsx](../src/features/dashboard/components/ExploreClassCard.jsx)
-- [JoinClass.jsx](../src/features/classroom/pages/JoinClass.jsx)
-- [classCode.js](../src/utils/classCode.js)
-- [classroomService.js](../src/features/classroom/api/classroomService.js)
+* [ExploreClassCard.jsx](https://www.google.com/search?q=../src/features/dashboard/components/ExploreClassCard.jsx)
+* [JoinClass.jsx](https://www.google.com/search?q=../src/features/classroom/pages/JoinClass.jsx)
+* [classCode.js](https://www.google.com/search?q=../src/utils/classCode.js)
+* [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
 
 ## Classroom storage behavior
 
@@ -290,72 +299,78 @@ Current keys:
 
 ```text
 campus-mind.classrooms.<userId>
+
 ```
 
 Important behavior:
 
-- Created and joined classrooms are written per user.
-- Missing user storage falls back to the shared `mockClassrooms` fixture.
-- Explore classrooms always come from `exploreClassrooms.js`.
-- Classroom service methods simulate asynchronous network behavior with a 300 ms delay.
-- No classroom data is sent to a server.
+* Created and joined classrooms are written per user.
+* Missing user storage falls back to the shared `mockClassrooms` fixture.
+* Explore classrooms always come from `exploreClassrooms.js`.
+* Classroom service methods simulate asynchronous network behavior with a 300 ms delay.
+* No classroom data is sent to a server.
 
 # Other Feature Data Flows
 
 ## Community
 
-```text
-DashboardCommunityPage
-  -> import COMMUNITY_POSTS and COMMUNITY_FILTERS from mockCommunityPosts.js
-  -> useDashboardData() only to determine whether the user has classes
-  -> local useState for active filter, draft, likes, and like counts
-  -> render filtered mock posts
+```mermaid
+flowchart TD
+    Page["DashboardCommunityPage"] --> Import["import COMMUNITY_POSTS and COMMUNITY_FILTERS from mockCommunityPosts.js"]
+    Page --> CheckClasses["useDashboardData() only to determine whether the user has classes"]
+    Page --> LocalState["local useState for active filter, draft, likes, and like counts"]
+    Page --> Render["render filtered mock posts"]
+
 ```
 
 Community posts are not loaded through a service and are not persisted. Posting is currently a UI-only control with no mutation handler.
 
 ## Messages
 
-```text
-DashboardMessagesPage
-  -> import CONVERSATIONS from mockMessages.js
-  -> local state for query and active conversation
-  -> ChatThread copies conversation.messages into local state
-  -> sending appends to local React state only
+```mermaid
+flowchart TD
+    MessagesPage["DashboardMessagesPage"] --> Import["import CONVERSATIONS from mockMessages.js"]
+    MessagesPage --> State["local state for query and active conversation"]
+    MessagesPage --> Thread["ChatThread copies conversation.messages into local state"]
+    Thread --> Send["sending appends to local React state only"]
+
 ```
 
 Messages disappear when the page unmounts or the browser refreshes.
 
 ## Assignments
 
-```text
-DashboardAssignmentPage
-  -> import ASSIGNMENTS and ASSIGNMENT_FILTERS from mockAssignments.js
-  -> useDashboardData() only to determine whether the user has classes
-  -> local state for filter and completion status
-  -> completion toggles update local React state only
+```mermaid
+flowchart TD
+    AssignPage["DashboardAssignmentPage"] --> Import["import ASSIGNMENTS and ASSIGNMENT_FILTERS from mockAssignments.js"]
+    AssignPage --> CheckClasses["useDashboardData() only to determine whether the user has classes"]
+    AssignPage --> State["local state for filter and completion status"]
+    State --> Toggle["completion toggles update local React state only"]
+
 ```
 
 Assignment completion is not persisted and has no service/API boundary.
 
 ## Saved items
 
-```text
-DashboardSavedPage
-  -> defines collections and saved items directly in the page module
-  -> local state for filters, search, collections, and unsaving
+```mermaid
+flowchart TD
+    SavedPage["DashboardSavedPage"] --> ModData["defines collections and saved items directly in the page module"]
+    SavedPage --> LocalState["local state for filters, search, collections, and unsaving"]
+
 ```
 
 Saved data is neither imported from a service nor persisted to localStorage.
 
 ## Settings
 
-```text
-SettingsPage
-  -> local state for notifications and privacy
-  -> local state initialized from localStorage for theme
-  -> useEffect toggles document.documentElement.dark
-  -> writes campus-mind.theme to localStorage
+```mermaid
+flowchart TD
+    SettingsPage["SettingsPage"] --> LocalPrefs["local state for notifications and privacy"]
+    SettingsPage --> ThemeInit["local state initialized from localStorage for theme"]
+    ThemeInit --> Effect["useEffect toggles document.documentElement.dark"]
+    Effect --> PersistTheme["writes campus-mind.theme to localStorage"]
+
 ```
 
 Theme is the only settings value persisted. Notification and privacy changes are local to the mounted page.
@@ -363,7 +378,7 @@ Theme is the only settings value persisted. Notification and privacy changes are
 # State Ownership Map
 
 | State | Runtime owner | Persistence | Source |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Current user | `AuthContext` and `useLocalStorage` | `campus-mind.session` | Auth service result |
 | Authentication status | Derived in `AuthContext` | Derived | `Boolean(user)` |
 | Registered users | `authService` | `campus-mind.mock-users` | `mockUsers.js` fallback |
@@ -386,10 +401,10 @@ Theme is the only settings value persisted. Notification and privacy changes are
 
 The following feature pages directly import mock data:
 
-- Login demo-account picker imports `mockUsers`.
-- Assignment page imports `mockAssignments`.
-- Community page imports `mockCommunityPosts`.
-- Messages page imports `mockMessages`.
+* Login demo-account picker imports `mockUsers`.
+* Assignment page imports `mockAssignments`.
+* Community page imports `mockCommunityPosts`.
+* Messages page imports `mockMessages`.
 
 These pages know fixture structure and own data initialization, so a backend integration would require changing page implementations rather than swapping a service adapter.
 
@@ -401,42 +416,39 @@ These pages know fixture structure and own data initialization, so a backend int
 
 Async simulation exists in:
 
-- `authService.login`
-- `authService.register`
-- classroom service reads and mutations
+* `authService.login`
+* `authService.register`
+* classroom service reads and mutations
 
 Synchronous or local-only behavior exists in:
 
-- profile updates
-- theme persistence
-- notification toggles
-- privacy toggles
-- message sending
-- assignment completion
-- saved item mutations
+* profile updates
+* theme persistence
+* notification toggles
+* privacy toggles
+* message sending
+* assignment completion
+* saved item mutations
 
 This means loading, retry, and failure states are not consistent across features.
 
 ## Data shape and authority risks
 
-- Passwords are stored in plaintext in the demo user list.
-- Profile updates modify the session but not the stored user record.
-- Deleting a user does not remove `campus-mind.classrooms.<userId>`.
-- Missing classroom storage falls back to the same mock classrooms for every user.
-- Each `useDashboardData()` call has independent state and no shared cache.
-- Classroom home content remains fixture-driven even when the classroom record is loaded through a service.
+* Passwords are stored in plaintext in the demo user list.
+* Profile updates modify the session but not the stored user record.
+* Deleting a user does not remove `campus-mind.classrooms.<userId>`.
+* Missing classroom storage falls back to the same mock classrooms for every user.
+* Each `useDashboardData()` call has independent state and no shared cache.
+* Classroom home content remains fixture-driven even when the classroom record is loaded through a service.
 
 # Backend Migration Seams
 
 The cleanest existing seam is:
 
-```text
-Page
-  -> feature hook
-    -> feature service
-      -> localStorage/mock implementation
+```mermaid
+flowchart TD
+    Page["Page"] --> Hook["feature hook"]
+    Hook --> Service["feature service"]
+    Service --> Storage["localStorage/mock implementation"]
+
 ```
-
-The classroom area already follows this pattern most closely. The future backend migration should preserve the page-facing service contracts and replace the storage implementation behind them.
-
-The least isolated areas are community, messages, assignments, saved items, and settings because their pages import fixtures or directly own the data lifecycle.
