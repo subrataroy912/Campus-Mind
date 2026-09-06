@@ -1,113 +1,183 @@
-import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
-import AuthInput from '../../components/auth/AuthInput.jsx'
-import { Button } from '../../components/ui/button.jsx'
-import { useAuth } from '../../context/AuthContext.jsx'
-
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, XCircle } from "lucide-react";
+import AuthInput from "../../components/auth/AuthInput.jsx";
+import { Button } from "../../components/ui/button.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { mockUsers } from "../../mock/mockUsers.js";
 function LoginPage() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { login } = useAuth()
-  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false })
-  const [errorMessage, setErrorMessage] = useState('') // Replaced boolean with string for dynamic messages
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false) // State to toggle password visibility
-
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+  const [errorMessage, setErrorMessage] = useState(""); // Replaced boolean with string for dynamic messages
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [openDummyEmailCard, setOpenDummyEmailCard] = useState(false);
   const updateField = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
-  }
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setErrorMessage('')
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
     try {
-      await login(formData)
-      navigate('/dashboard', { replace: true })
+      await login(formData);
+      navigate("/dashboard", { replace: true });
     } catch (error) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div>
-        <h1 className="text-3xl font-bold tracking-tight text-text-heading">Welcome back</h1>
-        <p className="mt-2 text-text-main">Sign in to see what is happening in your classes.</p>
-        {location.state?.registered && <p className="mt-5 rounded-xl border border-success/25 bg-success/10 px-4 py-3 text-sm font-medium text-text-main" role="status">Account created. You can sign in now.</p>}
-        
-        {/* Render precise backend or network errors */}
-        {errorMessage && (
-          <p className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main" role="alert">
-            {errorMessage}
-          </p>
-        )}
+    <div className="relative">
+      <h1 className="text-3xl font-bold tracking-tight text-text-heading">
+        Welcome back
+      </h1>
+      <p className="mt-2 text-text-main">
+        Sign in to see what is happening in your classes.
+      </p>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <AuthInput
-            icon={Mail}
-            label="Email"
-            name="email"
-            onChange={updateField}
-            placeholder="you@example.com"
-            required
-            type="email"
-            value={formData.email}
-            disabled={isLoading}
-          />
-          <AuthInput
-            icon={Lock}
-            label="Password"
-            name="password"
-            onChange={updateField}
-            placeholder="Enter your password"
-            required
-            rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-text-muted hover:text-text-main focus:outline-none"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-              </button>
-            }
-            type={showPassword ? 'text' : 'password'}
-            value={formData.password}
-            disabled={isLoading}
-          />
-          <div className="flex items-center justify-between gap-4 text-sm font-bold">
-            <label className="flex min-h-11 items-center gap-3 cursor-pointer select-none">
-              <input
-                className="h-5 w-5 accent-primary rounded cursor-pointer"
-                name="rememberMe"
-                onChange={updateField}
-                type="checkbox"
-                checked={formData.rememberMe}
-                disabled={isLoading}
-              />
-              Remember me
-            </label>
-            <Link className="text-primary-hover hover:underline" to="/auth/forgot-password">Forgot Password?</Link>
-          </div>
-
-          <Button className="w-full text-lg flex items-center justify-center gap-2" type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'} <ArrowRight size={24} />
-          </Button>
-        </form>
-        
-        <p className="mt-7 text-center text-text-main">
-          New here? <Link className="font-bold text-primary hover:underline" to="/auth/register">Create an account</Link>
+      {location.state?.registered && (
+        <p
+          className="mt-5 rounded-xl border border-success/25 bg-success/10 px-4 py-3 text-sm font-medium text-text-main"
+          role="status"
+        >
+          Account created. You can sign in now.
         </p>
+      )}
+
+      {/* Render precise backend or network errors */}
+      {errorMessage && (
+        <p
+          className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main"
+          role="alert"
+        >
+          {errorMessage}
+        </p>
+      )}
+
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <AuthInput
+          icon={Mail}
+          label="Email"
+          name="email"
+          onChange={updateField}
+          placeholder="you@example.com"
+          required
+          type="email"
+          value={formData.email}
+          disabled={isLoading}
+        />
+        <AuthInput
+          icon={Lock}
+          label="Password"
+          name="password"
+          onChange={updateField}
+          placeholder="Enter your password"
+          required
+          rightIcon={
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-text-muted hover:text-text-main focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            </button>
+          }
+          type={showPassword ? "text" : "password"}
+          value={formData.password}
+          disabled={isLoading}
+        />
+        <div className="flex items-center justify-between gap-4 text-sm font-bold">
+          <label className="flex min-h-11 items-center gap-3 cursor-pointer select-none">
+            <input
+              className="h-5 w-5 accent-primary rounded cursor-pointer"
+              name="rememberMe"
+              onChange={updateField}
+              type="checkbox"
+              checked={formData.rememberMe}
+              disabled={isLoading}
+            />
+            Remember me
+          </label>
+          <Link
+            className="text-primary-hover hover:underline"
+            to="/auth/forgot-password"
+          >
+            Forgot Password?
+          </Link>
+        </div>
+
+        <Button
+          className="w-full text-lg flex items-center justify-center gap-2"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Login"} <ArrowRight size={24} />
+        </Button>
+      </form>
+
+      <p className="mt-7 text-center text-text-main">
+        New here?{" "}
+        <Link
+          className="font-bold text-primary hover:underline"
+          to="/auth/register"
+        >
+          Create an account
+        </Link>
+      </p>
+      <div className="flex items-center justify-center">
+        <Button
+          onClick={() => {
+            setOpenDummyEmailCard(true);
+          }}
+        >
+          Take Dummy email to login
+        </Button>
+      </div>
+      {openDummyEmailCard && (
+        <div className="absolute z-100 w-full h-full bg-primary top-0 rounded-lg">
+          <h1 className="text-center text-white font-extrabold font-sans">
+            Use These Given Gmail ids to Login
+          </h1>
+          <h1
+            onClick={() => setOpenDummyEmailCard(false)}
+            className="absolute right-2 top-2 z-10 text-white cursor-pointer text-lg  hover:text-secondary-hover hover:text-2xl"
+          >
+            <XCircle />
+          </h1>
+          {mockUsers.map((items, index) => (
+            <div
+              key={index}
+              className="flex flex-col text-white p-3 m-2 rounded-sm hover:bg-secondary-hover"
+            >
+              <div className="flex items-center gap-1">
+                <h1 className="font-bold">Email:</h1>
+                <p>{items.email}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <h1 className="font-bold">password:</h1>
+                <p>{items.password}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;
