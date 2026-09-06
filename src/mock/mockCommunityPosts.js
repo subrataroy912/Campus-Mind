@@ -55,7 +55,7 @@ export const COMMUNITY_POSTS = [
     type: "announcement",
     author: {
       id: "137924284",
-      name: "Riya Soren",
+      name: "Riya Saren",
       avatar: "https://testingbot.com/free-online-tools/random-avatar/600",
     },
     avatarColor: "bg-secondary",
