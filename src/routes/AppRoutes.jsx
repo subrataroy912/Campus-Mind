@@ -4,7 +4,7 @@ import AuthLayout from "../components/layout/AuthLayout.jsx";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import RootLayout from "../components/layout/RootLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-
+import PublicRoute from "./PublicRoute.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(
   () => import("../pages/dashboard/DashboardHomePage.jsx"),
@@ -40,46 +40,54 @@ const NotFound = lazy(() => import("../pages/NotFoundPage.jsx"));
 
 export const AppRoutes = createBrowserRouter([
   {
-    path: "/",
-    element: <RootLayout />,
+    element: <PublicRoute />,
     children: [
       {
-        index: true,
-        element: <GetStartedPage />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
-    element: <AuthLayout />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="login" replace />,
+        path: "/",
+        element: <RootLayout />,
+        children: [
+          {
+            index: true,
+            element: <GetStartedPage />,
+          },
+        ],
       },
       {
-        path: "login",
-        element: <LoginPage />,
-      },
-      {
-        path: "register",
-        element: <RegisterPage />,
-      },
-      {
-        path: "forgot-password",
-        element: <ForgotPasswordPage />,
-      },
+        path: "/auth",
+        element: <AuthLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="login" replace />,
+          },
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+          {
+            path: "register",
+            element: <RegisterPage />,
+          },
+          {
+            path: "forgot-password",
+            element: <ForgotPasswordPage />,
+          },
 
+          {
+            path: "reset-password",
+            element: <ResetPasswordPage />,
+          },
+        ],
+      },
       {
-        path: "reset-password",
-        element: <ResetPasswordPage />,
+        path: "/login",
+        element: <Navigate to="/auth/login" replace />,
       },
     ],
   },
-  {
-    path: "/login",
-    element: <Navigate to="/auth/login" replace />,
-  },
+
+  // end public routes
+
   {
     element: <ProtectedRoute />,
     children: [
