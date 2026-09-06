@@ -96,7 +96,7 @@ export default function DashboardHeader() {
 
       {/* Mobile Sidebar Dropdown */}
       {menuOpen && (
-        <div ref={sidebarRef}>
+        <div ref={sidebarRef} className="absolute">
           <Sidebar
             isAbsolute="absolute left-0 top-16 h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg"
             onNavigate={() => setMenuOpen(false)}
