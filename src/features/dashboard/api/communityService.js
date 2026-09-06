@@ -1,4 +1,7 @@
-import { COMMUNITY_FILTERS, COMMUNITY_POSTS } from "@/mock/mockCommunityPosts.js";
+import {
+  COMMUNITY_FILTERS,
+  COMMUNITY_POSTS,
+} from "@/mock/mockCommunityPosts.js";
 
 const delay = (value) =>
   new Promise((resolve) => setTimeout(() => resolve(value), 300));

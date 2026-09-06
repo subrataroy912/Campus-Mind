@@ -14,6 +14,7 @@ import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 const TYPE_META = {
   announcement: {
@@ -54,11 +55,15 @@ function CommunityPost({ post }) {
         </div>
       )}
       <div className="flex gap-3">
-        <ClassroomAvatar name={post.author} />
+        <ClassroomAvatar
+          to="#"
+          avatar={post?.author?.avatar}
+          name={post?.author?.name}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-sm font-semibold text-text-heading">
-              {post.author}
+              {post?.author?.name}
             </span>
             <span className="text-xs text-text-muted">· {post.classroom}</span>
             <span className="text-xs text-text-muted">· {post.time}</span>
@@ -91,6 +96,7 @@ function CommunityPost({ post }) {
 }
 
 export default function DashboardCommunityPage() {
+  const { user } = useAuth();
   const { classrooms = [] } = useDashboardData();
   const { data, isLoading, error } = useCommunityFeed();
   const [activeFilter, setActiveFilter] = useState("all");
@@ -150,7 +156,7 @@ export default function DashboardCommunityPage() {
         <>
           <div className="mt-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
             <div className="flex gap-3">
-              <ClassroomAvatar name="You" />
+              <ClassroomAvatar to="/dashboard/profile" avatar={user?.avatar} name={user?.name} />
               <div className="flex-1">
                 <textarea
                   value={draft}

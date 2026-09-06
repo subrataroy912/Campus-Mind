@@ -5,6 +5,7 @@ import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar
 import { useMessages } from "../hooks/useMessages.js";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
+// import { useAuth } from "@/context/AuthContext.jsx";
 
 const EMPTY_CONVERSATIONS = [];
 
@@ -133,6 +134,7 @@ function ChatThread({ conversation, onBack }) {
 }
 
 export default function DashboardMessagesPage() {
+  // const {user} = useAuth();
   const { data, isLoading, error } = useMessages();
   const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState(null);

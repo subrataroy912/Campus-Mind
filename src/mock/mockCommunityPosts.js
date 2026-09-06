@@ -2,7 +2,11 @@ export const COMMUNITY_POSTS = [
   {
     id: "post-1",
     type: "question",
-    author: "Daniel R.",
+    author: {
+      id: "13719353",
+      name: "Debraj Roy",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/300",
+    },
     avatarColor: "bg-primary",
     classroom: "Algebra II",
     time: "2 hours ago",
@@ -15,7 +19,11 @@ export const COMMUNITY_POSTS = [
   {
     id: "post-2",
     type: "announcement",
-    author: "Ms. Patel",
+    author: {
+      id: "1371984",
+      name: "subrata roy",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/400",
+    },
     avatarColor: "bg-secondary",
     classroom: "Algebra II",
     time: "5 hours ago",
@@ -28,7 +36,11 @@ export const COMMUNITY_POSTS = [
   {
     id: "post-3",
     type: "discussion",
-    author: "Priya S.",
+    author: {
+      id: "1335431984",
+      name: "Nabojeet Biswas",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/500",
+    },
     avatarColor: "bg-accent",
     classroom: "World History",
     time: "Yesterday",
@@ -41,7 +53,11 @@ export const COMMUNITY_POSTS = [
   {
     id: "post-4",
     type: "announcement",
-    author: "Mr. Davis",
+    author: {
+      id: "137924284",
+      name: "Riya Soren",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/600",
+    },
     avatarColor: "bg-secondary",
     classroom: "World History",
     time: "2 days ago",
@@ -54,7 +70,11 @@ export const COMMUNITY_POSTS = [
   {
     id: "post-5",
     type: "question",
-    author: "Wei L.",
+    author: {
+      id: "141487294",
+      name: "dhrubo biswas",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/700",
+    },
     avatarColor: "bg-primary",
     classroom: "AP Physics",
     time: "3 days ago",
