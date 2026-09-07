@@ -13,9 +13,6 @@ const DashboardCommunityPage = lazy(
 const DashboardMessagesPage = lazy(
   () => import("../features/dashboard/pages/DashboardMessagesPage.jsx"),
 );
-const DashboardAssignmentPage = lazy(
-  () => import("../features/dashboard/pages/DashboardAssignmentPage.jsx"),
-);
 const DashboardSavedPage = lazy(
   () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
 );
@@ -106,10 +103,6 @@ export const AppRoutes = createBrowserRouter([
             element: <DashboardMessagesPage />,
           },
           {
-            path: "assignments",
-            element: <DashboardAssignmentPage />,
-          },
-          {
             path: "saved",
             element: <DashboardSavedPage />,
           },
@@ -133,6 +126,10 @@ export const AppRoutes = createBrowserRouter([
       },
       {
         path: "/dashboard/profile",
+        element: <ProfilePage />,
+      },
+      {
+        path: "/dashboard/profile/:userId",
         element: <ProfilePage />,
       },
       {

@@ -11,10 +11,11 @@ export const mockUsers = [
       "https://murraysinteriors.com.au/wp-content/uploads/2018/09/dummy-banner.jpg",
     role: "student",
     headline: "High School Science Educator",
-    created_class_ids: ["cls_bio101_2026", "cls_chem202_2026"],
+    created_class_ids: ["1", "2"],
     joined_class_ids: [],
     created_at: "2026-09-01T08:30:00",
     updated_at: "2026-09-02T14:15:22",
+    privacy: { discoverable: true },
   },
   {
     id: "usr_98234jksd83",
@@ -28,10 +29,11 @@ export const mockUsers = [
     bio: "Passionate educator teaching high school biology and chemistry.",
     headline: "Biology & Chemistry Teacher",
     auth_provider: "LOCAL",
-    created_class_ids: ["cls_bio101_2026", "cls_chem202_2026"],
+    created_class_ids: ["1", "2"],
     joined_class_ids: [],
     created_at: "2026-09-01T08:30:00",
     updated_at: "2026-09-02T14:15:22",
+    privacy: { discoverable: true },
   },
   {
     id: "usr_47102lkjsd9",
@@ -46,9 +48,10 @@ export const mockUsers = [
     headline: "Computer Science Student | Aspiring Developer",
     auth_provider: "GOOGLE",
     created_class_ids: [],
-    joined_class_ids: ["cls_java_basics", "cls_spring_boot_3"],
+    joined_class_ids: ["1", "3"],
     created_at: "2026-08-15T12:00:00",
     updated_at: "2026-08-15T12:05:10",
+    privacy: { discoverable: true },
   },
   {
     id: "usr_55193hfskw2",
@@ -62,9 +65,14 @@ export const mockUsers = [
     bio: null,
     headline: "History Instructor",
     auth_provider: "LOCAL",
-    created_class_ids: ["cls_hist_101"],
-    joined_class_ids: ["cls_staff_room_global"],
+    created_class_ids: ["2"],
+    joined_class_ids: ["4"],
     created_at: "2026-05-20T09:00:00",
     updated_at: "2026-09-02T10:43:15",
+    privacy: { discoverable: false },
   },
 ];
+
+export function lookupUserById(userId) {
+  return mockUsers.find((user) => user.id === userId) ?? null;
+}
