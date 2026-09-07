@@ -14,6 +14,7 @@ export const mockClassrooms = [
     deadline: null,
     memberCount: 24,
     onlineCount: 3,
+    allowStudentPosts: true,
   },
   {
     id: "2",
@@ -30,6 +31,7 @@ export const mockClassrooms = [
     deadline: "2026-09-02T23:59:00Z",
     memberCount: 28,
     onlineCount: 5,
+    allowStudentPosts: true,
   },
   {
     id: "3",
@@ -46,6 +48,7 @@ export const mockClassrooms = [
     deadline: "2026-09-05T17:00:00Z",
     memberCount: 18,
     onlineCount: 12,
+    allowStudentPosts: true,
   },
   {
     id: "4",
@@ -62,5 +65,6 @@ export const mockClassrooms = [
     deadline: null,
     memberCount: 30,
     onlineCount: 1,
+    allowStudentPosts: false,
   },
 ];
