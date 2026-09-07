@@ -2,9 +2,14 @@ import { useState } from "react";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 
-export default function ClassPostBox() {
+export default function ClassPostBox({ onSubmit }) {
   const [text, setText] = useState("");
 
+  const submit = () => {
+    if (!text.trim()) return;
+    onSubmit?.(text.trim());
+    setText("");
+  };
   return (
     <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
       <div className="flex gap-3">
@@ -25,7 +30,7 @@ export default function ClassPostBox() {
             </button>
           ))}
         </div>
-        <button
+        <button onClick={submit}
           disabled={!text.trim()}
           className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
