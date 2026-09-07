@@ -1,7 +1,8 @@
-import { Home, MessageCircle, Save, Users } from "lucide-react";
+import { Compass, Home, MessageCircle, Save, Users } from "lucide-react";
 
 export const SIDEBAR_NAV_ITEMS = [
   { label: "Home", to: "/dashboard", Icon: Home },
+  { label: "Explore", to: "/dashboard/explore", Icon: Compass },
   { label: "Community", to: "/dashboard/community", Icon: Users },
   { label: "Messages", to: "/dashboard/messages", Icon: MessageCircle },
   { label: "Saved", to: "/dashboard/saved", Icon: Save },
