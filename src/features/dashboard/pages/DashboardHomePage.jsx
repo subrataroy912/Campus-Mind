@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Compass, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { useDashboardData } from "../useDashboardData.js";
-import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
@@ -12,8 +11,6 @@ import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.j
 
 export default function DashboardHomePage() {
   const { user } = useAuth();
-  const [feedFilter, setFeedFilter] = useState("all");
-
   const {
     classrooms = [],
     exploreClassrooms = [],
@@ -27,15 +24,8 @@ export default function DashboardHomePage() {
       (classroom) => !joinedCodes.has(classroom.code),
     );
 
-    if (feedFilter === "popular") {
-      return [...available].sort((a, b) => b.popularity - a.popularity);
-    }
-    if (feedFilter === "recommended") {
-      return available.filter((classroom) => classroom.recommended);
-    }
-
-    return available;
-  }, [classrooms, exploreClassrooms, feedFilter]);
+    return [...available].sort((a, b) => b.popularity - a.popularity).slice(0, 3);
+  }, [classrooms, exploreClassrooms]);
 
   // Handle global loading state to prevent UI jumping
   if (status === "loading" || status === "idle") {
@@ -119,39 +109,7 @@ export default function DashboardHomePage() {
               Explore popular classes and recommendations selected for you.
             </p>
           </div>
-          <div
-            className="-mx-1 flex max-w-full items-center gap-1 overflow-x-auto px-1 pb-1"
-            role="tablist"
-            aria-label="Explore classes"
-          >
-            <Button
-              variant={feedFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFeedFilter("all")}
-              role="tab"
-              aria-selected={feedFilter === "all"}
-            >
-              Explore all
-            </Button>
-            <Button
-              variant={feedFilter === "popular" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFeedFilter("popular")}
-              role="tab"
-              aria-selected={feedFilter === "popular"}
-            >
-              Popular
-            </Button>
-            <Button
-              variant={feedFilter === "recommended" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFeedFilter("recommended")}
-              role="tab"
-              aria-selected={feedFilter === "recommended"}
-            >
-              Recommended
-            </Button>
-          </div>
+          <Link to="/dashboard/explore" className="text-sm font-medium text-primary hover:underline">See all</Link>
         </div>
 
         {status === "error" ? (

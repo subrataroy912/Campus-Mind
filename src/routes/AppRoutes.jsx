@@ -16,6 +16,7 @@ const DashboardMessagesPage = lazy(
 const DashboardSavedPage = lazy(
   () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
 );
+const ExplorePage = lazy(() => import("../features/explore/pages/ExplorePage.jsx"));
 const LoginPage = lazy(() => import("../features/auth/pages/LoginPage.jsx"));
 const RegisterPage = lazy(() => import("../features/auth/pages/RegisterPage.jsx"));
 const ForgotPasswordPage = lazy(
@@ -105,6 +106,10 @@ export const AppRoutes = createBrowserRouter([
           {
             path: "saved",
             element: <DashboardSavedPage />,
+          },
+          {
+            path: "explore",
+            element: <ExplorePage />,
           },
         ],
       },

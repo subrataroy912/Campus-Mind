@@ -7,6 +7,7 @@ import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import { mockClassrooms } from "@/mock/mockClassrooms.js";
 import { lookupUserById } from "@/mock/mockUsers.js";
+import { getSharedClassCount, getSharedClassIds } from "@/utils/sharedClasses.js";
 import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
@@ -25,8 +26,8 @@ export default function ProfilePage() {
   const viewedUser = userId && userId !== currentUser?.id ? lookupUserById(userId) : currentUser;
   const profile = useMemo(() => viewedUser && profileFor(viewedUser), [viewedUser]);
   const currentClassIds = classIds(currentUser);
-  const sharedIds = classIds(viewedUser).filter((id) => currentClassIds.includes(id));
-  const sharedClassCount = new Set(sharedIds).size;
+  const sharedIds = getSharedClassIds(currentUser, viewedUser);
+  const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
   const classes = isOwner ? mockClassrooms.filter((item) => currentClassIds.includes(item.id)) : mockClassrooms.filter((item) => sharedIds.includes(item.id));
 
   if (!profile) return <ProfileMessage title="This CampusMind member couldn't be found" description="The profile may have been removed or the link is incorrect." />;
