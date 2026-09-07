@@ -13,9 +13,6 @@ const DashboardCommunityPage = lazy(
 const DashboardMessagesPage = lazy(
   () => import("../features/dashboard/pages/DashboardMessagesPage.jsx"),
 );
-const DashboardAssignmentPage = lazy(
-  () => import("../features/dashboard/pages/DashboardAssignmentPage.jsx"),
-);
 const DashboardSavedPage = lazy(
   () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
 );
@@ -104,10 +101,6 @@ export const AppRoutes = createBrowserRouter([
           {
             path: "messages",
             element: <DashboardMessagesPage />,
-          },
-          {
-            path: "assignments",
-            element: <DashboardAssignmentPage />,
           },
           {
             path: "saved",
