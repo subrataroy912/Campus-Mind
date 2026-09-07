@@ -1,6 +1,7 @@
 export const CLASS_TABS = [
   { id: "home", label: "Home" },
   { id: "classwork", label: "Classwork" },
+  { id: "quick-links", label: "Quick links" },
   { id: "members", label: "Members" },
   { id: "grades", label: "Grades" },
 ];
@@ -43,12 +44,6 @@ export const TODO_ITEMS = [
   { id: 1, title: "Quiz 1: Chapters 1–3", due: "Due tomorrow" },
   { id: 2, title: "Homework set 4", due: "Due in 3 days" },
   { id: 3, title: "Group project proposal", due: "Due in 6 days" },
-];
-
-export const ACTIVE_NOW = [
-  { id: 1, name: "Daniel R." },
-  { id: 2, name: "Priya S." },
-  { id: 3, name: "Wei L." },
 ];
 
 export const QUICK_LINKS = [
