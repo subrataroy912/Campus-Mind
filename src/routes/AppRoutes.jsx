@@ -129,6 +129,10 @@ export const AppRoutes = createBrowserRouter([
         element: <ProfilePage />,
       },
       {
+        path: "/dashboard/profile/:userId",
+        element: <ProfilePage />,
+      },
+      {
         path: "/dashboard/settings",
         element: <SettingsPage />,
       },
