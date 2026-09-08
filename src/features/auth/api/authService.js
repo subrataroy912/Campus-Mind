@@ -23,11 +23,18 @@ export function normalizeAuthResponse(response) {
 }
 
 export function getOAuthRedirectUrl(provider, mode) {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
+  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
+  const baseUrl = rawBaseUrl.replace(/\/+$/, ""); // Strip trailing slashes
+  
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
   const params = new URLSearchParams({
-    mode,
-    redirect_uri: `${window.location.origin}/auth/callback`,
+    redirect_uri: `${origin}/auth/callback`,
   });
+
+  if (mode !== undefined && mode !== null) {
+    params.append("mode", mode);
+  }
+
   return `${baseUrl}/auth/oauth/${provider}?${params.toString()}`;
 }
 
