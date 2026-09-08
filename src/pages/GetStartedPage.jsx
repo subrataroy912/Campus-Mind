@@ -30,6 +30,7 @@ export default function GetStartedPage() {
             Sign in
           </Button>
         </header>
+
         <section className="grid gap-10 py-16 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:py-24">
           <div>
             <p className="inline-flex rounded-full bg-accent/15 px-3 py-1 text-sm font-semibold text-primary">
@@ -43,17 +44,12 @@ export default function GetStartedPage() {
               learning easier—without making school feel more complicated.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button to="/auth/register" className="px-6">
-                Create a local account <ArrowRight size={18} />
-              </Button>
-              <Button to="/auth/login" variant="outline" className="px-6">
-                Explore the demo
+              <Button to="/auth/register" className="px-6" size="lg">
+                Get Started <ArrowRight size={18} />
               </Button>
             </div>
-            <p className="mt-4 text-sm text-text-muted">
-              Try the demo: student@campusmind.local · password123
-            </p>
           </div>
+
           <aside className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
             <p className="text-sm font-semibold text-primary">
               Today at CampusMind
@@ -80,6 +76,7 @@ export default function GetStartedPage() {
             </div>
           </aside>
         </section>
+
         <section className="grid gap-4 pb-12 md:grid-cols-3">
           {features.map(({ icon: Icon, title, text }) => (
             <article
@@ -95,6 +92,9 @@ export default function GetStartedPage() {
           ))}
         </section>
       </div>
+      <footer className="py-6 text-center text-sm text-text-muted">
+        © {new Date().getFullYear()} CampusMind. All rights reserved.
+      </footer>
     </main>
   );
 }

@@ -10,29 +10,24 @@ import { store } from "./app/store.js";
 import { maintenanceMode } from "./config/appConfig.js";
 import ServerDown from "./pages/ServerDown.jsx";
 
+if (maintenanceMode && import.meta.env.DEV) {
+  console.log("Application is in maintenance mode!");
+}
+console.log("All Vite Env Variables:", import.meta.env);
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Provider store={store}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Suspense
-            fallback={
-              <div
-                className="grid min-h-screen place-items-center bg-background px-4 text-center text-sm font-medium text-muted-foreground"
-                role="status"
-              >
-                Loading CampusMind…
-              </div>
-            }
-          >
-            {maintenanceMode ? (
-              <ServerDown />
-            ) : (
+    {maintenanceMode ? (
+      <ServerDown />
+    ) : (
+      <Provider store={store}>
+        <TooltipProvider>
+          <AuthProvider>
+            <Suspense fallback={<div>Loading CampusMind…</div>}>
               <RouterProvider router={AppRoutes} />
-            )}
-          </Suspense>
-        </AuthProvider>
-      </TooltipProvider>
-    </Provider>
+            </Suspense>
+          </AuthProvider>
+        </TooltipProvider>
+      </Provider>
+    )}
   </StrictMode>,
 );

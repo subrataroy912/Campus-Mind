@@ -2,6 +2,7 @@ import { ServerCrash, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ServerDown() {
+ 
   const handleRetry = () => {
     window.location.reload();
   };
@@ -15,7 +16,8 @@ export default function ServerDown() {
         Oops! The hamsters took a coffee break ☕
       </h1>
       <p className="text-lg text-muted-foreground mb-8 max-w-md">
-        Our servers are taking an unexpected nap. We are working hard to wake them up. Check your connection or give it another shot!
+        Our servers are taking an unexpected nap. We are working hard to wake
+        them up. Check your connection or give it another shot!
       </p>
       <Button onClick={handleRetry} size="lg" className="gap-2">
         <RefreshCw className="h-4 w-4" />

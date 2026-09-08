@@ -1,10 +1,22 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 function BrandLogo({ compact = false, className = '' }) {
-  return (
-    <Link to="/" className={`inline-flex max-w-full px-2 py-1 transition-opacity hover:opacity-80 sm:px-3 ${className}`}>
-      <div className="flex items-center justify-center gap-1 md:gap-2 flex-nowrap">
+  const location = useLocation()
+  const isHome = location.pathname === '/'
 
+  const handleClick = (e) => {
+    if (isHome) {
+      e.preventDefault()
+    }
+  }
+
+  return (
+    <Link
+      to="/"
+      onClick={handleClick}
+      className={`relative inline-flex max-w-full px-2 py-1 transition-opacity hover:opacity-80 sm:px-3 ${className}`}
+    >
+      <div className="flex items-center justify-center gap-1 md:gap-2 flex-nowrap">
         <img
           src="/logo-square.png"
           alt="CampusMind"
@@ -18,6 +30,10 @@ function BrandLogo({ compact = false, className = '' }) {
           </span>
         )}
       </div>
+
+      <span className="absolute -right-3 -top-1 rounded bg-primary px-1 py-0.5 text-[9px] font-extrabold uppercase leading-none text-primary-foreground shadow-sm">
+        beta
+      </span>
     </Link>
   )
 }
