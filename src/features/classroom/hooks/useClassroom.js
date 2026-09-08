@@ -1,27 +1,9 @@
-import { useEffect, useState } from "react";
-import { findClassroomById } from "../api/classroomService.js";
-import { useAuth } from "../../../context/AuthContext.jsx";
+import { useFindClassroomByIdQuery } from "../api/classroomApi.js";
 
 export function useClassroom(classId) {
-  const { user } = useAuth();
-  const [classroom, setClassroom] = useState(undefined);
-  const [error, setError] = useState(null);
+  const { data, error, isLoading } = useFindClassroomByIdQuery(classId, {
+    skip: !classId,
+  });
 
-  useEffect(() => {
-    let active = true;
-
-    findClassroomById(user?.id, classId)
-      .then((result) => {
-        if (active) setClassroom(result);
-      })
-      .catch((requestError) => {
-        if (active) setError(requestError);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [classId, user?.id]);
-
-  return { classroom, error };
+  return { classroom: data?.data ?? data, error, isLoading };
 }

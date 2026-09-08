@@ -10,6 +10,8 @@ import {
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useDispatch } from "react-redux";
 import { clearCredentials, setCredentials } from "../features/auth/authSlice.js";
+import { baseApi } from "../app/baseApi.js";
+import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 
 const AuthContext = createContext(null);
 const SESSION_KEY = "campus-mind.session";
@@ -28,6 +30,11 @@ function toProfilePatch(formData, currentUser) {
     if (value !== currentValue) changes[apiField] = value;
     return changes;
   }, {});
+}
+
+function resetApiCache(dispatch) {
+  dispatch(baseApi.util.resetApiState());
+  clearPersistedApiState();
 }
 
 export function AuthProvider({ children }) {
@@ -54,6 +61,7 @@ export function AuthProvider({ children }) {
           setAuthState({ status: "failed", error });
           throw error;
         }
+        resetApiCache(dispatch);
         setUser({ ...nextUser, accessToken, refreshToken });
         dispatch(setCredentials({ accessToken, refreshToken, user: nextUser }));
         setAuthState({ status: "succeeded", error: null });
@@ -64,6 +72,7 @@ export function AuthProvider({ children }) {
         try {
           const response = await loginRequest(credentials);
           const { accessToken, refreshToken, user: nextUser } = response;
+          resetApiCache(dispatch);
           setUser({ ...nextUser, accessToken, refreshToken });
           dispatch(setCredentials({ accessToken, refreshToken, user: nextUser }));
           setAuthState({ status: "succeeded", error: null });
@@ -78,6 +87,7 @@ export function AuthProvider({ children }) {
         try {
           const result = await registerRequest(details);
           if (result.accessToken && result.user) {
+            resetApiCache(dispatch);
             setUser({ ...result.user, accessToken: result.accessToken, refreshToken: result.refreshToken });
             dispatch(setCredentials(result));
           }
@@ -106,10 +116,12 @@ export function AuthProvider({ children }) {
         if (user?.id) await deleteAccountRequest(user.id);
         setUser(null);
         dispatch(clearCredentials());
+        resetApiCache(dispatch);
       },
       logout() {
         setUser(null);
         dispatch(clearCredentials());
+        resetApiCache(dispatch);
       },
     }),
     [authState, dispatch, user, setUser],

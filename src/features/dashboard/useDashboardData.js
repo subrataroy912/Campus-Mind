@@ -1,36 +1,19 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext.jsx";
 import {
-  fetchClassrooms,
-  fetchExploreClassrooms,
-} from "../../features/classroom/api/classroomService";
+  useFetchClassroomsQuery,
+  useFetchExploreClassroomsQuery,
+} from "../classroom/api/classroomApi.js";
 
 export function useDashboardData() {
-  const { user } = useAuth();
-  const [classrooms, setClassrooms] = useState([]);
-  const [exploreClassrooms, setExploreClassrooms] = useState([]);
-  const [status, setStatus] = useState("loading");
+  const classroomsQuery = useFetchClassroomsQuery();
+  const exploreQuery = useFetchExploreClassroomsQuery();
+  const classrooms = classroomsQuery.data?.data ?? classroomsQuery.data ?? [];
+  const exploreClassrooms = exploreQuery.data?.data ?? exploreQuery.data ?? [];
+  const isLoading = classroomsQuery.isLoading || exploreQuery.isLoading;
+  const isError = classroomsQuery.isError || exploreQuery.isError;
 
-  useEffect(() => {
-    let active = true;
-
-    Promise.all([fetchClassrooms(user?.id), fetchExploreClassrooms()])
-      .then(([joined, explore]) => {
-        if (active) {
-          setClassrooms(joined);
-          setExploreClassrooms(explore);
-          setStatus("ready");
-        }
-      })
-      .catch(() => {
-        if (active) setStatus("error");
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [user?.id]);
-
-  // Return the data so your components can use it
-  return { classrooms, exploreClassrooms, status };
+  return {
+    classrooms,
+    exploreClassrooms,
+    status: isLoading ? "loading" : isError ? "error" : "ready",
+  };
 }

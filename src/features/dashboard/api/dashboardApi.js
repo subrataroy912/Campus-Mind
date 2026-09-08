@@ -8,3 +8,10 @@ export const dashboardApi = baseApi.injectEndpoints({
     exploreUsers: builder.query({ query: () => "/users/explore" }),
   }),
 });
+
+export const {
+  useCommunityFeedQuery,
+  useConversationsQuery,
+  useAssignmentsQuery,
+  useExploreUsersQuery,
+} = dashboardApi;

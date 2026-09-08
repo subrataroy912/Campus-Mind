@@ -13,9 +13,8 @@ import ServerDown from "./pages/ServerDown.jsx";
 if (maintenanceMode && import.meta.env.DEV) {
   console.log("Application is in maintenance mode!");
 }
-console.log("All Vite Env Variables:", import.meta.env);
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  <>
     {maintenanceMode ? (
       <ServerDown />
     ) : (
@@ -29,5 +28,5 @@ createRoot(document.getElementById("root")).render(
         </TooltipProvider>
       </Provider>
     )}
-  </StrictMode>,
+  </>,
 );

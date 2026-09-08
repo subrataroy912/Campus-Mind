@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearCredentials, setCredentials } from "@/features/auth/authSlice.js";
+import { clearPersistedApiState } from "./apiCachePersistence.js";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
 
@@ -19,6 +20,8 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
   const refreshToken = api.getState().auth?.refreshToken;
   if (!refreshToken) {
     api.dispatch(clearCredentials());
+    api.dispatch(baseApi.util.resetApiState());
+    clearPersistedApiState();
     window.localStorage.removeItem("campus-mind.session");
     return result;
   }
@@ -41,6 +44,8 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
     result = await rawBaseQuery(args, api, extraOptions);
   } else {
     api.dispatch(clearCredentials());
+    api.dispatch(baseApi.util.resetApiState());
+    clearPersistedApiState();
     window.localStorage.removeItem("campus-mind.session");
   }
   return result;
