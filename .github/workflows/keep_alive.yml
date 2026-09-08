@@ -1,0 +1,16 @@
+name: Keep Render Server Awake
+
+on:
+  schedule:
+    # Runs every 14 minutes (Render sleeps at 15 minutes)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows you to manually trigger it from GitHub if needed
+
+jobs:
+  ping-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Ping Request to Render
+        run: |
+          curl -I -s https://onrender.com
+          
