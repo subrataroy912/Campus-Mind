@@ -25,7 +25,11 @@ createRoot(document.getElementById("root")).render(
               </div>
             }
           >
-            {maintenanceMode ? <ServerDown /> : <RouterProvider router={AppRoutes} />}
+            {maintenanceMode ? (
+              <ServerDown />
+            ) : (
+              <RouterProvider router={AppRoutes} />
+            )}
           </Suspense>
         </AuthProvider>
       </TooltipProvider>
