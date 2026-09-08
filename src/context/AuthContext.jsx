@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   login as loginRequest,
   register as registerRequest,
+  getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
   deleteAccount as deleteAccountRequest,
 } from "../features/auth/api/authService";
@@ -12,6 +13,22 @@ import { clearCredentials, setCredentials } from "../features/auth/authSlice.js"
 
 const AuthContext = createContext(null);
 const SESSION_KEY = "campus-mind.session";
+const PROFILE_FIELDS = {
+  name: "displayName",
+  bio: "about",
+  avatar: "avatarUrl",
+  banner: "bannerUrl",
+  batchYear: "gradeLevel",
+};
+
+function toProfilePatch(formData, currentUser) {
+  return Object.entries(PROFILE_FIELDS).reduce((changes, [formField, apiField]) => {
+    const value = formData[formField] ?? "";
+    const currentValue = currentUser?.[apiField] ?? "";
+    if (value !== currentValue) changes[apiField] = value;
+    return changes;
+  }, {});
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useLocalStorage(SESSION_KEY, null);
@@ -72,9 +89,18 @@ export function AuthProvider({ children }) {
         }
       },
       async updateProfile(details) {
-        const nextUser = await updateProfileRequest(user?.id, details);
+        const nextProfile = await updateProfileRequest(toProfilePatch(details, user));
+        const nextUser = { ...user, ...nextProfile, name: nextProfile.displayName || user?.name };
         setUser(nextUser);
-        return nextUser;
+        dispatch(setCredentials({ accessToken: user?.accessToken, refreshToken: user?.refreshToken, user: nextUser }));
+        return nextProfile;
+      },
+      async hydrateProfile() {
+        const profile = await getCurrentProfileRequest();
+        const nextUser = { ...user, ...profile, name: profile.displayName || user?.name };
+        setUser(nextUser);
+        dispatch(setCredentials({ accessToken: user?.accessToken, refreshToken: user?.refreshToken, user: nextUser }));
+        return profile;
       },
       async deleteAccount() {
         if (user?.id) await deleteAccountRequest(user.id);

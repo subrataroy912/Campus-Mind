@@ -1,5 +1,6 @@
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
+import { profileApi } from "@/features/profile/api/profileApi.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
@@ -42,10 +43,16 @@ export async function register(details) {
   );
 }
 
-export async function updateProfile(userId, details) {
+export async function getCurrentProfile() {
+  return unwrapResponse(
+    await store.dispatch(profileApi.endpoints.getCurrentProfile.initiate()).unwrap(),
+  );
+}
+
+export async function updateProfile(details) {
   return unwrapResponse(
     await store.dispatch(
-      authApi.endpoints.updateProfile.initiate({ userId, details }),
+      profileApi.endpoints.updateCurrentProfile.initiate(details),
     ).unwrap(),
   );
 }
