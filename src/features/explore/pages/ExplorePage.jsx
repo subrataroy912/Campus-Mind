@@ -3,7 +3,6 @@ import { Loader2, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import { mockClassrooms } from "@/mock/mockClassrooms.js";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import ExplorePersonCard from "../components/ExplorePersonCard.jsx";
@@ -19,15 +18,7 @@ export default function ExplorePage() {
   const [classFilter, setClassFilter] = useState("all");
   const [personFilter, setPersonFilter] = useState("all");
 
-  const joinedClassIds = useMemo(() => [
-    ...(user?.created_class_ids || []),
-    ...(user?.joined_class_ids || []),
-  ], [user]);
-  const subjectSet = useMemo(() => new Set(
-    mockClassrooms
-      .filter((classroom) => joinedClassIds.includes(classroom.id))
-      .map((classroom) => classroom.subject),
-  ), [joinedClassIds]);
+  const subjectSet = useMemo(() => new Set(), []);
   const classSubjects = [...new Set(classes.map((item) => item.subject).filter(Boolean))];
   const departments = [...new Set(users.map((item) => item.department).filter(Boolean))];
   const batchYears = [...new Set(users.map((item) => item.batchYear).filter(Boolean))];

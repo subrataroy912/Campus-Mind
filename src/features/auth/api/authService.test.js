@@ -1,32 +1,39 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { updateProfile } from "./authService.js";
+import { describe, expect, it } from "vitest";
+import { normalizeAuthResponse } from "./authService.js";
 
-function createStorage() {
-  const values = new Map();
-  return {
-    getItem: (key) => values.get(key) ?? null,
-    setItem: (key, value) => values.set(key, String(value)),
-  };
-}
-
-beforeEach(() => {
-  globalThis.window = { localStorage: createStorage() };
-});
-
-describe("authService profile persistence", () => {
-  it("updates the stored user record and returns a session-safe user", async () => {
-    const updatedUser = await updateProfile("demo-student", {
-      name: "Updated Student",
-      bio: "A new bio",
+describe("normalizeAuthResponse", () => {
+  it("maps the flat backend credential response into auth state", () => {
+    const result = normalizeAuthResponse({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      userId: "user-1",
+      email: "student@example.com",
+      displayName: "Campus Student",
+      avatarUrl: "https://example.com/avatar.png",
     });
-    const storedUsers = JSON.parse(
-      window.localStorage.getItem("campus-mind.mock-users"),
-    );
-    const storedUser = storedUsers.find((user) => user.id === "demo-student");
 
-    expect(updatedUser.name).toBe("Updated Student");
-    expect(updatedUser.password).toBeUndefined();
-    expect(storedUser.name).toBe("Updated Student");
-    expect(storedUser.bio).toBe("A new bio");
+    expect(result).toEqual({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: {
+        id: "user-1",
+        email: "student@example.com",
+        name: "Campus Student",
+        avatar: "https://example.com/avatar.png",
+      },
+    });
+  });
+
+  it("keeps compatibility with nested token and user responses", () => {
+    expect(
+      normalizeAuthResponse({
+        token: "access-token",
+        user: { id: "user-1", name: "Campus Student" },
+      }),
+    ).toEqual({
+      accessToken: "access-token",
+      refreshToken: null,
+      user: { id: "user-1", name: "Campus Student" },
+    });
   });
 });

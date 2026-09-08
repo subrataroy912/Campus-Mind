@@ -1,13 +1,7 @@
-import { CONVERSATIONS } from "@/mock/mockMessages.js";
-
-const delay = (value) =>
-  new Promise((resolve) => setTimeout(() => resolve(value), 300));
+import { store } from "@/app/store.js";
+import { dashboardApi } from "./dashboardApi.js";
 
 export async function fetchConversations() {
-  return delay({
-    conversations: CONVERSATIONS.map((conversation) => ({
-      ...conversation,
-      messages: conversation.messages.map((message) => ({ ...message })),
-    })),
-  });
+  const response = await store.dispatch(dashboardApi.endpoints.conversations.initiate()).unwrap();
+  return response?.data ?? response;
 }

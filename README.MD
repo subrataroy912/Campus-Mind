@@ -1,6 +1,6 @@
 # Campus Mind
 
-Campus Mind is a standalone React + Vite interface. It runs entirely in the browser with local mock fixtures and localStorage-backed interactions—no backend, API server, WebSocket, or environment configuration is required.
+Campus Mind is a React + Vite client for the Campus Mind API.
 
 ## Run locally
 
@@ -9,9 +9,13 @@ npm install
 npm run dev
 ```
 
-## Demo sign-in
+Set the API URL in `.env.local` when the backend is not running at the default address:
 
-Use `student@campusmind.local` and `password123`, or create a local account. Authentication and classroom mutations persist in browser localStorage.
+```bash
+VITE_API_BASE_URL=http://localhost:8080/v1
+```
+
+Set `VITE_MAINTENANCE_MODE=true` in `.env.local` to show the server maintenance page across the app while updating the codebase. Set it to `false` or remove it to restore normal routing. Restart Vite after changing environment variables.
 
 ## Architecture
 
@@ -19,18 +23,31 @@ Use `student@campusmind.local` and `password123`, or create a local account. Aut
 - `src/app/layouts` contains app-wide route layouts.
 - `src/features` owns domain services and feature-local boundaries.
 - `src/features/*/pages` contains route-level implementations owned by each domain.
-- `src/mock` provides deterministic frontend fixtures.
 - `src/context` contains client-wide providers.
 - `src/pages` contains only global route pages and shared page shells.
 - `src/routes` centralizes route definitions and client-side guards.
 
-## Local data behavior
+## Runtime data behavior
 
-- Demo users and passwords are frontend fixtures only; this is not production authentication.
-- The active session is stored under `campus-mind.session`.
-- Classroom records are stored per user under `campus-mind.classrooms.<userId>`.
-- Settings such as the selected theme are stored in browser localStorage.
-- Clear the site data in browser developer tools to reset the local demo state.
+- Authentication and feature data are requested from the configured API.
+- The active session is retained locally so route guards can restore the last session.
+- Settings such as the selected theme remain client preferences.
+
+## API contract used by the client
+
+The client currently calls these endpoints under `VITE_API_BASE_URL`:
+
+- `POST /auth/login` and `POST /auth/register`
+- `GET /auth/oauth/google` and `GET /auth/oauth/github`
+- `PATCH /users/:id` and `DELETE /users/:id`
+- `GET /classrooms`, `GET /classrooms/explore`, `GET /classrooms/:id`
+- `GET /classrooms/lookup?code=...`, `POST /classrooms`, `POST /classrooms/join`
+- `GET /community/feed`, `GET /messages/conversations`, `GET /assignments`
+- `GET /users/explore`
+
+Login responses should contain `accessToken`, `refreshToken`, `userId`, `email`, `displayName`, and `avatarUrl`. Other responses may be returned directly or wrapped in a `data` property. The backend must provide the classroom, community, message, assignment, and user fields consumed by the existing views.
+
+OAuth endpoints receive `mode` (`login` or `register`) and `redirect_uri` query parameters. After provider authentication, they should redirect to that URI with `accessToken`, `refreshToken`, and either a URL-encoded `user` object or the flat user fields. On failure, return an `error` query parameter instead.
 
 ## Verification
 

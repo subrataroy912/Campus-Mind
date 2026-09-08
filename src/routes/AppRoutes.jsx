@@ -5,6 +5,7 @@ import DashboardLayout from "../app/layouts/DashboardLayout.jsx";
 import RootLayout from "../app/layouts/RootLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import PublicRoute from "./PublicRoute.jsx";
+import ServerDown from "@/pages/ServerDown.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(() => import("../features/dashboard/pages/DashboardHomePage.jsx"));
 const DashboardCommunityPage = lazy(
@@ -24,6 +25,9 @@ const ForgotPasswordPage = lazy(
 );
 const ResetPasswordPage = lazy(
   () => import("../features/auth/pages/ResetPasswordPage.jsx"),
+);
+const OAuthCallbackPage = lazy(
+  () => import("../features/auth/pages/OAuthCallbackPage.jsx"),
 );
 const ClassPage = lazy(() => import("../features/classroom/pages/ClassPage.jsx"));
 const CreateClassPage = lazy(
@@ -72,6 +76,10 @@ export const AppRoutes = createBrowserRouter([
           {
             path: "reset-password",
             element: <ResetPasswordPage />,
+          },
+          {
+            path: "callback",
+            element: <OAuthCallbackPage />,
           },
         ],
       },
@@ -142,6 +150,10 @@ export const AppRoutes = createBrowserRouter([
         element: <SettingsPage />,
       },
     ],
+  },
+  { 
+    path: "/server-down", 
+    element: <ServerDown /> 
   },
   { path: "*", element: <NotFound /> },
 ]);

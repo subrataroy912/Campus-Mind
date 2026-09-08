@@ -1,66 +1,55 @@
-import { mockUsers } from "../../../mock/mockUsers";
+import { store } from "@/app/store.js";
+import { authApi } from "./authApi.js";
 
-const wait = (value) =>
-  new Promise((resolve) => setTimeout(() => resolve(value), 300));
-const USERS_KEY = "campus-mind.mock-users";
+const unwrapResponse = (response) => response?.data ?? response;
 
-function users() {
-  try {
-    const stored = window.localStorage.getItem(USERS_KEY);
-    const parsed = stored ? JSON.parse(stored) : null;
-    return Array.isArray(parsed) ? parsed : mockUsers;
-  } catch {
-    return mockUsers;
-  }
-}
-
-export async function login({ email, password }) {
-  const user = users().find(
-    (candidate) =>
-      candidate.email.toLowerCase() === email.toLowerCase() &&
-      candidate.password === password,
-  );
-  if (!user)
-    throw new Error("Use Dummy email ids , or create a local account.");
-  return wait({ ...user, password: undefined });
-}
-
-export async function register({ name, email, password }) {
-  const existingUsers = users();
-  if (
-    existingUsers.some(
-      (user) => user.email.toLowerCase() === email.toLowerCase(),
-    )
-  )
-    throw new Error("An account with this email already exists.");
+export function normalizeAuthResponse(response) {
+  const payload = unwrapResponse(response);
+  const nestedUser = payload.user ?? {};
   const user = {
-    id: `user-${Date.now()}`,
-    name,
-    email,
-    password,
-    role: "student",
-    avatar: "/images/avatar.png",
+    ...nestedUser,
+    id: payload.userId ?? nestedUser.id,
+    name: payload.displayName ?? nestedUser.name,
+    email: payload.email ?? nestedUser.email,
+    avatar: payload.avatarUrl ?? nestedUser.avatar,
   };
-  window.localStorage.setItem(USERS_KEY, JSON.stringify([...existingUsers, user]));
-  return wait({ ...user, password: undefined });
+
+  return {
+    accessToken: payload.accessToken ?? payload.token,
+    refreshToken: payload.refreshToken ?? null,
+    user,
+  };
+}
+
+export function getOAuthRedirectUrl(provider, mode) {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
+  const params = new URLSearchParams({
+    mode,
+    redirect_uri: `${window.location.origin}/auth/callback`,
+  });
+  return `${baseUrl}/auth/oauth/${provider}?${params.toString()}`;
+}
+
+export async function login(credentials) {
+  return normalizeAuthResponse(
+    await store.dispatch(authApi.endpoints.login.initiate(credentials)).unwrap(),
+  );
+}
+
+export async function register(details) {
+  return normalizeAuthResponse(
+    await store.dispatch(authApi.endpoints.register.initiate(details)).unwrap(),
+  );
 }
 
 export async function updateProfile(userId, details) {
-  const existingUsers = users();
-  const userIndex = existingUsers.findIndex((user) => user.id === userId);
-
-  if (userIndex === -1) throw new Error("User account could not be found.");
-
-  const updatedUser = { ...existingUsers[userIndex], ...details };
-  const nextUsers = existingUsers.map((user, index) =>
-    index === userIndex ? updatedUser : user,
+  return unwrapResponse(
+    await store.dispatch(
+      authApi.endpoints.updateProfile.initiate({ userId, details }),
+    ).unwrap(),
   );
-
-  window.localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers));
-  return wait({ ...updatedUser, password: undefined });
 }
 
 export async function deleteAccount(userId) {
-  const remainingUsers = users().filter((user) => user.id !== userId);
-  window.localStorage.setItem(USERS_KEY, JSON.stringify(remainingUsers));
+  await store.dispatch(authApi.endpoints.deleteAccount.initiate(userId)).unwrap();
 }

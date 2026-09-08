@@ -1,6 +1,6 @@
 # Campus Mind Data Flow
 
-This document describes the current runtime data flow of Campus Mind. It reflects the browser-only implementation as it exists today: React state, Context API, mock fixtures, and localStorage. It does not describe a future backend design.
+This document describes the original browser-only data flow of Campus Mind. The active client now uses RTK Query and the REST API documented in `README.MD`; the historical fixture references below are retained as migration context. Classroom detail presentation data still needs to be supplied by a classroom-content endpoint.
 
 ## System Boundary
 

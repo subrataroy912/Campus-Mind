@@ -1,27 +1,42 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchAssignments } from "./assignmentService.js";
 import { fetchCommunityFeed } from "./communityService.js";
 import { fetchConversations } from "./messageService.js";
+import { store } from "@/app/store.js";
+
+vi.mock("@/app/store.js", () => ({
+  store: { dispatch: vi.fn() },
+}));
 
 describe("dashboard services", () => {
-  it("return assignment data through an async boundary", async () => {
+  beforeEach(() => {
+    store.dispatch.mockReset();
+  });
+
+  it("unwraps assignment data returned by the API", async () => {
+    store.dispatch.mockReturnValue({
+      unwrap: () => Promise.resolve({ data: { items: [], filters: [] } }),
+    });
     const result = await fetchAssignments();
 
-    expect(result.items.length).toBeGreaterThan(0);
-    expect(result.filters.length).toBeGreaterThan(0);
+    expect(result).toEqual({ items: [], filters: [] });
   });
 
-  it("return community data through an async boundary", async () => {
+  it("unwraps community data returned by the API", async () => {
+    store.dispatch.mockReturnValue({
+      unwrap: () => Promise.resolve({ data: { posts: [], filters: [] } }),
+    });
     const result = await fetchCommunityFeed();
 
-    expect(result.posts.length).toBeGreaterThan(0);
-    expect(result.filters.length).toBeGreaterThan(0);
+    expect(result).toEqual({ posts: [], filters: [] });
   });
 
-  it("return conversations with copied message arrays", async () => {
+  it("unwraps conversations returned by the API", async () => {
+    store.dispatch.mockReturnValue({
+      unwrap: () => Promise.resolve({ data: { conversations: [] } }),
+    });
     const result = await fetchConversations();
 
-    expect(result.conversations.length).toBeGreaterThan(0);
-    expect(result.conversations[0].messages).not.toBeUndefined();
+    expect(result).toEqual({ conversations: [] });
   });
 });
