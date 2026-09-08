@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { LogOut, Moon, Shield, Sun, Trash2, UserRound } from "lucide-react";
+import { LogOut, Moon, Shield, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Card } from "@/components/ui/card.jsx";
@@ -35,7 +35,7 @@ const DEFAULT_PRIVACY = {
 };
 
 export default function SettingsPage() {
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, logout } = useAuth();
   const {
     theme,
     isLoading: isThemeLoading,
@@ -47,7 +47,6 @@ export default function SettingsPage() {
 
   const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
   const [privacy, setPrivacy] = useState(DEFAULT_PRIVACY);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const toggleNotification = (key) =>
     setNotifications((previous) => ({ ...previous, [key]: !previous[key] }));
@@ -70,11 +69,6 @@ export default function SettingsPage() {
     } catch {
       // The hook exposes the save error for the page to render.
     }
-  };
-
-  const handleDeleteAccount = async () => {
-    await deleteAccount();
-    navigate("/", { replace: true });
   };
 
   return (
@@ -232,32 +226,6 @@ export default function SettingsPage() {
             </div>
           </ProfileSection>
 
-          <div className="mt-6 border-t border-border pt-6">
-            <ProfileSection
-              title="Danger zone"
-              description="Deleting your account removes your classes, posts, and saved items. This can't be undone."
-            >
-              {confirmingDelete ? (
-                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-                  <p className="flex-1 text-sm font-medium text-text-heading">
-                    Are you sure? This will permanently delete your account.
-                  </p>
-                  <Button variant="destructive" onClick={handleDeleteAccount} className="gap-2">
-                    <Trash2 size={16} aria-hidden="true" />
-                    Yes, delete it
-                  </Button>
-                  <Button variant="outline" onClick={() => setConfirmingDelete(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button variant="destructive" onClick={() => setConfirmingDelete(true)} className="gap-2">
-                  <Trash2 size={16} aria-hidden="true" />
-                  Delete account
-                </Button>
-              )}
-            </ProfileSection>
-          </div>
         </Card>
       </div>
     </div>

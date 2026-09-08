@@ -25,6 +25,12 @@ function ValidateField(name, value) {
   if (name === "batchYear" && text.trim() && !/^\d{4}$/.test(text.trim())) {
     return "Batch year must be a 4-digit year.";
   }
+  if (name === "avatar" && text.length > 2048) {
+    return "Use a hosted image URL shorter than 2048 characters.";
+  }
+  if (name === "banner" && text.length > 2048) {
+    return "Use a hosted image URL shorter than 2048 characters.";
+  }
   return null;
 }
 

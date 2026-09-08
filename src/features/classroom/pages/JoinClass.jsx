@@ -8,6 +8,7 @@ export default function JoinClass() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
+  const [courseId, setCourseId] = useState(() => searchParams.get("courseId") || "");
   const [code, setCode] = useState(() => Array.from({ length: CLASS_CODE_LENGTH }, (_, index) => initialCode[index] || ""));
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
@@ -52,11 +53,11 @@ export default function JoinClass() {
 
   const handleFindClass = async (e) => {
     e.preventDefault();
-    if (code.some((character) => !character)) { setStatus("incomplete"); return; }
+    if (!courseId.trim() || code.some((character) => !character)) { setStatus("incomplete"); return; }
     setStatus("loading");
     setError("");
     try {
-      const match = await findClassroomByCode(user?.id, formatClassCode(code));
+      const match = await findClassroomByCode(user?.id, courseId.trim());
       setFoundClass(match);
       setStatus(match ? "found" : "not-found");
     } catch (requestError) {
@@ -68,7 +69,7 @@ export default function JoinClass() {
   const handleJoin = async () => {
     setError("");
     try {
-      await joinClassroom(user?.id, formatClassCode(code));
+      await joinClassroom(user?.id, courseId.trim(), formatClassCode(code));
       setStatus("joined");
     } catch (requestError) {
       setError(requestError.message || "Unable to join this class.");
@@ -77,6 +78,7 @@ export default function JoinClass() {
 
   const handleReset = () => {
     setCode(Array.from({ length: CLASS_CODE_LENGTH }, () => ""));
+    setCourseId("");
     setStatus("idle");
     setFoundClass(null);
     setError("");
@@ -114,6 +116,15 @@ export default function JoinClass() {
         <div className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-border sm:p-6 lg:p-8">
           {status !== "joined" && (
             <form onSubmit={handleFindClass}>
+              <label className="mb-2 block text-center text-sm font-medium text-text-main">
+                Course ID
+              </label>
+              <input
+                value={courseId}
+                onChange={(event) => setCourseId(event.target.value)}
+                placeholder="Paste the course ID from your teacher"
+                className="mb-5 w-full rounded-lg border border-border px-3 py-2 text-center text-sm text-text-heading outline-none focus:border-primary focus:ring-2 focus:ring-focus"
+              />
               <label className="mb-3 block text-center text-sm font-medium text-text-main">
                 Class code
               </label>
@@ -140,7 +151,7 @@ export default function JoinClass() {
               </div>
 
               {status === "incomplete" && (
-                <p className="mt-3 text-center text-xs text-secondary">Enter all 8 characters of the class code.</p>
+                <p className="mt-3 text-center text-xs text-secondary">Enter the course ID and all 8 characters of the class code.</p>
               )}
               {status === "not-found" && (
                 <p className="mt-3 text-center text-xs text-secondary">

@@ -2,10 +2,10 @@ import { baseApi } from "@/app/baseApi.js";
 
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    communityFeed: builder.query({ query: () => "/community/feed" }),
-    conversations: builder.query({ query: () => "/messages/conversations" }),
-    assignments: builder.query({ query: () => "/assignments" }),
-    exploreUsers: builder.query({ query: () => "/users/explore" }),
+    communityFeed: builder.query({ queryFn: () => ({ data: { posts: [], filters: [] } }) }),
+    conversations: builder.query({ queryFn: () => ({ data: { conversations: [] } }) }),
+    assignments: builder.query({ queryFn: () => ({ data: [] }) }),
+    exploreUsers: builder.query({ queryFn: () => ({ data: [] }) }),
   }),
 });
 

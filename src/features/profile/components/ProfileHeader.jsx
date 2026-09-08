@@ -24,12 +24,12 @@ export default function ProfileHeader({
     );
   return (
     <header className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
-      <div className="h-40 bg-accent/30 sm:h-54">
+      <div className="h-40 bg-accent/30 sm:h-56">
         {profile.banner ? (
           <img
             src={profile.banner}
             alt="Profile banner"
-            className="h-full w-full object-cover"
+            className="block h-full w-full object-cover"
           />
         ) : (
           <div className="h-full bg-linear-to-r from-accent/20 to-accent/40" />
@@ -37,12 +37,13 @@ export default function ProfileHeader({
       </div>
       <div className="px-4 pb-6 sm:px-7">
         <div className="flex items-center justify-between gap-3">
-          <div className="-mt-10 grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-surface bg-primary text-xl font-bold text-primary-foreground shadow-sm">
+          <div className="-mt-10 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-primary text-xl font-bold text-primary-foreground shadow-sm">
             {profile.avatar ? (
               <img
-                className="h-full w-full object-cover"
+                className="h-20 w-20 object-cover"
                 src={profile.avatar}
                 alt={`${profile.name}'s avatar`}
+                referrerPolicy="no-referrer"
               />
             ) : (
               initials(profile.name)
@@ -135,7 +136,7 @@ export default function ProfileHeader({
   );
 }
 
-function ViewerMenu({ copyLink }) {
+function ViewerMenu({ copyLink, onBlock, onReport }) {
   const [confirming, setConfirming] = useState(false);
   return confirming ? (
     <div className="p-2">
@@ -147,7 +148,10 @@ function ViewerMenu({ copyLink }) {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => setConfirming(false)}
+          onClick={() => {
+            onBlock?.();
+            setConfirming(false);
+          }}
         >
           Block
         </Button>
@@ -157,7 +161,9 @@ function ViewerMenu({ copyLink }) {
     <>
       <DropdownMenuItem onClick={copyLink}>Copy profile link</DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive">Report</DropdownMenuItem>
+      <DropdownMenuItem variant="destructive" onClick={onReport}>
+        Report
+      </DropdownMenuItem>
       <DropdownMenuItem
         variant="destructive"
         onClick={() => setConfirming(true)}

@@ -8,15 +8,13 @@ export const authApi = baseApi.injectEndpoints({
     register: builder.mutation({
       query: (details) => ({ url: "/auth/register", method: "POST", body: details }),
     }),
-    updateProfile: builder.mutation({
-      query: ({ userId, details }) => ({
-        url: `/users/${userId}`,
-        method: "PATCH",
-        body: details,
+    logout: builder.mutation({
+      extraOptions: { skipAuthRefresh: true },
+      query: (refreshToken) => ({
+        url: "/auth/logout",
+        method: "POST",
+        body: { refreshToken },
       }),
-    }),
-    deleteAccount: builder.mutation({
-      query: (userId) => ({ url: `/users/${userId}`, method: "DELETE" }),
     }),
   }),
 });

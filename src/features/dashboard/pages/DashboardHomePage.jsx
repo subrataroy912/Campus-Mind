@@ -2,15 +2,15 @@ import { useMemo } from "react";
 import { Compass, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 
-import { useAuth } from "@/context/AuthContext.jsx";
 import { useDashboardData } from "../useDashboardData.js";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
+import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 
 export default function DashboardHomePage() {
-  const { user } = useAuth();
+  const { data: profile, isLoading, error } = useGetCurrentProfileQuery();
   const {
     classrooms = [],
     exploreClassrooms = [],
@@ -24,14 +24,28 @@ export default function DashboardHomePage() {
       (classroom) => !joinedCodes.has(classroom.code),
     );
 
-    return [...available].sort((a, b) => b.popularity - a.popularity).slice(0, 3);
+    return [...available]
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, 3);
   }, [classrooms, exploreClassrooms]);
 
-  // Handle global loading state to prevent UI jumping
-  if (status === "loading" || status === "idle") {
+  // Handle global loading states for both dashboard data and profile
+  if (status === "loading" || status === "idle" || isLoading) {
     return (
       <div className="flex h-64 w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Handle profile fetch errors
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl p-6">
+        <EmptyState
+          title="We could not load your profile"
+          description="Please check your connection or refresh the page."
+        />
       </div>
     );
   }
@@ -43,7 +57,7 @@ export default function DashboardHomePage() {
           Your learning space
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
-          Welcome back, {user?.name?.split(" ")[0] || "there"}.
+          Welcome back, {profile?.displayName?.split(" ")[0] || "there"}.
         </h1>
         <p className="mt-2 max-w-2xl text-text-muted">
           Keep up with your classes, then discover a new space to learn with the
@@ -109,7 +123,12 @@ export default function DashboardHomePage() {
               Explore popular classes and recommendations selected for you.
             </p>
           </div>
-          <Link to="/dashboard/explore" className="text-sm font-medium text-primary hover:underline">See all</Link>
+          <Link
+            to="/dashboard/explore"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            See all
+          </Link>
         </div>
 
         {status === "error" ? (

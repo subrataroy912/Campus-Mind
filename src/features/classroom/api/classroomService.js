@@ -21,20 +21,24 @@ export async function findClassroomById(_userId, classId) {
   );
 }
 
-export async function findClassroomByCode(_userId, code) {
-  return unwrapResponse(
-    await store.dispatch(classroomApi.endpoints.findClassroomByCode.initiate(code)).unwrap(),
-  );
+export async function findClassroomByCode(_userId, courseId) {
+  return findClassroomById(_userId, courseId);
 }
 
 export async function createClassroom(_userId, details) {
   return unwrapResponse(
-    await store.dispatch(classroomApi.endpoints.createClassroom.initiate(details)).unwrap(),
+    await store.dispatch(classroomApi.endpoints.createClassroom.initiate({
+      title: details.className,
+      section: details.section,
+      subject: details.subject,
+      description: details.description,
+      visibility: details.accessType === "open" ? "PUBLIC" : "PRIVATE",
+    })).unwrap(),
   );
 }
 
-export async function joinClassroom(_userId, code) {
+export async function joinClassroom(_userId, courseId, code) {
   return unwrapResponse(
-    await store.dispatch(classroomApi.endpoints.joinClassroom.initiate(code)).unwrap(),
+    await store.dispatch(classroomApi.endpoints.joinClassroom.initiate({ courseId, code })).unwrap(),
   );
 }

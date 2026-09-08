@@ -64,6 +64,7 @@ export async function updateProfile(details) {
   );
 }
 
-export async function deleteAccount(userId) {
-  await store.dispatch(authApi.endpoints.deleteAccount.initiate(userId)).unwrap();
+export async function logout(refreshToken) {
+  if (!refreshToken) return;
+  await store.dispatch(authApi.endpoints.logout.initiate(refreshToken)).unwrap();
 }

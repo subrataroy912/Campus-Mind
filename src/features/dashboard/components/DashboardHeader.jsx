@@ -2,17 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { LogOut, Menu, X } from "lucide-react";
 
-import { useAuth } from "../../../context/AuthContext";
 import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
+import { initials } from "@/utils/initials";
+import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
+import { logout } from "@/features/auth/api/authService";
 
 export default function DashboardHeader() {
+  const { data: profile, isLoading, error } = useGetCurrentProfileQuery();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const buttonRef = useRef(null);
-
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -31,12 +33,12 @@ export default function DashboardHeader() {
         setMenuOpen(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "unset"; 
+      document.body.style.overflow = "unset";
     };
   }, [menuOpen]);
 
@@ -44,11 +46,11 @@ export default function DashboardHeader() {
     logout();
     navigate("/", { replace: true });
   };
-
+console.log(profile);
+  if (isLoading) return <div>Loading profile...</div>;
+  if (error) return <div>Failed to load profile data.</div>;
   return (
-   
     <header className="relative flex h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6 z-40">
-      
       {/* Grouped Menu Button and Logos */}
       <div className="flex items-center gap-1 sm:gap-2">
         <button
@@ -73,22 +75,23 @@ export default function DashboardHeader() {
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <Link
           to="/dashboard/profile"
-          className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main hover:bg-canvas transition-colors"
+          className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main transition-colors hover:bg-canvas"
         >
-          <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-accent/20 text-primary">
-            {user?.avatar ? (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent/20 text-primary">
+            {profile?.avatarUrl ? (
               <img
-                src={user.avatar}
-                alt={`${user?.name || "User"}'s avatar`}
+                src={profile.avatarUrl}
+                alt={`${profile?.displayName || "User"}'s avatar`}
                 className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
-              <span className="font-bold text-sm uppercase">
-                {user?.name ? user.name.charAt(0) : "U"}
+              <span className="text-sm font-bold uppercase">
+                {profile?.displayName ? initials(profile.displayName) : "U"}
               </span>
             )}
-          </span>
-          <span className="hidden sm:inline">{user?.name || "Profile"}</span>
+          </div>
+          <span className="hidden sm:inline">{profile?.displayName || "Profile"}</span>
         </Link>
 
         <button
@@ -100,21 +103,19 @@ export default function DashboardHeader() {
         </button>
       </div>
 
-      
       {menuOpen && (
         <>
           {/* Backdrop/Overlay */}
-          <div 
+          <div
             className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          
+
           {/* Sidebar Container */}
-          
+
           <div ref={sidebarRef} className="fixed left-0 top-16 z-50 md:hidden">
             <Sidebar
-              
               isAbsolute="h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg overflow-y-auto bg-surface"
               onNavigate={() => setMenuOpen(false)}
             />
@@ -123,4 +124,4 @@ export default function DashboardHeader() {
       )}
     </header>
   );
-                }
+}

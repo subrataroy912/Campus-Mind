@@ -138,6 +138,43 @@ export function EditProfileModal({
                 <FieldError id="profile-handle-error" message={errors.handle} />
               </div>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="profile-first-name" className="mb-1.5 block text-sm font-medium text-text-main">
+                    First name
+                  </label>
+                  <Input
+                    id="profile-first-name"
+                    value={formData.firstName}
+                    onChange={(event) => handleChange("firstName", event.target.value)}
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="profile-last-name" className="mb-1.5 block text-sm font-medium text-text-main">
+                    Last name
+                  </label>
+                  <Input
+                    id="profile-last-name"
+                    value={formData.lastName}
+                    onChange={(event) => handleChange("lastName", event.target.value)}
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="profile-headline" className="mb-1.5 block text-sm font-medium text-text-main">
+                  Headline
+                </label>
+                <Input
+                  id="profile-headline"
+                  value={formData.headline}
+                  onChange={(event) => handleChange("headline", event.target.value)}
+                  placeholder="e.g. Computer science student"
+                />
+              </div>
+
               <div>
                 <div className="mb-1.5 flex items-center justify-between gap-3">
                   <label
@@ -174,24 +211,20 @@ export function EditProfileModal({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label
-                      htmlFor="profile-department"
+                      htmlFor="profile-city"
                       className="mb-1.5 block text-sm font-medium text-text-main"
                     >
-                      Department / course
+                      City
                     </label>
                     <Input
-                      id="profile-department"
-                      value={formData.department}
+                      id="profile-city"
+                      value={formData.city}
                       onChange={(event) =>
-                        handleChange("department", event.target.value)
+                        handleChange("city", event.target.value)
                       }
-                      onBlur={() => handleBlur("department")}
-                      aria-invalid={Boolean(errors.department)}
-                      placeholder="e.g. Computer Science"
-                    />
-                    <FieldError
-                      id="profile-department-error"
-                      message={errors.department}
+                      onBlur={() => handleBlur("city")}
+                      aria-invalid={Boolean(errors.city)}
+                      placeholder="e.g. Dhaka"
                     />
                   </div>
                   <div>
@@ -199,25 +232,47 @@ export function EditProfileModal({
                       htmlFor="profile-batch-year"
                       className="mb-1.5 block text-sm font-medium text-text-main"
                     >
-                      Batch year
+                      Country
                     </label>
                     <Input
-                      id="profile-batch-year"
-                      value={formData.batchYear}
+                      id="profile-country"
+                      value={formData.country}
                       onChange={(event) =>
-                        handleChange("batchYear", event.target.value)
+                        handleChange("country", event.target.value)
                       }
-                      onBlur={() => handleBlur("batchYear")}
-                      maxLength={4}
-                      inputMode="numeric"
-                      aria-invalid={Boolean(errors.batchYear)}
-                      placeholder="e.g. 2026"
-                    />
-                    <FieldError
-                      id="profile-batch-year-error"
-                      message={errors.batchYear}
+                      onBlur={() => handleBlur("country")}
+                      aria-invalid={Boolean(errors.country)}
+                      placeholder="e.g. India"
                     />
                   </div>
+                </div>
+                <div className="mt-4">
+                  <label htmlFor="profile-batch-year" className="mb-1.5 block text-sm font-medium text-text-main">
+                    Grade or batch
+                  </label>
+                  <Input
+                    id="profile-batch-year"
+                    value={formData.batchYear}
+                    onChange={(event) => handleChange("batchYear", event.target.value)}
+                    onBlur={() => handleBlur("batchYear")}
+                    placeholder="e.g. 2026"
+                  />
+                  <FieldError id="profile-batch-year-error" message={errors.batchYear} />
+                </div>
+                <div className="mt-4">
+                  <label htmlFor="profile-visibility" className="mb-1.5 block text-sm font-medium text-text-main">
+                    Profile visibility
+                  </label>
+                  <select
+                    id="profile-visibility"
+                    value={formData.profileVisibility}
+                    onChange={(event) => handleChange("profileVisibility", event.target.value)}
+                    className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    <option value="PUBLIC">Public</option>
+                    <option value="PRIVATE">Private</option>
+                    <option value="COURSE_MEMBERS">Course members</option>
+                  </select>
                 </div>
               </div>
             </div>

@@ -22,7 +22,8 @@ function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const isLoading = authStatus === "loading";
-  const errorMessage = authError?.data?.message || authError?.message || "Unable to sign in.";
+  const errorMessage =
+    authError?.data?.message || authError?.message || "Unable to sign in.";
   const startOAuth = (provider) => {
     clearAuthError();
     window.location.assign(getOAuthRedirectUrl(provider, "login"));
@@ -102,7 +103,9 @@ function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="text-text-muted hover:text-text-main focus:outline-none"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   />
                 }
               >

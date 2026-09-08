@@ -3,21 +3,29 @@ import ValidateField from "@/utils/ValidateField.jsx";
 
 const FORM_FIELDS = [
   "name",
+  "firstName",
+  "lastName",
   "handle",
+  "headline",
   "bio",
-  "department",
+  "city",
+  "country",
   "batchYear",
-  "avatar",
-  "banner",
+  "profileVisibility",
 ];
 
 function getInitialFormData(profile) {
   return {
     name: profile?.name || "",
+    firstName: profile?.firstName || "",
+    lastName: profile?.lastName || "",
     handle: profile?.handle || "",
+    headline: profile?.headline || "",
     bio: profile?.bio || "",
-    department: profile?.department || "",
+    city: profile?.city || "",
+    country: profile?.country || "",
     batchYear: profile?.batchYear || "",
+    profileVisibility: profile?.profileVisibility || "PUBLIC",
     avatar: profile?.avatar || "",
     banner: profile?.banner || "",
   };

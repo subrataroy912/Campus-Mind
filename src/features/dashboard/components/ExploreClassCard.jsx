@@ -68,7 +68,7 @@ export default function ExploreClassCard({ classroom }) {
           {/* Note: If your Button component doesn't support the 'to' prop out of the box, 
               wrap it in a <Link to="..."> instead. */}
           <Button
-            to={`/dashboard/class/join?code=${classroom.code}`}
+            to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom.id)}`}
             size="sm"
             className="bg-primary text-white hover:bg-primary-hover transition-colors"
           >

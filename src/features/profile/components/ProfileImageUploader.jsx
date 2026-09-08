@@ -8,7 +8,7 @@ export function ProfileImageUploader(props) {
       label="Photo"
       maxSize={5 * 1024 * 1024}
       sizeClass="h-24 w-24 rounded-full border-4 border-white"
-      helperText="JPG, PNG, GIF or WebP. Max 5MB."
+      helperText="JPG, PNG, GIF or WebP. Preview only until image upload is enabled."
     />
   );
 }
@@ -21,7 +21,7 @@ export function CoverImageUploader(props) {
       label="Cover"
       maxSize={10 * 1024 * 1024}
       sizeClass="h-48 w-full"
-      helperText="JPG, PNG, GIF or WebP. Max 10MB. Recommended 1200x400px."
+      helperText="JPG, PNG, GIF or WebP. Preview only until image upload is enabled."
     />
   );
 }

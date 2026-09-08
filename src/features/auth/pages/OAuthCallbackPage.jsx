@@ -26,22 +26,26 @@ export default function OAuthCallbackPage() {
       return;
     }
 
-    try {
-      const user = encodedUser ? JSON.parse(decodeURIComponent(encodedUser)) : null;
-      const response = normalizeAuthResponse({
-        accessToken,
-        refreshToken,
-        user,
-        userId: searchParams.get("userId"),
-        email: searchParams.get("email"),
-        displayName: searchParams.get("displayName"),
-        avatarUrl: searchParams.get("avatarUrl"),
-      });
-      completeOAuth(response);
-      navigate("/dashboard", { replace: true });
-    } catch {
-      // AuthContext owns the failure state shown below.
-    }
+    const finishOAuth = async () => {
+      try {
+        const user = encodedUser ? JSON.parse(decodeURIComponent(encodedUser)) : null;
+        const response = normalizeAuthResponse({
+          accessToken,
+          refreshToken,
+          user,
+          userId: searchParams.get("userId"),
+          email: searchParams.get("email"),
+          displayName: searchParams.get("displayName"),
+          avatarUrl: searchParams.get("avatarUrl"),
+        });
+        await completeOAuth(response);
+        navigate("/dashboard", { replace: true });
+      } catch {
+        // AuthContext owns the failure state shown below.
+      }
+    };
+
+    finishOAuth();
   }, [authStatus, completeOAuth, navigate, searchParams]);
 
   if (authStatus === "failed") {

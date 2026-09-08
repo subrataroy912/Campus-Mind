@@ -5,7 +5,7 @@ import {
   register as registerRequest,
   getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
-  deleteAccount as deleteAccountRequest,
+  logout as logoutRequest,
 } from "../features/auth/api/authService";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useDispatch } from "react-redux";
@@ -17,17 +17,27 @@ const AuthContext = createContext(null);
 const SESSION_KEY = "campus-mind.session";
 const PROFILE_FIELDS = {
   name: "displayName",
+  firstName: "firstName",
+  lastName: "lastName",
+  handle: "handle",
+  headline: "headline",
   bio: "about",
   avatar: "avatarUrl",
   banner: "bannerUrl",
+  city: "city",
+  country: "country",
   batchYear: "gradeLevel",
+  profileVisibility: "profileVisibility",
 };
 
 function toProfilePatch(formData, currentUser) {
   return Object.entries(PROFILE_FIELDS).reduce((changes, [formField, apiField]) => {
     const value = formData[formField] ?? "";
-    const currentValue = currentUser?.[apiField] ?? "";
-    if (value !== currentValue) changes[apiField] = value;
+    const currentValue = currentUser?.[apiField] ?? currentUser?.[formField] ?? "";
+    if ((apiField === "avatarUrl" || apiField === "bannerUrl") && value.startsWith("data:")) {
+      return changes;
+    }
+    if (value !== currentValue || formField === "profileVisibility") changes[apiField] = value;
     return changes;
   }, {});
 }
@@ -50,27 +60,30 @@ export function AuthProvider({ children }) {
       clearAuthError() {
         setAuthState((current) => ({ ...current, error: null }));
       },
-      completeOAuth({ accessToken, refreshToken, user: nextUser, errorMessage }) {
+      async completeOAuth({ accessToken, refreshToken, user: nextUser, errorMessage }) {
         if (errorMessage) {
           const error = new Error(errorMessage);
           setAuthState({ status: "failed", error });
           throw error;
         }
-        if (!accessToken || !nextUser) {
+        if (!accessToken) {
           const error = new Error("The social sign-in response was incomplete.");
           setAuthState({ status: "failed", error });
           throw error;
         }
         resetApiCache(dispatch);
-        setUser({ ...nextUser, accessToken, refreshToken });
         dispatch(setCredentials({ accessToken, refreshToken, user: nextUser }));
+        const profile = nextUser || await getCurrentProfileRequest();
+        setUser({ ...profile, accessToken, refreshToken });
+        dispatch(setCredentials({ accessToken, refreshToken, user: profile }));
         setAuthState({ status: "succeeded", error: null });
-        return nextUser;
+        return profile;
       },
       async login(credentials) {
         setAuthState({ status: "loading", error: null });
         try {
-          const response = await loginRequest(credentials);
+          const { rememberMe: _rememberMe, ...loginCredentials } = credentials;
+          const response = await loginRequest(loginCredentials);
           const { accessToken, refreshToken, user: nextUser } = response;
           resetApiCache(dispatch);
           setUser({ ...nextUser, accessToken, refreshToken });
@@ -100,7 +113,15 @@ export function AuthProvider({ children }) {
       },
       async updateProfile(details) {
         const nextProfile = await updateProfileRequest(toProfilePatch(details, user));
-        const nextUser = { ...user, ...nextProfile, name: nextProfile.displayName || user?.name };
+        const nextUser = {
+          ...user,
+          ...nextProfile,
+          name: nextProfile.displayName || user?.name,
+          avatar: nextProfile.avatarUrl || user?.avatar,
+          banner: nextProfile.bannerUrl || user?.banner,
+          bio: nextProfile.about || user?.bio,
+          batchYear: nextProfile.gradeLevel || user?.batchYear,
+        };
         setUser(nextUser);
         dispatch(setCredentials({ accessToken: user?.accessToken, refreshToken: user?.refreshToken, user: nextUser }));
         return nextProfile;
@@ -112,16 +133,14 @@ export function AuthProvider({ children }) {
         dispatch(setCredentials({ accessToken: user?.accessToken, refreshToken: user?.refreshToken, user: nextUser }));
         return profile;
       },
-      async deleteAccount() {
-        if (user?.id) await deleteAccountRequest(user.id);
-        setUser(null);
-        dispatch(clearCredentials());
-        resetApiCache(dispatch);
-      },
-      logout() {
-        setUser(null);
-        dispatch(clearCredentials());
-        resetApiCache(dispatch);
+      async logout() {
+        try {
+          await logoutRequest(user?.refreshToken);
+        } finally {
+          setUser(null);
+          dispatch(clearCredentials());
+          resetApiCache(dispatch);
+        }
       },
     }),
     [authState, dispatch, user, setUser],

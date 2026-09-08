@@ -18,10 +18,6 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 
-const classIds = (user) => [
-  ...(user?.created_class_ids || []),
-  ...(user?.joined_class_ids || []),
-];
 const profileFor = (user) => ({
   ...user,
   name:
@@ -29,9 +25,11 @@ const profileFor = (user) => ({
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     "CampusMind member",
   bio: user?.about || user?.bio,
-  avatar: user?.avatarUrl || user?.avatar_url,
+  avatar: user?.avatarUrl || user?.avatar_url || user?.avatar,
   banner: user?.bannerUrl || user?.banner_url,
   batchYear: user?.gradeLevel || user?.batchYear,
+  firstName: user?.firstName,
+  lastName: user?.lastName,
   privacy: {
     discoverable: user?.profileVisibility !== "PRIVATE",
     ...user?.privacy,
@@ -65,11 +63,10 @@ export default function ProfilePage() {
     () => viewedUser && profileFor(viewedUser),
     [viewedUser],
   );
-  const currentClassIds = classIds(currentUser);
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
   const classes = isOwner
-    ? classrooms.filter((item) => currentClassIds.includes(item.id))
+    ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
   if (isCurrentProfileLoading || isPublicProfileLoading)
@@ -101,6 +98,16 @@ export default function ProfilePage() {
     {
       label: "Headline",
       value: profile.headline || "CampusMind learner",
+      icon: "program",
+    },
+    {
+      label: "Account type",
+      value: profile.accountType || "—",
+      icon: "member",
+    },
+    {
+      label: "Academic level",
+      value: profile.batchYear || "—",
       icon: "program",
     },
     {
