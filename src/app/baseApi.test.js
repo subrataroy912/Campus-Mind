@@ -22,7 +22,9 @@ describe("shouldForceLogout", () => {
     vi.stubGlobal("window", undefined);
     vi.resetModules();
 
-    const { default: authReducer } = await import("../features/auth/authSlice.js");
+    const { default: authReducer } = await import(
+      "../features/auth/authSlice.js"
+    );
 
     expect(authReducer(undefined, { type: "@@INIT" })).toEqual({
       accessToken: null,

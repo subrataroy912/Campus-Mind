@@ -4,21 +4,30 @@ import { useSearchParams } from "react-router";
 import { findClassroomByCode, joinClassroom } from "../api/classroomService";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
-import { CLASS_CODE_LENGTH, formatClassCode, normalizeClassCode } from "@/utils/classCode.js";
+import {
+  CLASS_CODE_LENGTH,
+  formatClassCode,
+  normalizeClassCode,
+} from "@/utils/classCode.js";
 
 export default function JoinClass() {
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const { user } = useAuth();
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
-  const [courseId, setCourseId] = useState(() => searchParams.get("courseId") || "");
-  const [code, setCode] = useState(() => Array.from({ length: CLASS_CODE_LENGTH }, (_, index) => initialCode[index] || ""));
+  const [courseId, setCourseId] = useState(
+    () => searchParams.get("courseId") || ""
+  );
+  const [code, setCode] = useState(() =>
+    Array.from(
+      { length: CLASS_CODE_LENGTH },
+      (_, index) => initialCode[index] || ""
+    )
+  );
   const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
   const [foundClass, setFoundClass] = useState(null);
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
-
-
 
   const handleChange = (index, value) => {
     const clean = normalizeClassCode(value).slice(0, 1);
@@ -60,26 +69,7 @@ export default function JoinClass() {
     const classCode = formatClassCode(code);
     const hasCode = code.every(Boolean);
 
-    if ((!trimmedCourseId && !hasCode) || (!trimmedCourseId && !hasCode)) {
-      setStatus("incomplete");
-      return;
-    }
-
-    if (!trimmedCourseId && hasCode) {
-      setStatus("loading");
-      setError("");
-      try {
-        const match = await findClassroomByCode(user?.id, "", classCode);
-        setFoundClass(match);
-        setStatus(match ? "found" : "not-found");
-      } catch (requestError) {
-        setError(requestError.message || "Unable to look up this class.");
-        setStatus("idle");
-      }
-      return;
-    }
-
-    if (!hasCode) {
+    if (!trimmedCourseId || !hasCode) {
       setStatus("incomplete");
       return;
     }
@@ -87,7 +77,11 @@ export default function JoinClass() {
     setStatus("loading");
     setError("");
     try {
-      const match = await findClassroomByCode(user?.id, trimmedCourseId, classCode);
+      const match = await findClassroomByCode(
+        user?.id,
+        trimmedCourseId,
+        classCode
+      );
       setFoundClass(match);
       setStatus(match ? "found" : "not-found");
     } catch (requestError) {
@@ -186,14 +180,23 @@ export default function JoinClass() {
               </div>
 
               {status === "incomplete" && (
-                <p className="mt-3 text-center text-xs text-secondary">Enter the course ID and all 8 characters of the class code.</p>
+                <p className="mt-3 text-center text-xs text-secondary">
+                  Enter the course ID and all 8 characters of the class code.
+                </p>
               )}
               {status === "not-found" && (
                 <p className="mt-3 text-center text-xs text-secondary">
                   No class found with that code. Check it and try again.
                 </p>
               )}
-              {error && <p className="mt-3 text-center text-xs text-secondary" role="alert">{error}</p>}
+              {error && (
+                <p
+                  className="mt-3 text-center text-xs text-secondary"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
 
               <button
                 type="submit"
@@ -207,7 +210,9 @@ export default function JoinClass() {
                 Try{" "}
                 <button
                   type="button"
-                  onClick={() => setCode(["A", "L", "G", "2", "7", "X", "9", "K"])}
+                  onClick={() =>
+                    setCode(["A", "L", "G", "2", "7", "X", "9", "K"])
+                  }
                   className="font-medium text-primary hover:underline"
                 >
                   ALG2-7X9K
@@ -232,7 +237,10 @@ export default function JoinClass() {
                   {foundClass.title} · {foundClass.subtitle}
                 </p>
                 <p className="text-sm text-text-muted">
-                  {foundClass.subject} · Taught by {foundClass.instructor?.name || foundClass.teacher?.name || 'CampusMind teacher'}
+                  {foundClass.subject} · Taught by{" "}
+                  {foundClass.instructor?.name ||
+                    foundClass.teacher?.name ||
+                    "CampusMind teacher"}
                 </p>
               </div>
               <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row">
@@ -276,7 +284,10 @@ export default function JoinClass() {
                 You've joined {foundClass.title}
               </h2>
               <p className="mt-1 text-sm text-text-muted">
-                {foundClass.subtitle} with {foundClass.instructor?.name || foundClass.teacher?.name || 'CampusMind teacher'}
+                {foundClass.subtitle} with{" "}
+                {foundClass.instructor?.name ||
+                  foundClass.teacher?.name ||
+                  "CampusMind teacher"}
               </p>
               <button
                 type="button"

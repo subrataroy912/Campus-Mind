@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { optimizeImage } from "@/utils/optimizeImage.js";
 
 const VALID_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
@@ -8,6 +9,7 @@ export default function ImageUploader({
   inputId,
   label,
   maxSize,
+  maxDimension,
   sizeClass,
   helperText,
 }) {
@@ -17,7 +19,13 @@ export default function ImageUploader({
   const fileInputRef = useRef(null);
   const hasChanges = Boolean(preview) && preview !== (currentImage || null);
 
-  const handleFileSelect = (file) => {
+  useEffect(() => {
+    return () => {
+      if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
+  const handleFileSelect = async (file) => {
     if (!VALID_TYPES.includes(file.type)) {
       setError("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
       return;
@@ -28,12 +36,10 @@ export default function ImageUploader({
     }
 
     setError("");
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setPreview(event.target.result);
-      onChange(event.target.result);
-    };
-    reader.readAsDataURL(file);
+    const optimizedFile = await optimizeImage(file, maxDimension);
+    const previewUrl = URL.createObjectURL(optimizedFile);
+    setPreview(previewUrl);
+    onChange(previewUrl, optimizedFile);
   };
 
   const handleDrop = (event) => {
@@ -46,7 +52,7 @@ export default function ImageUploader({
   const handleRemove = () => {
     const safeCurrent = currentImage || null;
     setPreview(safeCurrent);
-    onChange(safeCurrent);
+    onChange(safeCurrent, null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 

@@ -10,12 +10,27 @@ export const profileApi = baseApi.injectEndpoints({
     }),
     getPublicProfile: builder.query({
       query: (userId) => `/users/${userId}`,
-      providesTags: (_result, _error, userId) => [{ type: "Profile", id: userId }],
+      providesTags: (_result, _error, userId) => [
+        { type: "Profile", id: userId },
+      ],
       keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: 300,
     }),
     updateCurrentProfile: builder.mutation({
-      query: (changes) => ({ url: "/users/me", method: "PATCH", body: changes }),
+      query: (changes) => {
+        const { avatarFile, bannerFile, ...profile } = changes;
+        if (!avatarFile && !bannerFile) {
+          return { url: "/users/me", method: "PATCH", body: profile };
+        }
+        const body = new FormData();
+        body.append(
+          "profile",
+          new Blob([JSON.stringify(profile)], { type: "application/json" })
+        );
+        if (avatarFile) body.append("avatarFile", avatarFile, avatarFile.name);
+        if (bannerFile) body.append("bannerFile", bannerFile, bannerFile.name);
+        return { url: "/users/me", method: "PATCH", body };
+      },
       invalidatesTags: ["Profile", "Classrooms"],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {

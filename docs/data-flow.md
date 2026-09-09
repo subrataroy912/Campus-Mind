@@ -22,7 +22,7 @@ flowchart LR
 
 ```
 
-There is currently no backend server, HTTP client, API endpoint, database, WebSocket connection, or environment-based API configuration.
+The active client uses the configured REST API through RTK Query. Backend data is requested from `VITE_API_BASE_URL`; local storage is used for session persistence and API cache persistence.
 
 ## Application Startup
 
@@ -94,21 +94,21 @@ sequenceDiagram
 
 ### Login ownership
 
-| Layer | Current responsibility |
-| --- | --- |
-| View | Collects credentials, displays loading/errors, navigates after success |
-| Context | Exposes `login`, stores the current user, derives `isAuthenticated` |
-| Service | Reads users, validates credentials, removes password from returned session object, simulates 300 ms latency |
-| Storage | Stores registered users and active session |
-| Fixtures | Provides fallback demo users and demo-account picker data |
+| Layer    | Current responsibility                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| View     | Collects credentials, displays loading/errors, navigates after success                                      |
+| Context  | Exposes `login`, stores the current user, derives `isAuthenticated`                                         |
+| Service  | Reads users, validates credentials, removes password from returned session object, simulates 300 ms latency |
+| Storage  | Stores registered users and active session                                                                  |
+| Fixtures | Provides fallback demo users and demo-account picker data                                                   |
 
 Relevant files:
 
-* [LoginPage.jsx](https://www.google.com/search?q=../src/features/auth/pages/LoginPage.jsx)
-* [AuthContext.jsx](https://www.google.com/search?q=../src/context/AuthContext.jsx)
-* [authService.js](https://www.google.com/search?q=../src/features/auth/api/authService.js)
-* [useLocalStorage.js](https://www.google.com/search?q=../src/hooks/useLocalStorage.js)
-* [mockUsers.js](https://www.google.com/search?q=../src/mock/mockUsers.js)
+- [LoginPage.jsx](https://www.google.com/search?q=../src/features/auth/pages/LoginPage.jsx)
+- [AuthContext.jsx](https://www.google.com/search?q=../src/context/AuthContext.jsx)
+- [authService.js](https://www.google.com/search?q=../src/features/auth/api/authService.js)
+- [useLocalStorage.js](https://www.google.com/search?q=../src/hooks/useLocalStorage.js)
+- [mockUsers.js](https://www.google.com/search?q=../src/mock/mockUsers.js)
 
 ## Registration
 
@@ -189,12 +189,12 @@ sequenceDiagram
 
 Relevant files:
 
-* [useDashboardData.js](https://www.google.com/search?q=../src/features/dashboard/useDashboardData.js)
-* [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
-* [DashboardHomePage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardHomePage.jsx)
-* [ProfilePage.jsx](https://www.google.com/search?q=../src/features/profile/pages/ProfilePage.jsx)
-* [DashboardCommunityPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardCommunityPage.jsx)
-* [DashboardAssignmentPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardAssignmentPage.jsx)
+- [useDashboardData.js](https://www.google.com/search?q=../src/features/dashboard/useDashboardData.js)
+- [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
+- [DashboardHomePage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardHomePage.jsx)
+- [ProfilePage.jsx](https://www.google.com/search?q=../src/features/profile/pages/ProfilePage.jsx)
+- [DashboardCommunityPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardCommunityPage.jsx)
+- [DashboardAssignmentPage.jsx](https://www.google.com/search?q=../src/features/dashboard/pages/DashboardAssignmentPage.jsx)
 
 ## Opening a classroom
 
@@ -216,11 +216,11 @@ flowchart TD
 
 The classroom record is service-loaded, but the classroom home content is fixture-driven:
 
-* `PINNED_ANNOUNCEMENT`
-* `FEED_POSTS`
-* `TODO_ITEMS`
-* `ACTIVE_NOW`
-* `QUICK_LINKS`
+- `PINNED_ANNOUNCEMENT`
+- `FEED_POSTS`
+- `TODO_ITEMS`
+- `ACTIVE_NOW`
+- `QUICK_LINKS`
 
 These are defined in [classPageData.js](https://www.google.com/search?q=../src/features/classroom/data/classPageData.js).
 
@@ -288,10 +288,10 @@ sequenceDiagram
 
 Relevant files:
 
-* [ExploreClassCard.jsx](https://www.google.com/search?q=../src/features/dashboard/components/ExploreClassCard.jsx)
-* [JoinClass.jsx](https://www.google.com/search?q=../src/features/classroom/pages/JoinClass.jsx)
-* [classCode.js](https://www.google.com/search?q=../src/utils/classCode.js)
-* [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
+- [ExploreClassCard.jsx](https://www.google.com/search?q=../src/features/dashboard/components/ExploreClassCard.jsx)
+- [JoinClass.jsx](https://www.google.com/search?q=../src/features/classroom/pages/JoinClass.jsx)
+- [classCode.js](https://www.google.com/search?q=../src/utils/classCode.js)
+- [classroomService.js](https://www.google.com/search?q=../src/features/classroom/api/classroomService.js)
 
 ## Classroom storage behavior
 
@@ -304,11 +304,11 @@ campus-mind.classrooms.<userId>
 
 Important behavior:
 
-* Created and joined classrooms are written per user.
-* Missing user storage falls back to the shared `mockClassrooms` fixture.
-* Explore classrooms always come from `exploreClassrooms.js`.
-* Classroom service methods simulate asynchronous network behavior with a 300 ms delay.
-* No classroom data is sent to a server.
+- Created and joined classrooms are written per user.
+- Missing user storage falls back to the shared `mockClassrooms` fixture.
+- Explore classrooms always come from `exploreClassrooms.js`.
+- Classroom service methods simulate asynchronous network behavior with a 300 ms delay.
+- No classroom data is sent to a server.
 
 # Other Feature Data Flows
 
@@ -377,23 +377,23 @@ Theme is the only settings value persisted. Notification and privacy changes are
 
 # State Ownership Map
 
-| State | Runtime owner | Persistence | Source |
-| --- | --- | --- | --- |
-| Current user | `AuthContext` and `useLocalStorage` | `campus-mind.session` | Auth service result |
-| Authentication status | Derived in `AuthContext` | Derived | `Boolean(user)` |
-| Registered users | `authService` | `campus-mind.mock-users` | `mockUsers.js` fallback |
-| User classrooms | `useDashboardData`, `useClassroom` | `campus-mind.classrooms.<userId>` | `mockClassrooms.js` fallback |
-| Explore classrooms | `useDashboardData` | None | `exploreClassrooms.js` |
-| Classroom detail content | `ClassPage` and feature data module | None | `classPageData.js` |
-| Join code | `JoinClass` local state | URL initializes it | `useSearchParams` |
-| Classroom ID | `ClassPage` URL params | URL | `useParams` |
-| Reset token | `ResetPasswordPage` URL params | URL | `useSearchParams` |
-| Dashboard filters | Individual page state | None | User interaction |
-| Chat messages | `ChatThread` local state | None | `mockMessages.js` initial data |
-| Assignment completion | Assignment page state | None | `mockAssignments.js` initial data |
-| Notifications | Settings page state | None | Default constants |
-| Privacy | Settings page state | None | Default constants |
-| Theme | Settings page state and document class | `campus-mind.theme` | Browser preference |
+| State                    | Runtime owner                          | Persistence                       | Source                            |
+| ------------------------ | -------------------------------------- | --------------------------------- | --------------------------------- |
+| Current user             | `AuthContext` and `useLocalStorage`    | `campus-mind.session`             | Auth service result               |
+| Authentication status    | Derived in `AuthContext`               | Derived                           | `Boolean(user)`                   |
+| Registered users         | `authService`                          | `campus-mind.mock-users`          | `mockUsers.js` fallback           |
+| User classrooms          | `useDashboardData`, `useClassroom`     | `campus-mind.classrooms.<userId>` | `mockClassrooms.js` fallback      |
+| Explore classrooms       | `useDashboardData`                     | None                              | `exploreClassrooms.js`            |
+| Classroom detail content | `ClassPage` and feature data module    | None                              | `classPageData.js`                |
+| Join code                | `JoinClass` local state                | URL initializes it                | `useSearchParams`                 |
+| Classroom ID             | `ClassPage` URL params                 | URL                               | `useParams`                       |
+| Reset token              | `ResetPasswordPage` URL params         | URL                               | `useSearchParams`                 |
+| Dashboard filters        | Individual page state                  | None                              | User interaction                  |
+| Chat messages            | `ChatThread` local state               | None                              | `mockMessages.js` initial data    |
+| Assignment completion    | Assignment page state                  | None                              | `mockAssignments.js` initial data |
+| Notifications            | Settings page state                    | None                              | Default constants                 |
+| Privacy                  | Settings page state                    | None                              | Default constants                 |
+| Theme                    | Settings page state and document class | `campus-mind.theme`               | Browser preference                |
 
 # Coupling and Backend Migration Risks
 
@@ -401,10 +401,10 @@ Theme is the only settings value persisted. Notification and privacy changes are
 
 The following feature pages directly import mock data:
 
-* Login demo-account picker imports `mockUsers`.
-* Assignment page imports `mockAssignments`.
-* Community page imports `mockCommunityPosts`.
-* Messages page imports `mockMessages`.
+- Login demo-account picker imports `mockUsers`.
+- Assignment page imports `mockAssignments`.
+- Community page imports `mockCommunityPosts`.
+- Messages page imports `mockMessages`.
 
 These pages know fixture structure and own data initialization, so a backend integration would require changing page implementations rather than swapping a service adapter.
 
@@ -416,30 +416,30 @@ These pages know fixture structure and own data initialization, so a backend int
 
 Async simulation exists in:
 
-* `authService.login`
-* `authService.register`
-* classroom service reads and mutations
+- `authService.login`
+- `authService.register`
+- classroom service reads and mutations
 
 Synchronous or local-only behavior exists in:
 
-* profile updates
-* theme persistence
-* notification toggles
-* privacy toggles
-* message sending
-* assignment completion
-* saved item mutations
+- profile updates
+- theme persistence
+- notification toggles
+- privacy toggles
+- message sending
+- assignment completion
+- saved item mutations
 
 This means loading, retry, and failure states are not consistent across features.
 
 ## Data shape and authority risks
 
-* Passwords are stored in plaintext in the demo user list.
-* Profile updates modify the session but not the stored user record.
-* Deleting a user does not remove `campus-mind.classrooms.<userId>`.
-* Missing classroom storage falls back to the same mock classrooms for every user.
-* Each `useDashboardData()` call has independent state and no shared cache.
-* Classroom home content remains fixture-driven even when the classroom record is loaded through a service.
+- Passwords are stored in plaintext in the demo user list.
+- Profile updates modify the session but not the stored user record.
+- Deleting a user does not remove `campus-mind.classrooms.<userId>`.
+- Missing classroom storage falls back to the same mock classrooms for every user.
+- Each `useDashboardData()` call has independent state and no shared cache.
+- Classroom home content remains fixture-driven even when the classroom record is loaded through a service.
 
 # Backend Migration Seams
 

@@ -1,5 +1,10 @@
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
-import { DAYS, GRADE_LEVELS, SUBJECTS, THEME_COLORS } from "../model/createClassForm.js";
+import {
+  DAYS,
+  GRADE_LEVELS,
+  SUBJECTS,
+  THEME_COLORS,
+} from "../model/createClassForm.js";
 
 export default function CreateClass() {
   const {
@@ -66,12 +71,14 @@ export default function CreateClass() {
             </div>
             {!preview && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {THEME_COLORS.map((c) => (
+                {THEME_COLORS.map((c, index) => (
                   <button
-                    key={c.value}
+                    key={index}
                     type="button"
                     onClick={() => update("theme", c.value)}
-                    className={`h-7 w-7 rounded-full ${c.value} ring-offset-2 transition ${
+                    className={`h-7 w-7 rounded-full ${
+                      c.value
+                    } ring-offset-2 transition ${
                       form.theme === c.value
                         ? "ring-2 ring-text-heading"
                         : "ring-1 ring-border"
@@ -99,7 +106,9 @@ export default function CreateClass() {
                 }`}
               />
               {errors.className && (
-                <p className="mt-1 text-xs text-secondary">{errors.className}</p>
+                <p className="mt-1 text-xs text-secondary">
+                  {errors.className}
+                </p>
               )}
             </div>
             <div>
@@ -159,7 +168,9 @@ export default function CreateClass() {
                 ))}
               </select>
               {errors.gradeLevel && (
-                <p className="mt-1 text-xs text-secondary">{errors.gradeLevel}</p>
+                <p className="mt-1 text-xs text-secondary">
+                  {errors.gradeLevel}
+                </p>
               )}
             </div>
           </div>
@@ -246,9 +257,21 @@ export default function CreateClass() {
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {[
-                { value: "invite", label: "Invite only", desc: "Add students manually" },
-                { value: "code", label: "Class code", desc: "Students join with a code" },
-                { value: "open", label: "Open", desc: "Anyone with the link can join" },
+                {
+                  value: "invite",
+                  label: "Invite only",
+                  desc: "Add students manually",
+                },
+                {
+                  value: "code",
+                  label: "Class code",
+                  desc: "Students join with a code",
+                },
+                {
+                  value: "open",
+                  label: "Open",
+                  desc: "Anyone with the link can join",
+                },
               ].map((opt) => (
                 <label
                   key={opt.value}
@@ -297,7 +320,10 @@ export default function CreateClass() {
             </div>
           )}
           {submissionError && (
-            <div className="rounded-lg bg-secondary/10 px-4 py-3 text-sm text-secondary" role="alert">
+            <div
+              className="rounded-lg bg-secondary/10 px-4 py-3 text-sm text-secondary"
+              role="alert"
+            >
               {submissionError}
             </div>
           )}

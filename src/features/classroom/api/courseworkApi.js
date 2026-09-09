@@ -24,6 +24,19 @@ const normalizeSubmission = (submission = {}) => ({
   submitted: submission.submitted ?? Boolean(submission.submittedAt),
 });
 
+const normalizeGradebook = (response) => {
+  const list = Array.isArray(response) ? response : response?.data ?? [];
+  return list.map((item) => ({
+    ...item,
+    id: item.id ?? item.courseworkId ?? item.submissionId,
+    assignmentTitle: item.assignmentTitle ?? item.courseworkTitle ?? item.title,
+    dueDate: item.dueDate ?? item.dueAt ?? null,
+    score: item.score ?? item.pointsEarned ?? null,
+    outOf: item.outOf ?? item.maximumPoints ?? item.pointsPossible ?? null,
+    status: item.status ?? item.state ?? "assigned",
+  }));
+};
+
 export const courseworkApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCourseworkList: builder.query({
@@ -34,8 +47,10 @@ export const courseworkApi = baseApi.injectEndpoints({
       },
     }),
     getCourseworkById: builder.query({
-      query: ({ courseId, courseworkId }) => `/courses/${courseId}/coursework/${courseworkId}`,
-      transformResponse: (response) => normalizeCoursework(response?.data ?? response),
+      query: ({ courseId, courseworkId }) =>
+        `/courses/${courseId}/coursework/${courseworkId}`,
+      transformResponse: (response) =>
+        normalizeCoursework(response?.data ?? response),
     }),
     createCoursework: builder.mutation({
       query: ({ courseId, payload }) => ({
@@ -43,7 +58,8 @@ export const courseworkApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeCoursework(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeCoursework(response?.data ?? response),
       invalidatesTags: ["Classrooms", "Profile"],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -55,15 +71,23 @@ export const courseworkApi = baseApi.injectEndpoints({
       },
     }),
     getSubmissionList: builder.query({
-      query: ({ courseId, courseworkId }) => `/courses/${courseId}/coursework/${courseworkId}/submissions`,
+      query: ({ courseId, courseworkId }) =>
+        `/courses/${courseId}/coursework/${courseworkId}/submissions`,
       transformResponse: (response) => {
         const list = Array.isArray(response) ? response : response?.data ?? [];
         return list.map(normalizeSubmission);
       },
     }),
     getMySubmission: builder.query({
-      query: ({ courseId, courseworkId }) => `/courses/${courseId}/coursework/${courseworkId}/submissions/me`,
-      transformResponse: (response) => normalizeSubmission(response?.data ?? response),
+      query: ({ courseId, courseworkId }) =>
+        `/courses/${courseId}/coursework/${courseworkId}/submissions/me`,
+      transformResponse: (response) =>
+        normalizeSubmission(response?.data ?? response),
+    }),
+    getStudentGradebook: builder.query({
+      query: ({ courseId, studentId }) =>
+        `/analytics/courses/${courseId}/students/${studentId}/gradebook`,
+      transformResponse: normalizeGradebook,
     }),
     startSubmission: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({
@@ -71,7 +95,8 @@ export const courseworkApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeSubmission(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeSubmission(response?.data ?? response),
     }),
     saveSubmission: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({
@@ -79,7 +104,8 @@ export const courseworkApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: payload,
       }),
-      transformResponse: (response) => normalizeSubmission(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeSubmission(response?.data ?? response),
     }),
     gradeSubmission: builder.mutation({
       query: ({ courseworkId, submissionId, payload = {} }) => ({
@@ -87,7 +113,8 @@ export const courseworkApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: payload,
       }),
-      transformResponse: (response) => normalizeSubmission(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeSubmission(response?.data ?? response),
       invalidatesTags: ["Classrooms", "Profile"],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -107,6 +134,7 @@ export const {
   useCreateCourseworkMutation,
   useGetSubmissionListQuery,
   useGetMySubmissionQuery,
+  useGetStudentGradebookQuery,
   useStartSubmissionMutation,
   useSaveSubmissionMutation,
   useGradeSubmissionMutation,

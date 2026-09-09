@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildUploadRequestBody, normalizeAttachment } from "./attachmentService.js";
+import {
+  buildUploadRequestBody,
+  normalizeAttachment,
+} from "./attachmentService.js";
 
 describe("buildUploadRequestBody", () => {
   it("maps a file input to the upload-url request contract", () => {
@@ -8,12 +11,14 @@ describe("buildUploadRequestBody", () => {
         name: "homework.pdf",
         type: "application/pdf",
         size: 1024,
-      }),
+        resourceId: "coursework-1",
+      })
     ).toEqual({
-      fileName: "homework.pdf",
-      fileType: "application/pdf",
-      contentLength: 1024,
-      folder: "coursework",
+      resourceType: "COURSEWORK",
+      resourceId: "coursework-1",
+      originalFilename: "homework.pdf",
+      contentType: "application/pdf",
+      sizeBytes: 1024,
     });
   });
 });
@@ -25,7 +30,7 @@ describe("normalizeAttachment", () => {
         id: "attachment-1",
         name: "homework.pdf",
         downloadUrl: "https://example.com/homework.pdf",
-      }),
+      })
     ).toEqual({
       id: "attachment-1",
       name: "homework.pdf",

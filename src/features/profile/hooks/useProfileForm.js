@@ -37,6 +37,7 @@ export function useProfileForm({ profile, isOpen, onClose, onSave }) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [activeTab, setActiveTab] = useState("profile");
+  const [imageFiles, setImageFiles] = useState({ avatar: null, banner: null });
 
   const handleChange = (name, value) => {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -56,24 +57,35 @@ export function useProfileForm({ profile, isOpen, onClose, onSave }) {
     }));
   };
 
+  const handleImageFileChange = (name, file) => {
+    setImageFiles((current) => ({ ...current, [name]: file }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const nextErrors = Object.fromEntries(
-      FORM_FIELDS.map((field) => [field, ValidateField(field, formData[field])]).filter(
-        ([, error]) => error,
-      ),
+      FORM_FIELDS.map((field) => [
+        field,
+        ValidateField(field, formData[field]),
+      ]).filter(([, error]) => error)
     );
     setErrors(nextErrors);
     setTouched(Object.fromEntries(FORM_FIELDS.map((field) => [field, true])));
     if (Object.keys(nextErrors).length > 0) return;
-    await onSave(formData);
+    await onSave({
+      ...formData,
+      avatarFile: imageFiles.avatar,
+      bannerFile: imageFiles.banner,
+    });
     onClose();
   };
 
   const handleCancel = () => {
     if (
       JSON.stringify(formData) !== JSON.stringify(initialFormData) &&
-      !window.confirm("You have unsaved changes. Are you sure you want to cancel?")
+      !window.confirm(
+        "You have unsaved changes. Are you sure you want to cancel?"
+      )
     ) {
       return;
     }
@@ -88,6 +100,7 @@ export function useProfileForm({ profile, isOpen, onClose, onSave }) {
     errors,
     handleChange,
     handleBlur,
+    handleImageFileChange,
     handleSubmit,
     handleCancel,
     isOpen,

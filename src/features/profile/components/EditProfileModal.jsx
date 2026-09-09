@@ -38,6 +38,7 @@ export function EditProfileModal({
     errors,
     handleChange,
     handleBlur,
+    handleImageFileChange,
     handleSubmit,
     handleCancel,
   } = useProfileForm({ profile, isOpen, onClose, onSave });
@@ -78,7 +79,11 @@ export function EditProfileModal({
                 role="tab"
                 aria-selected={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${activeTab === tab ? "bg-surface text-primary shadow-sm" : "text-text-muted hover:bg-surface/70 hover:text-text-main"}`}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
+                  activeTab === tab
+                    ? "bg-surface text-primary shadow-sm"
+                    : "text-text-muted hover:bg-surface/70 hover:text-text-main"
+                }`}
               >
                 <Icon size={16} aria-hidden="true" />
                 {label}
@@ -140,37 +145,52 @@ export function EditProfileModal({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="profile-first-name" className="mb-1.5 block text-sm font-medium text-text-main">
+                  <label
+                    htmlFor="profile-first-name"
+                    className="mb-1.5 block text-sm font-medium text-text-main"
+                  >
                     First name
                   </label>
                   <Input
                     id="profile-first-name"
                     value={formData.firstName}
-                    onChange={(event) => handleChange("firstName", event.target.value)}
+                    onChange={(event) =>
+                      handleChange("firstName", event.target.value)
+                    }
                     placeholder="First name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="profile-last-name" className="mb-1.5 block text-sm font-medium text-text-main">
+                  <label
+                    htmlFor="profile-last-name"
+                    className="mb-1.5 block text-sm font-medium text-text-main"
+                  >
                     Last name
                   </label>
                   <Input
                     id="profile-last-name"
                     value={formData.lastName}
-                    onChange={(event) => handleChange("lastName", event.target.value)}
+                    onChange={(event) =>
+                      handleChange("lastName", event.target.value)
+                    }
                     placeholder="Last name"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="profile-headline" className="mb-1.5 block text-sm font-medium text-text-main">
+                <label
+                  htmlFor="profile-headline"
+                  className="mb-1.5 block text-sm font-medium text-text-main"
+                >
                   Headline
                 </label>
                 <Input
                   id="profile-headline"
                   value={formData.headline}
-                  onChange={(event) => handleChange("headline", event.target.value)}
+                  onChange={(event) =>
+                    handleChange("headline", event.target.value)
+                  }
                   placeholder="e.g. Computer science student"
                 />
               </div>
@@ -247,26 +267,39 @@ export function EditProfileModal({
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label htmlFor="profile-batch-year" className="mb-1.5 block text-sm font-medium text-text-main">
+                  <label
+                    htmlFor="profile-batch-year"
+                    className="mb-1.5 block text-sm font-medium text-text-main"
+                  >
                     Grade or batch
                   </label>
                   <Input
                     id="profile-batch-year"
                     value={formData.batchYear}
-                    onChange={(event) => handleChange("batchYear", event.target.value)}
+                    onChange={(event) =>
+                      handleChange("batchYear", event.target.value)
+                    }
                     onBlur={() => handleBlur("batchYear")}
                     placeholder="e.g. 2026"
                   />
-                  <FieldError id="profile-batch-year-error" message={errors.batchYear} />
+                  <FieldError
+                    id="profile-batch-year-error"
+                    message={errors.batchYear}
+                  />
                 </div>
                 <div className="mt-4">
-                  <label htmlFor="profile-visibility" className="mb-1.5 block text-sm font-medium text-text-main">
+                  <label
+                    htmlFor="profile-visibility"
+                    className="mb-1.5 block text-sm font-medium text-text-main"
+                  >
                     Profile visibility
                   </label>
                   <select
                     id="profile-visibility"
                     value={formData.profileVisibility}
-                    onChange={(event) => handleChange("profileVisibility", event.target.value)}
+                    onChange={(event) =>
+                      handleChange("profileVisibility", event.target.value)
+                    }
                     className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     <option value="PUBLIC">Public</option>
@@ -291,7 +324,10 @@ export function EditProfileModal({
                 </div>
                 <ProfileImageUploader
                   currentImage={initialFormData.avatar}
-                  onChange={(url) => handleChange("avatar", url)}
+                  onChange={(url, file) => {
+                    handleChange("avatar", url);
+                    handleImageFileChange("avatar", file);
+                  }}
                 />
               </section>
               <section className="border-t border-border pt-5">
@@ -305,7 +341,10 @@ export function EditProfileModal({
                 </div>
                 <CoverImageUploader
                   currentImage={initialFormData.banner}
-                  onChange={(url) => handleChange("banner", url)}
+                  onChange={(url, file) => {
+                    handleChange("banner", url);
+                    handleImageFileChange("banner", file);
+                  }}
                 />
               </section>
             </div>

@@ -1,53 +1,54 @@
-import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
-import { Lock, Eye, EyeOff, ShieldCheck, Check, X } from 'lucide-react'
-import AuthInput from '../components/AuthInput.jsx'
-import { Button } from '@/components/ui/button.jsx'
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router";
+import { Lock, Eye, EyeOff, ShieldCheck, Check, X } from "lucide-react";
+import AuthInput from "../components/AuthInput.jsx";
+import { Button } from "@/components/ui/button.jsx";
 
 const RULES = [
-  { id: 'length', label: 'At least 8 characters', test: (value) => value.length >= 8 },
-  { id: 'number', label: 'Contains a number', test: (value) => /\d/.test(value) },
-]
+  {
+    id: "length",
+    label: "At least 8 characters",
+    test: (value) => value.length >= 8,
+  },
+  {
+    id: "number",
+    label: "Contains a number",
+    test: (value) => /\d/.test(value),
+  },
+];
 
 export default function ResetPasswordPage() {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
-  const [formData, setFormData] = useState({ password: '', confirmPassword: '' })
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const updateField = ({ target: { name, value } }) =>
-    setFormData((previous) => ({ ...previous, [name]: value }))
+    setFormData((previous) => ({ ...previous, [name]: value }));
 
-  const failedRule = RULES.find((rule) => !rule.test(formData.password))
+  const failedRule = RULES.find((rule) => !rule.test(formData.password));
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    setError('')
+    event.preventDefault();
+    setError("");
 
     if (failedRule) {
-      setError('Choose a password that meets every requirement below.')
-      return
+      return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('Those passwords do not match.')
-      return
+      setError("Those passwords do not match.");
+      return;
     }
 
-    setIsLoading(true)
-    try {
-      // Mock request — a real app would exchange the token for a new password here.
-      await new Promise((resolve) => setTimeout(resolve, 600))
-      navigate('/auth/login', { replace: true, state: { passwordReset: true } })
-    } catch (submissionError) {
-      setError(submissionError.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    setError(
+      "Password recovery is not available until the backend exposes a reset endpoint."
+    );
+  };
 
   if (!token) {
     return (
@@ -59,13 +60,14 @@ export default function ResetPasswordPage() {
           This link isn't valid
         </h1>
         <p className="mt-2 text-text-main">
-          It may have expired, or already been used. Request a fresh link to continue.
+          It may have expired, or already been used. Request a fresh link to
+          continue.
         </p>
         <Link to="/auth/forgot-password">
           <Button className="mt-7 w-full">Request a new link</Button>
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -91,19 +93,18 @@ export default function ResetPasswordPage() {
           icon={Lock}
           label="New password"
           name="password"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           value={formData.password}
           onChange={updateField}
           placeholder="Enter a new password"
           required
-          disabled={isLoading}
           autoComplete="new-password"
           rightIcon={
             <button
               type="button"
               onClick={() => setShowPassword((previous) => !previous)}
               className="text-text-muted hover:text-text-main focus:outline-none"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
             </button>
@@ -113,41 +114,49 @@ export default function ResetPasswordPage() {
           icon={Lock}
           label="Confirm password"
           name="confirmPassword"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           value={formData.confirmPassword}
           onChange={updateField}
           placeholder="Re-enter the password"
           required
-          disabled={isLoading}
           autoComplete="new-password"
         />
 
         <ul className="space-y-1.5 rounded-xl border border-border bg-canvas px-4 py-3">
           {RULES.map((rule) => {
-            const met = rule.test(formData.password)
+            const met = rule.test(formData.password);
             return (
               <li key={rule.id} className="flex items-center gap-2 text-sm">
                 {met ? (
-                  <Check size={16} className="text-success" aria-hidden="true" />
+                  <Check
+                    size={16}
+                    className="text-success"
+                    aria-hidden="true"
+                  />
                 ) : (
                   <X size={16} className="text-text-muted" aria-hidden="true" />
                 )}
-                <span className={met ? 'text-text-main' : 'text-text-muted'}>{rule.label}</span>
+                <span className={met ? "text-text-main" : "text-text-muted"}>
+                  {rule.label}
+                </span>
               </li>
-            )
+            );
           })}
         </ul>
 
-        <Button className="w-full" type="submit" disabled={isLoading}>
-          {isLoading ? 'Updating password…' : 'Update password'}
+        <Button className="w-full" type="submit">
+          Update password
         </Button>
       </form>
 
       <p className="mt-7 text-center text-text-main">
-        <Link className="font-bold text-primary hover:underline" to="/auth/login">
+        <Link
+          className="font-bold text-primary hover:underline"
+          to="/auth/login"
+        >
           Back to sign in
         </Link>
       </p>
     </div>
-  )
+  );
 }

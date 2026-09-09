@@ -43,23 +43,22 @@ function normalizeImageField(value) {
 function toProfilePatch(formData, currentUser) {
   return Object.entries(PROFILE_FIELDS).reduce(
     (changes, [formField, apiField]) => {
-      const value = normalizeImageField(formData[formField]);
-      const currentValue = normalizeImageField(
-        currentUser?.[apiField] ?? currentUser?.[formField],
-      );
       if (
-        (apiField === "avatarUrl" || apiField === "bannerUrl") &&
-        typeof value === "string" &&
-        value.startsWith("data:")
+        (formField === "avatar" && formData.avatarFile) ||
+        (formField === "banner" && formData.bannerFile)
       ) {
         return changes;
       }
+      const value = normalizeImageField(formData[formField]);
+      const currentValue = normalizeImageField(
+        currentUser?.[apiField] ?? currentUser?.[formField]
+      );
       if (value !== currentValue || formField === "profileVisibility") {
         changes[apiField] = value;
       }
       return changes;
     },
-    {},
+    {}
   );
 }
 
@@ -114,7 +113,7 @@ export function AuthProvider({ children }) {
             accessToken,
             refreshToken,
             user: nextUser,
-          }),
+          })
         );
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
@@ -165,7 +164,7 @@ export function AuthProvider({ children }) {
         }
         if (!accessToken) {
           const error = new Error(
-            "The social sign-in response was incomplete.",
+            "The social sign-in response was incomplete."
           );
           setAuthState({ status: "failed", error });
           throw error;
@@ -194,7 +193,9 @@ export function AuthProvider({ children }) {
         };
 
         setUser(finalUser);
-        dispatch(setCredentials({ accessToken, refreshToken, user: finalUser }));
+        dispatch(
+          setCredentials({ accessToken, refreshToken, user: finalUser })
+        );
         triggerLifecycleRefresh(dispatch, "user-oauth-linked");
         setAuthState({ status: "succeeded", error: null });
         return finalUser;
@@ -216,7 +217,7 @@ export function AuthProvider({ children }) {
           resetApiCache(dispatch);
           setUser(hydratedUser);
           dispatch(
-            setCredentials({ accessToken, refreshToken, user: hydratedUser }),
+            setCredentials({ accessToken, refreshToken, user: hydratedUser })
           );
           setAuthState({ status: "succeeded", error: null });
           return hydratedUser;
@@ -245,7 +246,7 @@ export function AuthProvider({ children }) {
                 accessToken: result.accessToken,
                 refreshToken: result.refreshToken,
                 user: hydratedUser,
-              }),
+              })
             );
           }
           triggerLifecycleRefresh(dispatch, "user-registered");
@@ -258,7 +259,11 @@ export function AuthProvider({ children }) {
       },
       async updateProfile(details) {
         const profilePatch = toProfilePatch(details, user);
-        const nextProfile = await updateProfileRequest(profilePatch);
+        const nextProfile = await updateProfileRequest({
+          ...profilePatch,
+          avatarFile: details.avatarFile,
+          bannerFile: details.bannerFile,
+        });
         const nextUser = {
           ...user,
           ...nextProfile,
@@ -274,15 +279,17 @@ export function AuthProvider({ children }) {
             accessToken: user?.accessToken,
             refreshToken: user?.refreshToken,
             user: nextUser,
-          }),
+          })
         );
         const visibilityChanged = Object.prototype.hasOwnProperty.call(
           profilePatch,
-          "profileVisibility",
+          "profileVisibility"
         );
         triggerLifecycleRefresh(
           dispatch,
-          visibilityChanged ? "user-profile-visibility-changed" : "user-profile-updated",
+          visibilityChanged
+            ? "user-profile-visibility-changed"
+            : "user-profile-updated"
         );
         return nextProfile;
       },
@@ -301,7 +308,7 @@ export function AuthProvider({ children }) {
             accessToken: user?.accessToken,
             refreshToken: user?.refreshToken,
             user: nextUser,
-          }),
+          })
         );
         triggerLifecycleRefresh(dispatch, "user-profile-updated");
         return profile;
@@ -316,7 +323,7 @@ export function AuthProvider({ children }) {
         }
       },
     }),
-    [authState, dispatch, user, setUser],
+    [authState, dispatch, user, setUser]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

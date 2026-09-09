@@ -40,8 +40,9 @@ The client currently calls these endpoints under `VITE_API_BASE_URL`:
 - `POST /auth/login` and `POST /auth/register`
 - `GET /auth/oauth/google` and `GET /auth/oauth/github`
 - `PATCH /users/:id` and `DELETE /users/:id`
-- `GET /classrooms`, `GET /classrooms/explore`, `GET /classrooms/:id`
-- `GET /classrooms/lookup?code=...`, `POST /classrooms`, `POST /classrooms/join`
+- `GET /courses`, `GET /explore/feed`, `GET /courses/:id`
+- `POST /courses`, `POST /courses/:id/enrollment`
+- `POST /courses/cover-upload`
 - `GET /community/feed`, `GET /messages/conversations`, `GET /assignments`
 - `GET /users/explore`
 

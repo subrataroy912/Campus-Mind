@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
 import {
   Attachment,
   AttachmentContent,
@@ -22,26 +23,17 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from "@/components/ui/attachment.jsx";
-import ClassFeedPost from "../components/ClassFeedPost.jsx";
 import ClassHeader from "../components/ClassHeader.jsx";
-import ClassPostBox from "../components/ClassPostBox.jsx";
 import ClassTabs from "../components/ClassTabs.jsx";
 import ClassQuickLinks from "../components/ClassQuickLinks.jsx";
 import { ClassroomAvatar } from "../components/ClassroomAvatar.jsx";
-import {
-  CLASS_MEMBERS,
-  CLASSWORK_ITEMS,
-  FEED_POSTS,
-  PINNED_ANNOUNCEMENT,
-  STUDENT_GRADES,
-  TEACHER_GRADES,
-} from "../data/classPageData.js";
 import { useClassroom } from "../hooks/useClassroom.js";
 import { setClassroomTab } from "../classroomSlice.js";
 import {
   useGetCourseworkByIdQuery,
   useGetCourseworkListQuery,
   useGetSubmissionListQuery,
+  useGetStudentGradebookQuery,
   useGradeSubmissionMutation,
   useStartSubmissionMutation,
 } from "../api/courseworkApi.js";
@@ -49,11 +41,13 @@ import {
   useCompleteUploadMutation,
   useRequestUploadUrlMutation,
 } from "../api/attachmentApi.js";
+import { buildUploadRequestBody } from "../api/attachmentService.js";
 import {
   useAddCourseworkCommentMutation,
   useAddSubmissionCommentMutation,
   useGetCourseworkCommentsQuery,
 } from "../api/commentApi.js";
+import { useGetClassroomRosterQuery } from "../api/classroomApi.js";
 
 const statusClass = {
   assigned: "bg-canvas text-text-main",
@@ -84,27 +78,28 @@ function Chip({ status }) {
 function Home() {
   return (
     <div className="mt-4 space-y-4">
-      <ClassFeedPost post={PINNED_ANNOUNCEMENT} pinned />
-      <ClassPostBox />
-      {FEED_POSTS.map((post) => (
-        <ClassFeedPost key={post.id} post={post} />
-      ))}
+      <EmptyState
+        title="No class updates yet"
+        description="Announcements and discussions will appear here when your class creates them."
+      />
     </div>
   );
 }
-function UpcomingPanel() {
+function UpcomingPanel({ items }) {
   return (
     <aside className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
       <h2 className="mb-3 text-sm font-semibold text-text-heading">
         Upcoming in this class
       </h2>
       <ul className="space-y-3">
-        {CLASSWORK_ITEMS.filter((x) => x.group !== "Past").map((x) => (
-          <li key={x.id}>
-            <p className="text-sm text-text-main">{x.title}</p>
-            <p className="mt-0.5 text-xs text-text-muted">{x.dueDate}</p>
-          </li>
-        ))}
+        {items
+          .filter((x) => x.group !== "Past")
+          .map((x) => (
+            <li key={x.id}>
+              <p className="text-sm text-text-main">{x.title}</p>
+              <p className="mt-0.5 text-xs text-text-muted">{x.dueDate}</p>
+            </li>
+          ))}
       </ul>
     </aside>
   );
@@ -115,7 +110,9 @@ function Classwork({ teacher, classId }) {
   const [draftSubmission, setDraftSubmission] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [feedbackDrafts, setFeedbackDrafts] = useState({});
-  const [uploadedAttachmentsByItem, setUploadedAttachmentsByItem] = useState({});
+  const [uploadedAttachmentsByItem, setUploadedAttachmentsByItem] = useState(
+    {}
+  );
   const [gradeDrafts, setGradeDrafts] = useState({});
   const [commentsByItem, setCommentsByItem] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,12 +122,16 @@ function Classwork({ teacher, classId }) {
   const [gradingError, setGradingError] = useState("");
   const [commentError, setCommentError] = useState("");
   const fileInputRefs = useRef({});
-  const { data: coursework = [], isLoading, error } = useGetCourseworkListQuery(classId, {
+  const {
+    data: coursework = [],
+    isLoading,
+    error,
+  } = useGetCourseworkListQuery(classId, {
     skip: !classId,
   });
   const { data: expandedCoursework } = useGetCourseworkByIdQuery(
     { courseId: classId, courseworkId: expanded },
-    { skip: !classId || !expanded },
+    { skip: !classId || !expanded }
   );
   const [startSubmission] = useStartSubmissionMutation();
   const [requestUploadUrl] = useRequestUploadUrlMutation();
@@ -140,15 +141,15 @@ function Classwork({ teacher, classId }) {
   const [addSubmissionComment] = useAddSubmissionCommentMutation();
   const { data: submissionList = [] } = useGetSubmissionListQuery(
     { courseId: classId, courseworkId: expanded },
-    { skip: !classId || !expanded || !teacher },
+    { skip: !classId || !expanded || !teacher }
   );
   const { data: courseworkComments = [] } = useGetCourseworkCommentsQuery(
     { courseId: classId, courseworkId: expanded },
-    { skip: !classId || !expanded },
+    { skip: !classId || !expanded }
   );
 
   const items = useMemo(() => {
-    const nextItems = coursework.length ? coursework : CLASSWORK_ITEMS;
+    const nextItems = coursework;
     return nextItems.map((item) => {
       const dueAt = item.dueAt ?? item.dueDate ?? null;
       const itemStatus = item.status ?? (dueAt ? "assigned" : "done");
@@ -156,7 +157,7 @@ function Classwork({ teacher, classId }) {
         ? item.attachments.map((file) =>
             typeof file === "string"
               ? { name: file, detail: "Attachment" }
-              : file,
+              : file
           )
         : [];
 
@@ -169,7 +170,9 @@ function Classwork({ teacher, classId }) {
         status: itemStatus,
         attachments,
         submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
-        totalCount: item.totalCount ?? (item.submittedCount ? item.submittedCount + 2 : 24),
+        totalCount:
+          item.totalCount ??
+          (item.submittedCount ? item.submittedCount + 2 : 24),
       };
     });
   }, [coursework]);
@@ -184,39 +187,59 @@ function Classwork({ teacher, classId }) {
     setSubmissionError("");
 
     try {
-      const uploadRequest = await requestUploadUrl({
-        fileName: file.name,
-        fileType: file.type || "application/octet-stream",
-        contentLength: file.size,
-        folder: "coursework",
-      }).unwrap();
+      const uploadRequest = await requestUploadUrl(
+        buildUploadRequestBody({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          resourceId: item.id,
+        })
+      ).unwrap();
 
-      const uploadUrl = uploadRequest.uploadUrl || uploadRequest.url || uploadRequest?.data?.uploadUrl;
+      const uploadUrl =
+        uploadRequest.uploadUrl ||
+        uploadRequest.url ||
+        uploadRequest?.data?.uploadUrl;
 
-      if (uploadUrl) {
-        await fetch(uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": file.type || "application/octet-stream",
-          },
-          body: file,
-        });
+      if (
+        !uploadUrl ||
+        !uploadRequest.publicId ||
+        !uploadRequest.uploadApiKey ||
+        !uploadRequest.uploadSignature
+      ) {
+        throw new Error("The file upload service is not configured.");
       }
 
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      uploadForm.append("api_key", uploadRequest.uploadApiKey);
+      uploadForm.append("timestamp", String(uploadRequest.uploadTimestamp));
+      uploadForm.append("signature", uploadRequest.uploadSignature);
+      uploadForm.append("public_id", uploadRequest.publicId);
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "POST",
+        body: uploadForm,
+      });
+      if (!uploadResponse.ok) throw new Error("Cloudinary upload failed.");
+
       const completedAttachment = await completeUpload({
-        attachmentId: uploadRequest.id ?? uploadRequest.attachmentId ?? `attachment-${item.id}`,
+        attachmentId:
+          uploadRequest.id ??
+          uploadRequest.attachmentId ??
+          `attachment-${item.id}`,
         payload: {
-          fileName: file.name,
-          fileType: file.type || "application/octet-stream",
-          contentLength: file.size,
-          courseworkId: item.id,
+          publicId: uploadRequest.publicId,
+          sizeBytes: file.size,
         },
       }).unwrap();
 
       const attachment = completedAttachment?.id
         ? completedAttachment
         : {
-            id: uploadRequest.id ?? uploadRequest.attachmentId ?? `${item.id}-${Date.now()}`,
+            id:
+              uploadRequest.id ??
+              uploadRequest.attachmentId ??
+              `${item.id}-${Date.now()}`,
             name: file.name,
             detail: `${(file.size / 1024).toFixed(1)} KB`,
             downloadUrl: uploadRequest.downloadUrl ?? null,
@@ -228,7 +251,7 @@ function Classwork({ teacher, classId }) {
       }));
     } catch (requestError) {
       setSubmissionError(
-        requestError?.message || "Unable to upload this file right now.",
+        requestError?.message || "Unable to upload this file right now."
       );
     } finally {
       setIsUploading(false);
@@ -253,7 +276,7 @@ function Classwork({ teacher, classId }) {
       setDraftSubmission((current) => ({ ...current, [item.id]: "" }));
     } catch (requestError) {
       setSubmissionError(
-        requestError?.message || "Unable to submit this assignment right now.",
+        requestError?.message || "Unable to submit this assignment right now."
       );
     } finally {
       setIsSubmitting(false);
@@ -262,7 +285,9 @@ function Classwork({ teacher, classId }) {
 
   const handleGrade = async (item, submission) => {
     if (!item?.id || !submission?.id) return;
-    const gradeValue = Number(gradeDrafts[submission.id] ?? submission.score ?? 0);
+    const gradeValue = Number(
+      gradeDrafts[submission.id] ?? submission.score ?? 0
+    );
     setIsGrading(true);
     setGradingError("");
 
@@ -277,7 +302,9 @@ function Classwork({ teacher, classId }) {
       }).unwrap();
       setGradeDrafts((current) => ({ ...current, [submission.id]: "" }));
     } catch (requestError) {
-      setGradingError(requestError?.message || "Unable to grade this submission.");
+      setGradingError(
+        requestError?.message || "Unable to grade this submission."
+      );
     } finally {
       setIsGrading(false);
     }
@@ -297,7 +324,10 @@ function Classwork({ teacher, classId }) {
 
       setCommentsByItem((current) => ({
         ...current,
-        [item.id]: [...(current[item.id] ?? courseworkComments ?? []), nextComment],
+        [item.id]: [
+          ...(current[item.id] ?? courseworkComments ?? []),
+          nextComment,
+        ],
       }));
       setCommentDrafts((current) => ({ ...current, [item.id]: "" }));
     } catch (requestError) {
@@ -376,7 +406,10 @@ function Classwork({ teacher, classId }) {
             const groupItems = items.filter((x) => {
               const normalized = x.dueDate ?? x.dueAt ?? "";
               if (group === "Past") {
-                return String(normalized).toLowerCase().includes("aug") || String(normalized).toLowerCase().includes("sep");
+                return (
+                  String(normalized).toLowerCase().includes("aug") ||
+                  String(normalized).toLowerCase().includes("sep")
+                );
               }
               return true;
             });
@@ -390,7 +423,8 @@ function Classwork({ teacher, classId }) {
                   {groupItems.map((item) => {
                     const Icon = typeIcon[item.type] ?? ClipboardList;
                     const open = expanded === item.id;
-                    const detailItem = open && expandedCoursework ? expandedCoursework : item;
+                    const detailItem =
+                      open && expandedCoursework ? expandedCoursework : item;
 
                     return (
                       <div key={item.id}>
@@ -414,7 +448,9 @@ function Classwork({ teacher, classId }) {
                         {open && (
                           <div className="border-t border-border bg-canvas/50 px-4 py-4">
                             <p className="text-sm leading-6 text-text-main">
-                              {detailItem.instructions || detailItem.description || "No detailed instructions available yet."}
+                              {detailItem.instructions ||
+                                detailItem.description ||
+                                "No detailed instructions available yet."}
                             </p>
                             <div className="mt-3 flex flex-wrap gap-2">
                               {[
@@ -422,7 +458,13 @@ function Classwork({ teacher, classId }) {
                                 ...(uploadedAttachmentsByItem[item.id] || []),
                               ].map((file) => (
                                 <Attachment
-                                  key={`${detailItem.id}-${file.id ?? file.name ?? file.url ?? file.title ?? "attachment"}`}
+                                  key={`${detailItem.id}-${
+                                    file.id ??
+                                    file.name ??
+                                    file.url ??
+                                    file.title ??
+                                    "attachment"
+                                  }`}
                                   size="sm"
                                   className="border-border bg-surface"
                                 >
@@ -444,12 +486,14 @@ function Classwork({ teacher, classId }) {
                               <div className="mt-4 space-y-4">
                                 <div className="flex justify-between text-xs text-text-muted">
                                   <span>
-                                    {detailItem.submittedCount} of {detailItem.totalCount}{" "}
-                                    submitted
+                                    {detailItem.submittedCount} of{" "}
+                                    {detailItem.totalCount} submitted
                                   </span>
                                   <span>
                                     {Math.round(
-                                      (detailItem.submittedCount / Math.max(detailItem.totalCount, 1)) * 100,
+                                      (detailItem.submittedCount /
+                                        Math.max(detailItem.totalCount, 1)) *
+                                        100
                                     )}
                                     %
                                   </span>
@@ -458,20 +502,46 @@ function Classwork({ teacher, classId }) {
                                   <div
                                     className="h-full bg-success"
                                     style={{
-                                      width: `${(detailItem.submittedCount / Math.max(detailItem.totalCount, 1)) * 100}%`,
+                                      width: `${
+                                        (detailItem.submittedCount /
+                                          Math.max(detailItem.totalCount, 1)) *
+                                        100
+                                      }%`,
                                     }}
                                   />
                                 </div>
                                 <div className="rounded-xl border border-border bg-surface p-3">
-                                  <p className="mb-2 text-sm font-medium text-text-heading">Coursework comments</p>
-                                  {(commentsByItem[item.id] ?? courseworkComments ?? []).length === 0 ? (
-                                    <p className="text-xs text-text-muted">No comments yet.</p>
+                                  <p className="mb-2 text-sm font-medium text-text-heading">
+                                    Coursework comments
+                                  </p>
+                                  {(
+                                    commentsByItem[item.id] ??
+                                    courseworkComments ??
+                                    []
+                                  ).length === 0 ? (
+                                    <p className="text-xs text-text-muted">
+                                      No comments yet.
+                                    </p>
                                   ) : (
                                     <div className="space-y-2">
-                                      {(commentsByItem[item.id] ?? courseworkComments ?? []).map((comment) => (
-                                        <div key={comment.id ?? `${item.id}-${comment.content}`} className="rounded-lg bg-canvas px-2 py-2">
-                                          <p className="text-xs text-text-muted">{comment.author?.name ?? "Teacher"}</p>
-                                          <p className="text-sm text-text-main">{comment.content}</p>
+                                      {(
+                                        commentsByItem[item.id] ??
+                                        courseworkComments ??
+                                        []
+                                      ).map((comment) => (
+                                        <div
+                                          key={
+                                            comment.id ??
+                                            `${item.id}-${comment.content}`
+                                          }
+                                          className="rounded-lg bg-canvas px-2 py-2"
+                                        >
+                                          <p className="text-xs text-text-muted">
+                                            {comment.author?.name ?? "Teacher"}
+                                          </p>
+                                          <p className="text-sm text-text-main">
+                                            {comment.content}
+                                          </p>
                                         </div>
                                       ))}
                                     </div>
@@ -489,11 +559,18 @@ function Classwork({ teacher, classId }) {
                                       className="flex-1 resize-none rounded-lg border border-border bg-canvas px-2 py-2 text-sm text-text-main outline-none focus:ring-2 focus:ring-focus"
                                       placeholder="Add a classroom comment"
                                     />
-                                    <Button size="sm" onClick={() => handleAddComment(item)}>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleAddComment(item)}
+                                    >
                                       Post
                                     </Button>
                                   </div>
-                                  {commentError && <p className="mt-2 text-xs text-secondary">{commentError}</p>}
+                                  {commentError && (
+                                    <p className="mt-2 text-xs text-secondary">
+                                      {commentError}
+                                    </p>
+                                  )}
                                 </div>
                                 {submissionList.length > 0 && (
                                   <div className="space-y-3">
@@ -504,7 +581,8 @@ function Classwork({ teacher, classId }) {
                                       >
                                         <div className="flex items-center justify-between gap-2">
                                           <p className="text-sm font-medium text-text-heading">
-                                            {submission.user?.name ?? "Student submission"}
+                                            {submission.user?.name ??
+                                              "Student submission"}
                                           </p>
                                           <span className="text-xs text-text-muted">
                                             {submission.status ?? "new"}
@@ -515,11 +593,16 @@ function Classwork({ teacher, classId }) {
                                             type="number"
                                             min="0"
                                             max="100"
-                                            value={gradeDrafts[submission.id] ?? submission.score ?? ""}
+                                            value={
+                                              gradeDrafts[submission.id] ??
+                                              submission.score ??
+                                              ""
+                                            }
                                             onChange={(event) =>
                                               setGradeDrafts((current) => ({
                                                 ...current,
-                                                [submission.id]: event.target.value,
+                                                [submission.id]:
+                                                  event.target.value,
                                               }))
                                             }
                                             className="w-24 rounded-lg border border-border bg-canvas px-2 py-1.5 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
@@ -527,7 +610,9 @@ function Classwork({ teacher, classId }) {
                                           />
                                           <Button
                                             size="sm"
-                                            onClick={() => handleGrade(item, submission)}
+                                            onClick={() =>
+                                              handleGrade(item, submission)
+                                            }
                                             disabled={isGrading}
                                           >
                                             Save grade
@@ -535,11 +620,15 @@ function Classwork({ teacher, classId }) {
                                         </div>
                                         <div className="mt-3 flex gap-2">
                                           <input
-                                            value={feedbackDrafts[submission.id] ?? ""}
+                                            value={
+                                              feedbackDrafts[submission.id] ??
+                                              ""
+                                            }
                                             onChange={(event) =>
                                               setFeedbackDrafts((current) => ({
                                                 ...current,
-                                                [submission.id]: event.target.value,
+                                                [submission.id]:
+                                                  event.target.value,
                                               }))
                                             }
                                             className="flex-1 rounded-lg border border-border bg-canvas px-2 py-1.5 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
@@ -548,7 +637,12 @@ function Classwork({ teacher, classId }) {
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleAddSubmissionFeedback(item, submission)}
+                                            onClick={() =>
+                                              handleAddSubmissionFeedback(
+                                                item,
+                                                submission
+                                              )
+                                            }
                                           >
                                             Send
                                           </Button>
@@ -566,15 +660,37 @@ function Classwork({ teacher, classId }) {
                             ) : (
                               <div className="mt-4 space-y-4 rounded-xl bg-surface p-3 ring-1 ring-border">
                                 <div>
-                                  <p className="mb-2 text-sm font-medium text-text-heading">Comments</p>
-                                  {(commentsByItem[item.id] ?? courseworkComments ?? []).length === 0 ? (
-                                    <p className="text-xs text-text-muted">No comments yet.</p>
+                                  <p className="mb-2 text-sm font-medium text-text-heading">
+                                    Comments
+                                  </p>
+                                  {(
+                                    commentsByItem[item.id] ??
+                                    courseworkComments ??
+                                    []
+                                  ).length === 0 ? (
+                                    <p className="text-xs text-text-muted">
+                                      No comments yet.
+                                    </p>
                                   ) : (
                                     <div className="space-y-2">
-                                      {(commentsByItem[item.id] ?? courseworkComments ?? []).map((comment) => (
-                                        <div key={comment.id ?? `${item.id}-${comment.content}`} className="rounded-lg bg-canvas px-2 py-2">
-                                          <p className="text-xs text-text-muted">{comment.author?.name ?? "Teacher"}</p>
-                                          <p className="text-sm text-text-main">{comment.content}</p>
+                                      {(
+                                        commentsByItem[item.id] ??
+                                        courseworkComments ??
+                                        []
+                                      ).map((comment) => (
+                                        <div
+                                          key={
+                                            comment.id ??
+                                            `${item.id}-${comment.content}`
+                                          }
+                                          className="rounded-lg bg-canvas px-2 py-2"
+                                        >
+                                          <p className="text-xs text-text-muted">
+                                            {comment.author?.name ?? "Teacher"}
+                                          </p>
+                                          <p className="text-sm text-text-main">
+                                            {comment.content}
+                                          </p>
                                         </div>
                                       ))}
                                     </div>
@@ -593,30 +709,41 @@ function Classwork({ teacher, classId }) {
                                   placeholder="Add a private comment with your submission…"
                                 />
                                 {submissionError && (
-                                  <p className="mt-2 text-xs text-secondary">{submissionError}</p>
+                                  <p className="mt-2 text-xs text-secondary">
+                                    {submissionError}
+                                  </p>
                                 )}
                                 <div className="mt-2 flex justify-between gap-2">
                                   <div>
                                     <input
                                       ref={(element) => {
-                                        fileInputRefs.current[item.id] = element;
+                                        fileInputRefs.current[item.id] =
+                                          element;
                                       }}
                                       type="file"
                                       className="hidden"
-                                      onChange={(event) => handleAttachmentUpload(event, item)}
+                                      onChange={(event) =>
+                                        handleAttachmentUpload(event, item)
+                                      }
                                     />
                                     <Button
                                       type="button"
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => fileInputRefs.current[item.id]?.click()}
+                                      onClick={() =>
+                                        fileInputRefs.current[item.id]?.click()
+                                      }
                                       disabled={isUploading}
                                     >
                                       <Upload />
                                       {isUploading ? "Uploading…" : "Add file"}
                                     </Button>
                                   </div>
-                                  <Button size="sm" onClick={() => handleSubmit(item)} disabled={isSubmitting}>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSubmit(item)}
+                                    disabled={isSubmitting}
+                                  >
                                     {isSubmitting ? "Submitting…" : "Submit"}
                                   </Button>
                                 </div>
@@ -633,11 +760,18 @@ function Classwork({ teacher, classId }) {
                                     className="flex-1 resize-none rounded-lg border border-border bg-canvas px-2 py-2 text-sm text-text-main outline-none focus:ring-2 focus:ring-focus"
                                     placeholder="Add class comment"
                                   />
-                                  <Button size="sm" onClick={() => handleAddComment(item)}>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleAddComment(item)}
+                                  >
                                     Comment
                                   </Button>
                                 </div>
-                                {commentError && <p className="mt-2 text-xs text-secondary">{commentError}</p>}
+                                {commentError && (
+                                  <p className="mt-2 text-xs text-secondary">
+                                    {commentError}
+                                  </p>
+                                )}
                               </div>
                             )}
                           </div>
@@ -651,7 +785,7 @@ function Classwork({ teacher, classId }) {
           })
         )}
       </main>
-      <UpcomingPanel />
+      <UpcomingPanel items={items} />
     </div>
   );
 }
@@ -659,8 +793,11 @@ function Members({ classroom, teacher }) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [inviteEnabled, setInviteEnabled] = useState(true);
-  const members = CLASS_MEMBERS.filter((member) =>
-    member.name.toLowerCase().includes(query.toLowerCase()),
+  const { data: roster = [] } = useGetClassroomRosterQuery(classroom.id, {
+    skip: !classroom.id,
+  });
+  const members = roster.filter((member) =>
+    member.name.toLowerCase().includes(query.toLowerCase())
   );
   const teachers = members.filter((x) => x.role === "teacher");
   const students = members.filter((x) => x.role === "student");
@@ -741,8 +878,7 @@ function Members({ classroom, teacher }) {
               Members
             </h2>
             <p className="mt-1 text-sm text-text-muted">
-              {classroom.memberCount || CLASS_MEMBERS.length} members in this
-              class
+              {classroom.memberCount || members.length} members in this class
             </p>
           </div>
           {teacher && (
@@ -810,7 +946,12 @@ function Members({ classroom, teacher }) {
 }
 function Grades({ teacher }) {
   const [selected, setSelected] = useState(null);
-  const rows = teacher ? TEACHER_GRADES : STUDENT_GRADES;
+  const { classId } = useParams();
+  const { user } = useAuth();
+  const { data: rows = [] } = useGetStudentGradebookQuery(
+    { courseId: classId, studentId: user?.id },
+    { skip: teacher || !user?.id }
+  );
   const metrics = teacher
     ? [
         ["Class average", "89%"],
@@ -889,7 +1030,11 @@ function Grades({ teacher }) {
                           </div>
                         </td>
                         <td
-                          className={`px-4 py-3 font-medium ${row.average === "—" ? "text-text-muted" : "text-text-main"}`}
+                          className={`px-4 py-3 font-medium ${
+                            row.average === "—"
+                              ? "text-text-muted"
+                              : "text-text-main"
+                          }`}
                         >
                           {row.average}
                         </td>
@@ -928,7 +1073,11 @@ function Grades({ teacher }) {
                         {row.dueDate}
                       </td>
                       <td
-                        className={`px-4 py-3 font-medium ${row.score === null ? "text-text-muted" : "text-text-main"}`}
+                        className={`px-4 py-3 font-medium ${
+                          row.score === null
+                            ? "text-text-muted"
+                            : "text-text-main"
+                        }`}
                       >
                         {row.score === null ? "—" : `${row.score}/${row.outOf}`}
                       </td>
@@ -985,7 +1134,9 @@ export default function ClassPage() {
           onChange={(nextTab) => dispatch(setClassroomTab(nextTab))}
         />
         {activeTab === "home" && <Home />}
-        {activeTab === "classwork" && <Classwork teacher={teacher} classId={classId} />}
+        {activeTab === "classwork" && (
+          <Classwork teacher={teacher} classId={classId} />
+        )}
         {activeTab === "quick-links" && <ClassQuickLinks teacher={teacher} />}
         {activeTab === "members" && (
           <Members classroom={classroom} teacher={teacher} />

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { LogOut, Moon, Shield, Sun, UserRound } from "lucide-react";
+import { LogOut, Moon, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Card } from "@/components/ui/card.jsx";
@@ -11,12 +11,7 @@ import ProfileSection from "@/features/profile/components/ProfileSection.jsx";
 import { useSettings } from "../hooks/useSettings.js";
 import { fetchSettings, updateSettings } from "../api/settingsService.js";
 import { initials } from "@/utils/initials.js";
-import {
-  setNotifications,
-  setPrivacy,
-  toggleNotification,
-  togglePrivacy,
-} from "../settingsSlice.js";
+import { setNotifications, toggleNotification } from "../settingsSlice.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
@@ -41,7 +36,7 @@ function SettingRow({ title, description, checked, onChange }) {
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const dispatch = useDispatch();
-  const { notifications, privacy } = useSelector((state) => state.settings);
+  const { notifications } = useSelector((state) => state.settings);
   const {
     theme,
     isLoading: isThemeLoading,
@@ -58,7 +53,6 @@ export default function SettingsPage() {
       .then((savedSettings) => {
         if (!active) return;
         dispatch(setNotifications(savedSettings.notifications));
-        dispatch(setPrivacy(savedSettings.privacy));
       })
       .catch(() => {
         // leave defaults in place when settings cannot be loaded
@@ -78,24 +72,9 @@ export default function SettingsPage() {
     dispatch(toggleNotification(key));
 
     try {
-      await updateSettings({ notifications: nextNotifications, privacy });
+      await updateSettings({ notifications: nextNotifications });
     } catch {
       dispatch(setNotifications(notifications));
-    }
-  };
-
-  const handleTogglePrivacy = async (key) => {
-    const nextPrivacy = {
-      ...privacy,
-      [key]: !privacy[key],
-    };
-
-    dispatch(togglePrivacy(key));
-
-    try {
-      await updateSettings({ notifications, privacy: nextPrivacy });
-    } catch {
-      dispatch(setPrivacy(privacy));
     }
   };
 
@@ -171,58 +150,24 @@ export default function SettingsPage() {
             >
               <div className="divide-y divide-border rounded-xl border border-border px-4">
                 <SettingRow
-                  title="Class announcements"
-                  description="Pinned posts and updates from your teachers."
-                  checked={notifications.classAnnouncements}
-                  onChange={() =>
-                    handleToggleNotification("classAnnouncements")
-                  }
+                  title="Email notifications"
+                  description="Receive account and learning updates by email."
+                  checked={notifications.emailEnabled}
+                  onChange={() => handleToggleNotification("emailEnabled")}
                 />
                 <SettingRow
-                  title="Direct messages"
-                  description="New messages from classmates and instructors."
-                  checked={notifications.directMessages}
-                  onChange={() => handleToggleNotification("directMessages")}
+                  title="Push notifications"
+                  description="Allow browser or device push notifications."
+                  checked={notifications.pushEnabled}
+                  onChange={() => handleToggleNotification("pushEnabled")}
                 />
                 <SettingRow
-                  title="Assignment reminders"
-                  description="A nudge before something you saved is due."
-                  checked={notifications.assignmentReminders}
-                  onChange={() =>
-                    handleToggleNotification("assignmentReminders")
-                  }
-                />
-                <SettingRow
-                  title="Weekly digest"
-                  description="A Sunday-evening summary of what you missed."
-                  checked={notifications.weeklyDigest}
-                  onChange={() => handleToggleNotification("weeklyDigest")}
+                  title="In-app notifications"
+                  description="Show activity updates inside CampusMind."
+                  checked={notifications.inAppEnabled}
+                  onChange={() => handleToggleNotification("inAppEnabled")}
                 />
               </div>
-            </ProfileSection>
-
-            <ProfileSection
-              title="Privacy"
-              description="Control who can find and message you."
-            >
-              <div className="divide-y divide-border rounded-xl border border-border px-4">
-                <SettingRow
-                  title="Discoverable in class search"
-                  description="Classmates can find your profile from a shared class."
-                  checked={privacy.discoverable}
-                  onChange={() => handleTogglePrivacy("discoverable")}
-                />
-                <SettingRow
-                  title="Show online status"
-                  description="Let others see when you're active in a class."
-                  checked={privacy.showOnlineStatus}
-                  onChange={() => handleTogglePrivacy("showOnlineStatus")}
-                />
-              </div>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-text-muted">
-                <Shield size={14} aria-hidden="true" />
-                Your email is never shown to other students.
-              </p>
             </ProfileSection>
 
             <ProfileSection

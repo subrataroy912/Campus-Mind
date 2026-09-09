@@ -1,33 +1,25 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
-import { Mail, ArrowLeft, MailCheck } from 'lucide-react'
-import AuthInput from '../components/AuthInput.jsx'
-import { Button } from '@/components/ui/button.jsx'
+import { useState } from "react";
+import { Link } from "react-router";
+import { Mail, ArrowLeft, MailCheck } from "lucide-react";
+import AuthInput from "../components/AuthInput.jsx";
+import { Button } from "@/components/ui/button.jsx";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [sent, setSent] = useState(false)
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    setError('')
+    event.preventDefault();
+    setError("");
     if (!email.trim()) {
-      setError('Enter your email to continue.')
-      return
+      setError("Enter your email to continue.");
+      return;
     }
-    setIsLoading(true)
-    try {
-      // Mock request — in a real app this hits an auth API endpoint.
-      await new Promise((resolve) => setTimeout(resolve, 600))
-      setSent(true)
-    } catch (submissionError) {
-      setError(submissionError.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    setError(
+      "Password recovery is not available until the backend exposes a recovery endpoint."
+    );
+  };
 
   if (sent) {
     return (
@@ -39,10 +31,12 @@ export default function ForgotPasswordPage() {
           Check your inbox
         </h1>
         <p className="mt-2 text-text-main">
-          If an account exists for <span className="font-semibold text-text-heading">{email}</span>, a reset link is on its way.
+          If an account exists for{" "}
+          <span className="font-semibold text-text-heading">{email}</span>, a
+          reset link is on its way.
         </p>
         <p className="mt-6 text-sm text-text-muted">
-          Didn't get anything? Check your spam folder, or{' '}
+          Didn't get anything? Check your spam folder, or{" "}
           <button
             type="button"
             onClick={() => setSent(false)}
@@ -60,7 +54,7 @@ export default function ForgotPasswordPage() {
           Back to sign in
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -77,7 +71,8 @@ export default function ForgotPasswordPage() {
         Forgot your password?
       </h1>
       <p className="mt-2 text-text-main">
-        Enter the email tied to your account and we'll send you a link to reset it.
+        Enter the email tied to your account and we'll send you a link to reset
+        it.
       </p>
 
       {error && (
@@ -99,20 +94,22 @@ export default function ForgotPasswordPage() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
           required
-          disabled={isLoading}
           autoComplete="email"
         />
-        <Button className="w-full" type="submit" disabled={isLoading}>
-          {isLoading ? 'Sending link…' : 'Send reset link'}
+        <Button className="w-full" type="submit">
+          Send reset link
         </Button>
       </form>
 
       <p className="mt-7 text-center text-text-main">
-        Remembered it after all?{' '}
-        <Link className="font-bold text-primary hover:underline" to="/auth/login">
+        Remembered it after all?{" "}
+        <Link
+          className="font-bold text-primary hover:underline"
+          to="/auth/login"
+        >
           Sign in
         </Link>
       </p>
     </div>
-  )
+  );
 }

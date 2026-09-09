@@ -11,19 +11,20 @@ const normalizeComment = (comment = {}) => ({
 export const commentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCourseworkComments: builder.query({
-      query: ({ courseId, courseworkId }) => `/courses/${courseId}/coursework/${courseworkId}/comments`,
+      query: ({ courseworkId }) => `/coursework/${courseworkId}/comments`,
       transformResponse: (response) => {
         const list = Array.isArray(response) ? response : response?.data ?? [];
         return list.map(normalizeComment);
       },
     }),
     addCourseworkComment: builder.mutation({
-      query: ({ courseId, courseworkId, payload = {} }) => ({
-        url: `/courses/${courseId}/coursework/${courseworkId}/comments`,
+      query: ({ courseworkId, payload = {} }) => ({
+        url: `/coursework/${courseworkId}/comments`,
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeComment(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeComment(response?.data ?? response),
     }),
     getSubmissionComments: builder.query({
       query: ({ submissionId }) => `/submissions/${submissionId}/comments`,
@@ -38,7 +39,8 @@ export const commentApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeComment(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeComment(response?.data ?? response),
     }),
   }),
 });

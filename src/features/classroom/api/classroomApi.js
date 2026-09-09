@@ -1,15 +1,15 @@
 import { baseApi } from "@/app/baseApi.js";
 
-const normalizeCourse = (course = {}) => {
-  const teacher =
-    course.teacher ??
+const normalizeCourse = (response = {}) => {
+  const course = response?.data ?? response;
+  const teacher = course.teacher ??
     course.instructor ??
-    course.owner ??
-    {
+    course.owner ?? {
       name: course.teacherName ?? course.ownerName ?? "CampusMind teacher",
     };
 
-  const name = course.name ?? course.title ?? course.className ?? "Untitled class";
+  const name =
+    course.name ?? course.title ?? course.className ?? "Untitled class";
 
   return {
     ...course,
@@ -24,15 +24,23 @@ const normalizeCourse = (course = {}) => {
     teacher,
     instructor: teacher,
     role: course.role ?? "Joined",
-    memberCount: course.memberCount ?? course.rosterCount ?? course.members?.length ?? 0,
+    memberCount:
+      course.memberCount ?? course.rosterCount ?? course.members?.length ?? 0,
     popularity: course.popularity ?? course.popularityScore ?? 0,
-    logo: course.logo ?? course.avatarUrl ?? course.imageUrl ?? null,
+    coverUrl: course.coverUrl ?? course.cover_image_url ?? null,
+    logo:
+      course.logo ??
+      course.avatarUrl ??
+      course.imageUrl ??
+      course.coverUrl ??
+      null,
     theme: course.theme ?? "bg-primary",
   };
 };
 
 const normalizeCourseList = (response) => {
-  const courses = Array.isArray(response) ? response : response?.content ?? [];
+  const payload = response?.data ?? response;
+  const courses = Array.isArray(payload) ? payload : payload?.content ?? [];
   return courses.map(normalizeCourse);
 };
 
@@ -55,9 +63,16 @@ export const classroomApi = baseApi.injectEndpoints({
     findClassroomById: builder.query({
       query: (classId) => `/courses/${classId}`,
       transformResponse: normalizeCourse,
-      providesTags: (_result, _error, classId) => [{ type: "Classrooms", id: classId }],
+      providesTags: (_result, _error, classId) => [
+        { type: "Classrooms", id: classId },
+      ],
       keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: 300,
+    }),
+    getClassroomRoster: builder.query({
+      query: (classId) => `/courses/${classId}/roster`,
+      transformResponse: (response) => response?.data ?? response ?? [],
+      providesTags: ["Classrooms"],
     }),
     createClassroom: builder.mutation({
       query: (details) => ({ url: "/courses", method: "POST", body: details }),
@@ -71,6 +86,9 @@ export const classroomApi = baseApi.injectEndpoints({
           // The mutation error is handled by the caller.
         }
       },
+    }),
+    requestCourseCoverUpload: builder.mutation({
+      query: () => ({ url: "/courses/cover-upload", method: "POST" }),
     }),
     joinClassroom: builder.mutation({
       query: ({ courseId, code }) => ({
@@ -96,4 +114,6 @@ export const {
   useFetchClassroomsQuery,
   useFetchExploreClassroomsQuery,
   useFindClassroomByIdQuery,
+  useGetClassroomRosterQuery,
+  useRequestCourseCoverUploadMutation,
 } = classroomApi;

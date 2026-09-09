@@ -1,20 +1,21 @@
 import { useMemo, useState } from "react";
-import { COLLECTIONS, FILTERS, SAVED_ITEMS, TYPE_META } from "../model/savedData.js";
+import { FILTERS, TYPE_META } from "../model/savedData.js";
 
 export function useSavedItems() {
   const [activeCollection, setActiveCollection] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState(SAVED_ITEMS);
+  const [items, setItems] = useState([]);
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
-  const [collections, setCollections] = useState(COLLECTIONS);
+  const [collections, setCollections] = useState([]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchesCollection =
         activeCollection === "all" || item.collection === activeCollection;
-      const matchesFilter = activeFilter === "all" || item.type === activeFilter;
+      const matchesFilter =
+        activeFilter === "all" || item.type === activeFilter;
       const normalizedQuery = query.trim().toLowerCase();
       const matchesQuery =
         !normalizedQuery ||

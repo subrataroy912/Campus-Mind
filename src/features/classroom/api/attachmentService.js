@@ -2,10 +2,11 @@ const unwrapResponse = (response) => response?.data ?? response;
 
 export function buildUploadRequestBody(file = {}) {
   return {
-    fileName: file.name ?? file.fileName ?? "upload-file",
-    fileType: file.type ?? file.fileType ?? "application/octet-stream",
-    contentLength: file.size ?? file.contentLength ?? 0,
-    folder: file.folder ?? "coursework",
+    resourceType: file.resourceType ?? "COURSEWORK",
+    resourceId: file.resourceId ?? "",
+    originalFilename: file.name ?? file.fileName ?? "upload-file",
+    contentType: file.type ?? file.fileType ?? "application/octet-stream",
+    sizeBytes: file.size ?? file.contentLength ?? 0,
   };
 }
 

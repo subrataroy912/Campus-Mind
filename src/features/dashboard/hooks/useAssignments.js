@@ -1,28 +1,9 @@
-import { useEffect, useState } from "react";
-import { fetchAssignments } from "../api/assignmentService.js";
+import { useState } from "react";
 
 export function useAssignments() {
-  const [state, setState] = useState({
+  return useState({
     data: null,
-    isLoading: true,
+    isLoading: false,
     error: null,
-  });
-
-  useEffect(() => {
-    let active = true;
-
-    fetchAssignments()
-      .then((data) => {
-        if (active) setState({ data, isLoading: false, error: null });
-      })
-      .catch((error) => {
-        if (active) setState({ data: null, isLoading: false, error });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  return state;
+  })[0];
 }

@@ -3,10 +3,12 @@ import { baseApi } from "@/app/baseApi.js";
 const normalizeAttachment = (attachment = {}) => ({
   ...attachment,
   id: attachment.id ?? attachment.attachmentId,
+  publicId: attachment.publicId ?? attachment.public_id ?? null,
   name: attachment.name ?? attachment.fileName ?? "Attachment",
   uploadUrl: attachment.uploadUrl ?? attachment.upload_url ?? null,
   downloadUrl: attachment.downloadUrl ?? attachment.download_url ?? null,
-  fileType: attachment.fileType ?? attachment.mimeType ?? "application/octet-stream",
+  fileType:
+    attachment.fileType ?? attachment.mimeType ?? "application/octet-stream",
   detail: attachment.detail ?? "File",
 });
 
@@ -18,7 +20,8 @@ export const attachmentApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeAttachment(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeAttachment(response?.data ?? response),
     }),
     completeUpload: builder.mutation({
       query: ({ attachmentId, payload = {} }) => ({
@@ -26,7 +29,8 @@ export const attachmentApi = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response) => normalizeAttachment(response?.data ?? response),
+      transformResponse: (response) =>
+        normalizeAttachment(response?.data ?? response),
     }),
     deleteAttachment: builder.mutation({
       query: (attachmentId) => ({
