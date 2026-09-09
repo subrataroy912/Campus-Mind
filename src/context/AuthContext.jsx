@@ -171,6 +171,8 @@ export function AuthProvider({ children }) {
           throw error;
         }
 
+        setAuthState({ status: "loading", error: null });
+
         const hydratedUser = nextUser
           ? {
               ...nextUser,
@@ -183,7 +185,26 @@ export function AuthProvider({ children }) {
           : null;
 
         resetApiCache(dispatch);
-        const profile = hydratedUser || (await getCurrentProfileRequest());
+        // Install the provider-issued token before requesting /users/me. Without
+        // this, the profile request is sent without Authorization on a new OAuth
+        // session and the callback can never complete.
+        const provisionalUser = hydratedUser ?? { accessToken, refreshToken };
+        dispatch(
+          setCredentials({
+            accessToken,
+            refreshToken,
+            user: provisionalUser,
+          }),
+        );
+
+        let profile;
+        try {
+          profile = hydratedUser || (await getCurrentProfileRequest());
+        } catch (error) {
+          dispatch(clearCredentials());
+          resetApiCache(dispatch);
+          throw error;
+        }
         const finalUser = {
           ...profile,
           accessToken,
