@@ -11,6 +11,10 @@ import { logout } from "@/features/auth/api/authService";
 export default function DashboardHeader() {
   const { data: profile, isLoading, error } = useGetCurrentProfileQuery();
   const [menuOpen, setMenuOpen] = useState(false);
+  const safeAvatarUrl =
+    typeof profile?.avatarUrl === "string" && profile.avatarUrl.trim()
+      ? profile.avatarUrl.trim()
+      : null;
 
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
@@ -46,7 +50,6 @@ export default function DashboardHeader() {
     logout();
     navigate("/", { replace: true });
   };
-console.log(profile);
   if (isLoading) return <div>Loading profile...</div>;
   if (error) return <div>Failed to load profile data.</div>;
   return (
@@ -78,9 +81,9 @@ console.log(profile);
           className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main transition-colors hover:bg-canvas"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent/20 text-primary">
-            {profile?.avatarUrl ? (
+            {safeAvatarUrl ? (
               <img
-                src={profile.avatarUrl}
+                src={safeAvatarUrl}
                 alt={`${profile?.displayName || "User"}'s avatar`}
                 className="h-full w-full object-cover"
                 referrerPolicy="no-referrer"
@@ -91,7 +94,9 @@ console.log(profile);
               </span>
             )}
           </div>
-          <span className="hidden sm:inline">{profile?.displayName || "Profile"}</span>
+          <span className="hidden sm:inline">
+            {profile?.displayName || "Profile"}
+          </span>
         </Link>
 
         <button

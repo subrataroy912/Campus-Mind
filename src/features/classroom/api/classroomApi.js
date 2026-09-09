@@ -1,14 +1,35 @@
 import { baseApi } from "@/app/baseApi.js";
 
-const normalizeCourse = (course) => ({
-  ...course,
-  id: course.id ?? course.courseId,
-  name: course.name ?? course.title,
-  className: course.className ?? course.title,
-  code: course.code ?? course.enrollmentCode,
-  teacherId: course.teacherId ?? course.ownerId,
-  popularity: course.popularity ?? course.popularityScore ?? 0,
-});
+const normalizeCourse = (course = {}) => {
+  const teacher =
+    course.teacher ??
+    course.instructor ??
+    course.owner ??
+    {
+      name: course.teacherName ?? course.ownerName ?? "CampusMind teacher",
+    };
+
+  const name = course.name ?? course.title ?? course.className ?? "Untitled class";
+
+  return {
+    ...course,
+    id: course.id ?? course.courseId ?? course.classId,
+    name,
+    title: name,
+    className: course.className ?? name,
+    subtitle: course.section ?? course.subtitle ?? course.term ?? "",
+    section: course.section ?? course.subtitle ?? "",
+    code: course.code ?? course.enrollmentCode ?? course.classCode ?? "",
+    teacherId: course.teacherId ?? course.ownerId,
+    teacher,
+    instructor: teacher,
+    role: course.role ?? "Joined",
+    memberCount: course.memberCount ?? course.rosterCount ?? course.members?.length ?? 0,
+    popularity: course.popularity ?? course.popularityScore ?? 0,
+    logo: course.logo ?? course.avatarUrl ?? course.imageUrl ?? null,
+    theme: course.theme ?? "bg-primary",
+  };
+};
 
 const normalizeCourseList = (response) => {
   const courses = Array.isArray(response) ? response : response?.content ?? [];
@@ -41,7 +62,15 @@ export const classroomApi = baseApi.injectEndpoints({
     createClassroom: builder.mutation({
       query: (details) => ({ url: "/courses", method: "POST", body: details }),
       transformResponse: normalizeCourse,
-      invalidatesTags: ["Classrooms"],
+      invalidatesTags: ["Classrooms", "Profile"],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(classroomApi.util.invalidateTags(["Classrooms", "Profile"]));
+        } catch {
+          // The mutation error is handled by the caller.
+        }
+      },
     }),
     joinClassroom: builder.mutation({
       query: ({ courseId, code }) => ({
@@ -50,7 +79,15 @@ export const classroomApi = baseApi.injectEndpoints({
         body: { code },
       }),
       transformResponse: normalizeCourse,
-      invalidatesTags: ["Classrooms"],
+      invalidatesTags: ["Classrooms", "Profile"],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(classroomApi.util.invalidateTags(["Classrooms", "Profile"]));
+        } catch {
+          // The mutation error is handled by the caller.
+        }
+      },
     }),
   }),
 });

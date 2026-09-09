@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { fetchTheme, updateTheme } from "./settingsService.js";
+import {
+  fetchSettings,
+  fetchTheme,
+  updateSettings,
+  updateTheme,
+} from "./settingsService.js";
 
 function createStorage() {
   const values = new Map();
@@ -26,5 +31,40 @@ describe("settingsService", () => {
 
   it("rejects unsupported themes", async () => {
     await expect(updateTheme("sepia")).rejects.toThrow("Unsupported theme.");
+  });
+
+  it("loads the default notification and privacy preferences", async () => {
+    await expect(fetchSettings()).resolves.toMatchObject({
+      notifications: {
+        classAnnouncements: true,
+        directMessages: true,
+        assignmentReminders: true,
+        weeklyDigest: false,
+      },
+      privacy: {
+        discoverable: true,
+        showOnlineStatus: true,
+      },
+    });
+  });
+
+  it("persists and reloads notification and privacy preferences", async () => {
+    await updateSettings({
+      notifications: { classAnnouncements: false, directMessages: true, assignmentReminders: false, weeklyDigest: true },
+      privacy: { discoverable: false, showOnlineStatus: true },
+    });
+
+    await expect(fetchSettings()).resolves.toMatchObject({
+      notifications: {
+        classAnnouncements: false,
+        directMessages: true,
+        assignmentReminders: false,
+        weeklyDigest: true,
+      },
+      privacy: {
+        discoverable: false,
+        showOnlineStatus: true,
+      },
+    });
   });
 });

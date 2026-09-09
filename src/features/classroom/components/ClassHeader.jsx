@@ -4,6 +4,10 @@ import { ClassroomIcon } from "./ClassroomIcon.jsx";
 export default function ClassHeader({ classroom }) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const teacherName =
+    typeof classroom?.teacher === "string"
+      ? classroom.teacher
+      : classroom?.teacher?.name || classroom?.instructor?.name || "CampusMind teacher";
 
   const handleCopy = () => {
     if (!classroom?.code) return;
@@ -72,11 +76,8 @@ export default function ClassHeader({ classroom }) {
             </h1>
             <p className="mt-1 text-sm font-medium text-text-muted line-clamp-1">
               {classroom?.section || classroom?.subtitle}
-              {(classroom?.section || classroom?.subtitle) &&
-              (classroom?.teacher || classroom?.instructor)
-                ? " · "
-                : ""}
-              {(classroom?.teacher || classroom?.instructor)?.name}
+              {(classroom?.section || classroom?.subtitle) && teacherName ? " · " : ""}
+              {teacherName}
             </p>
           </div>
         </div>

@@ -11,11 +11,11 @@ export default function ImageUploader({
   sizeClass,
   helperText,
 }) {
-  const [preview, setPreview] = useState(currentImage);
+  const [preview, setPreview] = useState(currentImage || null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
-  const hasChanges = preview !== currentImage;
+  const hasChanges = Boolean(preview) && preview !== (currentImage || null);
 
   const handleFileSelect = (file) => {
     if (!VALID_TYPES.includes(file.type)) {
@@ -44,8 +44,9 @@ export default function ImageUploader({
   };
 
   const handleRemove = () => {
-    setPreview(currentImage);
-    onChange(currentImage);
+    const safeCurrent = currentImage || null;
+    setPreview(safeCurrent);
+    onChange(safeCurrent);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -53,7 +54,9 @@ export default function ImageUploader({
     <div className="relative">
       <div
         className={`relative ${sizeClass} overflow-hidden rounded-lg border bg-gray-200 object-cover shadow-sm transition-all ${
-          isDragging ? "border-blue-500 ring-2 ring-blue-500/50" : "border-gray-200"
+          isDragging
+            ? "border-blue-500 ring-2 ring-blue-500/50"
+            : "border-gray-200"
         }`}
         onDrop={handleDrop}
         onDragOver={(event) => {
@@ -62,7 +65,17 @@ export default function ImageUploader({
         }}
         onDragLeave={() => setIsDragging(false)}
       >
-        <img src={preview} alt={`${label} preview`} className="h-full w-full object-cover" />
+        {preview ? (
+          <img
+            src={preview}
+            alt={`${label} preview`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-medium text-muted-foreground">
+            No {label.toLowerCase()} yet
+          </div>
+        )}
         {hasChanges && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <span className="rounded-full bg-black/50 px-3 py-1 text-sm font-medium text-white">
@@ -104,7 +117,11 @@ export default function ImageUploader({
         )}
       </div>
 
-      {error && <p className="mt-2 text-sm text-red-600" role="alert">{error}</p>}
+      {error && (
+        <p className="mt-2 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
       <p className="mt-2 text-xs text-gray-500">{helperText}</p>
     </div>
   );

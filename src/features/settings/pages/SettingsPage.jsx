@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { LogOut, Moon, Shield, Sun, UserRound } from "lucide-react";
 
@@ -8,34 +9,39 @@ import { Button } from "@/components/ui/button.jsx";
 import { Switch } from "@/components/ui/switch.jsx";
 import ProfileSection from "@/features/profile/components/ProfileSection.jsx";
 import { useSettings } from "../hooks/useSettings.js";
+import { fetchSettings, updateSettings } from "../api/settingsService.js";
 import { initials } from "@/utils/initials.js";
+import {
+  setNotifications,
+  setPrivacy,
+  toggleNotification,
+  togglePrivacy,
+} from "../settingsSlice.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
     <label className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
       <span>
-        <span className="block text-sm font-semibold text-text-heading">{title}</span>
-        <span className="mt-0.5 block text-sm text-text-muted">{description}</span>
+        <span className="block text-sm font-semibold text-text-heading">
+          {title}
+        </span>
+        <span className="mt-0.5 block text-sm text-text-muted">
+          {description}
+        </span>
       </span>
-      <Switch checked={checked} onCheckedChange={onChange} className="mt-0.5 shrink-0" />
+      <Switch
+        checked={checked}
+        onCheckedChange={onChange}
+        className="mt-0.5 shrink-0"
+      />
     </label>
   );
 }
 
-const DEFAULT_NOTIFICATIONS = {
-  classAnnouncements: true,
-  directMessages: true,
-  assignmentReminders: true,
-  weeklyDigest: false,
-};
-
-const DEFAULT_PRIVACY = {
-  discoverable: true,
-  showOnlineStatus: true,
-};
-
 export default function SettingsPage() {
   const { user, logout } = useAuth();
+  const dispatch = useDispatch();
+  const { notifications, privacy } = useSelector((state) => state.settings);
   const {
     theme,
     isLoading: isThemeLoading,
@@ -45,14 +51,53 @@ export default function SettingsPage() {
   } = useSettings();
   const navigate = useNavigate();
 
-  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
-  const [privacy, setPrivacy] = useState(DEFAULT_PRIVACY);
+  useEffect(() => {
+    let active = true;
 
-  const toggleNotification = (key) =>
-    setNotifications((previous) => ({ ...previous, [key]: !previous[key] }));
+    fetchSettings()
+      .then((savedSettings) => {
+        if (!active) return;
+        dispatch(setNotifications(savedSettings.notifications));
+        dispatch(setPrivacy(savedSettings.privacy));
+      })
+      .catch(() => {
+        // leave defaults in place when settings cannot be loaded
+      });
 
-  const togglePrivacy = (key) =>
-    setPrivacy((previous) => ({ ...previous, [key]: !previous[key] }));
+    return () => {
+      active = false;
+    };
+  }, [dispatch]);
+
+  const handleToggleNotification = async (key) => {
+    const nextNotifications = {
+      ...notifications,
+      [key]: !notifications[key],
+    };
+
+    dispatch(toggleNotification(key));
+
+    try {
+      await updateSettings({ notifications: nextNotifications, privacy });
+    } catch {
+      dispatch(setNotifications(notifications));
+    }
+  };
+
+  const handleTogglePrivacy = async (key) => {
+    const nextPrivacy = {
+      ...privacy,
+      [key]: !privacy[key],
+    };
+
+    dispatch(togglePrivacy(key));
+
+    try {
+      await updateSettings({ notifications, privacy: nextPrivacy });
+    } catch {
+      dispatch(setPrivacy(privacy));
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -104,7 +149,9 @@ export default function SettingsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    initials(user?.name || "") || <UserRound size={22} aria-hidden="true" />
+                    initials(user?.name || "") || (
+                      <UserRound size={22} aria-hidden="true" />
+                    )
                   )}
                 </div>
                 <div className="min-w-0">
@@ -127,25 +174,29 @@ export default function SettingsPage() {
                   title="Class announcements"
                   description="Pinned posts and updates from your teachers."
                   checked={notifications.classAnnouncements}
-                  onChange={() => toggleNotification("classAnnouncements")}
+                  onChange={() =>
+                    handleToggleNotification("classAnnouncements")
+                  }
                 />
                 <SettingRow
                   title="Direct messages"
                   description="New messages from classmates and instructors."
                   checked={notifications.directMessages}
-                  onChange={() => toggleNotification("directMessages")}
+                  onChange={() => handleToggleNotification("directMessages")}
                 />
                 <SettingRow
                   title="Assignment reminders"
                   description="A nudge before something you saved is due."
                   checked={notifications.assignmentReminders}
-                  onChange={() => toggleNotification("assignmentReminders")}
+                  onChange={() =>
+                    handleToggleNotification("assignmentReminders")
+                  }
                 />
                 <SettingRow
                   title="Weekly digest"
                   description="A Sunday-evening summary of what you missed."
                   checked={notifications.weeklyDigest}
-                  onChange={() => toggleNotification("weeklyDigest")}
+                  onChange={() => handleToggleNotification("weeklyDigest")}
                 />
               </div>
             </ProfileSection>
@@ -159,13 +210,13 @@ export default function SettingsPage() {
                   title="Discoverable in class search"
                   description="Classmates can find your profile from a shared class."
                   checked={privacy.discoverable}
-                  onChange={() => togglePrivacy("discoverable")}
+                  onChange={() => handleTogglePrivacy("discoverable")}
                 />
                 <SettingRow
                   title="Show online status"
                   description="Let others see when you're active in a class."
                   checked={privacy.showOnlineStatus}
-                  onChange={() => togglePrivacy("showOnlineStatus")}
+                  onChange={() => handleTogglePrivacy("showOnlineStatus")}
                 />
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-xs text-text-muted">
@@ -174,7 +225,10 @@ export default function SettingsPage() {
               </p>
             </ProfileSection>
 
-            <ProfileSection title="Appearance" description="Pick how CampusMind looks on this device.">
+            <ProfileSection
+              title="Appearance"
+              description="Pick how CampusMind looks on this device."
+            >
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -208,7 +262,9 @@ export default function SettingsPage() {
                   Unable to save your theme preference.
                 </p>
               )}
-              <p className="mt-3 text-xs text-text-muted">Theme preference is saved on this device.</p>
+              <p className="mt-3 text-xs text-text-muted">
+                Theme preference is saved on this device.
+              </p>
             </ProfileSection>
           </div>
         </Card>
@@ -219,13 +275,16 @@ export default function SettingsPage() {
             description="Sign out here, or on every device you've used."
           >
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" onClick={handleLogout} className="gap-2">
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="gap-2"
+              >
                 <LogOut size={16} aria-hidden="true" />
                 Log out
               </Button>
             </div>
           </ProfileSection>
-
         </Card>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
+import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import {
   Tooltip,
@@ -42,9 +43,18 @@ function LoginPage() {
     clearAuthError();
     try {
       await login(formData);
+      toast.add({
+        title: "Welcome back",
+        description: "You are signed in and ready to continue.",
+        type: "success",
+      });
       navigate("/dashboard", { replace: true });
     } catch {
-      // AuthContext exposes the request error for the alert below.
+      toast.add({
+        title: "Sign-in failed",
+        description: "Please check your email and password and try again.",
+        type: "error",
+      });
     }
   };
 

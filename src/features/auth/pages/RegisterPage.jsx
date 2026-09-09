@@ -4,6 +4,7 @@ import { Lock, Mail, UserRound, Users } from "lucide-react";
 import AuthInput from "../components/AuthInput.jsx";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
+import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import {
   Tooltip,
@@ -53,9 +54,18 @@ export default function RegisterPage() {
     clearAuthError();
     try {
       await register(formData);
+      toast.add({
+        title: "Account created",
+        description: "Your account is ready. Sign in to continue.",
+        type: "success",
+      });
       navigate("/auth/login", { replace: true, state: { registered: true } });
     } catch {
-      // AuthContext exposes the request error for the alert below.
+      toast.add({
+        title: "Registration failed",
+        description: "Please review the form and try again.",
+        type: "error",
+      });
     }
   };
   return (

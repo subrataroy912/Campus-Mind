@@ -8,6 +8,7 @@ import {
   Pin,
   Send,
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { useDashboardData } from "../useDashboardData.js";
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
@@ -15,6 +16,10 @@ import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import {
+  setCommunityDraft,
+  setCommunityFilter,
+} from "../dashboardSlice.js";
 
 const TYPE_META = {
   announcement: {
@@ -97,18 +102,18 @@ function CommunityPost({ post }) {
 
 export default function DashboardCommunityPage() {
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const { classrooms = [] } = useDashboardData();
   const { data, isLoading, error } = useCommunityFeed();
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [draft, setDraft] = useState("");
+  const { communityFilter, draft } = useSelector((state) => state.dashboard);
 
   const posts = data?.posts ?? EMPTY_FEED;
   const filters = data?.filters ?? EMPTY_FEED;
 
   const filteredPosts = useMemo(() => {
-    if (activeFilter === "all") return posts;
-    return posts.filter((post) => post.type === activeFilter);
-  }, [activeFilter, posts]);
+    if (communityFilter === "all") return posts;
+    return posts.filter((post) => post.type === communityFilter);
+  }, [communityFilter, posts]);
 
   const hasClasses = classrooms.length > 0;
 
@@ -160,7 +165,7 @@ export default function DashboardCommunityPage() {
               <div className="flex-1">
                 <textarea
                   value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => dispatch(setCommunityDraft(event.target.value))}
                   rows={2}
                   placeholder="Ask a question or share something with your classes…"
                   className="w-full resize-none rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-4 focus:ring-focus"
@@ -187,11 +192,11 @@ export default function DashboardCommunityPage() {
             {filters.map((filter) => (
               <Button
                 key={filter.id}
-                variant={activeFilter === filter.id ? "default" : "outline"}
+                variant={communityFilter === filter.id ? "default" : "outline"}
                 size="sm"
-                onClick={() => setActiveFilter(filter.id)}
+                onClick={() => dispatch(setCommunityFilter(filter.id))}
                 role="tab"
-                aria-selected={activeFilter === filter.id}
+                aria-selected={communityFilter === filter.id}
               >
                 {filter.label}
               </Button>

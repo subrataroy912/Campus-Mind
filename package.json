@@ -22,6 +22,7 @@
     "cn": "^0.2.5",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
+    "inngest": "^4.20.0",
     "input-otp": "^1.5.0",
     "lucide-react": "latest",
     "react": "^19.2.8",

@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import { createClassroom } from "../api/classroomService.js";
 import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
 
 export function useCreateClassForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const [form, setForm] = useState(INITIAL_CLASS_FORM);
   const [preview, setPreview] = useState(null);
@@ -68,6 +71,7 @@ export function useCreateClassForm() {
         ...form,
         coverImage: preview,
       });
+      triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
       navigate(`/dashboard/classes/${classroom.id}`);
     } catch (error) {

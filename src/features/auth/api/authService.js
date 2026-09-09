@@ -9,23 +9,45 @@ export function normalizeAuthResponse(response) {
   const nestedUser = payload.user ?? {};
   const user = {
     ...nestedUser,
-    id: payload.userId ?? nestedUser.id,
-    name: payload.displayName ?? nestedUser.name,
+    id: payload.userId ?? nestedUser.id ?? payload.id ?? nestedUser.userId,
+    name:
+      payload.displayName ??
+      nestedUser.name ??
+      nestedUser.displayName ??
+      payload.name ??
+      nestedUser.fullName ??
+      "CampusMind member",
     email: payload.email ?? nestedUser.email,
-    avatar: payload.avatarUrl ?? nestedUser.avatar,
+    avatar: payload.avatarUrl ?? nestedUser.avatar ?? nestedUser.avatarUrl,
+    banner: payload.bannerUrl ?? nestedUser.banner ?? nestedUser.bannerUrl,
+    handle: payload.handle ?? nestedUser.handle,
+    headline: payload.headline ?? nestedUser.headline,
+    profileVisibility: payload.profileVisibility ?? nestedUser.profileVisibility,
+    accountType: payload.accountType ?? nestedUser.accountType,
+    firstName: payload.firstName ?? nestedUser.firstName,
+    lastName: payload.lastName ?? nestedUser.lastName,
+    bio: payload.bio ?? nestedUser.bio ?? nestedUser.about,
+    avatarUrl: payload.avatarUrl ?? nestedUser.avatarUrl ?? nestedUser.avatar,
+    bannerUrl: payload.bannerUrl ?? nestedUser.bannerUrl ?? nestedUser.banner,
+    role: payload.role ?? nestedUser.role,
   };
 
+  Object.keys(user).forEach((key) => {
+    if (user[key] === undefined) delete user[key];
+  });
+
   return {
-    accessToken: payload.accessToken ?? payload.token,
-    refreshToken: payload.refreshToken ?? null,
+    accessToken: payload.accessToken ?? payload.token ?? null,
+    refreshToken: payload.refreshToken ?? payload.refresh_token ?? null,
     user,
   };
 }
 
 export function getOAuthRedirectUrl(provider, mode) {
-  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
+  const rawBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
   const baseUrl = rawBaseUrl.replace(/\/+$/, ""); // Strip trailing slashes
-  
+
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const params = new URLSearchParams({
     redirect_uri: `${origin}/auth/callback`,
@@ -40,7 +62,9 @@ export function getOAuthRedirectUrl(provider, mode) {
 
 export async function login(credentials) {
   return normalizeAuthResponse(
-    await store.dispatch(authApi.endpoints.login.initiate(credentials)).unwrap(),
+    await store
+      .dispatch(authApi.endpoints.login.initiate(credentials))
+      .unwrap(),
   );
 }
 
@@ -52,19 +76,23 @@ export async function register(details) {
 
 export async function getCurrentProfile() {
   return unwrapResponse(
-    await store.dispatch(profileApi.endpoints.getCurrentProfile.initiate()).unwrap(),
+    await store
+      .dispatch(profileApi.endpoints.getCurrentProfile.initiate())
+      .unwrap(),
   );
 }
 
 export async function updateProfile(details) {
   return unwrapResponse(
-    await store.dispatch(
-      profileApi.endpoints.updateCurrentProfile.initiate(details),
-    ).unwrap(),
+    await store
+      .dispatch(profileApi.endpoints.updateCurrentProfile.initiate(details))
+      .unwrap(),
   );
 }
 
 export async function logout(refreshToken) {
   if (!refreshToken) return;
-  await store.dispatch(authApi.endpoints.logout.initiate(refreshToken)).unwrap();
+  await store
+    .dispatch(authApi.endpoints.logout.initiate(refreshToken))
+    .unwrap();
 }

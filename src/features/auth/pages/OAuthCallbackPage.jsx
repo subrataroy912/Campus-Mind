@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { normalizeAuthResponse } from "../api/authService.js";
+import { handleOAuthFailure } from "../oauth.js";
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
@@ -17,17 +18,13 @@ export default function OAuthCallbackPage() {
     const errorMessage = searchParams.get("error");
     const encodedUser = searchParams.get("user");
 
-    if (errorMessage) {
-      try {
-        completeOAuth({ token: null, user: null, errorMessage });
-      } catch {
-        // AuthContext owns the failure state shown below.
-      }
-      return;
-    }
-
     const finishOAuth = async () => {
       try {
+        if (errorMessage) {
+          await handleOAuthFailure({ completeOAuth, errorMessage });
+          return;
+        }
+
         const user = encodedUser ? JSON.parse(decodeURIComponent(encodedUser)) : null;
         const response = normalizeAuthResponse({
           accessToken,
@@ -45,7 +42,7 @@ export default function OAuthCallbackPage() {
       }
     };
 
-    finishOAuth();
+    void finishOAuth();
   }, [authStatus, completeOAuth, navigate, searchParams]);
 
   if (authStatus === "failed") {

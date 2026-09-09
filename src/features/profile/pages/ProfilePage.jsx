@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
@@ -17,6 +18,12 @@ import {
 import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import {
+  setProfileEditing,
+  setProfilePreview,
+  setProfileSaving,
+  setProfileTab,
+} from "../profileSlice.js";
 
 const profileFor = (user) => ({
   ...user,
@@ -39,10 +46,10 @@ const profileFor = (user) => ({
 export default function ProfilePage() {
   const { userId } = useParams();
   const { user: currentUser, updateProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState("classes");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [preview, setPreview] = useState(false);
+  const dispatch = useDispatch();
+  const { activeTab, isEditing, isSaving, preview } = useSelector(
+    (state) => state.profile,
+  );
   const { classrooms = [] } = useDashboardData();
   const isProfileOwner = !userId || userId === currentUser?.id;
   const isOwner = isProfileOwner && !preview;
@@ -122,11 +129,11 @@ export default function ProfilePage() {
     },
   ];
   const save = async (formData) => {
-    setIsSaving(true);
+    dispatch(setProfileSaving(true));
     try {
       await updateProfile(formData);
     } finally {
-      setIsSaving(false);
+      dispatch(setProfileSaving(false));
     }
   };
   return (
@@ -135,8 +142,8 @@ export default function ProfilePage() {
         <ProfileHeader
           profile={profile}
           isOwner={isOwner}
-          onEdit={() => setIsEditing(true)}
-          onPreview={() => setPreview(true)}
+          onEdit={() => dispatch(setProfileEditing(true))}
+          onPreview={() => dispatch(setProfilePreview(true))}
           sharedClassCount={sharedClassCount}
         />
         <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
@@ -147,7 +154,7 @@ export default function ProfilePage() {
             <Button
               variant={activeTab === "classes" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setActiveTab("classes")}
+              onClick={() => dispatch(setProfileTab("classes"))}
             >
               Classes
             </Button>
@@ -155,7 +162,7 @@ export default function ProfilePage() {
               <Button
                 variant={activeTab === "saved" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setActiveTab("saved")}
+                onClick={() => dispatch(setProfileTab("saved"))}
               >
                 Saved
               </Button>
@@ -199,7 +206,7 @@ export default function ProfilePage() {
       {isOwner && (
         <EditProfileModal
           isOpen={isEditing}
-          onClose={() => setIsEditing(false)}
+          onClose={() => dispatch(setProfileEditing(false))}
           profile={profile}
           onSave={save}
           isSaving={isSaving}

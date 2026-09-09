@@ -1,11 +1,14 @@
 import { useState, useRef } from "react";
+import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router";
 import { findClassroomByCode, joinClassroom } from "../api/classroomService";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import { CLASS_CODE_LENGTH, formatClassCode, normalizeClassCode } from "@/utils/classCode.js";
 
 export default function JoinClass() {
   const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
   const [courseId, setCourseId] = useState(() => searchParams.get("courseId") || "");
@@ -53,11 +56,38 @@ export default function JoinClass() {
 
   const handleFindClass = async (e) => {
     e.preventDefault();
-    if (!courseId.trim() || code.some((character) => !character)) { setStatus("incomplete"); return; }
+    const trimmedCourseId = courseId.trim();
+    const classCode = formatClassCode(code);
+    const hasCode = code.every(Boolean);
+
+    if ((!trimmedCourseId && !hasCode) || (!trimmedCourseId && !hasCode)) {
+      setStatus("incomplete");
+      return;
+    }
+
+    if (!trimmedCourseId && hasCode) {
+      setStatus("loading");
+      setError("");
+      try {
+        const match = await findClassroomByCode(user?.id, "", classCode);
+        setFoundClass(match);
+        setStatus(match ? "found" : "not-found");
+      } catch (requestError) {
+        setError(requestError.message || "Unable to look up this class.");
+        setStatus("idle");
+      }
+      return;
+    }
+
+    if (!hasCode) {
+      setStatus("incomplete");
+      return;
+    }
+
     setStatus("loading");
     setError("");
     try {
-      const match = await findClassroomByCode(user?.id, courseId.trim());
+      const match = await findClassroomByCode(user?.id, trimmedCourseId, classCode);
       setFoundClass(match);
       setStatus(match ? "found" : "not-found");
     } catch (requestError) {
@@ -67,9 +97,14 @@ export default function JoinClass() {
   };
 
   const handleJoin = async () => {
+    const trimmedCourseId = courseId.trim();
     setError("");
     try {
-      await joinClassroom(user?.id, courseId.trim(), formatClassCode(code));
+      if (!trimmedCourseId) {
+        throw new Error("A course ID is required to join this class.");
+      }
+      await joinClassroom(user?.id, trimmedCourseId, formatClassCode(code));
+      triggerLifecycleRefresh(dispatch, "course-created");
       setStatus("joined");
     } catch (requestError) {
       setError(requestError.message || "Unable to join this class.");

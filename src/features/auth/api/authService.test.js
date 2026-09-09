@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizeAuthResponse } from "./authService.js";
+import { handleOAuthFailure } from "../oauth.js";
 
 describe("normalizeAuthResponse", () => {
   it("maps the flat backend credential response into auth state", () => {
@@ -20,6 +21,7 @@ describe("normalizeAuthResponse", () => {
         email: "student@example.com",
         name: "Campus Student",
         avatar: "https://example.com/avatar.png",
+        avatarUrl: "https://example.com/avatar.png",
       },
     });
   });
@@ -35,5 +37,15 @@ describe("normalizeAuthResponse", () => {
       refreshToken: null,
       user: { id: "user-1", name: "Campus Student" },
     });
+  });
+
+  it("handles OAuth callback failures without leaving a rejected promise unhandled", async () => {
+    const completeOAuth = async () => {
+      throw new Error("oauth_failed");
+    };
+
+    await expect(
+      handleOAuthFailure({ completeOAuth, errorMessage: "oauth_failed" }),
+    ).resolves.toBeInstanceOf(Error);
   });
 });

@@ -16,7 +16,15 @@ export const profileApi = baseApi.injectEndpoints({
     }),
     updateCurrentProfile: builder.mutation({
       query: (changes) => ({ url: "/users/me", method: "PATCH", body: changes }),
-      invalidatesTags: ["Profile"],
+      invalidatesTags: ["Profile", "Classrooms"],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(profileApi.util.invalidateTags(["Profile", "Classrooms"]));
+        } catch {
+          // The profile mutation will surface the request error to the caller.
+        }
+      },
     }),
   }),
 });

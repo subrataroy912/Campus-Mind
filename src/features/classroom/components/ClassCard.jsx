@@ -13,11 +13,17 @@ export default function ClassCard({ classroom }) {
       <div className={`relative h-24 w-full ${classroom.theme || "bg-primary"}`}>
         {/* Floating Avatar */}
         <div className="absolute -bottom-8 right-5 z-10 h-16 w-16 overflow-hidden rounded-full border-4 border-surface bg-canvas shadow-sm">
-          <img
-            src={classroom.logo || ""}
-            alt={`${classroom.title} avatar`}
-            className="h-full w-full object-cover"
-          />
+          {classroom.logo ? (
+            <img
+              src={classroom.logo}
+              alt={`${classroom.title} avatar`}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center bg-primary/10 text-sm font-bold text-primary">
+              {classroom.title?.slice(0, 2)?.toUpperCase() || "CL"}
+            </div>
+          )}
         </div>
       </div>
 
