@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { normalizeAuthResponse } from "../api/authService.js";
-import { handleOAuthFailure } from "../oauth.js";
+import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
@@ -13,28 +13,18 @@ export default function OAuthCallbackPage() {
   useEffect(() => {
     if (authStatus !== "idle") return;
 
-    const accessToken = searchParams.get("accessToken") || searchParams.get("access_token") || searchParams.get("token");
-    const refreshToken = searchParams.get("refreshToken") || searchParams.get("refresh_token");
-    const errorMessage = searchParams.get("error");
-    const encodedUser = searchParams.get("user");
-
     const finishOAuth = async () => {
       try {
-        if (errorMessage) {
-          await handleOAuthFailure({ completeOAuth, errorMessage });
+        const callback = parseOAuthCallback(searchParams);
+        if (callback.errorMessage) {
+          await handleOAuthFailure({
+            completeOAuth,
+            errorMessage: callback.errorMessage,
+          });
           return;
         }
 
-        const user = encodedUser ? JSON.parse(decodeURIComponent(encodedUser)) : null;
-        const response = normalizeAuthResponse({
-          accessToken,
-          refreshToken,
-          user,
-          userId: searchParams.get("userId"),
-          email: searchParams.get("email"),
-          displayName: searchParams.get("displayName"),
-          avatarUrl: searchParams.get("avatarUrl"),
-        });
+        const response = normalizeAuthResponse(callback);
         await completeOAuth(response);
         navigate("/dashboard", { replace: true });
       } catch {

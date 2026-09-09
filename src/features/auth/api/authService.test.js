@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizeAuthResponse } from "./authService.js";
-import { handleOAuthFailure } from "../oauth.js";
+import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
 
 describe("normalizeAuthResponse", () => {
   it("maps the flat backend credential response into auth state", () => {
@@ -47,5 +47,31 @@ describe("normalizeAuthResponse", () => {
     await expect(
       handleOAuthFailure({ completeOAuth, errorMessage: "oauth_failed" }),
     ).resolves.toBeInstanceOf(Error);
+  });
+
+  it("parses a URLSearchParams-decoded OAuth user exactly once", () => {
+    const callback = parseOAuthCallback(
+      new URLSearchParams({
+        access_token: "access-token",
+        refresh_token: "refresh-token",
+        user: JSON.stringify({ id: "user-1", name: "100% Campus Student" }),
+      }),
+    );
+
+    expect(callback).toEqual({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: { id: "user-1", name: "100% Campus Student" },
+      userId: null,
+      email: null,
+      displayName: null,
+      avatarUrl: null,
+    });
+  });
+
+  it("surfaces malformed user profiles as OAuth failures", () => {
+    expect(parseOAuthCallback(new URLSearchParams({ user: "not-json" }))).toEqual({
+      errorMessage: "The social sign-in response contained an invalid user profile.",
+    });
   });
 });
