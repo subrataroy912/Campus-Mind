@@ -94,9 +94,14 @@ export async function logout({ onLocalTeardown } = {}) {
     // Keep Redux credentials installed until the request is created so the
     // interceptor can send its bearer token. Clearing them first made logout
     // requests anonymous and left server-side sessions alive.
-    await store.dispatch(authApi.endpoints.logout.initiate()).unwrap();
+    // Do not await this best-effort request: fetchBaseQuery has no default
+    // timeout, so a stalled revocation must not keep the user signed in.
+    void store
+      .dispatch(authApi.endpoints.logout.initiate())
+      .unwrap()
+      .catch(() => {});
   } catch {
-    // Revocation is best-effort; local cleanup still happens below.
+    // A synchronous failure to start revocation must not block local cleanup.
   } finally {
     clearLocalAuthSession(store.dispatch, onLocalTeardown);
   }

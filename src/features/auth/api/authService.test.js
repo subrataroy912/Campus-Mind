@@ -161,6 +161,30 @@ describe("logout", () => {
     });
   });
 
+  it("tears down local state without waiting for a stalled logout request", async () => {
+    store.dispatch(
+      setCredentials({
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        user: { id: "student-1" },
+      })
+    );
+    const initiate = vi
+      .spyOn(authApi.endpoints.logout, "initiate")
+      .mockReturnValue(() => ({
+        unwrap: () => new Promise(() => {}),
+      }));
+
+    await expect(logout()).resolves.toBeUndefined();
+
+    expect(initiate).toHaveBeenCalledWith();
+    expect(store.getState().auth).toEqual({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+    });
+  });
+
   it("removes the session, cache, and every supported legacy storage key", () => {
     const localStorage = createStorage();
     vi.stubGlobal("window", { localStorage });
