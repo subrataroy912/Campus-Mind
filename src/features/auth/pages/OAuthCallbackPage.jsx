@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -9,9 +9,14 @@ export default function OAuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { completeOAuth, authError, authStatus } = useAuth();
+  const hasStarted = useRef(false);
 
   useEffect(() => {
-    if (authStatus !== "idle") return;
+    // AuthProvider starts by restoring any existing browser session, so there
+    // is no "idle" state to wait for.  Waiting for one left OAuth callbacks
+    // permanently on the completing screen after every fresh page load.
+    if (authStatus === "hydrating" || hasStarted.current) return;
+    hasStarted.current = true;
 
     const finishOAuth = async () => {
       try {

@@ -127,18 +127,21 @@ async function refreshCredentials(api, extraOptions) {
     api,
     { ...extraOptions, skipAuthRefresh: true }
   );
-  const refreshed = refreshResult.data;
+  const refreshed = refreshResult.data?.data ?? refreshResult.data;
   if (
     refreshResult.error ||
-    !validToken(refreshed?.accessToken) ||
-    !validToken(refreshed?.refreshToken)
+    !validToken(refreshed?.accessToken)
   ) {
     throw unauthenticatedError();
   }
 
   const credentials = {
     accessToken: refreshed.accessToken,
-    refreshToken: refreshed.refreshToken,
+    // Cookie-based refresh endpoints commonly rotate only the access token.
+    // Preserve the existing refresh token unless the server sends a new one.
+    refreshToken: validToken(refreshed.refreshToken)
+      ? refreshed.refreshToken
+      : refreshToken,
     user: api.getState().auth?.user ?? null,
   };
   persistRefreshedCredentials(credentials);
