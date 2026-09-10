@@ -2,7 +2,6 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import "./index.css";
 import { AppRoutes } from "./routes/AppRoutes.jsx";
-import { AuthProvider } from "./context/AuthContext.jsx";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Provider } from "react-redux";
 import { store } from "./app/store.js";
@@ -30,10 +29,8 @@ createRoot(document.getElementById("root")).render(
     ) : (
       <Provider store={store}>
         <TooltipProvider>
-          <AuthProvider>
-            <Toaster />
-            <RouterProvider router={AppRoutes} />
-          </AuthProvider>
+          <Toaster />
+          <RouterProvider router={AppRoutes} />
         </TooltipProvider>
       </Provider>
     )}

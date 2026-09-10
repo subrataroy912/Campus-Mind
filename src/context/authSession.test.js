@@ -3,6 +3,7 @@ import {
   getProtectedRouteState,
   hydratePersistedSession,
   mergeProfileIntoCurrentSession,
+  routeRequiresSessionRestore,
 } from "./authSession.js";
 
 const persistedSession = {
@@ -71,5 +72,19 @@ describe("persisted session bootstrap", () => {
     expect(getProtectedRouteState("hydrating", false)).toBe("hydrating");
     expect(getProtectedRouteState("succeeded", true)).toBe("authenticated");
     expect(getProtectedRouteState("failed", false)).toBe("unauthenticated");
+  });
+
+  it("restores sessions only for routes that require authentication", () => {
+    expect(
+      routeRequiresSessionRestore([
+        { handle: undefined },
+        { handle: { requiresSessionRestore: false } },
+      ])
+    ).toBe(false);
+    expect(
+      routeRequiresSessionRestore([
+        { handle: { requiresSessionRestore: true } },
+      ])
+    ).toBe(true);
   });
 });

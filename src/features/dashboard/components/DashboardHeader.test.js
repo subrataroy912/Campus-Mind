@@ -42,7 +42,7 @@ describe("DashboardHeader logout", () => {
     expect(dispatch).toHaveBeenCalledTimes(2);
     expect(localStorage.getItem("campus-mind.session")).toBeNull();
     expect(localStorage.getItem("campus-mind.api-cache.v1")).toBeNull();
-    expect(navigate).toHaveBeenCalledWith("/", { replace: true });
+    expect(navigate).toHaveBeenCalledWith("/auth/login", { replace: true });
 
     vi.resetModules();
     const { default: authReducer } = await import(

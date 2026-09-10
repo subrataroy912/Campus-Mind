@@ -84,6 +84,10 @@ export function getProtectedRouteState(authStatus, isAuthenticated) {
   return isAuthenticated ? "authenticated" : "unauthenticated";
 }
 
+export function routeRequiresSessionRestore(matches) {
+  return matches.some((match) => match.handle?.requiresSessionRestore === true);
+}
+
 export async function hydratePersistedSession({
   session,
   installCredentials,

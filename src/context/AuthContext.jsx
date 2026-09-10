@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useMatches } from "react-router";
 import {
   login as loginRequest,
   register as registerRequest,
@@ -21,6 +22,7 @@ import {
   commitAuthSession,
   mergeProfileIntoCurrentSession,
   clearLocalAuthSession,
+  routeRequiresSessionRestore,
 } from "./authSession.js";
 
 const AuthContext = createContext(null);
@@ -79,6 +81,8 @@ function resetApiCache(dispatch) {
 export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const store = useStore();
+  const matches = useMatches();
+  const requiresSessionRestore = routeRequiresSessionRestore(matches);
   const session = useSelector((state) => state.auth);
   const user = session.user;
   const userRef = useRef(user);
@@ -106,6 +110,15 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let ignore = false;
+
+    if (!requiresSessionRestore) {
+      setAuthState({ status: "succeeded", error: null });
+      return () => {
+        ignore = true;
+      };
+    }
+
+    setAuthState({ status: "hydrating", error: null });
 
     async function bootstrapSession() {
       try {
@@ -166,7 +179,7 @@ export function AuthProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [dispatch, store]);
+  }, [dispatch, requiresSessionRestore, store]);
 
   const value = useMemo(
     () => ({

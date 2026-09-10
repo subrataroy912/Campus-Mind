@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/", { replace: true });
+    navigate("/auth/login", { replace: true });
   };
 
   useEffect(() => {
