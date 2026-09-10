@@ -12,8 +12,10 @@ import { logoutFromHeader } from "./headerLogout.js";
 
 export default function DashboardHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { data: profile, isLoading } = useGetCurrentProfileQuery();
-  const { logout } = useAuth();
+  const { logout, authStatus } = useAuth();
+  const { data: profile, isLoading } = useGetCurrentProfileQuery(undefined, {
+    skip: authStatus === "hydrating",
+  });
   const navigate = useNavigate();
 
   const safeAvatarUrl =
