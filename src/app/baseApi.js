@@ -1,5 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { clearLocalAuthSession, commitAuthSession } from "@/context/authSession.js";
+import { setCredentials } from "@/features/auth/authSlice.js";
+import {
+  safeParseStorageJson,
+  safeLocalStorageSet,
+} from "@/utils/storage.js";
+import { clearLocalAuthSession, SESSION_KEY } from "@/context/authSession.js";
 
 /** The API always exposes versioned routes; callers configure only its origin. */
 export const apiBaseUrl = (() => {
@@ -96,6 +101,24 @@ function validToken(value) {
   return typeof value === "string" && value.length > 0;
 }
 
+function persistRefreshedCredentials(credentials) {
+  const persisted = safeParseStorageJson(SESSION_KEY, {});
+  const session =
+    persisted && typeof persisted === "object" && !Array.isArray(persisted)
+      ? persisted
+      : {};
+
+  // Write the complete rotated pair before exposing it to Redux, so a reload
+  // cannot observe a new access token paired with an old refresh token.
+  safeLocalStorageSet(SESSION_KEY, JSON.stringify({ ...session, ...credentials }));
+}
+
+async function refreshCredentials(api, extraOptions) {
+  const refreshToken = api.getState().auth?.refreshToken;
+  if (!validToken(refreshToken)) {
+    throw unauthenticatedError();
+  }
+
 async function refreshCredentials(api, extraOptions) {
   const refreshResult = await publicBaseQuery(
     { url: "/auth/refresh", method: "POST" },
@@ -112,9 +135,9 @@ async function refreshCredentials(api, extraOptions) {
     refreshToken: refreshed.refreshToken,
     user: api.getState().auth?.user ?? null,
   };
-  // This shared commit updates persistence and Redux from one canonical shape,
-  // so the provider cannot retain credentials that differ from RTK Query.
-  return commitAuthSession(api.dispatch, credentials);
+  persistRefreshedCredentials(credentials);
+  api.dispatch(setCredentials(credentials));
+  return credentials;
 }
 
 function getRefreshPromise(api, extraOptions) {

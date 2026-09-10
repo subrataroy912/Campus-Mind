@@ -7,6 +7,7 @@ import {
   logout as logoutRequest,
 } from "../features/auth/api/authService";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import { clearCredentials } from "../features/auth/authSlice.js";
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
@@ -14,8 +15,6 @@ import {
   hydratePersistedSession,
   readPersistedSession,
   commitAuthSession,
-  clearLocalAuthSession,
-  synchronizeExternalSession,
   mergeProfileIntoCurrentSession,
 } from "./authSession.js";
 
@@ -91,24 +90,6 @@ export function AuthProvider({ children }) {
   }), [store]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const receiveStorageEvent = (event) => {
-      if (event.key !== "campus-mind.session" || event.storageArea !== window.localStorage) return;
-      let session = null;
-      if (event.newValue !== null) {
-        try {
-          session = JSON.parse(event.newValue);
-        } catch {
-          // Treat corrupt cross-tab data as a sign-out, never as credentials.
-        }
-      }
-      synchronizeExternalSession(dispatch, session);
-    };
-    window.addEventListener("storage", receiveStorageEvent);
-    return () => window.removeEventListener("storage", receiveStorageEvent);
-  }, [dispatch]);
-
-  useEffect(() => {
     let ignore = false;
 
     async function validateSession() {
@@ -124,7 +105,8 @@ export function AuthProvider({ children }) {
       if (result.status === "failed") {
         if (ignore) return;
         if (result.expired) {
-          clearLocalAuthSession(dispatch);
+          dispatch(clearCredentials());
+          resetApiCache(dispatch);
           setAuthState({
             status: "failed",
             error: new Error("Your session has expired. Please log in again."),
