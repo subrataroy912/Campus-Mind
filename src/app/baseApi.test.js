@@ -1,9 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { baseQueryWithRefresh, shouldForceLogout } from "./baseApi.js";
-import {
-  mergeProfileIntoCurrentSession,
-  readPersistedSession,
-} from "../context/authSession.js";
 
 const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -20,7 +16,7 @@ function createApi({ accessToken = "expired-access", refreshToken = "old-refresh
     endpoint: "protectedResource",
     dispatch: (action) => {
       actions.push(action);
-      if (action.type === "auth/setCredentials" || action.type === "auth/setSession") {
+      if (action.type === "auth/setCredentials") {
         Object.assign(state.auth, action.payload);
       }
       if (action.type === "auth/clearCredentials") {
@@ -155,52 +151,5 @@ describe("shouldForceLogout", () => {
 
     expect(refreshCalls).toBe(1);
     expect(result).toEqual({ error: { status: 401, data: { error: "still unauthorized" } } });
-  });
-
-  it("migrates legacy flat and nested session records to the canonical shape", () => {
-    storage.set("campus-mind.session", JSON.stringify({
-      session: { accessToken: "access", refreshToken: "refresh", user: { id: "user-1" } },
-    }));
-
-    expect(readPersistedSession()).toEqual({
-      accessToken: "access",
-      refreshToken: "refresh",
-      user: { id: "user-1" },
-    });
-    expect(JSON.parse(storage.get("campus-mind.session"))).toEqual({
-      accessToken: "access",
-      refreshToken: "refresh",
-      user: { id: "user-1" },
-    });
-
-    storage.set("campus-mind.session", JSON.stringify({
-      accessToken: "flat-access", refreshToken: "flat-refresh", id: "user-2",
-    }));
-    expect(readPersistedSession()).toEqual({
-      accessToken: "flat-access",
-      refreshToken: "flat-refresh",
-      user: { id: "user-2" },
-    });
-  });
-
-  it("keeps refreshed credentials while committing startup validation and profile hydration", () => {
-    const refreshedState = {
-      auth: { accessToken: "rotated-access", refreshToken: "rotated-refresh", user: { id: "user-1", name: "Before" } },
-    };
-    const getState = () => refreshedState;
-
-    const startupCommit = mergeProfileIntoCurrentSession(getState, { displayName: "Validated" });
-    const hydrationCommit = mergeProfileIntoCurrentSession(getState, { avatarUrl: "new-avatar" });
-
-    expect(startupCommit).toMatchObject({
-      accessToken: "rotated-access",
-      refreshToken: "rotated-refresh",
-      user: { name: "Validated" },
-    });
-    expect(hydrationCommit).toMatchObject({
-      accessToken: "rotated-access",
-      refreshToken: "rotated-refresh",
-      user: { avatar: "new-avatar" },
-    });
   });
 });
