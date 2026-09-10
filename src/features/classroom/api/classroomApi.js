@@ -49,7 +49,16 @@ export const classroomApi = baseApi.injectEndpoints({
     fetchClassrooms: builder.query({
       query: () => "/courses",
       transformResponse: normalizeCourseList,
-      providesTags: ["Classrooms"],
+      providesTags: (result) =>
+        result
+          ? [
+              { type: "Classrooms", id: "LIST" },
+              ...result.map((course) => ({
+                type: "Classrooms",
+                id: course.id ?? "unknown",
+              })),
+            ]
+          : [{ type: "Classrooms", id: "LIST" }],
       keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: 300,
     }),
@@ -57,6 +66,7 @@ export const classroomApi = baseApi.injectEndpoints({
       query: (classId) => `/courses/${classId}`,
       transformResponse: normalizeCourse,
       providesTags: (_result, _error, classId) => [
+        { type: "Classrooms", id: "LIST" },
         { type: "Classrooms", id: classId },
       ],
       keepUnusedDataFor: 300,
@@ -68,29 +78,49 @@ export const classroomApi = baseApi.injectEndpoints({
         const payload = response?.data ?? response;
         return Array.isArray(payload) ? payload : payload?.content ?? [];
       },
-      providesTags: ["Classrooms"],
+      providesTags: (_result, _error, classId) => [
+        { type: "Classrooms", id: `${classId}:roster` },
+      ],
     }),
     createClassroom: builder.mutation({
       query: (details) => ({ url: "/courses", method: "POST", body: details }),
       transformResponse: normalizeCourse,
-      invalidatesTags: ["Classrooms", "Profile"],
+      invalidatesTags: [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Profile", id: "CURRENT" },
+      ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(classroomApi.util.invalidateTags(["Classrooms", "Profile"]));
+          dispatch(
+            classroomApi.util.invalidateTags([
+              { type: "Classrooms", id: "LIST" },
+              { type: "Profile", id: "CURRENT" },
+            ])
+          );
         } catch {
           // The mutation error is handled by the caller.
         }
       },
     }),
     updateClassroom: builder.mutation({
-      query: ({ courseId, changes }) => ({ url: `/courses/${courseId}`, method: "PATCH", body: changes }),
+      query: ({ courseId, changes }) => ({
+        url: `/courses/${courseId}`,
+        method: "PATCH",
+        body: changes,
+      }),
       transformResponse: normalizeCourse,
-      invalidatesTags: ["Classrooms"],
+      invalidatesTags: (result) => [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Classrooms", id: result?.id ?? "unknown" },
+      ],
     }),
     deleteClassroom: builder.mutation({
       query: (courseId) => ({ url: `/courses/${courseId}`, method: "DELETE" }),
-      invalidatesTags: ["Classrooms", "Profile"],
+      invalidatesTags: [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Profile", id: "CURRENT" },
+      ],
     }),
     requestCourseCoverUpload: builder.mutation({
       query: () => ({ url: "/courses/cover-upload", method: "POST" }),
@@ -102,19 +132,34 @@ export const classroomApi = baseApi.injectEndpoints({
         body: { code },
       }),
       transformResponse: normalizeCourse,
-      invalidatesTags: ["Classrooms", "Profile"],
+      invalidatesTags: (result) => [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Classrooms", id: result?.id ?? "unknown" },
+        { type: "Profile", id: "CURRENT" },
+      ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(classroomApi.util.invalidateTags(["Classrooms", "Profile"]));
+          dispatch(
+            classroomApi.util.invalidateTags([
+              { type: "Classrooms", id: "LIST" },
+              { type: "Profile", id: "CURRENT" },
+            ])
+          );
         } catch {
           // The mutation error is handled by the caller.
         }
       },
     }),
     leaveClassroom: builder.mutation({
-      query: (courseId) => ({ url: `/courses/${courseId}/enrollment`, method: "DELETE" }),
-      invalidatesTags: ["Classrooms", "Profile"],
+      query: (courseId) => ({
+        url: `/courses/${courseId}/enrollment`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Profile", id: "CURRENT" },
+      ],
     }),
   }),
 });

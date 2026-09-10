@@ -4,7 +4,7 @@ export const profileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCurrentProfile: builder.query({
       query: () => "/users/me",
-      providesTags: ["Profile"],
+      providesTags: [{ type: "Profile", id: "CURRENT" }],
       keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: 300,
     }),
@@ -31,11 +31,19 @@ export const profileApi = baseApi.injectEndpoints({
         if (bannerFile) body.append("bannerFile", bannerFile, bannerFile.name);
         return { url: "/users/me", method: "PATCH", body };
       },
-      invalidatesTags: ["Profile", "Classrooms"],
+      invalidatesTags: [
+        { type: "Profile", id: "CURRENT" },
+        { type: "Classrooms", id: "LIST" },
+      ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(profileApi.util.invalidateTags(["Profile", "Classrooms"]));
+          dispatch(
+            profileApi.util.invalidateTags([
+              { type: "Profile", id: "CURRENT" },
+              { type: "Classrooms", id: "LIST" },
+            ])
+          );
         } catch {
           // The profile mutation will surface the request error to the caller.
         }
