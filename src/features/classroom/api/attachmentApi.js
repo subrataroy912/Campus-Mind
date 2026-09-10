@@ -32,6 +32,15 @@ export const attachmentApi = baseApi.injectEndpoints({
       transformResponse: (response) =>
         normalizeAttachment(response?.data ?? response),
     }),
+    listAttachments: builder.query({
+      query: ({ resourceId, resourceType }) => ({ url: "/attachments", params: { resourceId, resourceType } }),
+      transformResponse: (response) => response.map(normalizeAttachment),
+      providesTags: ["Attachments"],
+    }),
+    getDownloadUrl: builder.query({
+      query: (attachmentId) => `/attachments/${attachmentId}/download-url`,
+      transformResponse: normalizeAttachment,
+    }),
     deleteAttachment: builder.mutation({
       query: (attachmentId) => ({
         url: `/attachments/${attachmentId}`,
@@ -44,5 +53,7 @@ export const attachmentApi = baseApi.injectEndpoints({
 export const {
   useRequestUploadUrlMutation,
   useCompleteUploadMutation,
+  useListAttachmentsQuery,
+  useGetDownloadUrlQuery,
   useDeleteAttachmentMutation,
 } = attachmentApi;

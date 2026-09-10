@@ -44,20 +44,10 @@ export function normalizeAuthResponse(response) {
 }
 
 export function getOAuthRedirectUrl(provider, mode) {
-  const rawBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
-  const baseUrl = rawBaseUrl.replace(/\/+$/, ""); // Strip trailing slashes
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const params = new URLSearchParams({
-    redirect_uri: `${origin}/auth/callback`,
-  });
-
-  if (mode !== undefined && mode !== null) {
-    params.append("mode", mode);
-  }
-
-  return `${baseUrl}/auth/oauth/${provider}?${params.toString()}`;
+  void mode;
+  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  const baseUrl = rawBaseUrl.replace(/\/+$/, "");
+  return `${baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`}/auth/oauth/${provider}`;
 }
 
 export async function login(credentials) {

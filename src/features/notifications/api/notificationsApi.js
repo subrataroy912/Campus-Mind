@@ -7,8 +7,6 @@ export const notificationsApi = baseApi.injectEndpoints({
         url: "/notifications",
         params: { unreadOnly, page, size },
       }),
-      transformResponse: (response) =>
-        response?.content ?? response?.data ?? [],
       providesTags: ["Notifications"],
     }),
     markNotificationRead: builder.mutation({

@@ -21,7 +21,7 @@ export const commentApi = baseApi.injectEndpoints({
       query: ({ courseworkId, payload = {} }) => ({
         url: `/coursework/${courseworkId}/comments`,
         method: "POST",
-        body: payload,
+        body: { body: payload.body },
       }),
       transformResponse: (response) =>
         normalizeComment(response?.data ?? response),
@@ -37,7 +37,7 @@ export const commentApi = baseApi.injectEndpoints({
       query: ({ submissionId, payload = {} }) => ({
         url: `/submissions/${submissionId}/comments`,
         method: "POST",
-        body: payload,
+        body: { body: payload.body },
       }),
       transformResponse: (response) =>
         normalizeComment(response?.data ?? response),

@@ -7,18 +7,16 @@ describe("mapCourseworkPayload", () => {
       mapCourseworkPayload({
         title: "Homework set 4",
         description: "Complete problems 1–24",
-        type: "assignment",
+        type: "ASSIGNMENT",
         dueAt: "2026-09-10T17:00:00Z",
         maximumPoints: 20,
-        published: true,
       }),
     ).toEqual({
       title: "Homework set 4",
       description: "Complete problems 1–24",
-      type: "assignment",
+      type: "ASSIGNMENT",
       dueAt: "2026-09-10T17:00:00Z",
       maximumPoints: 20,
-      published: true,
     });
   });
 });

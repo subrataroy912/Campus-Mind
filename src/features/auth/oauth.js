@@ -23,8 +23,8 @@ export async function handleOAuthFailure({ completeOAuth, errorMessage }) {
  * corrupts otherwise valid JSON that contains a percent character.
  */
 export function parseOAuthCallback(searchParams) {
-  const errorMessage =
-    searchParams.get("error") || searchParams.get("error_description");
+  const oauthError = searchParams.get("error");
+  const errorMessage = oauthError === "oauth_failed" ? "OAuth sign-in failed." : oauthError;
 
   if (errorMessage) return { errorMessage };
 
