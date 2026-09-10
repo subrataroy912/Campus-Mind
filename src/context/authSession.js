@@ -1,7 +1,7 @@
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
-import { clearCredentials } from "../features/auth/authSlice.js";
-import { safeLocalStorageRemove, safeParseStorageJson } from "../utils/storage.js";
+import { clearCredentials, setSession } from "../features/auth/authSlice.js";
+import { safeLocalStorageRemove, safeLocalStorageSet, safeParseStorageJson } from "../utils/storage.js";
 
 /**
  * Removes every client-side trace of an authenticated session.
@@ -19,9 +19,62 @@ export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken", "refreshToken"];
  * validation here lets the provider complete its bootstrap before any route
  * or data hook can treat a user as authenticated.
  */
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function token(value) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+/** Converts legacy token-bearing user records into the sole session contract. */
+export function normalizeSession(record) {
+  if (!isRecord(record)) return null;
+  const source = isRecord(record.session) ? record.session : record;
+  const accessToken = token(source.accessToken ?? source.token);
+  if (!accessToken) return null;
+  const nestedUser = isRecord(source.user) ? source.user : null;
+  const { accessToken: _accessToken, refreshToken: _refreshToken, token: _token, session: _session, user: _user, ...flatProfile } = source;
+  const user = nestedUser ?? flatProfile;
+  return {
+    accessToken,
+    refreshToken: token(source.refreshToken ?? source.refresh_token),
+    user: isRecord(user) && Object.keys(user).length ? user : null,
+  };
+}
+
+/** Persists and publishes exactly the same canonical session object. */
+export function commitAuthSession(dispatch, record) {
+  const session = normalizeSession(record);
+  if (!session) throw new Error("Cannot commit an invalid authenticated session.");
+  safeLocalStorageSet(SESSION_KEY, JSON.stringify(session));
+  dispatch(setSession(session));
+  return session;
+}
+
+/** Applies a profile response without ever copying credentials from its caller. */
+export function mergeProfileIntoCurrentSession(getState, profile) {
+  if (typeof getState !== "function" || !isRecord(profile)) {
+    throw new Error("Cannot merge an invalid profile response.");
+  }
+  const current = normalizeSession(getState()?.auth);
+  if (!current) return null;
+  const user = {
+    ...current.user,
+    ...profile,
+    name: profile.displayName || current.user?.name,
+    avatar: profile.avatarUrl ?? current.user?.avatar ?? null,
+    banner: profile.bannerUrl ?? current.user?.banner ?? null,
+  };
+  return { ...current, user };
+}
+
 export function readPersistedSession() {
-  const session = safeParseStorageJson(SESSION_KEY);
-  return session?.accessToken ? session : null;
+  const session = normalizeSession(safeParseStorageJson(SESSION_KEY));
+  if (!session) return null;
+  // Migration is idempotent and removes legacy flat/nested representations.
+  safeLocalStorageSet(SESSION_KEY, JSON.stringify(session));
+  return session;
 }
 
 export function isExpiredSessionError(error) {
