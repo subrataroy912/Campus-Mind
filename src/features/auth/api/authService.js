@@ -1,6 +1,7 @@
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
+import { clearLocalAuthSession } from "@/context/authSession.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
@@ -82,10 +83,17 @@ export async function updateProfile(details) {
   );
 }
 
-export async function logout(refreshToken) {
-  const token = refreshToken ?? store.getState().auth?.refreshToken;
+export async function logout({ onLocalTeardown } = {}) {
+  // Snapshot before clearing Redux so the best-effort request can still revoke
+  // the server session. Callers never need to handle or provide this token.
+  const token = store.getState().auth?.refreshToken;
+  clearLocalAuthSession(store.dispatch, onLocalTeardown);
 
   if (token) {
-    await store.dispatch(authApi.endpoints.logout.initiate(token)).unwrap();
+    try {
+      await store.dispatch(authApi.endpoints.logout.initiate(token)).unwrap();
+    } catch {
+      // Revocation is best-effort. The local session was already removed.
+    }
   }
 }

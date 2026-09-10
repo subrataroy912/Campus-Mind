@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearAuthSession } from "@/context/authSession.js";
+import { clearLocalAuthSession } from "@/context/authSession.js";
 import { logoutFromHeader } from "./headerLogout.js";
 
 function createStorage() {
@@ -34,7 +34,7 @@ describe("DashboardHeader logout", () => {
     const clearContextUser = vi.fn();
     const navigate = vi.fn();
     const logout = vi.fn(async () => {
-      clearAuthSession(dispatch, clearContextUser);
+      clearLocalAuthSession(dispatch, clearContextUser);
     });
 
     await logoutFromHeader(logout, navigate);

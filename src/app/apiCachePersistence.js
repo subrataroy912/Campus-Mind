@@ -1,3 +1,5 @@
+import { safeLocalStorageRemove } from "@/utils/storage.js";
+
 const STORAGE_KEY = "campus-mind.api-cache.v1";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PERSISTED_ENDPOINTS = new Set([
@@ -25,19 +27,19 @@ export function readPersistedApiState(authState) {
       stored.userId !== getUserId(authState)
     ) {
       if (stored?.userId !== getUserId(authState)) {
-        window.localStorage.removeItem(STORAGE_KEY);
+        clearPersistedApiState();
       }
       return undefined;
     }
 
     if (Date.now() - stored.savedAt > CACHE_TTL_MS) {
-      window.localStorage.removeItem(STORAGE_KEY);
+      clearPersistedApiState();
       return undefined;
     }
 
     return stored.apiState;
   } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
+    clearPersistedApiState();
     return undefined;
   }
 }
@@ -75,7 +77,5 @@ export function persistApiState(apiState, authState) {
 }
 
 export function clearPersistedApiState() {
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem(STORAGE_KEY);
-  }
+  safeLocalStorageRemove(STORAGE_KEY);
 }

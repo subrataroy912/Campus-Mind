@@ -9,14 +9,10 @@ import {
 } from "../features/auth/api/authService";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useDispatch } from "react-redux";
-import {
-  clearCredentials,
-  setCredentials,
-} from "../features/auth/authSlice.js";
+import { clearCredentials, setCredentials } from "../features/auth/authSlice.js";
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
-import { clearAuthSession } from "./authSession.js";
 
 const AuthContext = createContext(null);
 const SESSION_KEY = "campus-mind.session";
@@ -338,17 +334,12 @@ export function AuthProvider({ children }) {
         return profile;
       },
       async logout() {
-        const refreshToken = userRef.current?.refreshToken;
-        userRef.current = null;
-        clearAuthSession(dispatch, removeUser);
-
-        try {
-          await logoutRequest(refreshToken);
-        } catch (error) {
-          // Local cleanup has already completed; a server failure must not
-          // prevent the UI from reaching a signed-out state.
-          console.warn("Backend logout failed or token already invalid:", error);
-        }
+        await logoutRequest({
+          onLocalTeardown() {
+            userRef.current = null;
+            removeUser();
+          },
+        });
       },
     }),
     [authState, dispatch, removeUser, user, setUser]
