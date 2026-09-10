@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   login as loginRequest,
   register as registerRequest,
@@ -16,6 +23,7 @@ import {
   readPersistedSession,
   commitAuthSession,
   mergeProfileIntoCurrentSession,
+  clearLocalAuthSession,
 } from "./authSession.js";
 
 const AuthContext = createContext(null);
@@ -83,11 +91,18 @@ export function AuthProvider({ children }) {
     userRef.current = user;
   }, [user]);
 
-  useEffect(() => store.subscribe(() => {
-    if (store.getState().auth.accessToken || !userRef.current) return;
-    userRef.current = null;
-    setAuthState({ status: "failed", error: new Error("Your session has expired. Please log in again.") });
-  }), [store]);
+  useEffect(
+    () =>
+      store.subscribe(() => {
+        if (store.getState().auth.accessToken || !userRef.current) return;
+        userRef.current = null;
+        setAuthState({
+          status: "failed",
+          error: new Error("Your session has expired. Please log in again."),
+        });
+      }),
+    [store]
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -98,7 +113,8 @@ export function AuthProvider({ children }) {
         session: currentSession,
         // Install credentials before the profile validation request. RTK Query
         // must never read a token directly from storage while hydration runs.
-        installCredentials: (nextSession) => commitAuthSession(dispatch, nextSession),
+        installCredentials: (nextSession) =>
+          commitAuthSession(dispatch, nextSession),
         getProfile: getCurrentProfileRequest,
       });
 
@@ -127,7 +143,10 @@ export function AuthProvider({ children }) {
         // A logout can happen while this request is in flight. Do not let its
         // response recreate the session after client-side cleanup.
         if (ignore) return;
-        const nextSession = mergeProfileIntoCurrentSession(store.getState, profile);
+        const nextSession = mergeProfileIntoCurrentSession(
+          store.getState,
+          profile
+        );
         if (!nextSession) return;
         commitAuthSession(dispatch, nextSession);
         setAuthState({ status: "succeeded", error: null });
@@ -148,7 +167,8 @@ export function AuthProvider({ children }) {
       user,
       // A persisted user is only authenticated after its profile has been
       // validated and its credentials are installed in Redux.
-      isAuthenticated: authState.status === "succeeded" && Boolean(session.accessToken),
+      isAuthenticated:
+        authState.status === "succeeded" && Boolean(session.accessToken),
       authStatus: authState.status,
       authError: authState.error,
       clearAuthError() {
@@ -189,7 +209,11 @@ export function AuthProvider({ children }) {
         // this, the profile request is sent without Authorization on a new OAuth
         // session and the callback can never complete.
         const provisionalUser = hydratedUser ?? null;
-        commitAuthSession(dispatch, { accessToken, refreshToken, user: provisionalUser });
+        commitAuthSession(dispatch, {
+          accessToken,
+          refreshToken,
+          user: provisionalUser,
+        });
 
         let profile;
         try {
@@ -205,7 +229,11 @@ export function AuthProvider({ children }) {
           displayName: profile?.displayName ?? profile?.name,
         };
 
-        commitAuthSession(dispatch, { accessToken, refreshToken, user: finalUser });
+        commitAuthSession(dispatch, {
+          accessToken,
+          refreshToken,
+          user: finalUser,
+        });
         triggerLifecycleRefresh(dispatch, "user-oauth-linked");
         setAuthState({ status: "succeeded", error: null });
         return finalUser;
@@ -223,7 +251,11 @@ export function AuthProvider({ children }) {
             displayName: nextUser?.displayName ?? nextUser?.name,
           };
           resetApiCache(dispatch);
-          commitAuthSession(dispatch, { accessToken, refreshToken, user: hydratedUser });
+          commitAuthSession(dispatch, {
+            accessToken,
+            refreshToken,
+            user: hydratedUser,
+          });
           setAuthState({ status: "succeeded", error: null });
           return hydratedUser;
         } catch (error) {
@@ -273,7 +305,10 @@ export function AuthProvider({ children }) {
           bio: nextProfile.about || user?.bio,
           batchYear: nextProfile.gradeLevel || user?.batchYear,
         };
-        commitAuthSession(dispatch, { ...store.getState().auth, user: nextUser });
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
         const visibilityChanged = Object.prototype.hasOwnProperty.call(
           profilePatch,
           "profileVisibility"
@@ -290,8 +325,12 @@ export function AuthProvider({ children }) {
         const profile = await getCurrentProfileRequest();
         // This request can trigger a token refresh. Merge into the latest
         // session so neither the access nor refresh token can be reverted.
-        const nextSession = mergeProfileIntoCurrentSession(store.getState, profile);
-        if (!nextSession) throw new Error("The authenticated session was cleared.");
+        const nextSession = mergeProfileIntoCurrentSession(
+          store.getState,
+          profile
+        );
+        if (!nextSession)
+          throw new Error("The authenticated session was cleared.");
         commitAuthSession(dispatch, nextSession);
         triggerLifecycleRefresh(dispatch, "user-profile-updated");
         return profile;

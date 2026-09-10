@@ -18,7 +18,11 @@ const authSlice = createSlice({
     // Replaces, rather than merges, credentials. Session transitions (startup,
     // refresh, and logout) must never retain a token from an earlier session.
     setSession: (state, action) => {
-      const { accessToken = null, refreshToken = null, user = null } = action.payload ?? {};
+      const {
+        accessToken = null,
+        refreshToken = null,
+        user = null,
+      } = action.payload ?? {};
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
       state.user = user;
@@ -36,5 +40,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, setSession, clearCredentials } = authSlice.actions;
+export const { setCredentials, setSession, clearCredentials, forcedSignOut } =
+  authSlice.actions;
 export default authSlice.reducer;

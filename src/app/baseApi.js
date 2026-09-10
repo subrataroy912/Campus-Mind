@@ -1,9 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "@/features/auth/authSlice.js";
-import {
-  safeParseStorageJson,
-  safeLocalStorageSet,
-} from "@/utils/storage.js";
+import { safeParseStorageJson, safeLocalStorageSet } from "@/utils/storage.js";
 import { clearLocalAuthSession, SESSION_KEY } from "@/context/authSession.js";
 
 /** The API always exposes versioned routes; callers configure only its origin. */
@@ -17,9 +14,13 @@ export const apiBaseUrl = (() => {
 const csrfCookieName = import.meta.env.VITE_CSRF_COOKIE_NAME || "XSRF-TOKEN";
 
 function csrfToken() {
-  if (typeof document === "undefined" || typeof document.cookie !== "string") return null;
+  if (typeof document === "undefined" || typeof document.cookie !== "string")
+    return null;
   const prefix = `${encodeURIComponent(csrfCookieName)}=`;
-  const cookie = document.cookie.split(";").map((value) => value.trim()).find((value) => value.startsWith(prefix));
+  const cookie = document.cookie
+    .split(";")
+    .map((value) => value.trim())
+    .find((value) => value.startsWith(prefix));
   if (!cookie) return null;
   try {
     return decodeURIComponent(cookie.slice(prefix.length));
@@ -110,7 +111,10 @@ function persistRefreshedCredentials(credentials) {
 
   // Write the complete rotated pair before exposing it to Redux, so a reload
   // cannot observe a new access token paired with an old refresh token.
-  safeLocalStorageSet(SESSION_KEY, JSON.stringify({ ...session, ...credentials }));
+  safeLocalStorageSet(
+    SESSION_KEY,
+    JSON.stringify({ ...session, ...credentials })
+  );
 }
 
 async function refreshCredentials(api, extraOptions) {
@@ -118,15 +122,17 @@ async function refreshCredentials(api, extraOptions) {
   if (!validToken(refreshToken)) {
     throw unauthenticatedError();
   }
-
-async function refreshCredentials(api, extraOptions) {
   const refreshResult = await publicBaseQuery(
     { url: "/auth/refresh", method: "POST" },
     api,
     { ...extraOptions, skipAuthRefresh: true }
   );
   const refreshed = refreshResult.data;
-  if (refreshResult.error || !validToken(refreshed?.accessToken) || !validToken(refreshed?.refreshToken)) {
+  if (
+    refreshResult.error ||
+    !validToken(refreshed?.accessToken) ||
+    !validToken(refreshed?.refreshToken)
+  ) {
     throw unauthenticatedError();
   }
 

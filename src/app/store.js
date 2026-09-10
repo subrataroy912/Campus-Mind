@@ -8,7 +8,7 @@ import exploreReducer from "@/features/explore/exploreSlice.js";
 import profileReducer from "@/features/profile/profileSlice.js";
 import settingsReducer from "@/features/settings/settingsSlice.js";
 import uiReducer from "@/features/ui/uiSlice.js";
-import { forcedSignOut } from "@/features/auth/authSlice.js";
+import { clearCredentials, forcedSignOut } from "@/features/auth/authSlice.js";
 import { clearClassroomState } from "@/features/classroom/classroomSlice.js";
 import { clearDashboardState } from "@/features/dashboard/dashboardSlice.js";
 import { clearExploreState } from "@/features/explore/exploreSlice.js";
@@ -39,7 +39,10 @@ const appReducer = {
 const combinedReducer = combineReducers(appReducer);
 
 function rootReducer(state, action) {
-  if (action.type !== forcedSignOut.type) {
+  if (
+    action.type !== forcedSignOut.type &&
+    action.type !== clearCredentials.type
+  ) {
     return combinedReducer(state, action);
   }
 
@@ -52,7 +55,10 @@ function rootReducer(state, action) {
     clearExploreState(),
     clearProfileState(),
     clearSettingsState(),
-  ].reduce((nextState, resetAction) => combinedReducer(nextState, resetAction), state);
+  ].reduce(
+    (nextState, resetAction) => combinedReducer(nextState, resetAction),
+    state
+  );
 }
 
 export const store = configureStore({
@@ -72,7 +78,7 @@ store.subscribe(() => {
   persistenceTimer = setTimeout(() => {
     persistApiState(
       store.getState()[baseApi.reducerPath],
-      store.getState().auth,
+      store.getState().auth
     );
   }, 200);
 });
