@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { LogOut, Menu, X, Loader2 } from "lucide-react";
-import { useSelector } from "react-redux";
 
 import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
 import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
-import { logout } from "@/features/auth/api/authService";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { logoutFromHeader } from "./headerLogout.js";
 
 export default function DashboardHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: profile, isLoading } = useGetCurrentProfileQuery();
-  const refreshToken = useSelector((state) => state.auth.refreshToken);
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const safeAvatarUrl =
@@ -31,11 +31,9 @@ export default function DashboardHeader() {
 
   const leave = async () => {
     try {
-      await logout(refreshToken);
+      await logoutFromHeader(logout, navigate);
     } catch (err) {
       console.error("Logout failed:", err);
-    } finally {
-      navigate("/", { replace: true });
     }
   };
 

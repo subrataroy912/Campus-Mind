@@ -16,6 +16,7 @@ import {
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { clearAuthSession } from "./authSession.js";
 
 const AuthContext = createContext(null);
 const SESSION_KEY = "campus-mind.session";
@@ -68,7 +69,7 @@ function resetApiCache(dispatch) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useLocalStorage(SESSION_KEY, null);
+  const [user, setUser, removeUser] = useLocalStorage(SESSION_KEY, null);
   const dispatch = useDispatch();
   const userRef = useRef(user);
   const [authState, setAuthState] = useState({ status: "idle", error: null });
@@ -97,7 +98,9 @@ export function AuthProvider({ children }) {
         }));
 
         const profile = await getCurrentProfileRequest();
-        if (ignore) return;
+        // A logout can happen while this request is in flight. Do not let its
+        // response recreate the session after client-side cleanup.
+        if (ignore || userRef.current !== currentUser) return;
 
         const nextUser = {
           ...currentUser,
@@ -335,16 +338,20 @@ export function AuthProvider({ children }) {
         return profile;
       },
       async logout() {
+        const refreshToken = userRef.current?.refreshToken;
+        userRef.current = null;
+        clearAuthSession(dispatch, removeUser);
+
         try {
-          await logoutRequest(user?.refreshToken);
-        } finally {
-          setUser(null);
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
+          await logoutRequest(refreshToken);
+        } catch (error) {
+          // Local cleanup has already completed; a server failure must not
+          // prevent the UI from reaching a signed-out state.
+          console.warn("Backend logout failed or token already invalid:", error);
         }
       },
     }),
-    [authState, dispatch, user, setUser]
+    [authState, dispatch, removeUser, user, setUser]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

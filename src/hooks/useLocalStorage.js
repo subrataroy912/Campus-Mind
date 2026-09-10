@@ -34,5 +34,17 @@ export function useLocalStorage(key, initialValue) {
     },
     [key],
   );
-  return [value, updateValue];
+  const removeValue = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Keep the in-memory state usable when storage is unavailable.
+      }
+    }
+
+    setValue(initialValue);
+  }, [initialValue, key]);
+
+  return [value, updateValue, removeValue];
 }
