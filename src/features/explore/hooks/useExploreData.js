@@ -11,7 +11,7 @@ export function useExploreData(currentUserId) {
     Promise.all([fetchExploreClasses(), fetchExploreUsers(currentUserId)])
       .then(([nextClasses, nextUsers]) => {
         if (!active) return;
-        setClasses(nextClasses);
+        setClasses(nextClasses.content);
         setUsers(nextUsers);
         setStatus("ready");
       })

@@ -4,14 +4,17 @@ import { courseworkApi } from "./courseworkApi.js";
 const unwrapResponse = (response) => response?.data ?? response;
 
 export function mapCourseworkPayload(payload = {}) {
-  return {
+  const type = String(payload.type ?? "ASSIGNMENT").toUpperCase();
+  const request = {
     title: payload.title ?? "",
     description: payload.description ?? "",
-    type: payload.type ?? "assignment",
-    dueAt: payload.dueAt ?? payload.dueDate ?? null,
-    maximumPoints: payload.maximumPoints ?? payload.pointsPossible ?? null,
-    published: payload.published ?? true,
+    type,
   };
+  if (type === "ASSIGNMENT") {
+    request.dueAt = payload.dueAt ?? payload.dueDate;
+    request.maximumPoints = payload.maximumPoints ?? payload.pointsPossible;
+  }
+  return request;
 }
 
 export function normalizeSubmission(submission = {}) {
@@ -25,9 +28,9 @@ export function normalizeSubmission(submission = {}) {
   };
 }
 
-export async function fetchCoursework(courseId) {
+export async function fetchCoursework(courseId, page = 0, size = 20) {
   return unwrapResponse(
-    await store.dispatch(courseworkApi.endpoints.getCourseworkList.initiate(courseId)).unwrap(),
+    await store.dispatch(courseworkApi.endpoints.getCourseworkList.initiate({ courseId, page, size })).unwrap(),
   );
 }
 
@@ -47,10 +50,10 @@ export async function createCoursework(courseId, payload) {
   );
 }
 
-export async function listSubmissions(courseId, courseworkId) {
+export async function listSubmissions(_courseId, courseworkId, page = 0, size = 20) {
   return unwrapResponse(
     await store.dispatch(
-      courseworkApi.endpoints.getSubmissionList.initiate({ courseId, courseworkId }),
+      courseworkApi.endpoints.getSubmissionList.initiate({ courseworkId, page, size }),
     ).unwrap(),
   );
 }
@@ -58,7 +61,7 @@ export async function listSubmissions(courseId, courseworkId) {
 export async function fetchMySubmission(courseId, courseworkId) {
   return unwrapResponse(
     await store.dispatch(
-      courseworkApi.endpoints.getMySubmission.initiate({ courseId, courseworkId }),
+      courseworkApi.endpoints.getMySubmission.initiate({ courseworkId }),
     ).unwrap(),
   );
 }

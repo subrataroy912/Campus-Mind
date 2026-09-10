@@ -24,7 +24,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const isLoading = authStatus === "loading";
   const errorMessage =
-    authError?.data?.message || authError?.message || "Unable to sign in.";
+    authError?.data?.error || authError?.message || "Unable to sign in.";
   const startOAuth = (provider) => {
     clearAuthError();
     window.location.assign(getOAuthRedirectUrl(provider, "login"));

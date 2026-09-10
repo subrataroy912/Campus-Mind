@@ -53,13 +53,6 @@ export const classroomApi = baseApi.injectEndpoints({
       keepUnusedDataFor: 300,
       refetchOnMountOrArgChange: 300,
     }),
-    fetchExploreClassrooms: builder.query({
-      query: () => "/explore/feed",
-      transformResponse: normalizeCourseList,
-      providesTags: ["Classrooms"],
-      keepUnusedDataFor: 300,
-      refetchOnMountOrArgChange: 300,
-    }),
     findClassroomById: builder.query({
       query: (classId) => `/courses/${classId}`,
       transformResponse: normalizeCourse,
@@ -87,6 +80,15 @@ export const classroomApi = baseApi.injectEndpoints({
         }
       },
     }),
+    updateClassroom: builder.mutation({
+      query: ({ courseId, changes }) => ({ url: `/courses/${courseId}`, method: "PATCH", body: changes }),
+      transformResponse: normalizeCourse,
+      invalidatesTags: ["Classrooms"],
+    }),
+    deleteClassroom: builder.mutation({
+      query: (courseId) => ({ url: `/courses/${courseId}`, method: "DELETE" }),
+      invalidatesTags: ["Classrooms", "Profile"],
+    }),
     requestCourseCoverUpload: builder.mutation({
       query: () => ({ url: "/courses/cover-upload", method: "POST" }),
     }),
@@ -107,13 +109,19 @@ export const classroomApi = baseApi.injectEndpoints({
         }
       },
     }),
+    leaveClassroom: builder.mutation({
+      query: (courseId) => ({ url: `/courses/${courseId}/enrollment`, method: "DELETE" }),
+      invalidatesTags: ["Classrooms", "Profile"],
+    }),
   }),
 });
 
 export const {
   useFetchClassroomsQuery,
-  useFetchExploreClassroomsQuery,
   useFindClassroomByIdQuery,
   useGetClassroomRosterQuery,
   useRequestCourseCoverUploadMutation,
+  useUpdateClassroomMutation,
+  useDeleteClassroomMutation,
+  useLeaveClassroomMutation,
 } = classroomApi;

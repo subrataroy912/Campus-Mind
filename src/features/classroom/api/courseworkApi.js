@@ -6,10 +6,9 @@ const normalizeCoursework = (item = {}) => ({
   id: item.id ?? item.courseworkId,
   title: item.title ?? item.name,
   description: item.description ?? item.instructions ?? "",
-  type: item.type ?? "assignment",
+  type: item.type ?? "ASSIGNMENT",
   dueAt: item.dueAt ?? item.dueDate ?? null,
   maximumPoints: item.maximumPoints ?? item.pointsPossible ?? null,
-  published: item.published ?? true,
   attachments: item.attachments ?? [],
   submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
   totalCount: item.totalCount ?? 0,
@@ -18,7 +17,7 @@ const normalizeCoursework = (item = {}) => ({
 const normalizeSubmission = (submission = {}) => ({
   ...submission,
   id: submission.id ?? submission.submissionId,
-  status: submission.status ?? submission.state ?? "new",
+  status: submission.status ?? "DRAFT",
   submittedAt: submission.submittedAt ?? submission.submitted_on ?? null,
   score: submission.score ?? submission.grade ?? null,
   submitted: submission.submitted ?? Boolean(submission.submittedAt),
@@ -40,10 +39,9 @@ const normalizeGradebook = (response) => {
 export const courseworkApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCourseworkList: builder.query({
-      query: (courseId) => `/courses/${courseId}/coursework`,
+      query: ({ courseId, page = 0, size = 20 }) => ({ url: `/courses/${courseId}/coursework`, params: { page, size } }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data ?? [];
-        return list.map(normalizeCoursework);
+        return { ...response, content: response.content.map(normalizeCoursework) };
       },
     }),
     getCourseworkById: builder.query({
@@ -70,17 +68,23 @@ export const courseworkApi = baseApi.injectEndpoints({
         }
       },
     }),
+    updateCoursework: builder.mutation({
+      query: ({ courseId, courseworkId, changes }) => ({ url: `/courses/${courseId}/coursework/${courseworkId}`, method: "PATCH", body: changes }),
+      transformResponse: normalizeCoursework,
+      invalidatesTags: ["Coursework", "Classrooms"],
+    }),
+    deleteCoursework: builder.mutation({
+      query: ({ courseId, courseworkId }) => ({ url: `/courses/${courseId}/coursework/${courseworkId}`, method: "DELETE" }),
+      invalidatesTags: ["Coursework", "Classrooms"],
+    }),
     getSubmissionList: builder.query({
-      query: ({ courseId, courseworkId }) =>
-        `/courses/${courseId}/coursework/${courseworkId}/submissions`,
+      query: ({ courseworkId, page = 0, size = 20 }) => ({ url: `/coursework/${courseworkId}/submissions`, params: { page, size } }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data ?? [];
-        return list.map(normalizeSubmission);
+        return { ...response, content: response.content.map(normalizeSubmission) };
       },
     }),
     getMySubmission: builder.query({
-      query: ({ courseId, courseworkId }) =>
-        `/courses/${courseId}/coursework/${courseworkId}/submissions/me`,
+      query: ({ courseworkId }) => `/coursework/${courseworkId}/submissions/me`,
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
     }),
@@ -88,6 +92,9 @@ export const courseworkApi = baseApi.injectEndpoints({
       query: ({ courseId, studentId }) =>
         `/analytics/courses/${courseId}/students/${studentId}/gradebook`,
       transformResponse: normalizeGradebook,
+    }),
+    getCourseAnalyticsSummary: builder.query({
+      query: (courseId) => `/analytics/courses/${courseId}/summary`,
     }),
     startSubmission: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({
@@ -132,9 +139,12 @@ export const {
   useGetCourseworkListQuery,
   useGetCourseworkByIdQuery,
   useCreateCourseworkMutation,
+  useUpdateCourseworkMutation,
+  useDeleteCourseworkMutation,
   useGetSubmissionListQuery,
   useGetMySubmissionQuery,
   useGetStudentGradebookQuery,
+  useGetCourseAnalyticsSummaryQuery,
   useStartSubmissionMutation,
   useSaveSubmissionMutation,
   useGradeSubmissionMutation,

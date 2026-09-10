@@ -32,7 +32,7 @@ export default function RegisterPage() {
   });
   const loading = authStatus === "loading";
   const error =
-    authError?.data?.message ||
+    authError?.data?.error ||
     authError?.message ||
     "Unable to create your account.";
 

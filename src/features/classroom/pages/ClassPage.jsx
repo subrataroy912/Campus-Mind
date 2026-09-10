@@ -123,10 +123,10 @@ function Classwork({ teacher, classId }) {
   const [commentError, setCommentError] = useState("");
   const fileInputRefs = useRef({});
   const {
-    data: coursework = [],
+    data: courseworkPage,
     isLoading,
     error,
-  } = useGetCourseworkListQuery(classId, {
+  } = useGetCourseworkListQuery({ courseId: classId, page: 0, size: 20 }, {
     skip: !classId,
   });
   const { data: expandedCoursework } = useGetCourseworkByIdQuery(
@@ -139,10 +139,12 @@ function Classwork({ teacher, classId }) {
   const [gradeSubmission] = useGradeSubmissionMutation();
   const [addCourseworkComment] = useAddCourseworkCommentMutation();
   const [addSubmissionComment] = useAddSubmissionCommentMutation();
-  const { data: submissionList = [] } = useGetSubmissionListQuery(
-    { courseId: classId, courseworkId: expanded },
+  const coursework = useMemo(() => courseworkPage?.content ?? [], [courseworkPage]);
+  const { data: submissionPage } = useGetSubmissionListQuery(
+    { courseworkId: expanded, page: 0, size: 20 },
     { skip: !classId || !expanded || !teacher }
   );
+  const submissionList = submissionPage?.content ?? [];
   const { data: courseworkComments = [] } = useGetCourseworkCommentsQuery(
     { courseId: classId, courseworkId: expanded },
     { skip: !classId || !expanded }

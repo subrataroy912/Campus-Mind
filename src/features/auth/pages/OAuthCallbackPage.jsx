@@ -16,6 +16,8 @@ export default function OAuthCallbackPage() {
     const finishOAuth = async () => {
       try {
         const callback = parseOAuthCallback(searchParams);
+        // Tokens are single-use bootstrap data and must not remain in history.
+        window.history.replaceState({}, document.title, window.location.pathname);
         if (callback.errorMessage) {
           await handleOAuthFailure({
             completeOAuth,

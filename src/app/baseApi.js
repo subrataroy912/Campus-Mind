@@ -7,20 +7,18 @@ import {
 } from "@/utils/storage.js";
 import { clearPersistedApiState } from "./apiCachePersistence.js";
 
-const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/v1";
+/** The API always exposes versioned routes; callers configure only its origin. */
+export const apiBaseUrl = (() => {
+  const configured = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(/\/+$/, "");
+  return configured.endsWith("/v1") ? configured : `${configured}/v1`;
+})();
 
+// Retained for callers which need to distinguish a missing current profile.
 export function shouldForceLogout(endpoint, statusCode) {
-  if (statusCode === 401) return true;
-  if (statusCode !== 404) return false;
-
-  const normalizedEndpoint = String(endpoint ?? "").toLowerCase();
-  return (
-    normalizedEndpoint.includes("/users/me") ||
-    normalizedEndpoint.includes("/auth/me") ||
-    normalizedEndpoint.includes("/profile")
-  );
+  return statusCode === 401 || (statusCode === 404 && String(endpoint).includes("/users/me"));
 }
+
+const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
 
 function clearAuthSession(api) {
   api.dispatch(clearCredentials());
@@ -31,84 +29,88 @@ function clearAuthSession(api) {
   safeLocalStorageRemove("refreshToken");
 }
 
+function normalizeError(error) {
+  const status = error?.status;
+  if (typeof status === "number" && status >= 500) {
+    return { ...error, data: { error: "Service unavailable" } };
+  }
+  if (typeof status !== "number") {
+    return { ...error, data: { error: "Service unavailable" } };
+  }
+  const serverError = error?.data?.error;
+  return { ...error, data: { error: typeof serverError === "string" ? serverError : "Request failed" } };
+}
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
-  prepareHeaders: (headers, { getState }) => {
-    const token =
-      getState().auth?.accessToken ||
-      safeParseStorageJson("campus-mind.session")?.accessToken ||
-      safeLocalStorageGet("accessToken");
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+  prepareHeaders: (headers, { getState, endpoint }) => {
+    headers.set("accept", "application/json");
+    if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint)) {
+      const token = getState().auth?.accessToken ||
+        safeParseStorageJson("campus-mind.session")?.accessToken ||
+        safeLocalStorageGet("accessToken");
+      if (token) headers.set("authorization", `Bearer ${token}`);
     }
     return headers;
   },
 });
 
+// Refresh is deliberately separate so it can never inherit a stale bearer token.
+const publicBaseQuery = fetchBaseQuery({
+  baseUrl: apiBaseUrl,
+  prepareHeaders: (headers) => {
+    headers.set("accept", "application/json");
+    return headers;
+  },
+});
+
+/** Refresh a failed authenticated request once. Refresh itself can never recurse. */
 const baseQueryWithRefresh = async (args, api, extraOptions) => {
-  const endpoint = typeof args === "string" ? args : args?.url || "";
   let result = await rawBaseQuery(args, api, extraOptions);
-
-  if (result.error && shouldForceLogout(endpoint, result.error?.status)) {
-    clearAuthSession(api);
-    return result;
+  if (result.error?.status !== 401 || extraOptions?.skipAuthRefresh || PUBLIC_AUTH_ENDPOINTS.has(api.endpoint)) {
+    return result.error ? { error: normalizeError(result.error) } : result;
   }
 
-  if (result.error?.status !== 401 || extraOptions?.skipAuthRefresh) {
-    return result;
-  }
-
-  const refreshToken =
-    api.getState().auth?.refreshToken ||
+  const refreshToken = api.getState().auth?.refreshToken ||
     safeParseStorageJson("campus-mind.session")?.refreshToken ||
     safeLocalStorageGet("refreshToken");
-
   if (!refreshToken) {
     clearAuthSession(api);
-    return result;
+    return { error: normalizeError(result.error) };
   }
 
-  const refreshResult = await rawBaseQuery(
+  const refreshResult = await publicBaseQuery(
     { url: "/auth/refresh", method: "POST", body: { refreshToken } },
     api,
-    { skipAuthRefresh: true }
+    { ...extraOptions, skipAuthRefresh: true },
   );
-
-  const payload = refreshResult.data?.data ?? refreshResult.data;
-
-  if (refreshResult.data && payload?.accessToken) {
-    const nextCredentials = {
-      accessToken: payload.accessToken,
-      refreshToken: payload.refreshToken ?? refreshToken,
-      user: payload.user ?? api.getState().auth.user,
+  const refreshed = refreshResult.data;
+  if (!refreshResult.error && refreshed?.accessToken && refreshed?.refreshToken) {
+    const credentials = {
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken,
+      user: api.getState().auth?.user,
     };
-
-    api.dispatch(setCredentials(nextCredentials));
-
-    const session = safeParseStorageJson("campus-mind.session", null);
-    const nextSession = { ...(session ?? {}), ...nextCredentials };
+    api.dispatch(setCredentials(credentials));
+    const session = safeParseStorageJson("campus-mind.session", {});
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.setItem(
-          "campus-mind.session",
-          JSON.stringify(nextSession)
-        );
+        window.localStorage.setItem("campus-mind.session", JSON.stringify({ ...session, ...credentials }));
       } catch {
-        // Ignore storage write failures
+        // A working in-memory session is still useful when storage is blocked.
       }
     }
-
-    result = await rawBaseQuery(args, api, extraOptions);
-  } else {
-    clearAuthSession(api);
+    result = await rawBaseQuery(args, api, { ...extraOptions, skipAuthRefresh: true });
+    return result.error ? { error: normalizeError(result.error) } : result;
   }
 
-  return result;
+  clearAuthSession(api);
+  return { error: normalizeError(result.error) };
 };
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
-  tagTypes: ["Classrooms", "Profile", "Notifications"],
+  tagTypes: ["Classrooms", "Profile", "Notifications", "Coursework", "Attachments"],
   baseQuery: baseQueryWithRefresh,
   endpoints: () => ({}),
 });
