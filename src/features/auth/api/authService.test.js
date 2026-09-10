@@ -185,6 +185,17 @@ describe("logout", () => {
     });
   });
 
+  it("runs the local teardown callback while revocation is still pending", () => {
+    const onLocalTeardown = vi.fn();
+    vi.spyOn(authApi.endpoints.logout, "initiate").mockReturnValue(() => ({
+      unwrap: () => new Promise(() => {}),
+    }));
+
+    logout({ onLocalTeardown });
+
+    expect(onLocalTeardown).toHaveBeenCalledOnce();
+  });
+
   it("removes the session, cache, and every supported legacy storage key", () => {
     const localStorage = createStorage();
     vi.stubGlobal("window", { localStorage });

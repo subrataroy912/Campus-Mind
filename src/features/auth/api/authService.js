@@ -96,10 +96,13 @@ export async function logout({ onLocalTeardown } = {}) {
     // requests anonymous and left server-side sessions alive.
     // Do not await this best-effort request: fetchBaseQuery has no default
     // timeout, so a stalled revocation must not keep the user signed in.
-    void store
+    const revocation = store
       .dispatch(authApi.endpoints.logout.initiate())
-      .unwrap()
-      .catch(() => {});
+      .unwrap();
+
+    // Normalize the result to a promise so rejection is always observed,
+    // without making the caller wait for a network response.
+    void Promise.resolve(revocation).catch(() => {});
   } catch {
     // A synchronous failure to start revocation must not block local cleanup.
   } finally {
