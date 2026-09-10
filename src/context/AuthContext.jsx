@@ -1,5 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
-import { useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   login as loginRequest,
   register as registerRequest,
@@ -7,16 +6,16 @@ import {
   updateProfile as updateProfileRequest,
   logout as logoutRequest,
 } from "../features/auth/api/authService";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import { useDispatch } from "react-redux";
-import { clearCredentials, setCredentials } from "../features/auth/authSlice.js";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
   hydratePersistedSession,
   readPersistedSession,
-  SESSION_KEY,
+  commitAuthSession,
+  clearLocalAuthSession,
+  mergeProfileIntoCurrentSession,
 } from "./authSession.js";
 
 const AuthContext = createContext(null);
@@ -69,14 +68,11 @@ function resetApiCache(dispatch) {
 }
 
 export function AuthProvider({ children }) {
-  // Read the single persisted record once. useLocalStorage owns subsequent
-  // writes, while this value makes the bootstrap source explicit.
-  const [persistedSession] = useState(readPersistedSession);
-  const [user, setUser, removeUser] = useLocalStorage(
-    SESSION_KEY,
-    persistedSession,
-  );
+  const persistedSession = useMemo(() => readPersistedSession(), []);
   const dispatch = useDispatch();
+  const store = useStore();
+  const session = useSelector((state) => state.auth);
+  const user = session.user;
   const userRef = useRef(user);
   const [authState, setAuthState] = useState({
     status: "hydrating",
@@ -87,25 +83,29 @@ export function AuthProvider({ children }) {
     userRef.current = user;
   }, [user]);
 
+  useEffect(() => store.subscribe(() => {
+    if (store.getState().auth.accessToken || !userRef.current) return;
+    userRef.current = null;
+    setAuthState({ status: "failed", error: new Error("Your session has expired. Please log in again.") });
+  }), [store]);
+
   useEffect(() => {
     let ignore = false;
 
     async function validateSession() {
-      const currentUser = userRef.current;
+      const currentSession = persistedSession;
       const result = await hydratePersistedSession({
-        session: currentUser,
+        session: currentSession,
         // Install credentials before the profile validation request. RTK Query
         // must never read a token directly from storage while hydration runs.
-        installCredentials: (session) => dispatch(setCredentials(session)),
+        installCredentials: (nextSession) => commitAuthSession(dispatch, nextSession),
         getProfile: getCurrentProfileRequest,
       });
 
       if (result.status === "failed") {
         if (ignore) return;
         if (result.expired) {
-          setUser(null);
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
+          clearLocalAuthSession(dispatch);
           setAuthState({
             status: "failed",
             error: new Error("Your session has expired. Please log in again."),
@@ -122,28 +122,13 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const { accessToken, refreshToken } = currentUser;
         const profile = result.profile;
         // A logout can happen while this request is in flight. Do not let its
         // response recreate the session after client-side cleanup.
-        if (ignore || userRef.current !== currentUser) return;
-
-        const nextUser = {
-          ...currentUser,
-          ...profile,
-          name: profile.displayName || currentUser?.name,
-          avatar: profile.avatarUrl ?? currentUser?.avatar ?? null,
-          banner: profile.bannerUrl ?? currentUser?.banner ?? null,
-        };
-
-        setUser(nextUser);
-        dispatch(
-          setCredentials({
-            accessToken,
-            refreshToken,
-            user: nextUser,
-          })
-        );
+        if (ignore) return;
+        const nextSession = mergeProfileIntoCurrentSession(store.getState, profile);
+        if (!nextSession) return;
+        commitAuthSession(dispatch, nextSession);
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
@@ -155,14 +140,14 @@ export function AuthProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [dispatch, setUser, user?.accessToken, user?.refreshToken]);
+  }, [dispatch, persistedSession, store]);
 
   const value = useMemo(
     () => ({
       user,
       // A persisted user is only authenticated after its profile has been
       // validated and its credentials are installed in Redux.
-      isAuthenticated: authState.status === "succeeded" && Boolean(user?.accessToken),
+      isAuthenticated: authState.status === "succeeded" && Boolean(session.accessToken),
       authStatus: authState.status,
       authError: authState.error,
       clearAuthError() {
@@ -192,8 +177,6 @@ export function AuthProvider({ children }) {
         const hydratedUser = nextUser
           ? {
               ...nextUser,
-              accessToken,
-              refreshToken,
               avatar: nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
               banner: nextUser?.banner ?? nextUser?.bannerUrl ?? null,
               displayName: nextUser?.displayName ?? nextUser?.name,
@@ -204,36 +187,24 @@ export function AuthProvider({ children }) {
         // Install the provider-issued token before requesting /users/me. Without
         // this, the profile request is sent without Authorization on a new OAuth
         // session and the callback can never complete.
-        const provisionalUser = hydratedUser ?? { accessToken, refreshToken };
-        dispatch(
-          setCredentials({
-            accessToken,
-            refreshToken,
-            user: provisionalUser,
-          }),
-        );
+        const provisionalUser = hydratedUser ?? null;
+        commitAuthSession(dispatch, { accessToken, refreshToken, user: provisionalUser });
 
         let profile;
         try {
           profile = hydratedUser || (await getCurrentProfileRequest());
         } catch (error) {
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
+          clearLocalAuthSession(dispatch);
           throw error;
         }
         const finalUser = {
           ...profile,
-          accessToken,
-          refreshToken,
           avatar: profile?.avatar ?? profile?.avatarUrl ?? null,
           banner: profile?.banner ?? profile?.bannerUrl ?? null,
           displayName: profile?.displayName ?? profile?.name,
         };
 
-        setUser(finalUser);
-        dispatch(
-          setCredentials({ accessToken, refreshToken, user: finalUser })
-        );
+        commitAuthSession(dispatch, { accessToken, refreshToken, user: finalUser });
         triggerLifecycleRefresh(dispatch, "user-oauth-linked");
         setAuthState({ status: "succeeded", error: null });
         return finalUser;
@@ -246,17 +217,12 @@ export function AuthProvider({ children }) {
           const { accessToken, refreshToken, user: nextUser } = response;
           const hydratedUser = {
             ...nextUser,
-            accessToken,
-            refreshToken,
             avatar: nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
             banner: nextUser?.banner ?? nextUser?.bannerUrl ?? null,
             displayName: nextUser?.displayName ?? nextUser?.name,
           };
           resetApiCache(dispatch);
-          setUser(hydratedUser);
-          dispatch(
-            setCredentials({ accessToken, refreshToken, user: hydratedUser })
-          );
+          commitAuthSession(dispatch, { accessToken, refreshToken, user: hydratedUser });
           setAuthState({ status: "succeeded", error: null });
           return hydratedUser;
         } catch (error) {
@@ -271,21 +237,16 @@ export function AuthProvider({ children }) {
           if (result.accessToken && result.user) {
             const hydratedUser = {
               ...result.user,
-              accessToken: result.accessToken,
-              refreshToken: result.refreshToken,
               avatar: result.user?.avatar ?? result.user?.avatarUrl ?? null,
               banner: result.user?.banner ?? result.user?.bannerUrl ?? null,
               displayName: result.user?.displayName ?? result.user?.name,
             };
             resetApiCache(dispatch);
-            setUser(hydratedUser);
-            dispatch(
-              setCredentials({
-                accessToken: result.accessToken,
-                refreshToken: result.refreshToken,
-                user: hydratedUser,
-              })
-            );
+            commitAuthSession(dispatch, {
+              accessToken: result.accessToken,
+              refreshToken: result.refreshToken,
+              user: hydratedUser,
+            });
           }
           triggerLifecycleRefresh(dispatch, "user-registered");
           setAuthState({ status: "succeeded", error: null });
@@ -311,14 +272,7 @@ export function AuthProvider({ children }) {
           bio: nextProfile.about || user?.bio,
           batchYear: nextProfile.gradeLevel || user?.batchYear,
         };
-        setUser(nextUser);
-        dispatch(
-          setCredentials({
-            accessToken: user?.accessToken,
-            refreshToken: user?.refreshToken,
-            user: nextUser,
-          })
-        );
+        commitAuthSession(dispatch, { ...store.getState().auth, user: nextUser });
         const visibilityChanged = Object.prototype.hasOwnProperty.call(
           profilePatch,
           "profileVisibility"
@@ -333,21 +287,11 @@ export function AuthProvider({ children }) {
       },
       async hydrateProfile() {
         const profile = await getCurrentProfileRequest();
-        const nextUser = {
-          ...user,
-          ...profile,
-          name: profile.displayName || user?.name,
-          avatar: profile.avatarUrl ?? user?.avatar ?? null,
-          banner: profile.bannerUrl ?? user?.banner ?? null,
-        };
-        setUser(nextUser);
-        dispatch(
-          setCredentials({
-            accessToken: user?.accessToken,
-            refreshToken: user?.refreshToken,
-            user: nextUser,
-          })
-        );
+        // This request can trigger a token refresh. Merge into the latest
+        // session so neither the access nor refresh token can be reverted.
+        const nextSession = mergeProfileIntoCurrentSession(store.getState, profile);
+        if (!nextSession) throw new Error("The authenticated session was cleared.");
+        commitAuthSession(dispatch, nextSession);
         triggerLifecycleRefresh(dispatch, "user-profile-updated");
         return profile;
       },
@@ -355,12 +299,11 @@ export function AuthProvider({ children }) {
         await logoutRequest({
           onLocalTeardown() {
             userRef.current = null;
-            removeUser();
           },
         });
       },
     }),
-    [authState, dispatch, removeUser, user, setUser]
+    [authState, dispatch, session.accessToken, store, user]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
