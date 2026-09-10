@@ -3,13 +3,11 @@ import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { clearCredentials, setSession } from "../features/auth/authSlice.js";
 import {
   safeLocalStorageRemove,
-  safeLocalStorageSet,
   safeParseStorageJson,
 } from "../utils/storage.js";
 
-
 export const SESSION_KEY = "campus-mind.session";
-export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken", "refreshToken"];
+export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken"];
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -27,7 +25,6 @@ export function normalizeSession(record) {
   const nestedUser = isRecord(source.user) ? source.user : null;
   const {
     accessToken: _accessToken,
-    refreshToken: _refreshToken,
     token: _token,
     session: _session,
     user: _user,
@@ -36,16 +33,15 @@ export function normalizeSession(record) {
   const user = nestedUser ?? flatProfile;
   return {
     accessToken,
-    refreshToken: token(source.refreshToken ?? source.refresh_token),
     user: isRecord(user) && Object.keys(user).length ? user : null,
   };
 }
 
 export function commitAuthSession(dispatch, record) {
   const session = normalizeSession(record);
-  if (!session)
+  if (!session) {
     throw new Error("Cannot commit an invalid authenticated session.");
-  safeLocalStorageSet(SESSION_KEY, JSON.stringify(session));
+  }
   dispatch(setSession(session));
   return session;
 }
@@ -74,8 +70,6 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
 
 export function readPersistedSession() {
   const session = normalizeSession(safeParseStorageJson(SESSION_KEY));
-  if (!session) return null;
-  safeLocalStorageSet(SESSION_KEY, JSON.stringify(session));
   return session;
 }
 
@@ -89,7 +83,6 @@ export function getProtectedRouteState(authStatus, isAuthenticated) {
   if (authStatus === "hydrating") return "hydrating";
   return isAuthenticated ? "authenticated" : "unauthenticated";
 }
-
 
 export async function hydratePersistedSession({
   session,

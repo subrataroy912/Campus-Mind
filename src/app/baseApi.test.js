@@ -7,8 +7,8 @@ const jsonResponse = (body, status = 200) =>
     headers: { "content-type": "application/json" },
   });
 
-function createApi({ accessToken = "expired-access", refreshToken = "old-refresh" } = {}) {
-  const state = { auth: { accessToken, refreshToken, user: { id: "user-1" } } };
+function createApi({ accessToken = "expired-access" } = {}) {
+  const state = { auth: { accessToken, user: { id: "user-1" } } };
   const actions = [];
   return {
     actions,
@@ -16,11 +16,14 @@ function createApi({ accessToken = "expired-access", refreshToken = "old-refresh
     endpoint: "protectedResource",
     dispatch: (action) => {
       actions.push(action);
-      if (action.type === "auth/setCredentials") {
-        Object.assign(state.auth, action.payload);
+      if (action.type === "auth/setAccessToken") {
+        state.auth.accessToken = action.payload;
+      }
+      if (action.type === "auth/setSession") {
+        state.auth = { ...state.auth, ...action.payload };
       }
       if (action.type === "auth/clearCredentials") {
-        state.auth = { accessToken: null, refreshToken: null, user: null };
+        state.auth = { accessToken: null, user: null };
       }
       return action;
     },
@@ -72,7 +75,6 @@ describe("shouldForceLogout", () => {
 
     expect(authReducer(undefined, { type: "@@INIT" })).toEqual({
       accessToken: null,
-      refreshToken: null,
       user: null,
     });
 
@@ -80,21 +82,24 @@ describe("shouldForceLogout", () => {
     vi.resetModules();
   });
 
-  it("uses one refresh request for simultaneous 401s and retries both with rotated credentials", async () => {
+  it("uses one refresh request for simultaneous 401s and retries both with the new access token", async () => {
     const api = createApi();
     let refreshCalls = 0;
     const protectedTokens = [];
-    vi.stubGlobal("fetch", vi.fn(async (request) => {
-      const url = new URL(request.url);
-      if (url.pathname.endsWith("/auth/refresh")) {
-        refreshCalls += 1;
-        return jsonResponse({ accessToken: "new-access", refreshToken: "new-refresh" });
-      }
-      protectedTokens.push(request.headers.get("authorization"));
-      return request.headers.get("authorization") === "Bearer new-access"
-        ? jsonResponse({ ok: true })
-        : jsonResponse({ error: "expired" }, 401);
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        const url = new URL(request.url);
+        if (url.pathname.endsWith("/auth/refresh")) {
+          refreshCalls += 1;
+          return jsonResponse({ accessToken: "new-access" });
+        }
+        protectedTokens.push(request.headers.get("authorization"));
+        return request.headers.get("authorization") === "Bearer new-access"
+          ? jsonResponse({ ok: true })
+          : jsonResponse({ error: "expired" }, 401);
+      })
+    );
 
     const [first, second] = await Promise.all([
       baseQueryWithRefresh({ url: "/protected/one" }, api, {}),
@@ -112,41 +117,39 @@ describe("shouldForceLogout", () => {
     ]);
     expect(api.getState().auth).toMatchObject({
       accessToken: "new-access",
-      refreshToken: "new-refresh",
     });
-    expect(JSON.parse(storage.get("campus-mind.session"))).toMatchObject({
-      accessToken: "new-access",
-      refreshToken: "new-refresh",
-    });
+    expect(storage.get("campus-mind.session") ?? null).toBeNull();
   });
 
-  it("accepts an access-token-only refresh response and keeps the existing refresh token", async () => {
+  it("accepts an access-token-only refresh response without any refresh token state", async () => {
     const api = createApi();
-    vi.stubGlobal("fetch", vi.fn(async (request) => {
-      if (new URL(request.url).pathname.endsWith("/auth/refresh")) {
-        return jsonResponse({ data: { accessToken: "new-access" } });
-      }
-      return request.headers.get("authorization") === "Bearer new-access"
-        ? jsonResponse({ ok: true })
-        : jsonResponse({ error: "expired" }, 401);
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        if (new URL(request.url).pathname.endsWith("/auth/refresh")) {
+          return jsonResponse({ data: { accessToken: "new-access" } });
+        }
+        return request.headers.get("authorization") === "Bearer new-access"
+          ? jsonResponse({ ok: true })
+          : jsonResponse({ error: "expired" }, 401);
+      })
+    );
 
     const result = await baseQueryWithRefresh({ url: "/protected" }, api, {});
 
     expect(result.data).toEqual({ ok: true });
     expect(api.getState().auth).toMatchObject({
       accessToken: "new-access",
-      refreshToken: "old-refresh",
     });
-    expect(JSON.parse(storage.get("campus-mind.session"))).toMatchObject({
-      accessToken: "new-access",
-      refreshToken: "old-refresh",
-    });
+    expect(storage.get("campus-mind.session") ?? null).toBeNull();
   });
 
   it("signs out once and returns the same unauthenticated error to all refresh waiters", async () => {
     const api = createApi();
-    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ error: "invalid refresh" }, 401)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse({ error: "invalid refresh" }, 401))
+    );
 
     const results = await Promise.all([
       baseQueryWithRefresh({ url: "/protected/one" }, api, {}),
@@ -157,23 +160,30 @@ describe("shouldForceLogout", () => {
       { error: { status: 401, data: { error: "Unauthenticated" } } },
       { error: { status: 401, data: { error: "Unauthenticated" } } },
     ]);
-    expect(api.actions.filter((action) => action.type === "auth/clearCredentials")).toHaveLength(1);
+    expect(
+      api.actions.filter((action) => action.type === "auth/clearCredentials")
+    ).toHaveLength(1);
   });
 
   it("does not refresh again when the one allowed retry also receives a 401", async () => {
     const api = createApi();
     let refreshCalls = 0;
-    vi.stubGlobal("fetch", vi.fn(async (request) => {
-      if (new URL(request.url).pathname.endsWith("/auth/refresh")) {
-        refreshCalls += 1;
-        return jsonResponse({ accessToken: "new-access", refreshToken: "new-refresh" });
-      }
-      return jsonResponse({ error: "still unauthorized" }, 401);
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        if (new URL(request.url).pathname.endsWith("/auth/refresh")) {
+          refreshCalls += 1;
+          return jsonResponse({ accessToken: "new-access" });
+        }
+        return jsonResponse({ error: "still unauthorized" }, 401);
+      })
+    );
 
     const result = await baseQueryWithRefresh({ url: "/protected" }, api, {});
 
     expect(refreshCalls).toBe(1);
-    expect(result).toEqual({ error: { status: 401, data: { error: "still unauthorized" } } });
+    expect(result).toEqual({
+      error: { status: 401, data: { error: "still unauthorized" } },
+    });
   });
 });

@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { setCredentials } from "@/features/auth/authSlice.js";
-import { safeParseStorageJson, safeLocalStorageSet } from "@/utils/storage.js";
-import { clearLocalAuthSession, SESSION_KEY } from "@/context/authSession.js";
+import { setAccessToken, setSession } from "@/features/auth/authSlice.js";
+import { clearLocalAuthSession } from "@/context/authSession.js";
 
 /** The API always exposes versioned routes; callers configure only its origin. */
 export const apiBaseUrl = (() => {
@@ -44,10 +43,12 @@ export function shouldForceLogout(endpoint, statusCode) {
   );
 }
 
-const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
-// Discovery is intentionally usable before sign-in. Keep this list scoped to
-// endpoint names rather than URL fragments so course-management calls always
-// retain their bearer token.
+const PUBLIC_AUTH_ENDPOINTS = new Set([
+  "login",
+  "register",
+  "refresh",
+  "logout",
+]);
 const PUBLIC_DISCOVERY_ENDPOINTS = new Set([
   "getExploreFeed",
   "searchExploreCourses",
@@ -57,8 +58,6 @@ const UNAUTHENTICATED_ERROR = Object.freeze({
   data: { error: "Unauthenticated" },
 });
 
-// This is intentionally module-scoped: separate RTK Query requests must share
-// one refresh operation because refresh-token rotation invalidates the old token.
 let refreshPromise = null;
 
 function normalizeError(error) {
@@ -83,7 +82,10 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: "include",
   prepareHeaders: (headers, { getState, endpoint }) => {
     prepareCookieHeaders(headers);
-    if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint) && !PUBLIC_DISCOVERY_ENDPOINTS.has(endpoint)) {
+    if (
+      !PUBLIC_AUTH_ENDPOINTS.has(endpoint) &&
+      !PUBLIC_DISCOVERY_ENDPOINTS.has(endpoint)
+    ) {
       const token = getState().auth?.accessToken;
       if (token) headers.set("authorization", `Bearer ${token}`);
     }
@@ -109,51 +111,27 @@ function validToken(value) {
   return typeof value === "string" && value.length > 0;
 }
 
-function persistRefreshedCredentials(credentials) {
-  const persisted = safeParseStorageJson(SESSION_KEY, {});
-  const session =
-    persisted && typeof persisted === "object" && !Array.isArray(persisted)
-      ? persisted
-      : {};
-
-  // Write the complete rotated pair before exposing it to Redux, so a reload
-  // cannot observe a new access token paired with an old refresh token.
-  safeLocalStorageSet(
-    SESSION_KEY,
-    JSON.stringify({ ...session, ...credentials })
-  );
-}
-
 async function refreshCredentials(api, extraOptions) {
-  const refreshToken = api.getState().auth?.refreshToken;
-  if (!validToken(refreshToken)) {
-    throw unauthenticatedError();
-  }
   const refreshResult = await publicBaseQuery(
     { url: "/auth/refresh", method: "POST" },
     api,
     { ...extraOptions, skipAuthRefresh: true }
   );
   const refreshed = refreshResult.data?.data ?? refreshResult.data;
-  if (
-    refreshResult.error ||
-    !validToken(refreshed?.accessToken)
-  ) {
+
+  if (refreshResult.error || !validToken(refreshed?.accessToken)) {
     throw unauthenticatedError();
   }
 
-  const credentials = {
-    accessToken: refreshed.accessToken,
-    // Cookie-based refresh endpoints commonly rotate only the access token.
-    // Preserve the existing refresh token unless the server sends a new one.
-    refreshToken: validToken(refreshed.refreshToken)
-      ? refreshed.refreshToken
-      : refreshToken,
-    user: api.getState().auth?.user ?? null,
-  };
-  persistRefreshedCredentials(credentials);
-  api.dispatch(setCredentials(credentials));
-  return credentials;
+  const existingUser = api.getState().auth?.user ?? null;
+  const nextAccessToken = refreshed.accessToken;
+  api.dispatch(setAccessToken(nextAccessToken));
+  if (existingUser) {
+    api.dispatch(
+      setSession({ accessToken: nextAccessToken, user: existingUser })
+    );
+  }
+  return nextAccessToken;
 }
 
 function getRefreshPromise(api, extraOptions) {
@@ -194,8 +172,10 @@ export const baseQueryWithRefresh = async (args, api, extraOptions) => {
     ...extraOptions,
     skipAuthRefresh: true,
   });
-  // A retry is deliberately final: a second 401 must not trigger another
-  // refresh, otherwise an invalid access token can create a refresh loop.
+  if (result.error?.status === 401) {
+    clearLocalAuthSession(api.dispatch);
+    return { error: normalizeError(result.error) };
+  }
   return result.error ? { error: normalizeError(result.error) } : result;
 };
 

@@ -7,7 +7,6 @@ import {
 
 const persistedSession = {
   accessToken: "access-token",
-  refreshToken: "refresh-token",
   id: "user-1",
 };
 
@@ -24,7 +23,10 @@ describe("persisted session bootstrap", () => {
 
     expect(installCredentials).toHaveBeenCalledWith(persistedSession);
     expect(getProfile).toHaveBeenCalledAfter(installCredentials);
-    expect(result).toMatchObject({ status: "succeeded", user: persistedSession });
+    expect(result).toMatchObject({
+      status: "succeeded",
+      user: persistedSession,
+    });
   });
 
   it("marks an expired persisted session as failed", async () => {
@@ -54,7 +56,6 @@ describe("persisted session bootstrap", () => {
   it("keeps the current session when a profile payload is missing or invalid", () => {
     const current = {
       accessToken: "access-token",
-      refreshToken: "refresh-token",
       user: { id: "user-1", name: "Ada" },
     };
 

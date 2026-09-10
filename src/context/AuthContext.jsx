@@ -18,8 +18,6 @@ import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
-  hydratePersistedSession,
-  readPersistedSession,
   commitAuthSession,
   mergeProfileIntoCurrentSession,
   clearLocalAuthSession,
@@ -79,7 +77,6 @@ function resetApiCache(dispatch) {
 }
 
 export function AuthProvider({ children }) {
-  const persistedSession = useMemo(() => readPersistedSession(), []);
   const dispatch = useDispatch();
   const store = useStore();
   const session = useSelector((state) => state.auth);
@@ -110,48 +107,41 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let ignore = false;
 
-    async function validateSession() {
-      const currentSession = persistedSession;
-      const result = await hydratePersistedSession({
-        session: currentSession,
-        // Install credentials before the profile validation request. RTK Query
-        // must never read a token directly from storage while hydration runs.
-        installCredentials: (nextSession) =>
-          commitAuthSession(dispatch, nextSession),
-        getProfile: getCurrentProfileRequest,
-      });
-
-      if (result.status === "failed") {
-        if (ignore) return;
-        if (result.expired) {
-          clearLocalAuthSession(dispatch);
-          setAuthState({
-            status: "failed",
-            error: new Error("Your session has expired. Please log in again."),
-          });
-        } else {
-          setAuthState({ status: "failed", error: result.error });
-        }
-        return;
-      }
-
-      if (!result.user) {
-        setAuthState({ status: "succeeded", error: null });
-        return;
-      }
-
+    async function bootstrapSession() {
       try {
-        const profile = result.profile;
-        // A logout can happen while this request is in flight. Do not let its
-        // response recreate the session after client-side cleanup.
+        const response = await fetch(
+          `${
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+          }/v1/auth/refresh`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { accept: "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Refresh failed");
+        }
+
+        const payload = await response.json();
+        const refreshed = payload?.data ?? payload;
+        const accessToken = refreshed?.accessToken;
+
+        if (!accessToken) {
+          throw new Error("Refresh failed");
+        }
+
+        commitAuthSession(dispatch, { accessToken, user: userRef.current });
+
+        const profile = await getCurrentProfileRequest();
         if (ignore) return;
         if (!isRecord(profile)) {
-          setAuthState({
-            status: "failed",
-            error: new Error("Your profile could not be loaded. Please sign in again."),
-          });
-          return;
+          throw new Error(
+            "Your profile could not be loaded. Please sign in again."
+          );
         }
+
         const nextSession = mergeProfileIntoCurrentSession(
           store.getState,
           profile
@@ -161,15 +151,22 @@ export function AuthProvider({ children }) {
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
-        setAuthState({ status: "failed", error });
+        clearLocalAuthSession(dispatch);
+        setAuthState({
+          status: "failed",
+          error:
+            error instanceof Error
+              ? error
+              : new Error("Your session has expired. Please log in again."),
+        });
       }
     }
 
-    validateSession();
+    bootstrapSession();
     return () => {
       ignore = true;
     };
-  }, [dispatch, persistedSession, store]);
+  }, [dispatch, store]);
 
   const value = useMemo(
     () => ({
@@ -183,12 +180,7 @@ export function AuthProvider({ children }) {
       clearAuthError() {
         setAuthState((current) => ({ ...current, error: null }));
       },
-      async completeOAuth({
-        accessToken,
-        refreshToken,
-        user: nextUser,
-        errorMessage,
-      }) {
+      async completeOAuth({ accessToken, user: nextUser, errorMessage }) {
         if (errorMessage) {
           const error = new Error(errorMessage);
           setAuthState({ status: "failed", error });
@@ -220,7 +212,6 @@ export function AuthProvider({ children }) {
         const provisionalUser = hydratedUser ?? null;
         commitAuthSession(dispatch, {
           accessToken,
-          refreshToken,
           user: provisionalUser,
         });
 
@@ -250,7 +241,6 @@ export function AuthProvider({ children }) {
 
         commitAuthSession(dispatch, {
           accessToken,
-          refreshToken,
           user: finalUser,
         });
         triggerLifecycleRefresh(dispatch, "user-oauth-linked");
@@ -262,7 +252,7 @@ export function AuthProvider({ children }) {
         try {
           const { rememberMe: _rememberMe, ...loginCredentials } = credentials;
           const response = await loginRequest(loginCredentials);
-          const { accessToken, refreshToken, user: nextUser } = response;
+          const { accessToken, user: nextUser } = response;
           const hydratedUser = {
             ...nextUser,
             avatar: nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
@@ -272,7 +262,6 @@ export function AuthProvider({ children }) {
           resetApiCache(dispatch);
           commitAuthSession(dispatch, {
             accessToken,
-            refreshToken,
             user: hydratedUser,
           });
           setAuthState({ status: "succeeded", error: null });
@@ -296,7 +285,6 @@ export function AuthProvider({ children }) {
             resetApiCache(dispatch);
             commitAuthSession(dispatch, {
               accessToken: result.accessToken,
-              refreshToken: result.refreshToken,
               user: hydratedUser,
             });
           }

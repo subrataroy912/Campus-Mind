@@ -37,7 +37,6 @@ describe("normalizeAuthResponse", () => {
   it("maps the flat backend credential response into auth state", () => {
     const result = normalizeAuthResponse({
       accessToken: "access-token",
-      refreshToken: "refresh-token",
       userId: "user-1",
       email: "student@example.com",
       displayName: "Campus Student",
@@ -46,7 +45,6 @@ describe("normalizeAuthResponse", () => {
 
     expect(result).toEqual({
       accessToken: "access-token",
-      refreshToken: "refresh-token",
       user: {
         id: "user-1",
         email: "student@example.com",
@@ -65,7 +63,6 @@ describe("normalizeAuthResponse", () => {
       })
     ).toEqual({
       accessToken: "access-token",
-      refreshToken: null,
       user: { id: "user-1", name: "Campus Student" },
     });
   });
@@ -74,11 +71,9 @@ describe("normalizeAuthResponse", () => {
     expect(
       normalizeAuthResponse({
         accessToken: "access-token",
-        refreshToken: "refresh-token",
       })
     ).toEqual({
       accessToken: "access-token",
-      refreshToken: "refresh-token",
       user: null,
     });
   });
@@ -104,7 +99,6 @@ describe("normalizeAuthResponse", () => {
 
     expect(callback).toEqual({
       accessToken: "access-token",
-      refreshToken: "refresh-token",
       user: { id: "user-1", name: "100% Campus Student" },
       userId: null,
       email: null,
@@ -132,7 +126,6 @@ describe("logout", () => {
     expect(initiate).toHaveBeenCalledWith();
     expect(store.getState().auth).toEqual({
       accessToken: null,
-      refreshToken: null,
       user: null,
     });
   });
@@ -141,7 +134,6 @@ describe("logout", () => {
     store.dispatch(
       setCredentials({
         accessToken: "access-token",
-        refreshToken: "refresh-token",
         user: { id: "student-1" },
       })
     );
@@ -156,7 +148,6 @@ describe("logout", () => {
     expect(initiate).toHaveBeenCalledWith();
     expect(store.getState().auth).toEqual({
       accessToken: null,
-      refreshToken: null,
       user: null,
     });
   });

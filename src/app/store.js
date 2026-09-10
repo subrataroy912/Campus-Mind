@@ -14,17 +14,12 @@ import { clearDashboardState } from "@/features/dashboard/dashboardSlice.js";
 import { clearExploreState } from "@/features/explore/exploreSlice.js";
 import { clearProfileState } from "@/features/profile/profileSlice.js";
 import { clearSettingsState } from "@/features/settings/settingsSlice.js";
-import { safeParseStorageJson } from "@/utils/storage.js";
 import {
   persistApiState,
   readPersistedApiState,
 } from "./apiCachePersistence.js";
 
-const storedSession = safeParseStorageJson("campus-mind.session");
-
-const preloadedApiState = readPersistedApiState({
-  user: storedSession?.user ?? storedSession ?? null,
-});
+const preloadedApiState = readPersistedApiState({ user: null });
 
 const appReducer = {
   auth: authReducer,

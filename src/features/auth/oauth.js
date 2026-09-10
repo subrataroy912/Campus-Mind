@@ -7,7 +7,6 @@ export async function handleOAuthFailure({ completeOAuth, errorMessage }) {
   try {
     await completeOAuth({
       accessToken: null,
-      refreshToken: null,
       user: null,
       errorMessage: normalizedError.message,
     });
@@ -24,7 +23,8 @@ export async function handleOAuthFailure({ completeOAuth, errorMessage }) {
  */
 export function parseOAuthCallback(searchParams) {
   const oauthError = searchParams.get("error");
-  const errorMessage = oauthError === "oauth_failed" ? "OAuth sign-in failed." : oauthError;
+  const errorMessage =
+    oauthError === "oauth_failed" ? "OAuth sign-in failed." : oauthError;
 
   if (errorMessage) return { errorMessage };
 
@@ -35,7 +35,10 @@ export function parseOAuthCallback(searchParams) {
     try {
       user = JSON.parse(serializedUser);
     } catch {
-      return { errorMessage: "The social sign-in response contained an invalid user profile." };
+      return {
+        errorMessage:
+          "The social sign-in response contained an invalid user profile.",
+      };
     }
   }
 
@@ -44,12 +47,11 @@ export function parseOAuthCallback(searchParams) {
       searchParams.get("accessToken") ||
       searchParams.get("access_token") ||
       searchParams.get("token"),
-    refreshToken:
-      searchParams.get("refreshToken") || searchParams.get("refresh_token"),
     user,
     userId: searchParams.get("userId") || searchParams.get("user_id"),
     email: searchParams.get("email"),
-    displayName: searchParams.get("displayName") || searchParams.get("display_name"),
+    displayName:
+      searchParams.get("displayName") || searchParams.get("display_name"),
     avatarUrl: searchParams.get("avatarUrl") || searchParams.get("avatar_url"),
   };
 }

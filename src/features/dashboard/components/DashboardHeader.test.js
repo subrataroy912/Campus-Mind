@@ -24,9 +24,8 @@ describe("DashboardHeader logout", () => {
       "campus-mind.session",
       JSON.stringify({
         accessToken: "access-token",
-        refreshToken: "refresh-token",
         user: { id: "student-1" },
-      }),
+      })
     );
     localStorage.setItem("campus-mind.api-cache.v1", "cached-query-state");
 
@@ -46,10 +45,11 @@ describe("DashboardHeader logout", () => {
     expect(navigate).toHaveBeenCalledWith("/", { replace: true });
 
     vi.resetModules();
-    const { default: authReducer } = await import("@/features/auth/authSlice.js");
+    const { default: authReducer } = await import(
+      "@/features/auth/authSlice.js"
+    );
     expect(authReducer(undefined, { type: "@@INIT" })).toEqual({
       accessToken: null,
-      refreshToken: null,
       user: null,
     });
   });

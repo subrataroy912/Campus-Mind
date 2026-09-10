@@ -40,7 +40,6 @@ export function normalizeAuthResponse(response) {
 
   return {
     accessToken: payload.accessToken ?? payload.token ?? null,
-    refreshToken: payload.refreshToken ?? payload.refresh_token ?? null,
     user,
   };
 }

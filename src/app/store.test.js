@@ -8,7 +8,9 @@ import { setClassroomTab } from "@/features/classroom/classroomSlice.js";
 
 describe("root forced sign-out", () => {
   it("clears user-scoped drafts and settings while retaining device-scoped UI state", () => {
-    store.dispatch(setSession({ accessToken: "user-one", refreshToken: "refresh-one", user: { id: "one" } }));
+    store.dispatch(
+      setSession({ accessToken: "user-one", user: { id: "one" } })
+    );
     store.dispatch(setCommunityDraft("private draft"));
     store.dispatch(setNotifications({ emailEnabled: false }));
     store.dispatch(setProfileEditing(true));
@@ -17,7 +19,7 @@ describe("root forced sign-out", () => {
 
     store.dispatch(forcedSignOut());
 
-    expect(store.getState().auth).toEqual({ accessToken: null, refreshToken: null, user: null });
+    expect(store.getState().auth).toEqual({ accessToken: null, user: null });
     expect(store.getState().dashboard.draft).toBe("");
     expect(store.getState().settings.notifications.emailEnabled).toBe(true);
     expect(store.getState().profile.isEditing).toBe(false);
