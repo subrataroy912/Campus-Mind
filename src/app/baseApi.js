@@ -2,8 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "@/features/auth/authSlice.js";
 import {
   safeParseStorageJson,
+  safeLocalStorageSet,
 } from "@/utils/storage.js";
-import { clearLocalAuthSession } from "@/context/authSession.js";
+import { clearLocalAuthSession, SESSION_KEY } from "@/context/authSession.js";
 
 /** The API always exposes versioned routes; callers configure only its origin. */
 export const apiBaseUrl = (() => {
@@ -22,6 +23,14 @@ export function shouldForceLogout(endpoint, statusCode) {
 }
 
 const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
+const UNAUTHENTICATED_ERROR = Object.freeze({
+  status: 401,
+  data: { error: "Unauthenticated" },
+});
+
+// This is intentionally module-scoped: separate RTK Query requests must share
+// one refresh operation because refresh-token rotation invalidates the old token.
+let refreshPromise = null;
 
 function normalizeError(error) {
   const status = error?.status;
@@ -61,8 +70,73 @@ const publicBaseQuery = fetchBaseQuery({
   },
 });
 
+function unauthenticatedError() {
+  return {
+    status: UNAUTHENTICATED_ERROR.status,
+    data: { ...UNAUTHENTICATED_ERROR.data },
+  };
+}
+
+function validToken(value) {
+  return typeof value === "string" && value.length > 0;
+}
+
+function persistRefreshedCredentials(credentials) {
+  const persisted = safeParseStorageJson(SESSION_KEY, {});
+  const session =
+    persisted && typeof persisted === "object" && !Array.isArray(persisted)
+      ? persisted
+      : {};
+
+  // Write the complete rotated pair before exposing it to Redux, so a reload
+  // cannot observe a new access token paired with an old refresh token.
+  safeLocalStorageSet(SESSION_KEY, JSON.stringify({ ...session, ...credentials }));
+}
+
+async function refreshCredentials(api, extraOptions) {
+  const refreshToken = api.getState().auth?.refreshToken;
+  if (!validToken(refreshToken)) {
+    throw unauthenticatedError();
+  }
+
+  const refreshResult = await publicBaseQuery(
+    { url: "/auth/refresh", method: "POST", body: { refreshToken } },
+    api,
+    { ...extraOptions, skipAuthRefresh: true }
+  );
+  const refreshed = refreshResult.data;
+  if (refreshResult.error || !validToken(refreshed?.accessToken) || !validToken(refreshed?.refreshToken)) {
+    throw unauthenticatedError();
+  }
+
+  const credentials = {
+    accessToken: refreshed.accessToken,
+    refreshToken: refreshed.refreshToken,
+    user: api.getState().auth?.user ?? null,
+  };
+  persistRefreshedCredentials(credentials);
+  api.dispatch(setCredentials(credentials));
+  return credentials;
+}
+
+function getRefreshPromise(api, extraOptions) {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = refreshCredentials(api, extraOptions)
+    .catch((error) => {
+      // All waiters share this branch, which makes teardown and the returned
+      // unauthenticated error deterministic even when many requests fail.
+      clearLocalAuthSession(api.dispatch);
+      throw error?.status === 401 ? error : unauthenticatedError();
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+  return refreshPromise;
+}
+
 /** Refresh a failed authenticated request once. Refresh itself can never recurse. */
-const baseQueryWithRefresh = async (args, api, extraOptions) => {
+export const baseQueryWithRefresh = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
   if (
     result.error?.status !== 401 ||
@@ -72,49 +146,19 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
     return result.error ? { error: normalizeError(result.error) } : result;
   }
 
-  const refreshToken = api.getState().auth?.refreshToken;
-  if (!refreshToken) {
-    clearLocalAuthSession(api.dispatch);
-    return { error: normalizeError(result.error) };
+  try {
+    await getRefreshPromise(api, extraOptions);
+  } catch {
+    return { error: unauthenticatedError() };
   }
 
-  const refreshResult = await publicBaseQuery(
-    { url: "/auth/refresh", method: "POST", body: { refreshToken } },
-    api,
-    { ...extraOptions, skipAuthRefresh: true }
-  );
-  const refreshed = refreshResult.data;
-  if (
-    !refreshResult.error &&
-    refreshed?.accessToken &&
-    refreshed?.refreshToken
-  ) {
-    const credentials = {
-      accessToken: refreshed.accessToken,
-      refreshToken: refreshed.refreshToken,
-      user: api.getState().auth?.user,
-    };
-    api.dispatch(setCredentials(credentials));
-    const session = safeParseStorageJson("campus-mind.session", {});
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(
-          "campus-mind.session",
-          JSON.stringify({ ...session, ...credentials })
-        );
-      } catch {
-        // A working in-memory session is still useful when storage is blocked.
-      }
-    }
-    result = await rawBaseQuery(args, api, {
-      ...extraOptions,
-      skipAuthRefresh: true,
-    });
-    return result.error ? { error: normalizeError(result.error) } : result;
-  }
-
-  clearLocalAuthSession(api.dispatch);
-  return { error: normalizeError(result.error) };
+  result = await rawBaseQuery(args, api, {
+    ...extraOptions,
+    skipAuthRefresh: true,
+  });
+  // A retry is deliberately final: a second 401 must not trigger another
+  // refresh, otherwise an invalid access token can create a refresh loop.
+  return result.error ? { error: normalizeError(result.error) } : result;
 };
 
 export const baseApi = createApi({
