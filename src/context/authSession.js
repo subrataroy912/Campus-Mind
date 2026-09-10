@@ -124,3 +124,16 @@ export function clearLocalAuthSession(dispatch, clearContextUser) {
   safeLocalStorageRemove(SESSION_KEY);
   LEGACY_AUTH_STORAGE_KEYS.forEach(safeLocalStorageRemove);
 }
+
+/** Applies a storage event from another tab without retaining its API cache. */
+export function synchronizeExternalSession(dispatch, sessionRecord) {
+  const session = normalizeSession(sessionRecord);
+  if (!session) {
+    clearLocalAuthSession(dispatch);
+    return null;
+  }
+  dispatch(forcedSignOut());
+  dispatch(baseApi.util.resetApiState());
+  clearPersistedApiState();
+  return commitAuthSession(dispatch, session);
+}

@@ -14,6 +14,27 @@ export const apiBaseUrl = (() => {
   return configured.endsWith("/v1") ? configured : `${configured}/v1`;
 })();
 
+const csrfCookieName = import.meta.env.VITE_CSRF_COOKIE_NAME || "XSRF-TOKEN";
+
+function csrfToken() {
+  if (typeof document === "undefined" || typeof document.cookie !== "string") return null;
+  const prefix = `${encodeURIComponent(csrfCookieName)}=`;
+  const cookie = document.cookie.split(";").map((value) => value.trim()).find((value) => value.startsWith(prefix));
+  if (!cookie) return null;
+  try {
+    return decodeURIComponent(cookie.slice(prefix.length));
+  } catch {
+    return null;
+  }
+}
+
+function prepareCookieHeaders(headers) {
+  headers.set("accept", "application/json");
+  const token = csrfToken();
+  if (token) headers.set("x-csrf-token", token);
+  return headers;
+}
+
 // Retained for callers which need to distinguish a missing current profile.
 export function shouldForceLogout(endpoint, statusCode) {
   return (
@@ -51,8 +72,9 @@ function normalizeError(error) {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
+  credentials: "include",
   prepareHeaders: (headers, { getState, endpoint }) => {
-    headers.set("accept", "application/json");
+    prepareCookieHeaders(headers);
     if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint)) {
       const token = getState().auth?.accessToken;
       if (token) headers.set("authorization", `Bearer ${token}`);
@@ -64,10 +86,8 @@ const rawBaseQuery = fetchBaseQuery({
 // Refresh is deliberately separate so it can never inherit a stale bearer token.
 const publicBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
-  prepareHeaders: (headers) => {
-    headers.set("accept", "application/json");
-    return headers;
-  },
+  credentials: "include",
+  prepareHeaders: prepareCookieHeaders,
 });
 
 function unauthenticatedError() {
@@ -99,8 +119,9 @@ async function refreshCredentials(api, extraOptions) {
     throw unauthenticatedError();
   }
 
+async function refreshCredentials(api, extraOptions) {
   const refreshResult = await publicBaseQuery(
-    { url: "/auth/refresh", method: "POST", body: { refreshToken } },
+    { url: "/auth/refresh", method: "POST" },
     api,
     { ...extraOptions, skipAuthRefresh: true }
   );
