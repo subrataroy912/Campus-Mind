@@ -1,6 +1,6 @@
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
-import { forcedSignOut, setSession } from "../features/auth/authSlice.js";
+import { clearCredentials, setSession } from "../features/auth/authSlice.js";
 import { safeLocalStorageRemove, safeLocalStorageSet, safeParseStorageJson } from "../utils/storage.js";
 
 /**
