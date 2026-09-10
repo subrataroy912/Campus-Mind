@@ -22,7 +22,6 @@ describe("mapCreateClassPayload", () => {
       subject: "Mathematics",
       description: "Advanced algebra",
       visibility: "PUBLIC",
-      coverUrl: null,
     });
   });
 
@@ -31,7 +30,7 @@ describe("mapCreateClassPayload", () => {
       mapJoinClassPayload({ courseId: "course-123", code: "abcd efgh" })
     ).toEqual({
       courseId: "course-123",
-      code: "ABCD-EFGH",
+      code: "ABCDEFGH",
     });
   });
 });

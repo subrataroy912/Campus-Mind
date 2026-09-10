@@ -12,7 +12,6 @@ export function mapCreateClassPayload(details = {}) {
     visibility:
       details.visibility ??
       (details.accessType === "open" ? "PUBLIC" : "PRIVATE"),
-    coverUrl: details.coverUrl ?? null,
   };
 }
 
@@ -25,12 +24,9 @@ export function mapJoinClassPayload({ courseId, code, classCode } = {}) {
 }
 
 function formatClassCodeFromInput(value) {
-  const normalized = String(value ?? "")
+  return String(value ?? "")
     .replace(/[^A-Za-z0-9]/g, "")
     .toUpperCase();
-  return normalized.length === 8
-    ? `${normalized.slice(0, 4)}-${normalized.slice(4)}`
-    : normalized;
 }
 
 export async function fetchClassrooms() {
@@ -41,30 +37,12 @@ export async function fetchClassrooms() {
   );
 }
 
-export async function fetchExploreClassrooms() {
-  return unwrapResponse(
-    await store
-      .dispatch(classroomApi.endpoints.fetchExploreClassrooms.initiate())
-      .unwrap()
-  );
-}
-
 export async function findClassroomById(_userId, classId) {
   return unwrapResponse(
     await store
       .dispatch(classroomApi.endpoints.findClassroomById.initiate(classId))
       .unwrap()
   );
-}
-
-export async function findClassroomByCode(_userId, courseId, code) {
-  const payload = mapJoinClassPayload({ courseId, code });
-
-  if (!payload.courseId || !payload.code) {
-    return null;
-  }
-
-  return findClassroomById(_userId, payload.courseId);
 }
 
 export async function createClassroom(_userId, details) {
@@ -81,6 +59,14 @@ export async function requestCourseCoverUpload() {
   return unwrapResponse(
     await store
       .dispatch(classroomApi.endpoints.requestCourseCoverUpload.initiate())
+      .unwrap()
+  );
+}
+
+export async function updateClassroom(courseId, changes) {
+  return unwrapResponse(
+    await store
+      .dispatch(classroomApi.endpoints.updateClassroom.initiate({ courseId, changes }))
       .unwrap()
   );
 }

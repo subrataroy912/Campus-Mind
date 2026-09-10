@@ -64,7 +64,10 @@ export const classroomApi = baseApi.injectEndpoints({
     }),
     getClassroomRoster: builder.query({
       query: (classId) => `/courses/${classId}/roster`,
-      transformResponse: (response) => response?.data ?? response ?? [],
+      transformResponse: (response) => {
+        const payload = response?.data ?? response;
+        return Array.isArray(payload) ? payload : payload?.content ?? [];
+      },
       providesTags: ["Classrooms"],
     }),
     createClassroom: builder.mutation({
@@ -124,4 +127,6 @@ export const {
   useUpdateClassroomMutation,
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,
+  useCreateClassroomMutation,
+  useJoinClassroomMutation,
 } = classroomApi;

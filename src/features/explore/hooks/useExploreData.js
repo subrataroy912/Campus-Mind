@@ -1,26 +1,28 @@
-import { useEffect, useState } from "react";
-import { fetchExploreClasses, fetchExploreUsers } from "../api/exploreService.js";
-import { useAuth } from "@/context/AuthContext.jsx";
+import {
+  useGetExploreFeedQuery,
+  useGetExploreRecommendationsQuery,
+  useSearchExploreCoursesQuery,
+} from "../api/exploreApi.js";
 
-export function useExploreData(currentUserId) {
-  const { authStatus } = useAuth();
-  const [classes, setClasses] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [status, setStatus] = useState("loading");
+/**
+ * Selects the API endpoint without ever turning an empty search into a feed.
+ * The API requires a nonblank q, while subject filtering belongs to the feed.
+ */
+export function useExploreData({ searchQuery = "", classFilter = "all", page = 0 } = {}) {
+  const q = searchQuery.trim();
+  const subject = !q && !["all", "popular", "recommended"].includes(classFilter)
+    ? classFilter
+    : undefined;
+  const feed = useGetExploreFeedQuery({ subject, page, size: 20 }, { skip: Boolean(q) || classFilter === "recommended" });
+  const search = useSearchExploreCoursesQuery({ q, page, size: 20 }, { skip: !q });
+  const recommendations = useGetExploreRecommendationsQuery({ page, size: 20 }, {
+    skip: Boolean(q) || classFilter !== "recommended",
+  });
+  const active = q ? search : classFilter === "recommended" ? recommendations : feed;
 
-  useEffect(() => {
-    if (authStatus === "hydrating") return undefined;
-    let active = true;
-    Promise.all([fetchExploreClasses(), fetchExploreUsers(currentUserId)])
-      .then(([nextClasses, nextUsers]) => {
-        if (!active) return;
-        setClasses(nextClasses.content);
-        setUsers(nextUsers);
-        setStatus("ready");
-      })
-      .catch(() => active && setStatus("error"));
-    return () => { active = false; };
-  }, [authStatus, currentUserId]);
-
-  return { classes, users, status };
+  return {
+    classes: active.data?.content ?? [],
+    page: active.data,
+    status: active.isLoading || active.isFetching ? "loading" : active.isError ? "error" : "ready",
+  };
 }

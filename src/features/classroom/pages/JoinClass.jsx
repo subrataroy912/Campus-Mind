@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router";
-import { findClassroomByCode, joinClassroom } from "../api/classroomService";
+import { joinClassroom } from "../api/classroomService";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
@@ -77,31 +77,15 @@ export default function JoinClass() {
     setStatus("loading");
     setError("");
     try {
-      const match = await findClassroomByCode(
-        user?.id,
-        trimmedCourseId,
-        classCode
-      );
-      setFoundClass(match);
-      setStatus(match ? "found" : "not-found");
-    } catch (requestError) {
-      setError(requestError.message || "Unable to look up this class.");
-      setStatus("idle");
-    }
-  };
-
-  const handleJoin = async () => {
-    const trimmedCourseId = courseId.trim();
-    setError("");
-    try {
-      if (!trimmedCourseId) {
-        throw new Error("A course ID is required to join this class.");
-      }
-      await joinClassroom(user?.id, trimmedCourseId, formatClassCode(code));
+      // A detail read is membership-protected, so joining must use the
+      // enrollment endpoint directly rather than attempting a preflight GET.
+      const joined = await joinClassroom(user?.id, trimmedCourseId, classCode);
       triggerLifecycleRefresh(dispatch, "course-created");
+      setFoundClass(joined);
       setStatus("joined");
     } catch (requestError) {
-      setError(requestError.message || "Unable to join this class.");
+      setError(joinErrorMessage(requestError));
+      setStatus("idle");
     }
   };
 
@@ -203,63 +187,10 @@ export default function JoinClass() {
                 disabled={status === "loading"}
                 className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {status === "loading" ? "Looking up class…" : "Find class"}
+                {status === "loading" ? "Joining class…" : "Join class"}
               </button>
 
-              <p className="mt-4 text-center text-xs text-text-muted">
-                Try{" "}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCode(["A", "L", "G", "2", "7", "X", "9", "K"])
-                  }
-                  className="font-medium text-primary hover:underline"
-                >
-                  ALG2-7X9K
-                </button>{" "}
-                as a demo code
-              </p>
             </form>
-          )}
-
-          {/* Found class preview */}
-          {status === "found" && foundClass && (
-            <div className="mt-6 border-t border-border pt-5">
-              <div
-                className={`flex h-24 items-center justify-center rounded-xl ${foundClass.theme} sm:h-28`}
-              >
-                <span className="text-lg font-semibold text-surface/90 sm:text-xl">
-                  {foundClass.title}
-                </span>
-              </div>
-              <div className="mt-4 space-y-1 text-center">
-                <p className="text-base font-medium text-text-heading">
-                  {foundClass.title} · {foundClass.subtitle}
-                </p>
-                <p className="text-sm text-text-muted">
-                  {foundClass.subject} · Taught by{" "}
-                  {foundClass.instructor?.name ||
-                    foundClass.teacher?.name ||
-                    "CampusMind teacher"}
-                </p>
-              </div>
-              <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-main transition hover:bg-canvas sm:w-auto"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleJoin}
-                  className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover"
-                >
-                  Join this class
-                </button>
-              </div>
-            </div>
           )}
 
           {/* Joined confirmation */}
@@ -302,4 +233,12 @@ export default function JoinClass() {
       </div>
     </div>
   );
+}
+
+function joinErrorMessage(error) {
+  const message = error?.data?.error || error?.message;
+  if (error?.status === 403)
+    return "This code is invalid or expired, enrollment is disabled, or your account cannot join courses.";
+  if (error?.status === 409) return message || "You have already joined this class.";
+  return message || "Unable to join this class. Please try again.";
 }

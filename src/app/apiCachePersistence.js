@@ -4,7 +4,6 @@ const STORAGE_KEY = "campus-mind.api-cache.v1";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PERSISTED_ENDPOINTS = new Set([
   "fetchClassrooms",
-  "fetchExploreClassrooms",
   "findClassroomById",
   "getCurrentProfile",
   "getPublicProfile",

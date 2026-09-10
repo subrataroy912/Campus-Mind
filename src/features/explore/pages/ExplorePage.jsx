@@ -17,14 +17,16 @@ import {
 
 const matches = (value, query) =>
   value.toLowerCase().includes(query.toLowerCase());
+const NO_USERS = [];
 
 export default function ExplorePage() {
   const { user } = useAuth();
   const dispatch = useDispatch();
-  const { classes, users, status } = useExploreData(user?.id);
   const { tab, searchQuery, classFilter, personFilter } = useSelector(
     (state) => state.explore,
   );
+  const { classes, status } = useExploreData({ searchQuery, classFilter });
+  const users = NO_USERS;
 
   const subjectSet = useMemo(() => new Set(), []);
   const classSubjects = [
@@ -49,12 +51,12 @@ export default function ExplorePage() {
           classFilter === "all" ||
           classFilter === "popular" ||
           classFilter === "recommended"
-            ? classFilter !== "recommended" || item.recommended
+            ? true
             : item.subject === classFilter,
         )
         .filter((item) =>
           matches(
-            `${item.title} ${item.subject} ${item.instructor?.name || ""}`,
+            `${item.title} ${item.subject} ${item.tags?.join(" ") || ""}`,
             searchQuery,
           ),
         )
@@ -126,7 +128,7 @@ export default function ExplorePage() {
         </p>
         <h1 className="mt-1 text-3xl font-bold text-text-heading">Explore</h1>
         <p className="mt-2 text-text-muted">
-          Find classes and people across CampusMind.
+          Find public courses across CampusMind.
         </p>
       </header>
       <div className="relative mt-6 max-w-xl">
@@ -134,7 +136,7 @@ export default function ExplorePage() {
         <input
           value={searchQuery}
           onChange={(event) => dispatch(setSearchQuery(event.target.value))}
-          placeholder="Search classes, teachers, or students"
+          placeholder="Search public courses"
           className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-primary"
         />
       </div>
@@ -188,16 +190,21 @@ export default function ExplorePage() {
             ))}
           </div>
           {filteredClasses.length ? (
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredClasses.map((classroom) => (
-                <ExploreClassCard key={classroom.id} classroom={classroom} />
-              ))}
-            </div>
+            <section className="mt-6">
+              {classFilter === "recommended" && (
+                <h2 className="mb-3 text-lg font-semibold text-text-heading">Recommended courses</h2>
+              )}
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredClasses.map((classroom) => (
+                  <ExploreClassCard key={classroom.id} classroom={classroom} />
+                ))}
+              </div>
+            </section>
           ) : (
             <div className="mt-6">
               <EmptyState
                 title="No classes found"
-                description="Try a different search or filter."
+                description="Try a different nonblank search or filter."
               />
             </div>
           )}
