@@ -35,8 +35,9 @@ function SettingRow({ title, description, checked, onChange }) {
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
-  const dispatch = useDispatch();
+  const refreshToken = useSelector((state) => state.auth.refreshToken);
   const { notifications } = useSelector((state) => state.settings);
+  const dispatch = useDispatch();
   const {
     theme,
     isLoading: isThemeLoading,
@@ -78,8 +79,8 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout(refreshToken);
     navigate("/", { replace: true });
   };
 

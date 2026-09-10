@@ -1,6 +1,8 @@
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
+import { clearCredentials } from "../authSlice.js";
+import { clearPersistedApiState } from "@/app/apiCachePersistence.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
@@ -22,7 +24,8 @@ export function normalizeAuthResponse(response) {
     banner: payload.bannerUrl ?? nestedUser.banner ?? nestedUser.bannerUrl,
     handle: payload.handle ?? nestedUser.handle,
     headline: payload.headline ?? nestedUser.headline,
-    profileVisibility: payload.profileVisibility ?? nestedUser.profileVisibility,
+    profileVisibility:
+      payload.profileVisibility ?? nestedUser.profileVisibility,
     accountType: payload.accountType ?? nestedUser.accountType,
     firstName: payload.firstName ?? nestedUser.firstName,
     lastName: payload.lastName ?? nestedUser.lastName,
@@ -45,22 +48,23 @@ export function normalizeAuthResponse(response) {
 
 export function getOAuthRedirectUrl(provider, mode) {
   void mode;
-  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  const rawBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   const baseUrl = rawBaseUrl.replace(/\/+$/, "");
-  return `${baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`}/auth/oauth/${provider}`;
+  return `${
+    baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`
+  }/auth/oauth/${provider}`;
 }
 
 export async function login(credentials) {
   return normalizeAuthResponse(
-    await store
-      .dispatch(authApi.endpoints.login.initiate(credentials))
-      .unwrap(),
+    await store.dispatch(authApi.endpoints.login.initiate(credentials)).unwrap()
   );
 }
 
 export async function register(details) {
   return normalizeAuthResponse(
-    await store.dispatch(authApi.endpoints.register.initiate(details)).unwrap(),
+    await store.dispatch(authApi.endpoints.register.initiate(details)).unwrap()
   );
 }
 
@@ -68,7 +72,7 @@ export async function getCurrentProfile() {
   return unwrapResponse(
     await store
       .dispatch(profileApi.endpoints.getCurrentProfile.initiate())
-      .unwrap(),
+      .unwrap()
   );
 }
 
@@ -76,13 +80,28 @@ export async function updateProfile(details) {
   return unwrapResponse(
     await store
       .dispatch(profileApi.endpoints.updateCurrentProfile.initiate(details))
-      .unwrap(),
+      .unwrap()
   );
 }
 
 export async function logout(refreshToken) {
-  if (!refreshToken) return;
-  await store
-    .dispatch(authApi.endpoints.logout.initiate(refreshToken))
-    .unwrap();
+  //TODO : logout problem 
+  const token = refreshToken ?? store.getState().auth?.refreshToken;
+
+  try {
+    if (token) {
+      await store.dispatch(authApi.endpoints.logout.initiate(token)).unwrap();
+    }
+  } catch (error) {
+    console.warn("Backend logout failed or token already invalid:", error);
+  } finally {
+    store.dispatch(clearCredentials());
+
+    store.dispatch(authApi.util.resetApiState());
+
+    clearPersistedApiState();
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+  }
 }

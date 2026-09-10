@@ -16,8 +16,14 @@ export function readPersistedApiState(authState) {
   if (typeof window === "undefined") return undefined;
 
   try {
-    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
-    if (!stored || stored.version !== 1 || stored.userId !== getUserId(authState)) {
+    const stored = JSON.parse(
+      window.localStorage.getItem(STORAGE_KEY) || "null"
+    );
+    if (
+      !stored ||
+      stored.version !== 1 ||
+      stored.userId !== getUserId(authState)
+    ) {
       if (stored?.userId !== getUserId(authState)) {
         window.localStorage.removeItem(STORAGE_KEY);
       }
@@ -44,8 +50,8 @@ export function persistApiState(apiState, authState) {
 
   const queries = Object.fromEntries(
     Object.entries(apiState.queries || {}).filter(([, query]) =>
-      PERSISTED_ENDPOINTS.has(query.endpointName),
-    ),
+      PERSISTED_ENDPOINTS.has(query.endpointName)
+    )
   );
 
   try {
@@ -61,7 +67,7 @@ export function persistApiState(apiState, authState) {
           mutations: {},
           subscriptions: {},
         },
-      }),
+      })
     );
   } catch {
     // Storage can be unavailable or full; memory caching still works.

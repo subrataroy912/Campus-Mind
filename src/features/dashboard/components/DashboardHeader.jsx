@@ -1,69 +1,55 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X, Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
 import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
 import { logout } from "@/features/auth/api/authService";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardHeader() {
-  const { data: profile, isLoading, error } = useGetCurrentProfileQuery();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: profile, isLoading } = useGetCurrentProfileQuery();
+  const refreshToken = useSelector((state) => state.auth.refreshToken);
+  const navigate = useNavigate();
+
   const safeAvatarUrl =
     typeof profile?.avatarUrl === "string" && profile.avatarUrl.trim()
       ? profile.avatarUrl.trim()
       : null;
 
-  const navigate = useNavigate();
-  const sidebarRef = useRef(null);
-  const buttonRef = useRef(null);
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    const handleClickOutside = (event) => {
-      if (
-        menuOpen &&
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
+    document.body.style.overflow = menuOpen ? "hidden" : "unset";
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
   }, [menuOpen]);
 
-  const leave = () => {
-    logout();
-    navigate("/", { replace: true });
+  const leave = async () => {
+    try {
+      await logout(refreshToken);
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      navigate("/", { replace: true });
+    }
   };
-  if (isLoading) return <div>Loading profile...</div>;
-  if (error) return <div>Failed to load profile data.</div>;
+
   return (
-    <header className="relative flex h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6 z-40">
+    <header className="relative z-40 flex h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6">
       {/* Grouped Menu Button and Logos */}
       <div className="flex items-center gap-1 sm:gap-2">
         <button
           className="relative z-50 rounded-lg p-2 text-text-main hover:bg-canvas md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
-          ref={buttonRef}
         >
-          {menuOpen ? <X /> : <Menu />}
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
         <div className="sm:hidden">
@@ -81,7 +67,9 @@ export default function DashboardHeader() {
           className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main transition-colors hover:bg-canvas"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent/20 text-primary">
-            {safeAvatarUrl ? (
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : safeAvatarUrl ? (
               <img
                 src={safeAvatarUrl}
                 alt={`${profile?.displayName || "User"}'s avatar`}
@@ -95,36 +83,35 @@ export default function DashboardHeader() {
             )}
           </div>
           <span className="hidden sm:inline">
-            {profile?.displayName || "Profile"}
+            {isLoading ? "Loading..." : profile?.displayName || "Profile"}
           </span>
         </Link>
 
-        <button
+        <Button
           onClick={leave}
-          className="rounded-lg p-2 text-text-muted hover:bg-canvas hover:text-primary transition-colors"
+          variant="outline"
+          size="icon"
           aria-label="Log out"
         >
           <LogOut size={18} />
-        </button>
+        </Button>
       </div>
 
+      {/* Mobile Drawer & Backdrop */}
       {menuOpen && (
         <>
-          {/* Backdrop/Overlay */}
           <div
             className="fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Sidebar Container */}
-
-          <div ref={sidebarRef} className="fixed left-0 top-16 z-50 md:hidden">
+          <aside className="fixed left-0 top-16 z-50 md:hidden">
             <Sidebar
               isAbsolute="h-[calc(100dvh-4rem)] w-[18rem] max-w-[85vw] shadow-lg overflow-y-auto bg-surface"
               onNavigate={() => setMenuOpen(false)}
             />
-          </div>
+          </aside>
         </>
       )}
     </header>
