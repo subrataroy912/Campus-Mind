@@ -1,21 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { safeParseStorageJson } from "@/utils/storage.js";
-
-const storedSession = safeParseStorageJson("campus-mind.session");
-
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    accessToken:
-      storedSession?.accessToken ??
-      storedSession?.token ??
-      safeParseStorageJson("accessToken") ??
-      null,
-    refreshToken:
-      storedSession?.refreshToken ??
-      safeParseStorageJson("refreshToken") ??
-      null,
-    user: storedSession?.user ?? storedSession ?? null,
+    // AuthProvider is the only place that reads persisted credentials. This
+    // prevents requests made during application startup from racing hydration.
+    accessToken: null,
+    refreshToken: null,
+    user: null,
   },
   reducers: {
     setCredentials: (state, action) => {

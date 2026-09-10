@@ -13,9 +13,13 @@ import { clearCredentials, setCredentials } from "../features/auth/authSlice.js"
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import {
+  hydratePersistedSession,
+  readPersistedSession,
+  SESSION_KEY,
+} from "./authSession.js";
 
 const AuthContext = createContext(null);
-const SESSION_KEY = "campus-mind.session";
 const PROFILE_FIELDS = {
   name: "displayName",
   firstName: "firstName",
@@ -65,10 +69,19 @@ function resetApiCache(dispatch) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser, removeUser] = useLocalStorage(SESSION_KEY, null);
+  // Read the single persisted record once. useLocalStorage owns subsequent
+  // writes, while this value makes the bootstrap source explicit.
+  const [persistedSession] = useState(readPersistedSession);
+  const [user, setUser, removeUser] = useLocalStorage(
+    SESSION_KEY,
+    persistedSession,
+  );
   const dispatch = useDispatch();
   const userRef = useRef(user);
-  const [authState, setAuthState] = useState({ status: "idle", error: null });
+  const [authState, setAuthState] = useState({
+    status: "hydrating",
+    error: null,
+  });
 
   useEffect(() => {
     userRef.current = user;
@@ -79,21 +92,38 @@ export function AuthProvider({ children }) {
 
     async function validateSession() {
       const currentUser = userRef.current;
-      const accessToken = currentUser?.accessToken;
-      const refreshToken = currentUser?.refreshToken;
+      const result = await hydratePersistedSession({
+        session: currentUser,
+        // Install credentials before the profile validation request. RTK Query
+        // must never read a token directly from storage while hydration runs.
+        installCredentials: (session) => dispatch(setCredentials(session)),
+        getProfile: getCurrentProfileRequest,
+      });
 
-      if (!accessToken) {
+      if (result.status === "failed") {
+        if (ignore) return;
+        if (result.expired) {
+          setUser(null);
+          dispatch(clearCredentials());
+          resetApiCache(dispatch);
+          setAuthState({
+            status: "failed",
+            error: new Error("Your session has expired. Please log in again."),
+          });
+        } else {
+          setAuthState({ status: "failed", error: result.error });
+        }
+        return;
+      }
+
+      if (!result.user) {
+        setAuthState({ status: "succeeded", error: null });
         return;
       }
 
       try {
-        setAuthState((current) => ({
-          ...current,
-          status: "checking",
-          error: null,
-        }));
-
-        const profile = await getCurrentProfileRequest();
+        const { accessToken, refreshToken } = currentUser;
+        const profile = result.profile;
         // A logout can happen while this request is in flight. Do not let its
         // response recreate the session after client-side cleanup.
         if (ignore || userRef.current !== currentUser) return;
@@ -117,20 +147,6 @@ export function AuthProvider({ children }) {
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
-
-        const status =
-          error?.status ?? error?.originalStatus ?? error?.response?.status;
-        if (status === 401 || status === 404) {
-          setUser(null);
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
-          setAuthState({
-            status: "failed",
-            error: new Error("Your session has expired. Please log in again."),
-          });
-          return;
-        }
-
         setAuthState({ status: "failed", error });
       }
     }
@@ -144,7 +160,9 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: Boolean(user),
+      // A persisted user is only authenticated after its profile has been
+      // validated and its credentials are installed in Redux.
+      isAuthenticated: authState.status === "succeeded" && Boolean(user?.accessToken),
       authStatus: authState.status,
       authError: authState.error,
       clearAuthError() {

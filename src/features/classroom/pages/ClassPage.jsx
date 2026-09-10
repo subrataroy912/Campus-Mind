@@ -105,6 +105,8 @@ function UpcomingPanel({ items }) {
   );
 }
 function Classwork({ teacher, classId }) {
+  const { authStatus } = useAuth();
+  const isHydrating = authStatus === "hydrating";
   const [expanded, setExpanded] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [draftSubmission, setDraftSubmission] = useState({});
@@ -127,11 +129,11 @@ function Classwork({ teacher, classId }) {
     isLoading,
     error,
   } = useGetCourseworkListQuery({ courseId: classId, page: 0, size: 20 }, {
-    skip: !classId,
+    skip: isHydrating || !classId,
   });
   const { data: expandedCoursework } = useGetCourseworkByIdQuery(
     { courseId: classId, courseworkId: expanded },
-    { skip: !classId || !expanded }
+    { skip: isHydrating || !classId || !expanded }
   );
   const [startSubmission] = useStartSubmissionMutation();
   const [requestUploadUrl] = useRequestUploadUrlMutation();
@@ -142,12 +144,12 @@ function Classwork({ teacher, classId }) {
   const coursework = useMemo(() => courseworkPage?.content ?? [], [courseworkPage]);
   const { data: submissionPage } = useGetSubmissionListQuery(
     { courseworkId: expanded, page: 0, size: 20 },
-    { skip: !classId || !expanded || !teacher }
+    { skip: isHydrating || !classId || !expanded || !teacher }
   );
   const submissionList = submissionPage?.content ?? [];
   const { data: courseworkComments = [] } = useGetCourseworkCommentsQuery(
     { courseId: classId, courseworkId: expanded },
-    { skip: !classId || !expanded }
+    { skip: isHydrating || !classId || !expanded }
   );
 
   const items = useMemo(() => {
@@ -795,8 +797,9 @@ function Members({ classroom, teacher }) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [inviteEnabled, setInviteEnabled] = useState(true);
+  const { authStatus } = useAuth();
   const { data: roster = [] } = useGetClassroomRosterQuery(classroom.id, {
-    skip: !classroom.id,
+    skip: authStatus === "hydrating" || !classroom.id,
   });
   const members = roster.filter((member) =>
     member.name.toLowerCase().includes(query.toLowerCase())
@@ -949,10 +952,10 @@ function Members({ classroom, teacher }) {
 function Grades({ teacher }) {
   const [selected, setSelected] = useState(null);
   const { classId } = useParams();
-  const { user } = useAuth();
+  const { user, authStatus } = useAuth();
   const { data: rows = [] } = useGetStudentGradebookQuery(
     { courseId: classId, studentId: user?.id },
-    { skip: teacher || !user?.id }
+    { skip: authStatus === "hydrating" || teacher || !user?.id }
   );
   const metrics = teacher
     ? [

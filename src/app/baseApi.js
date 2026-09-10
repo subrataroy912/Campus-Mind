@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setCredentials } from "@/features/auth/authSlice.js";
 import {
-  safeLocalStorageGet,
   safeParseStorageJson,
 } from "@/utils/storage.js";
 import { clearLocalAuthSession } from "@/context/authSession.js";
@@ -46,10 +45,7 @@ const rawBaseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { getState, endpoint }) => {
     headers.set("accept", "application/json");
     if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint)) {
-      const token =
-        getState().auth?.accessToken ||
-        safeParseStorageJson("campus-mind.session")?.accessToken ||
-        safeLocalStorageGet("accessToken");
+      const token = getState().auth?.accessToken;
       if (token) headers.set("authorization", `Bearer ${token}`);
     }
     return headers;
@@ -76,10 +72,7 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
     return result.error ? { error: normalizeError(result.error) } : result;
   }
 
-  const refreshToken =
-    api.getState().auth?.refreshToken ||
-    safeParseStorageJson("campus-mind.session")?.refreshToken ||
-    safeLocalStorageGet("refreshToken");
+  const refreshToken = api.getState().auth?.refreshToken;
   if (!refreshToken) {
     clearLocalAuthSession(api.dispatch);
     return { error: normalizeError(result.error) };

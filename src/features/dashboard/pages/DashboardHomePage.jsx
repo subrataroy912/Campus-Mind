@@ -8,9 +8,14 @@ import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function DashboardHomePage() {
-  const { data: profile, isLoading, error } = useGetCurrentProfileQuery();
+  const { authStatus } = useAuth();
+  const { data: profile, isLoading, error } = useGetCurrentProfileQuery(
+    undefined,
+    { skip: authStatus === "hydrating" },
+  );
   const {
     classrooms = [],
     exploreClassrooms = [],

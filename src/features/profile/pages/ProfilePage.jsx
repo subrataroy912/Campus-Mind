@@ -45,7 +45,7 @@ const profileFor = (user) => ({
 
 export default function ProfilePage() {
   const { userId } = useParams();
-  const { user: currentUser, updateProfile } = useAuth();
+  const { user: currentUser, updateProfile, authStatus } = useAuth();
   const dispatch = useDispatch();
   const { activeTab, isEditing, isSaving, preview } = useSelector(
     (state) => state.profile,
@@ -57,12 +57,16 @@ export default function ProfilePage() {
     data: currentProfile,
     isLoading: isCurrentProfileLoading,
     isError: isCurrentProfileError,
-  } = useGetCurrentProfileQuery(undefined, { skip: !isProfileOwner });
+  } = useGetCurrentProfileQuery(undefined, {
+    skip: authStatus === "hydrating" || !isProfileOwner,
+  });
   const {
     data: publicProfile,
     isLoading: isPublicProfileLoading,
     isError: isPublicProfileError,
-  } = useGetPublicProfileQuery(userId, { skip: !userId || isProfileOwner });
+  } = useGetPublicProfileQuery(userId, {
+    skip: authStatus === "hydrating" || !userId || isProfileOwner,
+  });
   const viewedUser = isProfileOwner
     ? currentProfile || currentUser
     : publicProfile;
