@@ -70,7 +70,13 @@ export async function register(details) {
 export async function getCurrentProfile() {
   return unwrapResponse(
     await store
-      .dispatch(profileApi.endpoints.getCurrentProfile.initiate())
+      // A cached /users/me response cannot validate credentials after a page
+      // reload. Always hit the server for the session bootstrap/OAuth flow.
+      .dispatch(
+        profileApi.endpoints.getCurrentProfile.initiate(undefined, {
+          forceRefetch: true,
+        })
+      )
       .unwrap()
   );
 }
@@ -84,13 +90,14 @@ export async function updateProfile(details) {
 }
 
 export async function logout({ onLocalTeardown } = {}) {
-  // Snapshot before clearing Redux so the best-effort request can still revoke
-  // the server session. Callers never need to handle or provide this token.
-  clearLocalAuthSession(store.dispatch, onLocalTeardown);
-
   try {
+    // Keep Redux credentials installed until the request is created so the
+    // interceptor can send its bearer token. Clearing them first made logout
+    // requests anonymous and left server-side sessions alive.
     await store.dispatch(authApi.endpoints.logout.initiate()).unwrap();
   } catch {
-    // Revocation is best-effort. The local session was already removed.
+    // Revocation is best-effort; local cleanup still happens below.
+  } finally {
+    clearLocalAuthSession(store.dispatch, onLocalTeardown);
   }
 }

@@ -14,7 +14,6 @@ import {
   logout as logoutRequest,
 } from "../features/auth/api/authService";
 import { useDispatch, useSelector, useStore } from "react-redux";
-import { clearCredentials } from "../features/auth/authSlice.js";
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
@@ -125,8 +124,7 @@ export function AuthProvider({ children }) {
       if (result.status === "failed") {
         if (ignore) return;
         if (result.expired) {
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
+          clearLocalAuthSession(dispatch);
           setAuthState({
             status: "failed",
             error: new Error("Your session has expired. Please log in again."),

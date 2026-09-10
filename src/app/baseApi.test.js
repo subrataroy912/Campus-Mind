@@ -120,6 +120,30 @@ describe("shouldForceLogout", () => {
     });
   });
 
+  it("accepts an access-token-only refresh response and keeps the existing refresh token", async () => {
+    const api = createApi();
+    vi.stubGlobal("fetch", vi.fn(async (request) => {
+      if (new URL(request.url).pathname.endsWith("/auth/refresh")) {
+        return jsonResponse({ data: { accessToken: "new-access" } });
+      }
+      return request.headers.get("authorization") === "Bearer new-access"
+        ? jsonResponse({ ok: true })
+        : jsonResponse({ error: "expired" }, 401);
+    }));
+
+    const result = await baseQueryWithRefresh({ url: "/protected" }, api, {});
+
+    expect(result.data).toEqual({ ok: true });
+    expect(api.getState().auth).toMatchObject({
+      accessToken: "new-access",
+      refreshToken: "old-refresh",
+    });
+    expect(JSON.parse(storage.get("campus-mind.session"))).toMatchObject({
+      accessToken: "new-access",
+      refreshToken: "old-refresh",
+    });
+  });
+
   it("signs out once and returns the same unauthenticated error to all refresh waiters", async () => {
     const api = createApi();
     vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ error: "invalid refresh" }, 401)));
