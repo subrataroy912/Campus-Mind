@@ -51,11 +51,17 @@ export function commitAuthSession(dispatch, record) {
 }
 
 export function mergeProfileIntoCurrentSession(getState, profile) {
-  if (typeof getState !== "function" || !isRecord(profile)) {
+  if (typeof getState !== "function") {
     throw new Error("Cannot merge an invalid profile response.");
   }
+
   const current = normalizeSession(getState()?.auth);
   if (!current) return null;
+
+  if (!isRecord(profile)) {
+    return current;
+  }
+
   const user = {
     ...current.user,
     ...profile,

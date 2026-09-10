@@ -48,6 +48,10 @@ function normalizeImageField(value) {
   return trimmed === "" ? null : trimmed;
 }
 
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 function toProfilePatch(formData, currentUser) {
   return Object.entries(PROFILE_FIELDS).reduce(
     (changes, [formField, apiField]) => {
@@ -143,6 +147,13 @@ export function AuthProvider({ children }) {
         // A logout can happen while this request is in flight. Do not let its
         // response recreate the session after client-side cleanup.
         if (ignore) return;
+        if (!isRecord(profile)) {
+          setAuthState({
+            status: "failed",
+            error: new Error("Your profile could not be loaded. Please sign in again."),
+          });
+          return;
+        }
         const nextSession = mergeProfileIntoCurrentSession(
           store.getState,
           profile
@@ -222,6 +233,16 @@ export function AuthProvider({ children }) {
           clearLocalAuthSession(dispatch);
           throw error;
         }
+
+        if (!isRecord(profile)) {
+          clearLocalAuthSession(dispatch);
+          const error = new Error(
+            "The social sign-in response did not include a valid profile."
+          );
+          setAuthState({ status: "failed", error });
+          throw error;
+        }
+
         const finalUser = {
           ...profile,
           avatar: profile?.avatar ?? profile?.avatarUrl ?? null,
@@ -323,6 +344,9 @@ export function AuthProvider({ children }) {
       },
       async hydrateProfile() {
         const profile = await getCurrentProfileRequest();
+        if (!isRecord(profile)) {
+          throw new Error("The authenticated profile was invalid or missing.");
+        }
         // This request can trigger a token refresh. Merge into the latest
         // session so neither the access nor refresh token can be reverted.
         const nextSession = mergeProfileIntoCurrentSession(

@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { getProtectedRouteState, hydratePersistedSession } from "./authSession.js";
+import {
+  getProtectedRouteState,
+  hydratePersistedSession,
+  mergeProfileIntoCurrentSession,
+} from "./authSession.js";
 
 const persistedSession = {
   accessToken: "access-token",
@@ -45,6 +49,21 @@ describe("persisted session bootstrap", () => {
     expect(result).toEqual({ status: "succeeded", user: null });
     expect(installCredentials).not.toHaveBeenCalled();
     expect(getProfile).not.toHaveBeenCalled();
+  });
+
+  it("keeps the current session when a profile payload is missing or invalid", () => {
+    const current = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: { id: "user-1", name: "Ada" },
+    };
+
+    expect(
+      mergeProfileIntoCurrentSession(() => ({ auth: current }), null)
+    ).toEqual(current);
+    expect(
+      mergeProfileIntoCurrentSession(() => ({ auth: current }), "bad-profile")
+    ).toEqual(current);
   });
 
   it("keeps a cold-start dashboard route in bootstrap until auth resolves", () => {
