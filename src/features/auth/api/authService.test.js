@@ -1,6 +1,37 @@
-import { describe, expect, it } from "vitest";
-import { normalizeAuthResponse } from "./authService.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { logout, normalizeAuthResponse } from "./authService.js";
 import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
+import { store } from "@/app/store.js";
+import { authApi } from "./authApi.js";
+import { setCredentials } from "../authSlice.js";
+import {
+  LEGACY_AUTH_STORAGE_KEYS,
+  clearLocalAuthSession,
+} from "@/context/authSession.js";
+
+function createStorage({ blocked = false } = {}) {
+  const values = new Map();
+  return {
+    getItem(key) {
+      if (blocked) throw new Error("storage blocked");
+      return values.get(key) ?? null;
+    },
+    removeItem(key) {
+      if (blocked) throw new Error("storage blocked");
+      values.delete(key);
+    },
+    setItem(key, value) {
+      if (blocked) throw new Error("storage blocked");
+      values.set(key, String(value));
+    },
+  };
+}
+
+afterEach(() => {
+  store.dispatch({ type: "auth/clearCredentials" });
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe("normalizeAuthResponse", () => {
   it("maps the flat backend credential response into auth state", () => {
@@ -73,5 +104,64 @@ describe("normalizeAuthResponse", () => {
     expect(parseOAuthCallback(new URLSearchParams({ user: "not-json" }))).toEqual({
       errorMessage: "The social sign-in response contained an invalid user profile.",
     });
+  });
+});
+
+describe("logout", () => {
+  it("clears local state without sending a request when the refresh token is missing", async () => {
+    const initiate = vi.spyOn(authApi.endpoints.logout, "initiate");
+
+    await expect(logout()).resolves.toBeUndefined();
+
+    expect(initiate).not.toHaveBeenCalled();
+    expect(store.getState().auth).toEqual({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+    });
+  });
+
+  it("keeps local teardown when the server logout request rejects", async () => {
+    store.dispatch(
+      setCredentials({
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        user: { id: "student-1" },
+      }),
+    );
+    const initiate = vi
+      .spyOn(authApi.endpoints.logout, "initiate")
+      .mockReturnValue(() => ({ unwrap: () => Promise.reject(new Error("offline")) }));
+
+    await expect(logout()).resolves.toBeUndefined();
+
+    expect(initiate).toHaveBeenCalledWith("refresh-token");
+    expect(store.getState().auth).toEqual({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+    });
+  });
+
+  it("removes the session, cache, and every supported legacy storage key", () => {
+    const localStorage = createStorage();
+    vi.stubGlobal("window", { localStorage });
+    localStorage.setItem("campus-mind.session", "session");
+    localStorage.setItem("campus-mind.api-cache.v1", "cache");
+    LEGACY_AUTH_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, "token"));
+
+    clearLocalAuthSession(store.dispatch);
+
+    expect(localStorage.getItem("campus-mind.session")).toBeNull();
+    expect(localStorage.getItem("campus-mind.api-cache.v1")).toBeNull();
+    LEGACY_AUTH_STORAGE_KEYS.forEach((key) => {
+      expect(localStorage.getItem(key)).toBeNull();
+    });
+  });
+
+  it("does not throw when browser storage is blocked", () => {
+    vi.stubGlobal("window", { localStorage: createStorage({ blocked: true }) });
+
+    expect(() => clearLocalAuthSession(store.dispatch)).not.toThrow();
   });
 });

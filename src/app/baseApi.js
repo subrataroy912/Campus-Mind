@@ -1,11 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { clearCredentials, setCredentials } from "@/features/auth/authSlice.js";
+import { setCredentials } from "@/features/auth/authSlice.js";
 import {
   safeLocalStorageGet,
-  safeLocalStorageRemove,
   safeParseStorageJson,
 } from "@/utils/storage.js";
-import { clearPersistedApiState } from "./apiCachePersistence.js";
+import { clearLocalAuthSession } from "@/context/authSession.js";
 
 /** The API always exposes versioned routes; callers configure only its origin. */
 export const apiBaseUrl = (() => {
@@ -24,15 +23,6 @@ export function shouldForceLogout(endpoint, statusCode) {
 }
 
 const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
-
-function clearAuthSession(api) {
-  api.dispatch(clearCredentials());
-  api.dispatch(baseApi.util.resetApiState());
-  clearPersistedApiState();
-  safeLocalStorageRemove("campus-mind.session");
-  safeLocalStorageRemove("accessToken");
-  safeLocalStorageRemove("refreshToken");
-}
 
 function normalizeError(error) {
   const status = error?.status;
@@ -91,7 +81,7 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
     safeParseStorageJson("campus-mind.session")?.refreshToken ||
     safeLocalStorageGet("refreshToken");
   if (!refreshToken) {
-    clearAuthSession(api);
+    clearLocalAuthSession(api.dispatch);
     return { error: normalizeError(result.error) };
   }
 
@@ -130,7 +120,7 @@ const baseQueryWithRefresh = async (args, api, extraOptions) => {
     return result.error ? { error: normalizeError(result.error) } : result;
   }
 
-  clearAuthSession(api);
+  clearLocalAuthSession(api.dispatch);
   return { error: normalizeError(result.error) };
 };
 
