@@ -6,6 +6,7 @@ import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
   createClassroom,
   requestCourseCoverUpload,
+  updateClassroom,
 } from "../api/classroomService.js";
 import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
@@ -87,10 +88,17 @@ export function useCreateClassForm() {
         if (!response.ok) throw new Error("Unable to upload the class cover.");
         coverUrl = (await response.json()).secure_url;
       }
-      const classroom = await createClassroom(user?.id, { ...form, coverUrl });
+      // The course API only accepts the cover URL on PATCH. Create first so the
+      // generated course ID is available for the signed Cloudinary result.
+      const classroom = await createClassroom(user?.id, form);
+      const savedClassroom = coverUrl
+        ? await updateClassroom(classroom.id, { coverUrl })
+        : classroom;
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
-      navigate(`/dashboard/classes/${classroom.id}`);
+      navigate(`/dashboard/classes/${savedClassroom.id}`, {
+        state: { enrollmentCode: classroom.code },
+      });
     } catch (error) {
       setSubmissionError(error.message || "Unable to create this class.");
     } finally {

@@ -23,10 +23,10 @@ export default function DashboardHomePage() {
   } = useDashboardData();
 
   const feedClasses = useMemo(() => {
-    const joinedCodes = new Set(classrooms.map((classroom) => classroom.code));
+    const joinedCourseIds = new Set(classrooms.map((classroom) => classroom.id));
 
     const available = exploreClassrooms.filter(
-      (classroom) => !joinedCodes.has(classroom.code),
+      (classroom) => !joinedCourseIds.has(classroom.id),
     );
 
     return [...available]

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import {
   ClipboardList,
   FileText,
@@ -1102,6 +1102,7 @@ export default function ClassPage() {
   const dispatch = useDispatch();
   const activeTab = useSelector((state) => state.classroom.activeTab);
   const { classId } = useParams();
+  const location = useLocation();
   const { classroom, error } = useClassroom(classId);
 
   if (classroom === undefined)
@@ -1113,7 +1114,7 @@ export default function ClassPage() {
   if (error)
     return (
       <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
-        Unable to load this class.
+        This class is unavailable.
       </div>
     );
   if (!classroom)
@@ -1130,10 +1131,14 @@ export default function ClassPage() {
     classroom.role === "Teacher" ||
     classroom.role === "Owner";
 
+  const classroomWithNewCode = classroom.code || !location.state?.enrollmentCode
+    ? classroom
+    : { ...classroom, code: location.state.enrollmentCode };
+
   return (
     <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <ClassHeader classroom={classroom} />
+        <ClassHeader classroom={classroomWithNewCode} />
         <ClassTabs
           active={activeTab}
           onChange={(nextTab) => dispatch(setClassroomTab(nextTab))}

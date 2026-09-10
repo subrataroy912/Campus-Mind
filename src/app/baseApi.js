@@ -45,6 +45,13 @@ export function shouldForceLogout(endpoint, statusCode) {
 }
 
 const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
+// Discovery is intentionally usable before sign-in. Keep this list scoped to
+// endpoint names rather than URL fragments so course-management calls always
+// retain their bearer token.
+const PUBLIC_DISCOVERY_ENDPOINTS = new Set([
+  "getExploreFeed",
+  "searchExploreCourses",
+]);
 const UNAUTHENTICATED_ERROR = Object.freeze({
   status: 401,
   data: { error: "Unauthenticated" },
@@ -76,7 +83,7 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: "include",
   prepareHeaders: (headers, { getState, endpoint }) => {
     prepareCookieHeaders(headers);
-    if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint)) {
+    if (!PUBLIC_AUTH_ENDPOINTS.has(endpoint) && !PUBLIC_DISCOVERY_ENDPOINTS.has(endpoint)) {
       const token = getState().auth?.accessToken;
       if (token) headers.set("authorization", `Bearer ${token}`);
     }
@@ -171,7 +178,8 @@ export const baseQueryWithRefresh = async (args, api, extraOptions) => {
   if (
     result.error?.status !== 401 ||
     extraOptions?.skipAuthRefresh ||
-    PUBLIC_AUTH_ENDPOINTS.has(api.endpoint)
+    PUBLIC_AUTH_ENDPOINTS.has(api.endpoint) ||
+    PUBLIC_DISCOVERY_ENDPOINTS.has(api.endpoint)
   ) {
     return result.error ? { error: normalizeError(result.error) } : result;
   }
