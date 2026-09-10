@@ -28,6 +28,11 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.user = null;
     },
+    forcedSignOut: (state) => {
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.user = null;
+    },
   },
 });
 

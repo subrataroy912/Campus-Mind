@@ -117,7 +117,8 @@ export async function hydratePersistedSession({ session, installCredentials, get
  */
 export function clearLocalAuthSession(dispatch, clearContextUser) {
   clearContextUser?.();
-  dispatch(clearCredentials());
+  // The root reducer consumes this event to clear every user-scoped slice.
+  dispatch(forcedSignOut());
   dispatch(baseApi.util.resetApiState());
   clearPersistedApiState();
   safeLocalStorageRemove(SESSION_KEY);

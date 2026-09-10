@@ -83,6 +83,12 @@ export function AuthProvider({ children }) {
     userRef.current = user;
   }, [user]);
 
+  useEffect(() => store.subscribe(() => {
+    if (store.getState().auth.accessToken || !userRef.current) return;
+    userRef.current = null;
+    setAuthState({ status: "failed", error: new Error("Your session has expired. Please log in again.") });
+  }), [store]);
+
   useEffect(() => {
     let ignore = false;
 
@@ -189,8 +195,7 @@ export function AuthProvider({ children }) {
         try {
           profile = hydratedUser || (await getCurrentProfileRequest());
         } catch (error) {
-          dispatch(clearCredentials());
-          resetApiCache(dispatch);
+          clearLocalAuthSession(dispatch);
           throw error;
         }
         const finalUser = {
