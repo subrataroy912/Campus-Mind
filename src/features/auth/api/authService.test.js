@@ -108,12 +108,12 @@ describe("normalizeAuthResponse", () => {
 });
 
 describe("logout", () => {
-  it("clears local state without sending a request when the refresh token is missing", async () => {
+  it("clears local state and requests cookie-backed logout without a refresh token body", async () => {
     const initiate = vi.spyOn(authApi.endpoints.logout, "initiate");
 
     await expect(logout()).resolves.toBeUndefined();
 
-    expect(initiate).not.toHaveBeenCalled();
+    expect(initiate).toHaveBeenCalledWith();
     expect(store.getState().auth).toEqual({
       accessToken: null,
       refreshToken: null,
@@ -135,7 +135,7 @@ describe("logout", () => {
 
     await expect(logout()).resolves.toBeUndefined();
 
-    expect(initiate).toHaveBeenCalledWith("refresh-token");
+    expect(initiate).toHaveBeenCalledWith();
     expect(store.getState().auth).toEqual({
       accessToken: null,
       refreshToken: null,

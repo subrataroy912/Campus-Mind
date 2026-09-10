@@ -18,10 +18,9 @@ export const authApi = baseApi.injectEndpoints({
     }),
     logout: builder.mutation({
       extraOptions: { skipAuthRefresh: true },
-      query: (refreshToken) => ({
+      query: () => ({
         url: "/auth/logout",
         method: "POST",
-        body: { refreshToken },
       }),
     }),
   }),
