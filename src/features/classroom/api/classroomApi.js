@@ -1,5 +1,16 @@
 import { baseApi } from "@/app/baseApi.js";
 
+const exploreTags = [
+  { type: "CourseFeed", id: "LIST" },
+  { type: "CourseSearch", id: "LIST" },
+  { type: "CourseRecommendations", id: "LIST" },
+];
+
+const discoveryFieldsChanged = (changes = {}) =>
+  ["title", "subject", "visibility", "status"].some((field) =>
+    Object.prototype.hasOwnProperty.call(changes, field)
+  );
+
 const normalizeCourse = (response = {}) => {
   const course = response?.data ?? response;
   const teacher = course.teacher ??
@@ -85,9 +96,10 @@ export const classroomApi = baseApi.injectEndpoints({
     createClassroom: builder.mutation({
       query: (details) => ({ url: "/courses", method: "POST", body: details }),
       transformResponse: normalizeCourse,
-      invalidatesTags: [
+      invalidatesTags: (_result, _error, details) => [
         { type: "Classrooms", id: "LIST" },
         { type: "Profile", id: "CURRENT" },
+        ...(details?.visibility === "PUBLIC" ? exploreTags : []),
       ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -110,9 +122,10 @@ export const classroomApi = baseApi.injectEndpoints({
         body: changes,
       }),
       transformResponse: normalizeCourse,
-      invalidatesTags: (result) => [
+      invalidatesTags: (result, _error, { changes = {} } = {}) => [
         { type: "Classrooms", id: "LIST" },
         { type: "Classrooms", id: result?.id ?? "unknown" },
+        ...(discoveryFieldsChanged(changes) ? exploreTags : []),
       ],
     }),
     deleteClassroom: builder.mutation({
@@ -120,6 +133,7 @@ export const classroomApi = baseApi.injectEndpoints({
       invalidatesTags: [
         { type: "Classrooms", id: "LIST" },
         { type: "Profile", id: "CURRENT" },
+        ...exploreTags,
       ],
     }),
     requestCourseCoverUpload: builder.mutation({
@@ -136,6 +150,7 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: "LIST" },
         { type: "Classrooms", id: result?.id ?? "unknown" },
         { type: "Profile", id: "CURRENT" },
+        ...exploreTags,
       ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
@@ -159,6 +174,7 @@ export const classroomApi = baseApi.injectEndpoints({
       invalidatesTags: [
         { type: "Classrooms", id: "LIST" },
         { type: "Profile", id: "CURRENT" },
+        ...exploreTags,
       ],
     }),
   }),

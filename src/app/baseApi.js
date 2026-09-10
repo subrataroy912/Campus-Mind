@@ -178,6 +178,9 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   tagTypes: [
     "Classrooms",
+    "CourseFeed",
+    "CourseSearch",
+    "CourseRecommendations",
     "Profile",
     "Notifications",
     "Coursework",

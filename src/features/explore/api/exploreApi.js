@@ -1,21 +1,21 @@
 import { baseApi } from "@/app/baseApi.js";
 
 const normalizeDiscoveryCourse = (course = {}) => ({
-  ...course,
-  id: course.courseId ?? course.id,
-  courseId: course.courseId ?? course.id,
+  courseId: course.courseId,
   title: course.title ?? "Untitled course",
-  subtitle: course.tags?.join(" · ") ?? "",
+  subject: course.subject ?? "",
   tags: Array.isArray(course.tags) ? course.tags : [],
-  memberCount: course.enrollmentCount ?? 0,
-  popularity: course.popularityScore ?? 0,
+  enrollmentCount: course.enrollmentCount ?? 0,
+  popularityScore: course.popularityScore ?? 0,
   lastActivityAt: course.lastActivityAt ?? null,
-  theme: "bg-primary",
 });
 
 export const normalizeDiscoveryPage = (response = {}) => {
   const page = response?.data ?? response;
-  return { ...page, content: (page?.content ?? []).map(normalizeDiscoveryCourse) };
+  return {
+    ...page,
+    content: (page?.content ?? []).map(normalizeDiscoveryCourse),
+  };
 };
 
 /** Public feed/search retain PageResponse metadata; recommendations are signed in. */
@@ -23,19 +23,33 @@ export const exploreApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getExploreFeed: builder.query({
       query: ({ subject, page = 0, size = 20 } = {}) => ({
-        url: "/explore/feed", params: { ...(subject ? { subject } : {}), page, size },
+        url: "/explore/feed",
+        params: { ...(subject ? { subject } : {}), page, size },
       }),
       transformResponse: normalizeDiscoveryPage,
+      providesTags: [{ type: "CourseFeed", id: "LIST" }],
     }),
     searchExploreCourses: builder.query({
-      query: ({ q, page = 0, size = 20 }) => ({ url: "/explore/courses/search", params: { q, page, size } }),
+      query: ({ q, page = 0, size = 20 }) => ({
+        url: "/explore/courses/search",
+        params: { q: q.trim(), page, size },
+      }),
       transformResponse: normalizeDiscoveryPage,
+      providesTags: [{ type: "CourseSearch", id: "LIST" }],
     }),
     getExploreRecommendations: builder.query({
-      query: ({ page = 0, size = 20 } = {}) => ({ url: "/explore/recommendations", params: { page, size } }),
+      query: ({ page = 0, size = 20 } = {}) => ({
+        url: "/explore/recommendations",
+        params: { page, size },
+      }),
       transformResponse: normalizeDiscoveryPage,
+      providesTags: [{ type: "CourseRecommendations", id: "LIST" }],
     }),
   }),
 });
 
-export const { useGetExploreFeedQuery, useSearchExploreCoursesQuery, useGetExploreRecommendationsQuery } = exploreApi;
+export const {
+  useGetExploreFeedQuery,
+  useSearchExploreCoursesQuery,
+  useGetExploreRecommendationsQuery,
+} = exploreApi;

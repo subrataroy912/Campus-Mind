@@ -12,10 +12,13 @@ import { useAuth } from "@/context/AuthContext.jsx";
 
 export default function DashboardHomePage() {
   const { authStatus } = useAuth();
-  const { data: profile, isLoading, error } = useGetCurrentProfileQuery(
-    undefined,
-    { skip: authStatus === "hydrating" },
-  );
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useGetCurrentProfileQuery(undefined, {
+    skip: authStatus === "hydrating",
+  });
   const {
     classrooms = [],
     exploreClassrooms = [],
@@ -23,15 +26,15 @@ export default function DashboardHomePage() {
   } = useDashboardData();
 
   const feedClasses = useMemo(() => {
-    const joinedCourseIds = new Set(classrooms.map((classroom) => classroom.id));
-
-    const available = exploreClassrooms.filter(
-      (classroom) => !joinedCourseIds.has(classroom.id),
+    const joinedCourseIds = new Set(
+      classrooms.map((classroom) => classroom.id)
     );
 
-    return [...available]
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, 3);
+    const available = exploreClassrooms.filter(
+      (classroom) => !joinedCourseIds.has(classroom.courseId)
+    );
+
+    return available.slice(0, 3);
   }, [classrooms, exploreClassrooms]);
 
   // Handle global loading states for both dashboard data and profile
@@ -125,7 +128,7 @@ export default function DashboardHomePage() {
               Find your next learning space
             </h2>
             <p className="mt-1 text-sm text-text-muted">
-              Explore popular classes and recommendations selected for you.
+              Explore public courses ranked by popularity and recent activity.
             </p>
           </div>
           <Link
@@ -146,18 +149,13 @@ export default function DashboardHomePage() {
         ) : feedClasses.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {feedClasses.map((classroom) => (
-              <div key={classroom.code || classroom.id}>
+              <div key={classroom.courseId}>
                 <ExploreClassCard classroom={classroom} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="mt-6">
-            <EmptyState
-              title="You are all caught up"
-              description="There are no more classes to show in this part of the feed."
-            />
-          </div>
+          <></>
         )}
       </section>
     </div>

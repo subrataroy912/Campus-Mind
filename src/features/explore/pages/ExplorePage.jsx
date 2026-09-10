@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -23,12 +23,30 @@ export default function ExplorePage() {
   const { user } = useAuth();
   const dispatch = useDispatch();
   const { tab, searchQuery, classFilter, personFilter } = useSelector(
-    (state) => state.explore,
+    (state) => state.explore
   );
-  const { classes, status } = useExploreData({ searchQuery, classFilter });
+  const [page, setPage] = useState(0);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  const {
+    classes,
+    page: pageData,
+    query,
+    status,
+  } = useExploreData({
+    searchQuery: debouncedSearchQuery,
+    classFilter,
+    page,
+  });
   const users = NO_USERS;
 
-  const subjectSet = useMemo(() => new Set(), []);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim());
+      setPage(0);
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [searchQuery]);
+
   const classSubjects = [
     ...new Set(classes.map((item) => item.subject).filter(Boolean)),
   ];
@@ -40,42 +58,18 @@ export default function ExplorePage() {
   ];
   const sharedPeople = useMemo(
     () => users.filter((person) => getSharedClassCount(user, person) > 0),
-    [user, users],
+    [user, users]
   );
   const generalPeople = users;
 
-  const filteredClasses = useMemo(
-    () =>
-      classes
-        .filter((item) =>
-          classFilter === "all" ||
-          classFilter === "popular" ||
-          classFilter === "recommended"
-            ? true
-            : item.subject === classFilter,
-        )
-        .filter((item) =>
-          matches(
-            `${item.title} ${item.subject} ${item.tags?.join(" ") || ""}`,
-            searchQuery,
-          ),
-        )
-        .sort(
-          (a, b) =>
-            (b.popularity || 0) - (a.popularity || 0) ||
-            Number(subjectSet.has(b.subject)) -
-              Number(subjectSet.has(a.subject)) ||
-            a.title.localeCompare(b.title),
-        ),
-    [classes, classFilter, searchQuery, subjectSet],
-  );
+  const filteredClasses = classes;
 
   const filteredPeople = useMemo(() => {
     const selfResult =
       searchQuery &&
       matches(
         `${user?.name || ""} ${user?.handle || ""} ${user?.department || ""}`,
-        searchQuery,
+        searchQuery
       )
         ? [user]
         : [];
@@ -91,20 +85,22 @@ export default function ExplorePage() {
       })
       .filter((person) =>
         matches(
-          `${person.name || ""} ${person.handle || ""} ${person.department || ""} ${person.batchYear || ""}`,
-          searchQuery,
-        ),
+          `${person.name || ""} ${person.handle || ""} ${
+            person.department || ""
+          } ${person.batchYear || ""}`,
+          searchQuery
+        )
       )
       .sort(
         (a, b) =>
           getSharedClassCount(user, b) - getSharedClassCount(user, a) ||
           Number(b.department === user?.department) -
             Number(a.department === user?.department) ||
-          (a.name || "").localeCompare(b.name || ""),
+          (a.name || "").localeCompare(b.name || "")
       );
   }, [generalPeople, personFilter, searchQuery, user]);
 
-  if (status === "loading")
+  if (query.isLoading && !pageData)
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -137,6 +133,7 @@ export default function ExplorePage() {
           value={searchQuery}
           onChange={(event) => dispatch(setSearchQuery(event.target.value))}
           placeholder="Search public courses"
+          aria-label="Search public courses"
           className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-primary"
         />
       </div>
@@ -163,19 +160,28 @@ export default function ExplorePage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <FilterButton
               active={classFilter === "all"}
-              onClick={() => dispatch(setClassFilter("all"))}
+              onClick={() => {
+                dispatch(setClassFilter("all"));
+                setPage(0);
+              }}
             >
               All
             </FilterButton>
             <FilterButton
               active={classFilter === "popular"}
-              onClick={() => dispatch(setClassFilter("popular"))}
+              onClick={() => {
+                dispatch(setClassFilter("popular"));
+                setPage(0);
+              }}
             >
               Popular
             </FilterButton>
             <FilterButton
               active={classFilter === "recommended"}
-              onClick={() => dispatch(setClassFilter("recommended"))}
+              onClick={() => {
+                dispatch(setClassFilter("recommended"));
+                setPage(0);
+              }}
             >
               Recommended
             </FilterButton>
@@ -183,7 +189,10 @@ export default function ExplorePage() {
               <FilterButton
                 key={subject}
                 active={classFilter === subject}
-                onClick={() => dispatch(setClassFilter(subject))}
+                onClick={() => {
+                  dispatch(setClassFilter(subject));
+                  setPage(0);
+                }}
               >
                 {subject}
               </FilterButton>
@@ -192,19 +201,47 @@ export default function ExplorePage() {
           {filteredClasses.length ? (
             <section className="mt-6">
               {classFilter === "recommended" && (
-                <h2 className="mb-3 text-lg font-semibold text-text-heading">Recommended courses</h2>
+                <h2 className="mb-3 text-lg font-semibold text-text-heading">
+                  Recommended courses
+                </h2>
               )}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredClasses.map((classroom) => (
-                  <ExploreClassCard key={classroom.id} classroom={classroom} />
+                  <ExploreClassCard
+                    key={classroom.courseId}
+                    classroom={classroom}
+                  />
                 ))}
               </div>
+              <ExplorePagination
+                page={pageData?.page ?? page}
+                totalPages={pageData?.totalPages ?? 0}
+                first={pageData?.first ?? true}
+                last={pageData?.last ?? true}
+                isFetching={query.isFetching}
+                onPrevious={() =>
+                  setPage((current) => Math.max(0, current - 1))
+                }
+                onNext={() => setPage((current) => current + 1)}
+              />
             </section>
           ) : (
             <div className="mt-6">
               <EmptyState
-                title="No classes found"
-                description="Try a different nonblank search or filter."
+                title={
+                  debouncedSearchQuery
+                    ? "No courses matched your search."
+                    : classFilter !== "all" &&
+                      classFilter !== "popular" &&
+                      classFilter !== "recommended"
+                    ? "No public courses found for this subject."
+                    : classFilter === "recommended"
+                    ? "No recommendations available."
+                    : "No public courses found."
+                }
+                description={
+                  query.isFetching ? "Loading courses..." : undefined
+                }
               />
             </div>
           )}
@@ -287,6 +324,39 @@ export default function ExplorePage() {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function ExplorePagination({
+  page,
+  totalPages,
+  first,
+  last,
+  isFetching,
+  onPrevious,
+  onNext,
+}) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div
+      className="mt-8 flex items-center justify-center gap-3"
+      aria-label="Course pagination"
+    >
+      <Button
+        variant="outline"
+        disabled={first || isFetching}
+        onClick={onPrevious}
+      >
+        Previous
+      </Button>
+      <span className="text-sm text-text-muted">
+        Page {page + 1} of {totalPages}
+      </span>
+      <Button variant="outline" disabled={last || isFetching} onClick={onNext}>
+        Next
+      </Button>
     </div>
   );
 }
