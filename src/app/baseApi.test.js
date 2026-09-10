@@ -7,13 +7,16 @@ const jsonResponse = (body, status = 200) =>
     headers: { "content-type": "application/json" },
   });
 
-function createApi({ accessToken = "expired-access" } = {}) {
+function createApi({
+  accessToken = "expired-access",
+  endpoint = "protectedResource",
+} = {}) {
   const state = { auth: { accessToken, user: { id: "user-1" } } };
   const actions = [];
   return {
     actions,
     getState: () => state,
-    endpoint: "protectedResource",
+    endpoint,
     dispatch: (action) => {
       actions.push(action);
       if (action.type === "auth/setAccessToken") {
@@ -185,5 +188,98 @@ describe("shouldForceLogout", () => {
     expect(result).toEqual({
       error: { status: 401, data: { error: "still unauthorized" } },
     });
+  });
+});
+
+describe("authenticated logout", () => {
+  it("sends the bearer header and includes cookies with a valid access token", async () => {
+    const api = createApi({
+      accessToken: "current-access",
+      endpoint: "logout",
+    });
+    const requests = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        requests.push(request);
+        return new Response(null, { status: 204 });
+      })
+    );
+
+    const result = await baseQueryWithRefresh(
+      { url: "/auth/logout", method: "POST" },
+      api,
+      {}
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].headers.get("authorization")).toMatch(/^Bearer .+/);
+    expect(requests[0].credentials).toBe("include");
+  });
+
+  it("refreshes once and retries logout with the new bearer header", async () => {
+    const api = createApi({
+      accessToken: "expired-access",
+      endpoint: "logout",
+    });
+    const requests = [];
+    const refreshRequests = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        requests.push(request);
+        const url = new URL(request.url);
+        if (url.pathname.endsWith("/auth/refresh")) {
+          refreshRequests.push(request);
+          return jsonResponse({ accessToken: "refreshed-access" });
+        }
+        if (requests.filter((item) => item.url === request.url).length === 1) {
+          return jsonResponse({ error: "expired" }, 401);
+        }
+        return new Response(null, { status: 204 });
+      })
+    );
+
+    const result = await baseQueryWithRefresh(
+      { url: "/auth/logout", method: "POST" },
+      api,
+      {}
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(refreshRequests).toHaveLength(1);
+    expect(requests).toHaveLength(3);
+    expect(requests[0].headers.get("authorization")).toMatch(/^Bearer .+/);
+    expect(requests[1].headers.get("authorization")).toBeNull();
+    expect(requests[2].headers.get("authorization")).toMatch(/^Bearer .+/);
+    expect(requests.every((request) => request.credentials === "include")).toBe(
+      true
+    );
+  });
+
+  it("stops after one failed refresh when no session remains", async () => {
+    const api = createApi({ accessToken: null, endpoint: "logout" });
+    const requests = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        requests.push(request);
+        return jsonResponse({ error: "unauthenticated" }, 401);
+      })
+    );
+
+    const result = await baseQueryWithRefresh(
+      { url: "/auth/logout", method: "POST" },
+      api,
+      {}
+    );
+
+    expect(result).toEqual({
+      error: { status: 401, data: { error: "Unauthenticated" } },
+    });
+    expect(requests).toHaveLength(2);
+    expect(requests[0].headers.get("authorization")).toBeNull();
+    expect(requests[1].headers.get("authorization")).toBeNull();
   });
 });

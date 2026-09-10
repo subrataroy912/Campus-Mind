@@ -43,12 +43,7 @@ export function shouldForceLogout(endpoint, statusCode) {
   );
 }
 
-const PUBLIC_AUTH_ENDPOINTS = new Set([
-  "login",
-  "register",
-  "refresh",
-  "logout",
-]);
+const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
 const PUBLIC_DISCOVERY_ENDPOINTS = new Set([
   "getExploreFeed",
   "searchExploreCourses",

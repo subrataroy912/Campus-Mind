@@ -17,9 +17,6 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
     logout: builder.mutation({
-      // Use the current bearer token to revoke the active server session.
-      // `skipAuthRefresh` keeps logout best-effort if that token has expired.
-      extraOptions: { skipAuthRefresh: true },
       query: () => ({
         url: "/auth/logout",
         method: "POST",
