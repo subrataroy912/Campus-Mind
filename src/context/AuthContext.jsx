@@ -217,7 +217,7 @@ export function AuthProvider({ children }) {
 
         let profile;
         try {
-          profile = hydratedUser || (await getCurrentProfileRequest());
+          profile = await getCurrentProfileRequest();
         } catch (error) {
           clearLocalAuthSession(dispatch);
           throw error;

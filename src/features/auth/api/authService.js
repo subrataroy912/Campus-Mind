@@ -8,7 +8,7 @@ const unwrapResponse = (response) => response?.data ?? response;
 export function normalizeAuthResponse(response) {
   const payload = unwrapResponse(response);
   const nestedUser = payload.user ?? {};
-  const user = {
+  const userFields = {
     ...nestedUser,
     id: payload.userId ?? nestedUser.id ?? payload.id ?? nestedUser.userId,
     name:
@@ -16,8 +16,7 @@ export function normalizeAuthResponse(response) {
       nestedUser.name ??
       nestedUser.displayName ??
       payload.name ??
-      nestedUser.fullName ??
-      "CampusMind member",
+      nestedUser.fullName,
     email: payload.email ?? nestedUser.email,
     avatar: payload.avatarUrl ?? nestedUser.avatar ?? nestedUser.avatarUrl,
     banner: payload.bannerUrl ?? nestedUser.banner ?? nestedUser.bannerUrl,
@@ -34,9 +33,10 @@ export function normalizeAuthResponse(response) {
     role: payload.role ?? nestedUser.role,
   };
 
-  Object.keys(user).forEach((key) => {
-    if (user[key] === undefined) delete user[key];
+  Object.keys(userFields).forEach((key) => {
+    if (userFields[key] === undefined) delete userFields[key];
   });
+  const user = Object.keys(userFields).length ? userFields : null;
 
   return {
     accessToken: payload.accessToken ?? payload.token ?? null,

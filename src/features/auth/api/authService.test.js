@@ -62,11 +62,24 @@ describe("normalizeAuthResponse", () => {
       normalizeAuthResponse({
         token: "access-token",
         user: { id: "user-1", name: "Campus Student" },
-      }),
+      })
     ).toEqual({
       accessToken: "access-token",
       refreshToken: null,
       user: { id: "user-1", name: "Campus Student" },
+    });
+  });
+
+  it("does not invent a user when an OAuth callback contains only tokens", () => {
+    expect(
+      normalizeAuthResponse({
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+      })
+    ).toEqual({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: null,
     });
   });
 
@@ -76,7 +89,7 @@ describe("normalizeAuthResponse", () => {
     };
 
     await expect(
-      handleOAuthFailure({ completeOAuth, errorMessage: "oauth_failed" }),
+      handleOAuthFailure({ completeOAuth, errorMessage: "oauth_failed" })
     ).resolves.toBeInstanceOf(Error);
   });
 
@@ -86,7 +99,7 @@ describe("normalizeAuthResponse", () => {
         access_token: "access-token",
         refresh_token: "refresh-token",
         user: JSON.stringify({ id: "user-1", name: "100% Campus Student" }),
-      }),
+      })
     );
 
     expect(callback).toEqual({
@@ -101,8 +114,11 @@ describe("normalizeAuthResponse", () => {
   });
 
   it("surfaces malformed user profiles as OAuth failures", () => {
-    expect(parseOAuthCallback(new URLSearchParams({ user: "not-json" }))).toEqual({
-      errorMessage: "The social sign-in response contained an invalid user profile.",
+    expect(
+      parseOAuthCallback(new URLSearchParams({ user: "not-json" }))
+    ).toEqual({
+      errorMessage:
+        "The social sign-in response contained an invalid user profile.",
     });
   });
 });
@@ -127,11 +143,13 @@ describe("logout", () => {
         accessToken: "access-token",
         refreshToken: "refresh-token",
         user: { id: "student-1" },
-      }),
+      })
     );
     const initiate = vi
       .spyOn(authApi.endpoints.logout, "initiate")
-      .mockReturnValue(() => ({ unwrap: () => Promise.reject(new Error("offline")) }));
+      .mockReturnValue(() => ({
+        unwrap: () => Promise.reject(new Error("offline")),
+      }));
 
     await expect(logout()).resolves.toBeUndefined();
 
@@ -148,7 +166,9 @@ describe("logout", () => {
     vi.stubGlobal("window", { localStorage });
     localStorage.setItem("campus-mind.session", "session");
     localStorage.setItem("campus-mind.api-cache.v1", "cache");
-    LEGACY_AUTH_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, "token"));
+    LEGACY_AUTH_STORAGE_KEYS.forEach((key) =>
+      localStorage.setItem(key, "token")
+    );
 
     clearLocalAuthSession(store.dispatch);
 
