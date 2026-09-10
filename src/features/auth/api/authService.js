@@ -1,8 +1,6 @@
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
-import { clearCredentials } from "../authSlice.js";
-import { clearPersistedApiState } from "@/app/apiCachePersistence.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
@@ -85,23 +83,9 @@ export async function updateProfile(details) {
 }
 
 export async function logout(refreshToken) {
-  //TODO : logout problem 
   const token = refreshToken ?? store.getState().auth?.refreshToken;
 
-  try {
-    if (token) {
-      await store.dispatch(authApi.endpoints.logout.initiate(token)).unwrap();
-    }
-  } catch (error) {
-    console.warn("Backend logout failed or token already invalid:", error);
-  } finally {
-    store.dispatch(clearCredentials());
-
-    store.dispatch(authApi.util.resetApiState());
-
-    clearPersistedApiState();
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+  if (token) {
+    await store.dispatch(authApi.endpoints.logout.initiate(token)).unwrap();
   }
 }
