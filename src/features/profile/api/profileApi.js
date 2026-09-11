@@ -40,8 +40,16 @@ export const profileApi = baseApi.injectEndpoints({
         const patchResult = dispatch(
           profileApi.util.updateQueryData("getCurrentProfile", undefined, (draft) => {
             Object.assign(draft, profile);
-            if (avatarFile) draft.avatar = URL.createObjectURL(avatarFile);
-            if (bannerFile) draft.bannerUrl = URL.createObjectURL(bannerFile);
+            if (avatarFile) {
+              const url = URL.createObjectURL(avatarFile);
+              draft.avatar = url;
+              draft.avatarUrl = url;
+            }
+            if (bannerFile) {
+              const url = URL.createObjectURL(bannerFile);
+              draft.banner = url;
+              draft.bannerUrl = url;
+            }
           })
         );
         try {

@@ -2,12 +2,14 @@ import { baseApi } from "@/app/baseApi.js";
 
 const normalizeDiscoveryCourse = (course = {}) => ({
   courseId: course.courseId,
+  id: course.courseId,
   title: course.title ?? "Untitled course",
   subject: course.subject ?? "",
   tags: Array.isArray(course.tags) ? course.tags : [],
   enrollmentCount: course.enrollmentCount ?? 0,
   popularityScore: course.popularityScore ?? 0,
   lastActivityAt: course.lastActivityAt ?? null,
+  accessType: (course.accessType || "OPEN").toUpperCase(),
 });
 
 export const normalizeDiscoveryPage = (response = {}) => {
@@ -67,6 +69,19 @@ export const exploreApi = baseApi.injectEndpoints({
       },
       providesTags: [{ type: "Profile", id: "LIST" }],
     }),
+    getPublicCourse: builder.query({
+      query: (courseId) => ({
+        url: `/explore/courses/${courseId}`,
+      }),
+      transformResponse: (response) => {
+        const payload = response?.data ?? response;
+        return {
+          ...payload,
+          accessType: (payload?.accessType || (payload?.visibility === "PUBLIC" ? "OPEN" : "CODE")).toUpperCase(),
+        };
+      },
+      providesTags: (_res, _err, courseId) => [{ type: "Classrooms", id: courseId }],
+    }),
   }),
 });
 
@@ -75,4 +90,5 @@ export const {
   useSearchExploreCoursesQuery,
   useGetExploreRecommendationsQuery,
   useGetExplorePeopleQuery,
+  useGetPublicCourseQuery,
 } = exploreApi;

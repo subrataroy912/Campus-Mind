@@ -228,7 +228,7 @@ export default function ProfilePage() {
         <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
           <ProfileDetails details={details} />
         </section>
-        {isOwner && profile.accountType === "STUDENT" && (
+        {isOwner && profile.accountType === "STUDENT" && !profile.canCreateCourses && (
           <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-1">
@@ -236,38 +236,23 @@ export default function ProfilePage() {
                   <h2 className="text-base font-semibold text-text-heading">
                     Course Creator Status
                   </h2>
-                  {profile.canCreateCourses ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                      <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" />
-                      Creator Privileges Active
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
-                      Standard Student
-                    </span>
-                  )}
+                  <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
+                    Standard Student
+                  </span>
                 </div>
                 <p className="text-sm text-text-muted">
-                  {profile.canCreateCourses
-                    ? "Your account has course-creation privileges unlocked. This setting is permanent and cannot be changed back."
-                    : "Unlock course-creation privileges to create and manage courses and study groups. Once enabled, this privilege cannot be changed or revoked."}
+                  Unlock course-creation privileges to create and manage courses and study groups. Once enabled, this privilege cannot be changed or revoked.
                 </p>
               </div>
               <div className="shrink-0">
-                {profile.canCreateCourses ? (
-                  <Button variant="outline" size="sm" disabled className="opacity-75 cursor-not-allowed">
-                    Privileges Unlocked
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={handleUnlockCreator}
-                    disabled={isUnlocking}
-                  >
-                    <Sparkles size={14} className="mr-1.5" />
-                    {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
-                  </Button>
-                )}
+                <Button
+                  size="sm"
+                  onClick={handleUnlockCreator}
+                  disabled={isUnlocking}
+                >
+                  <Sparkles size={14} className="mr-1.5" />
+                  {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
+                </Button>
               </div>
             </div>
           </section>

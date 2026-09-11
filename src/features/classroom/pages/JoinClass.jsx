@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useSearchParams } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Globe, Lock } from "lucide-react";
 import { joinClassroom } from "../api/classroomService";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { useGetPublicCourseQuery } from "@/features/explore/api/exploreApi.js";
 import {
   CLASS_CODE_LENGTH,
   formatClassCode,
@@ -17,6 +18,21 @@ export default function JoinClass() {
   const { user } = useAuth();
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
   const optionalCourseId = searchParams.get("courseId") || "";
+  const queryAccessType = (searchParams.get("accessType") || "").toUpperCase();
+
+  const { data: publicCourse } = useGetPublicCourseQuery(
+    optionalCourseId,
+    { skip: !optionalCourseId }
+  );
+
+  const effectiveAccessType =
+    queryAccessType ||
+    publicCourse?.accessType ||
+    (publicCourse?.visibility === "PUBLIC" ? "OPEN" : "CODE");
+
+  const isOpenCourse = Boolean(optionalCourseId && effectiveAccessType === "OPEN");
+  const isInviteCourse = Boolean(optionalCourseId && effectiveAccessType === "INVITE");
+
   const [code, setCode] = useState(() =>
     Array.from(
       { length: CLASS_CODE_LENGTH },
@@ -67,7 +83,7 @@ export default function JoinClass() {
     const classCode = formatClassCode(code);
     const hasCode = code.every(Boolean);
 
-    if (!hasCode && !optionalCourseId) {
+    if (!isOpenCourse && !hasCode && !optionalCourseId) {
       setStatus("incomplete");
       return;
     }
@@ -78,7 +94,7 @@ export default function JoinClass() {
       const joined = await joinClassroom(
         user?.id,
         optionalCourseId || undefined,
-        classCode || ""
+        isOpenCourse ? "" : classCode || ""
       );
       triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(joined);
@@ -113,86 +129,148 @@ export default function JoinClass() {
         {/* Header */}
         <div className="mb-6 text-center sm:mb-8">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-canvas sm:h-14 sm:w-14">
-            <svg
-              className="h-6 w-6 text-primary sm:h-7 sm:w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.8}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
+            {isOpenCourse ? (
+              <Globe className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
+            ) : isInviteCourse ? (
+              <Lock className="h-6 w-6 text-text-muted sm:h-7 sm:w-7" />
+            ) : (
+              <svg
+                className="h-6 w-6 text-primary sm:h-7 sm:w-7"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.8}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            )}
           </div>
           <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">
-            Join a class
+            {isOpenCourse
+              ? publicCourse?.title || "Join open class"
+              : isInviteCourse
+              ? "Invite-only class"
+              : "Join a class"}
           </h1>
           <p className="mt-1 text-sm text-text-muted sm:text-base">
-            {optionalCourseId
-              ? "Join via link, or enter a class code if you have one."
+            {isOpenCourse
+              ? "This class has open enrollment. Anyone can join — no class code required."
+              : isInviteCourse
+              ? "This class requires an invitation from the instructor to join."
+              : optionalCourseId
+              ? "Enter your class code to join this classroom."
               : "Ask your teacher for the class code, then enter it below."}
           </p>
         </div>
 
         <div className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-border sm:p-6 lg:p-8">
           {status !== "joined" && (
-            <form onSubmit={handleFindClass}>
-              <label className="mb-3 block text-center text-sm font-medium text-text-main">
-                Class code
-              </label>
-
-              <div className="flex items-center justify-center gap-1 sm:gap-2">
-                {code.map((char, i) => (
-                  <div key={i} className="flex items-center">
-                    <input
-                      ref={(el) => (inputsRef.current[i] = el)}
-                      type="text"
-                      inputMode="text"
-                      maxLength={1}
-                      value={char}
-                      onChange={(e) => handleChange(i, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(i, e)}
-                      onPaste={handlePaste}
-                      className="h-10 w-7 rounded-md border border-border text-center text-base font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-2 focus:ring-focus sm:h-12 sm:w-11 sm:rounded-lg sm:text-xl"
-                    />
-                    {i === 3 && (
-                      <span className="mx-0.5 text-border sm:mx-1.5">–</span>
-                    )}
+            isOpenCourse ? (
+              <form onSubmit={handleFindClass}>
+                <div className="rounded-xl border border-border/70 bg-canvas p-4 text-center">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    {publicCourse?.subject || "Open Course"}
                   </div>
-                ))}
-              </div>
+                  <div className="mt-1 text-base font-medium text-text-heading">
+                    {publicCourse?.title || "Classroom"}
+                  </div>
+                  {publicCourse?.instructorName && (
+                    <div className="mt-0.5 text-xs text-text-muted">
+                      Instructor: {publicCourse.instructorName}
+                    </div>
+                  )}
+                </div>
 
-              {status === "incomplete" && (
-                <p className="mt-3 text-center text-xs text-secondary">
-                  Enter all 8 characters of the class code.
-                </p>
-              )}
-              {status === "not-found" && (
-                <p className="mt-3 text-center text-xs text-secondary">
-                  No class found with that code. Check it and try again.
-                </p>
-              )}
-              {error && (
-                <p
-                  className="mt-3 text-center text-xs text-secondary"
-                  role="alert"
+                {error && (
+                  <p className="mt-3 text-center text-xs text-secondary" role="alert">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {error}
-                </p>
-              )}
+                  {status === "loading" ? "Joining class…" : "Join and Open Class"}
+                </button>
+              </form>
+            ) : isInviteCourse ? (
+              <div className="text-center py-2">
+                <div className="rounded-xl border border-border/70 bg-canvas p-4">
+                  <div className="text-sm font-medium text-text-heading">
+                    {publicCourse?.title || "Classroom"}
+                  </div>
+                  <p className="mt-2 text-xs text-text-muted">
+                    This classroom is invite-only. Please contact the teacher to be added to the student roster.
+                  </p>
+                </div>
+                <Link
+                  to="/dashboard"
+                  className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-main transition hover:bg-canvas"
+                >
+                  Back to dashboard
+                </Link>
+              </div>
+            ) : (
+              <form onSubmit={handleFindClass}>
+                <label className="mb-3 block text-center text-sm font-medium text-text-main">
+                  Class code
+                </label>
 
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {status === "loading" ? "Joining class…" : "Join class"}
-              </button>
+                <div className="flex items-center justify-center gap-1 sm:gap-2">
+                  {code.map((char, i) => (
+                    <div key={i} className="flex items-center">
+                      <input
+                        ref={(el) => (inputsRef.current[i] = el)}
+                        type="text"
+                        inputMode="text"
+                        maxLength={1}
+                        value={char}
+                        onChange={(e) => handleChange(i, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(i, e)}
+                        onPaste={handlePaste}
+                        className="h-10 w-7 rounded-md border border-border text-center text-base font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-2 focus:ring-focus sm:h-12 sm:w-11 sm:rounded-lg sm:text-xl"
+                      />
+                      {i === 3 && (
+                        <span className="mx-0.5 text-border sm:mx-1.5">–</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-            </form>
+                {status === "incomplete" && (
+                  <p className="mt-3 text-center text-xs text-secondary">
+                    Enter all 8 characters of the class code.
+                  </p>
+                )}
+                {status === "not-found" && (
+                  <p className="mt-3 text-center text-xs text-secondary">
+                    No class found with that code. Check it and try again.
+                  </p>
+                )}
+                {error && (
+                  <p
+                    className="mt-3 text-center text-xs text-secondary"
+                    role="alert"
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {status === "loading" ? "Joining class…" : "Join class"}
+                </button>
+              </form>
+            )
           )}
 
           {/* Joined confirmation */}

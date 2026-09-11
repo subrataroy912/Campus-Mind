@@ -6,6 +6,13 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Switch } from "@/components/ui/switch.jsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.jsx";
 import ProfileSection from "@/features/profile/components/ProfileSection.jsx";
 import { useSettings } from "../hooks/useSettings.js";
 import {
@@ -36,6 +43,9 @@ function SettingRow({ title, description, checked, onChange }) {
 
 export default function SettingsPage() {
   const { user, logout, unlockCreator } = useAuth();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [unlockMessage, setUnlockMessage] = useState("");
   const [unlockError, setUnlockError] = useState("");
@@ -48,7 +58,6 @@ export default function SettingsPage() {
     error: themeError,
     updateTheme,
   } = useSettings();
-  const navigate = useNavigate();
 
   const handleUnlockCreator = async () => {
     setIsUnlocking(true);
@@ -87,8 +96,15 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/auth/login", { replace: true });
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate("/auth/login", { replace: true });
+    } catch (err) {
+      console.error("Logout failed:", err);
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
+    }
   };
 
   useEffect(() => {
@@ -163,7 +179,7 @@ export default function SettingsPage() {
               </div>
             </ProfileSection>
 
-            {user?.accountType === "STUDENT" && (
+            {user?.accountType === "STUDENT" && !user?.canCreateCourses && (
               <ProfileSection
                 title="Course Creation Privileges"
                 description="Manage your creator permissions to set up classes and study groups."
@@ -174,34 +190,23 @@ export default function SettingsPage() {
                       <span className="text-sm font-semibold text-text-heading">
                         Creator Status
                       </span>
-                      {user?.canCreateCourses ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                          <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" />
-                          Unlocked
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-xs font-medium text-secondary">
-                          Standard Student
-                        </span>
-                      )}
+                      <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-xs font-medium text-secondary">
+                        Standard Student
+                      </span>
                     </div>
                     <p className="mt-1 text-xs text-text-muted sm:text-sm">
-                      {user?.canCreateCourses
-                        ? "You have full privileges to create and manage courses and study groups."
-                        : "Unlock course-creation privileges to build classes and host learning groups."}
+                      Unlock course-creation privileges to build classes and host learning groups.
                     </p>
                   </div>
-                  {!user?.canCreateCourses && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleUnlockCreator}
-                      disabled={isUnlocking}
-                      className="shrink-0 bg-primary hover:bg-primary-hover text-surface font-medium"
-                    >
-                      {isUnlocking ? "Unlocking…" : "Unlock privileges"}
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleUnlockCreator}
+                    disabled={isUnlocking}
+                    className="shrink-0 bg-primary hover:bg-primary-hover text-surface font-medium"
+                  >
+                    {isUnlocking ? "Unlocking…" : "Unlock privileges"}
+                  </Button>
                 </div>
                 {unlockMessage && (
                   <p className="mt-2 text-xs font-medium text-success">
@@ -241,42 +246,43 @@ export default function SettingsPage() {
                 />
               </div>
             </ProfileSection>
+          </div>
+        </Card>
 
+        {/* Theme Settings Card */}
+        <Card className="p-5 sm:p-6">
+          <div className="space-y-6">
             <ProfileSection
               title="Appearance"
-              description="Pick how CampusMind looks on this device."
+              description="Customize your interface theme."
             >
-              <div className="flex gap-3">
-                <button
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
                   type="button"
+                  variant={theme === "light" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => handleThemeChange("light")}
-                  disabled={isThemeLoading || isThemeSaving}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                    theme === "light"
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-text-main hover:bg-canvas"
-                  }`}
+                  disabled={isThemeSaving || isThemeLoading}
+                  className="gap-2"
                 >
-                  <Sun size={18} aria-hidden="true" />
+                  <Sun size={16} aria-hidden="true" />
                   Light
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant={theme === "dark" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => handleThemeChange("dark")}
-                  disabled={isThemeLoading || isThemeSaving}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                    theme === "dark"
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-text-main hover:bg-canvas"
-                  }`}
+                  disabled={isThemeSaving || isThemeLoading}
+                  className="gap-2"
                 >
-                  <Moon size={18} aria-hidden="true" />
+                  <Moon size={16} aria-hidden="true" />
                   Dark
-                </button>
+                </Button>
               </div>
               {themeError && (
-                <p className="mt-3 text-xs text-destructive" role="alert">
-                  Unable to save your theme preference.
+                <p className="mt-2 text-xs font-medium text-destructive">
+                  {themeError}
                 </p>
               )}
               <p className="mt-3 text-xs text-text-muted">
@@ -294,7 +300,7 @@ export default function SettingsPage() {
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="gap-2"
               >
                 <LogOut size={16} aria-hidden="true" />
@@ -304,6 +310,38 @@ export default function SettingsPage() {
           </ProfileSection>
         </Card>
       </div>
+
+      {/* Confirmation Dialog for Logout */}
+      <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <DialogContent className="max-w-md bg-surface p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-text-heading">
+              Confirm Log Out
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-sm text-text-muted">
+              Are you sure you want to log out of your CampusMind account? You will need your credentials to log back in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isLoggingOut}
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={isLoggingOut}
+              onClick={handleLogout}
+            >
+              {isLoggingOut ? "Logging out…" : "Yes, Log Out"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,22 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { LogOut, Menu, X, Loader2 } from "lucide-react";
+import { Link } from "react-router";
+import { Menu, X, Loader2 } from "lucide-react";
 
 import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
 import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { logoutFromHeader } from "./headerLogout.js";
 
 export default function DashboardHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { logout, authStatus } = useAuth();
+  const { authStatus } = useAuth();
   const { data: profile, isLoading } = useGetCurrentProfileQuery(undefined, {
     skip: authStatus === "hydrating",
   });
-  const navigate = useNavigate();
 
   const safeAvatarUrl =
     typeof profile?.avatarUrl === "string" && profile.avatarUrl.trim()
@@ -30,14 +27,6 @@ export default function DashboardHeader() {
       document.body.style.overflow = "unset";
     };
   }, [menuOpen]);
-
-  const leave = async () => {
-    try {
-      await logoutFromHeader(logout, navigate);
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
 
   return (
     <header className="relative z-40 flex h-16 items-center justify-between gap-1 border-b border-border bg-surface px-2 sm:gap-3 sm:px-6">
@@ -86,15 +75,6 @@ export default function DashboardHeader() {
             {isLoading ? "Loading..." : profile?.displayName || "Profile"}
           </span>
         </Link>
-
-        <Button
-          onClick={leave}
-          variant="outline"
-          size="icon"
-          aria-label="Log out"
-        >
-          <LogOut size={18} />
-        </Button>
       </div>
 
       {/* Mobile Drawer & Backdrop */}

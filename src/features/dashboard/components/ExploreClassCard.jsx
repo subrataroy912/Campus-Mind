@@ -1,32 +1,92 @@
-import { Link } from "react-router";
-import { Clock3, Users } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { Clock3, Globe, KeyRound, Lock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge.jsx";
 import { formatDisplayText } from "@/utils/textFormat.js";
+import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { joinClassroom } from "@/features/classroom/api/classroomService.js";
+import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 
 export default function ExploreClassCard({ classroom }) {
+  const { classrooms = [] } = useDashboardData();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const activity = classroom.lastActivityAt
     ? new Date(classroom.lastActivityAt).toLocaleDateString()
     : "No recent activity";
 
-  const joinTarget = classroom.code
-    ? `/dashboard/class/join?code=${encodeURIComponent(classroom.code)}`
-    : `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}`;
+  const isEnrolled = classrooms.some(
+    (c) => c.id === classroom.courseId || c.courseId === classroom.courseId
+  );
+  const accessType = (classroom.accessType || "OPEN").toUpperCase();
+
+  let target;
+  if (isEnrolled) {
+    target = `/dashboard/classes/${classroom.courseId}`;
+  } else if (accessType === "OPEN") {
+    target = `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=open`;
+  } else if (accessType === "INVITE") {
+    target = `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=invite`;
+  } else {
+    target = classroom.code
+      ? `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=code&code=${encodeURIComponent(classroom.code)}`
+      : `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=code`;
+  }
+
+  const handleClick = async (e) => {
+    if (isEnrolled) {
+      return;
+    }
+    if (accessType === "OPEN") {
+      e.preventDefault();
+      try {
+        await joinClassroom(user?.id, classroom.courseId);
+        triggerLifecycleRefresh(dispatch, "course-created");
+        navigate(`/dashboard/classes/${classroom.courseId}`);
+      } catch {
+        navigate(`/dashboard/classes/${classroom.courseId}`);
+      }
+    }
+  };
 
   return (
     <Link
-      to={joinTarget}
+      to={target}
+      onClick={handleClick}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
     >
       <div className="h-2 w-full bg-primary" />
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <Badge
-              variant="secondary"
-              className="mb-3 bg-canvas text-text-main border-border"
-            >
-              {formatDisplayText(classroom.subject || "General")}
-            </Badge>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="bg-canvas text-text-main border-border"
+              >
+                {formatDisplayText(classroom.subject || "General")}
+              </Badge>
+              {isEnrolled ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
+                  Enrolled
+                </span>
+              ) : accessType === "OPEN" ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                  <Globe size={11} /> Open
+                </span>
+              ) : accessType === "INVITE" ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted">
+                  <Lock size={11} /> Invite only
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted">
+                  <KeyRound size={11} /> Code required
+                </span>
+              )}
+            </div>
             <h3 className="text-lg font-bold text-text-heading line-clamp-1">
               {classroom.title}
             </h3>

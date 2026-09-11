@@ -31,6 +31,9 @@ export function toProfilePatch(formData, currentUser) {
       ) {
         return changes;
       }
+      if (formData[formField] === undefined) {
+        return changes;
+      }
       const value = normalizeImageField(formData[formField]);
       const currentValue = normalizeImageField(
         currentUser?.[apiField] ?? currentUser?.[formField]
