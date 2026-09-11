@@ -7,7 +7,7 @@ import {
   safeLocalStorageRemove,
   safeLocalStorageSet,
 } from "../utils/storage.js";
-import { getPersistedUserId, SESSION_KEY } from "../utils/sessionStorage.js";
+import { SESSION_KEY } from "../utils/sessionStorage.js";
 
 export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken"];
 const LEGACY_MIGRATION_KEY = "campus-mind.migrated-legacy-auth-keys";
@@ -123,5 +123,3 @@ export function clearLocalAuthSession(dispatch, clearContextUser, reason) {
     safeLocalStorageSet(LEGACY_MIGRATION_KEY, "1");
   }
 }
-
-export { getPersistedUserId, SESSION_KEY };

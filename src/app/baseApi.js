@@ -151,9 +151,7 @@ export function createBaseQueryWithRefresh() {
         return token;
       })
       .catch((error) => {
-        if (generation === refreshGeneration) {
-          clearLocalAuthSession(api.dispatch);
-        }
+        clearLocalAuthSession(api.dispatch);
         throw error?.status === 401 ? error : unauthenticatedError();
       })
       .finally(() => {
@@ -181,6 +179,7 @@ export function createBaseQueryWithRefresh() {
     if (!validToken(accessToken) && api.endpoint !== "logout") {
       return { error: unauthenticatedError() };
     }
+    const requestRefreshGeneration = refreshGeneration;
     try {
       await getRefreshPromise(api, extraOptions);
     } catch {
@@ -188,7 +187,7 @@ export function createBaseQueryWithRefresh() {
     }
 
     if (
-      refreshGeneration !== 0 &&
+      refreshGeneration !== requestRefreshGeneration &&
       !validToken(api.getState().auth?.accessToken)
     ) {
       return { error: unauthenticatedError() };

@@ -1,3 +1,4 @@
+// Dispatch is the stable identity shared by a store's API calls and teardown.
 const invalidators = new WeakMap();
 
 export function registerRefreshInvalidator(dispatch, invalidate) {

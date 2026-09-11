@@ -129,7 +129,7 @@ describe("shouldForceLogout", () => {
     expect(storage.get("campus-mind.session") ?? null).toBeNull();
   });
 
-  it("does not retry a request after logout invalidates its in-flight refresh", async () => {
+  it("rejects a stale refresh result after logout invalidates the request", async () => {
     const api = createApi();
     const query = createBaseQueryWithRefresh();
     let releaseRefresh;
@@ -160,6 +160,7 @@ describe("shouldForceLogout", () => {
     await expect(pending).resolves.toEqual({
       error: { status: 401, data: { error: "Unauthenticated" } },
     });
+    expect(api.getState().auth.accessToken).toBeNull();
     expect(
       requests.filter((request) => request.url.endsWith("/protected"))
     ).toHaveLength(1);
