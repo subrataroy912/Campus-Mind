@@ -74,7 +74,7 @@ function LoginPage() {
             setStorageWarning(true);
           }
         }
-      } catch (err) {
+      } catch {
         setStorageWarning(true);
       }
     }
