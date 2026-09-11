@@ -80,8 +80,8 @@ function LoginPage() {
           role="alert"
         >
           <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
-          <div className="flex-1 text-xs leading-relaxed text-amber-200/90">
-            <span className="font-semibold text-amber-300">Notice: </span>
+          <div className="flex-1 text-xs leading-relaxed text-black">
+            <span className="font-semibold text-black">Notice: </span>
             Please enable 3rd-party cookies in your browser settings; otherwise, your login session will not stay active.
           </div>
           <button
