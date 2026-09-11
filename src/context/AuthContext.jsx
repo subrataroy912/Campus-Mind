@@ -111,8 +111,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let ignore = false;
-
-    if (!requiresSessionRestore) {
+    const hasAccessToken = Boolean(session.accessToken);
+    if (!requiresSessionRestore || hasAccessToken) {
       setAuthState({ status: "succeeded", error: null });
       return () => {
         ignore = true;
@@ -167,7 +167,7 @@ export function AuthProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [dispatch, requiresSessionRestore, store]);
+  }, [dispatch, requiresSessionRestore, session.accessToken, store]);
 
   const value = useMemo(
     () => ({
