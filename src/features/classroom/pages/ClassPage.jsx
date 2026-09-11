@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams } from "react-router";
 import {
@@ -34,6 +34,8 @@ import {
   useGetCourseworkListQuery,
   useGetSubmissionListQuery,
   useGetStudentGradebookQuery,
+  useGetTeacherGradebookQuery,
+  useGetCourseAnalyticsSummaryQuery,
   useGradeSubmissionMutation,
   useStartSubmissionMutation,
 } from "../api/courseworkApi.js";
@@ -415,14 +417,20 @@ function Classwork({ teacher, classId }) {
         ) : (
           groups.map((group) => {
             const groupItems = items.filter((x) => {
-              const normalized = x?.dueDate ?? x?.dueAt ?? "";
-              if (group === "Past") {
-                return (
-                  String(normalized).toLowerCase().includes("aug") ||
-                  String(normalized).toLowerCase().includes("sep")
-                );
+              if (x?.temporalStatus) {
+                if (group === "This week") return x.temporalStatus === "THIS_WEEK";
+                if (group === "Upcoming") return x.temporalStatus === "UPCOMING" || x.temporalStatus === "NO_DUE_DATE";
+                if (group === "Past") return x.temporalStatus === "PAST";
               }
-              return true;
+              const due = x?.dueAt ? new Date(x.dueAt) : null;
+              if (!due || isNaN(due.getTime())) {
+                return group === "Upcoming";
+              }
+              const now = new Date();
+              if (group === "Past") return due < now;
+              const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+              if (group === "This week") return due >= now && due <= nextWeek;
+              return due > nextWeek;
             });
 
             return groupItems.length ? (
@@ -978,20 +986,52 @@ function Grades({ teacher }) {
   const [selected, setSelected] = useState(null);
   const { classId } = useParams();
   const { user, authStatus } = useAuth();
-  const { data: rows = [] } = useGetStudentGradebookQuery(
+  const { data: studentRows = [] } = useGetStudentGradebookQuery(
     { courseId: classId, studentId: user?.id },
     { skip: authStatus === "hydrating" || teacher || !user?.id }
   );
+  const { data: teacherRows = [] } = useGetTeacherGradebookQuery(classId, {
+    skip: authStatus === "hydrating" || !teacher || !classId,
+  });
+  const { data: summary } = useGetCourseAnalyticsSummaryQuery(classId, {
+    skip: authStatus === "hydrating" || !classId,
+  });
+
+  const rows = teacher ? teacherRows : studentRows;
+
   const metrics = teacher
     ? [
-        ["Class average", "89%"],
-        ["Missing submissions", "3"],
-        ["Graded this week", "18"],
+        [
+          "Class average",
+          summary?.averageScore != null
+            ? `${Math.round(summary.averageScore)}%`
+            : "—",
+        ],
+        ["Missing submissions", String(summary?.missingCount ?? 0)],
+        ["Submissions received", String(summary?.submissionCount ?? 0)],
       ]
     : [
-        ["Your grade", "90%"],
-        ["Assignments graded", "1 of 4"],
-        ["Missing submissions", "1"],
+        [
+          "Your grade",
+          studentRows.some((r) => r.score != null && r.outOf)
+            ? `${Math.round(
+                (studentRows.reduce((acc, r) => acc + (r.score ?? 0), 0) /
+                  Math.max(
+                    1,
+                    studentRows.reduce((acc, r) => acc + (r.outOf ?? 0), 0)
+                  )) *
+                  100
+              )}%`
+            : "—",
+        ],
+        [
+          "Assignments graded",
+          `${studentRows.filter((r) => r.score != null).length} of ${studentRows.length}`,
+        ],
+        [
+          "Missing submissions",
+          String(studentRows.filter((r) => r.status === "missing").length),
+        ],
       ];
   return (
     <section className="mt-4 space-y-4">
@@ -1047,8 +1087,8 @@ function Grades({ teacher }) {
             <tbody className="divide-y divide-border">
               {teacher
                 ? rows.map((row) => (
-                    <>
-                      <tr key={row.id}>
+                    <Fragment key={row.id}>
+                      <tr>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <ClassroomAvatar
@@ -1087,12 +1127,11 @@ function Grades({ teacher }) {
                             colSpan="4"
                             className="bg-canvas/50 px-4 py-3 text-sm text-text-muted"
                           >
-                            Per-assignment breakdown for {row.studentName}: Quiz
-                            1 — 18/20 · Homework set 4 — awaiting submission.
+                            Breakdown for {row.studentName}: {row.submittedCount ?? 0} assignments submitted · {row.missingCount ?? 0} missing.
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))
                 : rows.map((row) => (
                     <tr key={row.id}>

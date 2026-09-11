@@ -1,6 +1,6 @@
 const classIds = (user) => [
-  ...(user?.created_class_ids || []),
-  ...(user?.joined_class_ids || []),
+  ...(user?.created_class_ids || user?.createdClassIds || user?.createdCourseIds || []),
+  ...(user?.joined_class_ids || user?.joinedClassIds || user?.enrolledCourseIds || []),
 ];
 
 export function getSharedClassIds(userA, userB) {

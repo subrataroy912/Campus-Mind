@@ -125,6 +125,23 @@ export const courseworkApi = baseApi.injectEndpoints({
       transformResponse: normalizeGradebook,
       providesTags: (_result, _error, { courseId, studentId }) => [{ type: "Coursework", id: `GRADEBOOK-${courseId}-${studentId}` }],
     }),
+    getTeacherGradebook: builder.query({
+      query: (courseId) => `/analytics/courses/${courseId}/gradebook`,
+      transformResponse: (response) => {
+        const list = Array.isArray(response) ? response : response?.data ?? [];
+        return list.map((item) => ({
+          ...item,
+          id: item.studentId ?? item.id,
+          studentName: item.studentName || "Student",
+          avatar: item.avatarUrl ?? item.avatar ?? null,
+          average: item.averageScore != null ? `${Math.round(item.averageScore)}%` : "—",
+          missingCount: item.missingCount ?? 0,
+        }));
+      },
+      providesTags: (_result, _error, courseId) => [
+        { type: "Coursework", id: `TEACHER-GRADEBOOK-${courseId}` },
+      ],
+    }),
     getCourseAnalyticsSummary: builder.query({
       query: (courseId) => `/analytics/courses/${courseId}/summary`,
     }),
@@ -215,6 +232,7 @@ export const {
   useGetSubmissionListQuery,
   useGetMySubmissionQuery,
   useGetStudentGradebookQuery,
+  useGetTeacherGradebookQuery,
   useGetCourseAnalyticsSummaryQuery,
   useStartSubmissionMutation,
   useSaveSubmissionMutation,
