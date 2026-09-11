@@ -4,20 +4,31 @@ import { classroomApi } from "./classroomApi.js";
 const unwrapResponse = (response) => response?.data ?? response;
 
 export function mapCreateClassPayload(details = {}) {
+  const rawAccessType = (details.accessType || "").toUpperCase();
+  const accessType = ["INVITE", "CODE", "OPEN"].includes(rawAccessType)
+    ? rawAccessType
+    : details.visibility === "PUBLIC"
+    ? "OPEN"
+    : "CODE";
+
   return {
     title: details.title ?? details.name ?? details.className ?? "",
     section: details.section ?? "",
     subject: details.subject ?? "",
     description: details.description ?? "",
+    accessType,
     visibility:
       details.visibility ??
-      (details.accessType === "open" ? "PUBLIC" : "PRIVATE"),
+      (accessType === "OPEN" ? "PUBLIC" : "PRIVATE"),
   };
 }
 
 export function mapJoinClassPayload({ courseId, code, classCode } = {}) {
   const normalizedCode = formatClassCodeFromInput(code ?? classCode ?? "");
-  const payload = { code: normalizedCode };
+  const payload = {};
+  if (normalizedCode) {
+    payload.code = normalizedCode;
+  }
   if (courseId) {
     payload.courseId = courseId;
   }
@@ -73,9 +84,16 @@ export async function updateClassroom(courseId, changes) {
 }
 
 export async function joinClassroom(_userId, courseIdOrCode, maybeCode) {
-  let courseId = courseIdOrCode;
-  let code = maybeCode;
-  if (maybeCode === undefined) {
+  let courseId;
+  let code;
+
+  if (courseIdOrCode && typeof courseIdOrCode === "object") {
+    courseId = courseIdOrCode.courseId;
+    code = courseIdOrCode.code ?? courseIdOrCode.classCode;
+  } else if (maybeCode !== undefined) {
+    courseId = courseIdOrCode;
+    code = maybeCode;
+  } else {
     code = courseIdOrCode;
     courseId = undefined;
   }

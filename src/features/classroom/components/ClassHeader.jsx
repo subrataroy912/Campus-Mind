@@ -11,9 +11,19 @@ export default function ClassHeader({ classroom }) {
       ? classroom.teacher
       : classroom?.teacher?.name || classroom?.instructor?.name || "CampusMind teacher";
 
+  const accessType = (
+    classroom?.accessType ||
+    (classroom?.visibility === "PUBLIC" ? "open" : "code")
+  ).toLowerCase();
+
   const handleCopy = () => {
-    if (!classroom?.code) return;
-    navigator.clipboard?.writeText(classroom.code).catch(() => {});
+    let textToCopy = classroom?.code || "";
+    if (accessType === "open") {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      textToCopy = `${origin}/join?courseId=${classroom?.id || ""}`;
+    }
+    if (!textToCopy) return;
+    navigator.clipboard?.writeText(textToCopy).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -95,24 +105,46 @@ export default function ClassHeader({ classroom }) {
           </div>
         </div>
 
-        {/* Action Button (Invite Code) */}
-        <button
-          onClick={handleCopy}
-          className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:w-auto sm:self-auto"
-        >
-          <ClassroomIcon
-            name={copied ? "check" : "copy"}
-            className={`h-4 w-4 ${copied ? "text-success" : "text-text-muted"}`}
-          />
-          {copied ? (
-            <span className="text-success">Copied to clipboard</span>
-          ) : (
-            <span>
-              Invite code:{" "}
-              <span className="font-mono text-primary">{classroom?.code}</span>
-            </span>
-          )}
-        </button>
+        {/* Action Button based on Access Type */}
+        {accessType === "invite" ? (
+          <div className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas/70 px-4 py-2 text-sm font-medium text-text-muted sm:mb-2 sm:w-auto sm:self-auto">
+            <ClassroomIcon name="lock" className="h-4 w-4 text-text-muted" />
+            <span>Invite only</span>
+          </div>
+        ) : accessType === "open" ? (
+          <button
+            onClick={handleCopy}
+            className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
+          >
+            <ClassroomIcon
+              name={copied ? "check" : "link"}
+              className={`h-4 w-4 ${copied ? "text-success" : "text-text-muted"}`}
+            />
+            {copied ? (
+              <span className="text-success">Link copied!</span>
+            ) : (
+              <span>Copy join link</span>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={handleCopy}
+            className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
+          >
+            <ClassroomIcon
+              name={copied ? "check" : "copy"}
+              className={`h-4 w-4 ${copied ? "text-success" : "text-text-muted"}`}
+            />
+            {copied ? (
+              <span className="text-success">Copied to clipboard</span>
+            ) : (
+              <span>
+                Class code:{" "}
+                <span className="font-mono text-primary">{classroom?.code}</span>
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

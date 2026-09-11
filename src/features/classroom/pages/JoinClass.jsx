@@ -67,7 +67,7 @@ export default function JoinClass() {
     const classCode = formatClassCode(code);
     const hasCode = code.every(Boolean);
 
-    if (!hasCode) {
+    if (!hasCode && !optionalCourseId) {
       setStatus("incomplete");
       return;
     }
@@ -75,7 +75,11 @@ export default function JoinClass() {
     setStatus("loading");
     setError("");
     try {
-      const joined = await joinClassroom(user?.id, optionalCourseId || undefined, classCode);
+      const joined = await joinClassroom(
+        user?.id,
+        optionalCourseId || undefined,
+        classCode || ""
+      );
       triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(joined);
       setStatus("joined");
@@ -127,7 +131,9 @@ export default function JoinClass() {
             Join a class
           </h1>
           <p className="mt-1 text-sm text-text-muted sm:text-base">
-            Ask your teacher for the class code, then enter it below.
+            {optionalCourseId
+              ? "Join via link, or enter a class code if you have one."
+              : "Ask your teacher for the class code, then enter it below."}
           </p>
         </div>
 

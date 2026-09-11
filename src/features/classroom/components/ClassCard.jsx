@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { KeyRound, MessageCircle, Users } from "lucide-react";
+import { Globe, KeyRound, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ClassCard({ classroom }) {
@@ -11,6 +11,10 @@ export default function ClassCard({ classroom }) {
     : classroom.role === "Created"
     ? "Teaching"
     : "Class";
+  const accessType = (
+    classroom.accessType ||
+    (classroom.visibility === "PUBLIC" ? "open" : "code")
+  ).toLowerCase();
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -54,12 +58,22 @@ export default function ClassCard({ classroom }) {
             with {teacher.name}
           </span>
           <div className="flex items-center gap-2.5">
-            {classroom.code && (
+            {accessType === "invite" ? (
+              <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted">
+                <Lock size={11} className="text-text-muted" />
+                Invite only
+              </span>
+            ) : accessType === "open" ? (
+              <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Globe size={11} className="text-primary" />
+                Open
+              </span>
+            ) : classroom.code ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 font-mono text-xs font-semibold text-text-muted">
                 <KeyRound size={11} className="text-primary" />
                 {classroom.code}
               </span>
-            )}
+            ) : null}
             <span className="inline-flex items-center gap-1 font-medium">
               <Users size={14} />
               {classroom.memberCount || 0}

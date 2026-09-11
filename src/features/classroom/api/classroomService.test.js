@@ -5,7 +5,7 @@ import {
 } from "./classroomService.js";
 
 describe("mapCreateClassPayload", () => {
-  it("maps the form values to the backend course contract", () => {
+  it("maps the form values to the backend course contract with accessType", () => {
     expect(
       mapCreateClassPayload({
         className: "Algebra II",
@@ -21,7 +21,36 @@ describe("mapCreateClassPayload", () => {
       section: "Period 3",
       subject: "Mathematics",
       description: "Advanced algebra",
+      accessType: "OPEN",
       visibility: "PUBLIC",
+    });
+
+    expect(
+      mapCreateClassPayload({
+        className: "Biology Honors",
+        accessType: "invite",
+      })
+    ).toEqual({
+      title: "Biology Honors",
+      section: "",
+      subject: "",
+      description: "",
+      accessType: "INVITE",
+      visibility: "PRIVATE",
+    });
+
+    expect(
+      mapCreateClassPayload({
+        className: "Chemistry 101",
+        accessType: "code",
+      })
+    ).toEqual({
+      title: "Chemistry 101",
+      section: "",
+      subject: "",
+      description: "",
+      accessType: "CODE",
+      visibility: "PRIVATE",
     });
   });
 
@@ -31,6 +60,12 @@ describe("mapCreateClassPayload", () => {
     ).toEqual({
       courseId: "course-123",
       code: "ABCDEFGH",
+    });
+
+    expect(
+      mapJoinClassPayload({ courseId: "course-open-direct" })
+    ).toEqual({
+      courseId: "course-open-direct",
     });
   });
 });

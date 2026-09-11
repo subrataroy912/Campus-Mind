@@ -31,6 +31,10 @@ const normalizeCourse = (response = {}) => {
     subtitle: course.section ?? course.subtitle ?? course.term ?? "",
     section: course.section ?? course.subtitle ?? "",
     code: course.code ?? course.enrollmentCode ?? course.classCode ?? "",
+    accessType: (
+      course.accessType ||
+      (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
+    ).toLowerCase(),
     teacherId: course.teacherId ?? course.ownerId,
     teacher,
     instructor: teacher,
@@ -178,7 +182,7 @@ export const classroomApi = baseApi.injectEndpoints({
           return {
             url: `/courses/${courseId}/enrollment`,
             method: "POST",
-            body: { code },
+            body: code ? { code } : {},
           };
         }
         return {

@@ -4,8 +4,11 @@ import {
   Clock3,
   Copy,
   FileText,
+  Globe,
   Image,
+  Key,
   Link as LinkIcon,
+  Lock,
   MessageCircle,
   Pin,
   Settings,
@@ -26,6 +29,9 @@ const ICONS = {
   check: Check,
   clock: Clock3,
   pin: Pin,
+  lock: Lock,
+  key: Key,
+  globe: Globe,
 };
 
 export function ClassroomIcon({ name, className = "h-4 w-4" }) {
