@@ -1,11 +1,10 @@
 import {
   safeLocalStorageGet,
   safeLocalStorageRemove,
-  safeParseStorageJson,
 } from "@/utils/storage.js";
+import { getPersistedUserId } from "@/utils/sessionStorage.js";
 
 const STORAGE_KEY = "campus-mind.api-cache.v1";
-const SESSION_KEY = "campus-mind.session";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PERSISTED_ENDPOINTS = new Set([
   "fetchClassrooms",
@@ -14,14 +13,8 @@ const PERSISTED_ENDPOINTS = new Set([
   "getPublicProfile",
 ]);
 
-function getSessionUserId() {
-  const session = safeParseStorageJson(SESSION_KEY, null);
-  if (!session) return null;
-  return session.user?.id ?? session.userId ?? session.id ?? null;
-}
-
 function getUserId(authState) {
-  return authState?.user?.id ?? getSessionUserId();
+  return authState?.user?.id ?? getPersistedUserId();
 }
 
 export function readPersistedApiState(authState) {

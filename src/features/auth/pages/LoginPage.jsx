@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle, X } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  ArrowRight,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -31,7 +39,7 @@ function LoginPage() {
 
   const startOAuth = (provider) => {
     clearAuthError();
-    window.location.assign(getOAuthRedirectUrl(provider, "login"));
+    window.location.assign(getOAuthRedirectUrl(provider));
   };
 
   const updateField = (e) => {
@@ -82,7 +90,8 @@ function LoginPage() {
           <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
           <div className="flex-1 text-xs leading-relaxed text-black">
             <span className="font-semibold text-black">Notice: </span>
-            Please enable 3rd-party cookies in your browser settings; otherwise, your login session will not stay active.
+            Please enable 3rd-party cookies in your browser settings; otherwise,
+            your login session will not stay active.
           </div>
           <button
             type="button"

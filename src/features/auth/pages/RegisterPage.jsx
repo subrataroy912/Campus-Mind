@@ -38,9 +38,9 @@ export default function RegisterPage() {
 
   const startOAuth = (provider) => {
     clearAuthError();
-    window.location.assign(getOAuthRedirectUrl(provider, "register"));
+    window.location.assign(getOAuthRedirectUrl(provider));
   };
-  
+
   const updateField = (e) => {
     const { name, value } = e.target;
     setFormData((previous) => ({

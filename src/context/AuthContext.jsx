@@ -25,53 +25,16 @@ import {
   clearLocalAuthSession,
   routeRequiresSessionRestore,
 } from "./authSession.js";
+import {
+  getHydrationFailureError,
+  getProfileUpdateLifecycleEvent,
+  toProfilePatch,
+} from "./authContextUtils.js";
 
 const AuthContext = createContext(null);
-const PROFILE_FIELDS = {
-  name: "displayName",
-  firstName: "firstName",
-  lastName: "lastName",
-  handle: "handle",
-  headline: "headline",
-  bio: "about",
-  avatar: "avatarUrl",
-  banner: "bannerUrl",
-  city: "city",
-  country: "country",
-  batchYear: "gradeLevel",
-  profileVisibility: "profileVisibility",
-};
-
-function normalizeImageField(value) {
-  if (typeof value !== "string") return value ?? null;
-  const trimmed = value.trim();
-  return trimmed === "" ? null : trimmed;
-}
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function toProfilePatch(formData, currentUser) {
-  return Object.entries(PROFILE_FIELDS).reduce(
-    (changes, [formField, apiField]) => {
-      if (
-        (formField === "avatar" && formData.avatarFile) ||
-        (formField === "banner" && formData.bannerFile)
-      ) {
-        return changes;
-      }
-      const value = normalizeImageField(formData[formField]);
-      const currentValue = normalizeImageField(
-        currentUser?.[apiField] ?? currentUser?.[formField]
-      );
-      if (value !== currentValue || formField === "profileVisibility") {
-        changes[apiField] = value;
-      }
-      return changes;
-    },
-    {}
-  );
 }
 
 function resetApiCache(dispatch) {
@@ -87,6 +50,7 @@ export function AuthProvider({ children }) {
   const session = useSelector((state) => state.auth);
   const user = session.user;
   const userRef = useRef(user);
+  const explicitTeardownErrorRef = useRef(null);
   const [authState, setAuthState] = useState({
     status: "hydrating",
     error: null,
@@ -101,6 +65,7 @@ export function AuthProvider({ children }) {
       store.subscribe(() => {
         if (store.getState().auth.accessToken || !userRef.current) return;
         userRef.current = null;
+        if (explicitTeardownErrorRef.current) return;
         setAuthState({
           status: "failed",
           error: new Error("Your session has expired. Please log in again."),
@@ -153,14 +118,19 @@ export function AuthProvider({ children }) {
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
-        clearLocalAuthSession(dispatch);
+        explicitTeardownErrorRef.current = getHydrationFailureError(error);
+        clearLocalAuthSession(
+          dispatch,
+          (reason) => {
+            explicitTeardownErrorRef.current = reason;
+          },
+          explicitTeardownErrorRef.current
+        );
         setAuthState({
           status: "failed",
-          error:
-            error instanceof Error
-              ? error
-              : new Error("Your session has expired. Please log in again."),
+          error: getHydrationFailureError(error),
         });
+        explicitTeardownErrorRef.current = null;
       }
     }
 
@@ -318,15 +288,9 @@ export function AuthProvider({ children }) {
           ...store.getState().auth,
           user: nextUser,
         });
-        const visibilityChanged = Object.prototype.hasOwnProperty.call(
-          profilePatch,
-          "profileVisibility"
-        );
         triggerLifecycleRefresh(
           dispatch,
-          visibilityChanged
-            ? "user-profile-visibility-changed"
-            : "user-profile-updated"
+          getProfileUpdateLifecycleEvent(profilePatch)
         );
         return nextProfile;
       },

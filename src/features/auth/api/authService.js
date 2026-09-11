@@ -44,8 +44,7 @@ export function normalizeAuthResponse(response) {
   };
 }
 
-export function getOAuthRedirectUrl(provider, mode) {
-  void mode;
+export function getOAuthRedirectUrl(provider) {
   const rawBaseUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
   const baseUrl = rawBaseUrl.replace(/\/+$/, "");

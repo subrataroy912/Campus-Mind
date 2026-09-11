@@ -1,13 +1,16 @@
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
+import { invalidateRefreshForDispatch } from "../app/refreshState.js";
 import { clearCredentials, setSession } from "../features/auth/authSlice.js";
 import {
+  safeLocalStorageGet,
   safeLocalStorageRemove,
-  safeParseStorageJson,
+  safeLocalStorageSet,
 } from "../utils/storage.js";
+import { getPersistedUserId, SESSION_KEY } from "../utils/sessionStorage.js";
 
-export const SESSION_KEY = "campus-mind.session";
 export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken"];
+const LEGACY_MIGRATION_KEY = "campus-mind.migrated-legacy-auth-keys";
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -68,11 +71,6 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
   return { ...current, user };
 }
 
-export function readPersistedSession() {
-  const session = normalizeSession(safeParseStorageJson(SESSION_KEY));
-  return session;
-}
-
 export function isExpiredSessionError(error, endpoint) {
   const status =
     error?.status ?? error?.originalStatus ?? error?.response?.status;
@@ -112,23 +110,18 @@ export async function hydratePersistedSession({
   }
 }
 
-export function clearLocalAuthSession(dispatch, clearContextUser) {
-  clearContextUser?.();
+export function clearLocalAuthSession(dispatch, clearContextUser, reason) {
+  clearContextUser?.(reason);
+  invalidateRefreshForDispatch(dispatch);
   dispatch(clearCredentials());
   dispatch(baseApi.util.resetApiState());
   clearPersistedApiState();
   safeLocalStorageRemove(SESSION_KEY);
-  LEGACY_AUTH_STORAGE_KEYS.forEach(safeLocalStorageRemove);
+  if (safeLocalStorageGet(LEGACY_MIGRATION_KEY) !== "1") {
+    // Remove legacy auth storage once; delete this migration after legacy builds age out.
+    LEGACY_AUTH_STORAGE_KEYS.forEach(safeLocalStorageRemove);
+    safeLocalStorageSet(LEGACY_MIGRATION_KEY, "1");
+  }
 }
 
-export function synchronizeExternalSession(dispatch, sessionRecord) {
-  const session = normalizeSession(sessionRecord);
-  if (!session) {
-    clearLocalAuthSession(dispatch);
-    return null;
-  }
-  dispatch(clearCredentials());
-  dispatch(baseApi.util.resetApiState());
-  clearPersistedApiState();
-  return commitAuthSession(dispatch, session);
-}
+export { getPersistedUserId, SESSION_KEY };

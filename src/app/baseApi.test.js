@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { baseQueryWithRefresh, shouldForceLogout } from "./baseApi.js";
+import {
+  baseQueryWithRefresh,
+  createBaseQueryWithRefresh,
+  shouldForceLogout,
+} from "./baseApi.js";
+import { clearLocalAuthSession } from "@/context/authSession.js";
 
 const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -122,6 +127,42 @@ describe("shouldForceLogout", () => {
       accessToken: "new-access",
     });
     expect(storage.get("campus-mind.session") ?? null).toBeNull();
+  });
+
+  it("does not retry a request after logout invalidates its in-flight refresh", async () => {
+    const api = createApi();
+    const query = createBaseQueryWithRefresh();
+    let releaseRefresh;
+    const refreshStarted = new Promise((resolve) => {
+      releaseRefresh = resolve;
+    });
+    const requests = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        requests.push(request);
+        const url = new URL(request.url);
+        if (url.pathname.endsWith("/auth/refresh")) {
+          await refreshStarted;
+          return jsonResponse({ accessToken: "stale-access" });
+        }
+        return jsonResponse({ error: "expired" }, 401);
+      })
+    );
+
+    const pending = query({ url: "/protected" }, api, {});
+    await vi.waitFor(() => {
+      expect(requests).toHaveLength(2);
+    });
+    clearLocalAuthSession(api.dispatch);
+    releaseRefresh();
+
+    await expect(pending).resolves.toEqual({
+      error: { status: 401, data: { error: "Unauthenticated" } },
+    });
+    expect(
+      requests.filter((request) => request.url.endsWith("/protected"))
+    ).toHaveLength(1);
   });
 
   it("accepts an access-token-only refresh response without any refresh token state", async () => {

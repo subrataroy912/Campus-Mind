@@ -3,7 +3,7 @@ import { logout, normalizeAuthResponse, refresh } from "./authService.js";
 import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
-import { setCredentials } from "../authSlice.js";
+import { setSession } from "../authSlice.js";
 import {
   LEGACY_AUTH_STORAGE_KEYS,
   clearLocalAuthSession,
@@ -157,7 +157,7 @@ describe("logout", () => {
 
   it("keeps local teardown when the server logout request rejects", async () => {
     store.dispatch(
-      setCredentials({
+      setSession({
         accessToken: "access-token",
         user: { id: "student-1" },
       })
@@ -182,6 +182,7 @@ describe("logout", () => {
     vi.stubGlobal("window", { localStorage });
     localStorage.setItem("campus-mind.session", "session");
     localStorage.setItem("campus-mind.api-cache.v1", "cache");
+    localStorage.setItem("campus-mind.migrated-legacy-auth-keys", "0");
     LEGACY_AUTH_STORAGE_KEYS.forEach((key) =>
       localStorage.setItem(key, "token")
     );
@@ -193,6 +194,9 @@ describe("logout", () => {
     LEGACY_AUTH_STORAGE_KEYS.forEach((key) => {
       expect(localStorage.getItem(key)).toBeNull();
     });
+    expect(localStorage.getItem("campus-mind.migrated-legacy-auth-keys")).toBe(
+      "1"
+    );
   });
 
   it("does not throw when browser storage is blocked", () => {

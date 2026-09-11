@@ -4,6 +4,7 @@ import {
   clearLocalAuthSession,
   isExpiredSessionError,
 } from "@/context/authSession.js";
+import { registerRefreshInvalidator } from "./refreshState.js";
 
 export const apiBaseUrl = (() => {
   const configured = (
@@ -50,8 +51,6 @@ const UNAUTHENTICATED_ERROR = Object.freeze({
   status: 401,
   data: { error: "Unauthenticated" },
 });
-
-let refreshPromise = null;
 
 function normalizeError(error) {
   const status = error?.status;
@@ -126,51 +125,87 @@ async function refreshCredentials(api, extraOptions) {
   return nextAccessToken;
 }
 
-function getRefreshPromise(api, extraOptions) {
-  if (refreshPromise) return refreshPromise;
+export function createBaseQueryWithRefresh() {
+  let refreshPromise = null;
+  let refreshController = null;
+  let refreshGeneration = 0;
 
-  refreshPromise = refreshCredentials(api, extraOptions)
-    .catch((error) => {
-      clearLocalAuthSession(api.dispatch);
-      throw error?.status === 401 ? error : unauthenticatedError();
+  const invalidateRefresh = () => {
+    refreshGeneration += 1;
+    refreshController?.abort();
+    refreshController = null;
+    refreshPromise = null;
+  };
+
+  const getRefreshPromise = (api, extraOptions) => {
+    if (refreshPromise) return refreshPromise;
+
+    const generation = refreshGeneration;
+    refreshController = new AbortController();
+    refreshPromise = refreshCredentials(api, {
+      ...extraOptions,
+      signal: refreshController.signal,
     })
-    .finally(() => {
-      refreshPromise = null;
+      .then((token) => {
+        if (generation !== refreshGeneration) throw unauthenticatedError();
+        return token;
+      })
+      .catch((error) => {
+        if (generation === refreshGeneration) {
+          clearLocalAuthSession(api.dispatch);
+        }
+        throw error?.status === 401 ? error : unauthenticatedError();
+      })
+      .finally(() => {
+        if (generation === refreshGeneration) {
+          refreshController = null;
+          refreshPromise = null;
+        }
+      });
+    registerRefreshInvalidator(api.dispatch, invalidateRefresh);
+    return refreshPromise;
+  };
+
+  return async (args, api, extraOptions) => {
+    let result = await rawBaseQuery(args, api, extraOptions);
+    if (
+      result.error?.status !== 401 ||
+      extraOptions?.skipAuthRefresh ||
+      PUBLIC_AUTH_ENDPOINTS.has(api.endpoint) ||
+      PUBLIC_DISCOVERY_ENDPOINTS.has(api.endpoint)
+    ) {
+      return result.error ? { error: normalizeError(result.error) } : result;
+    }
+    const accessToken = api.getState().auth?.accessToken;
+
+    if (!validToken(accessToken) && api.endpoint !== "logout") {
+      return { error: unauthenticatedError() };
+    }
+    try {
+      await getRefreshPromise(api, extraOptions);
+    } catch {
+      return { error: unauthenticatedError() };
+    }
+
+    if (
+      refreshGeneration !== 0 &&
+      !validToken(api.getState().auth?.accessToken)
+    ) {
+      return { error: unauthenticatedError() };
+    }
+    result = await rawBaseQuery(args, api, {
+      ...extraOptions,
+      skipAuthRefresh: true,
     });
-  return refreshPromise;
+    if (result.error?.status === 401) {
+      clearLocalAuthSession(api.dispatch);
+      return { error: normalizeError(result.error) };
+    }
+    return result.error ? { error: normalizeError(result.error) } : result;
+  };
 }
 
-export const baseQueryWithRefresh = async (args, api, extraOptions) => {
-  let result = await rawBaseQuery(args, api, extraOptions);
-  if (
-    result.error?.status !== 401 ||
-    extraOptions?.skipAuthRefresh ||
-    PUBLIC_AUTH_ENDPOINTS.has(api.endpoint) ||
-    PUBLIC_DISCOVERY_ENDPOINTS.has(api.endpoint)
-  ) {
-    return result.error ? { error: normalizeError(result.error) } : result;
-  }
-  const accessToken = api.getState().auth?.accessToken;
-
-  if (!validToken(accessToken) && api.endpoint !== "logout") {
-    return { error: unauthenticatedError() };
-  }
-  try {
-    await getRefreshPromise(api, extraOptions);
-  } catch {
-    return { error: unauthenticatedError() };
-  }
-
-  result = await rawBaseQuery(args, api, {
-    ...extraOptions,
-    skipAuthRefresh: true,
-  });
-  if (result.error?.status === 401) {
-    clearLocalAuthSession(api.dispatch);
-    return { error: normalizeError(result.error) };
-  }
-  return result.error ? { error: normalizeError(result.error) } : result;
-};
+export const baseQueryWithRefresh = createBaseQueryWithRefresh();
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
