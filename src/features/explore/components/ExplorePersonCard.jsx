@@ -1,8 +1,9 @@
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import { initials } from "@/utils/initials.js";
+import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ExplorePersonCard({ person, currentUser }) {
   const sharedClassCount = getSharedClassCount(currentUser, person);
@@ -16,7 +17,12 @@ export default function ExplorePersonCard({ person, currentUser }) {
         </div>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Badge variant="secondary" className="bg-canvas text-text-main border-border">{person.department || "CampusMind learner"}</Badge>
+        <Badge variant="secondary" className="bg-canvas text-text-main border-border inline-flex items-center gap-1">
+          <span>{person.accountType ? formatDisplayText(person.accountType) : (person.department || "CampusMind learner")}</span>
+          {person.canCreateCourses && (
+            <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" aria-label="Course Creator" />
+          )}
+        </Badge>
         {sharedClassCount > 0 && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Shares {sharedClassCount} {sharedClassCount === 1 ? "class" : "classes"} with you</span>}
       </div>
       <div className="mt-6 flex gap-2 border-t border-border pt-4">

@@ -4,6 +4,8 @@ import { formatDisplayText } from "./textFormat.js";
 describe("formatDisplayText", () => {
   it("formats known account type enums into title case", () => {
     expect(formatDisplayText("STUDENT")).toBe("Student");
+    expect(formatDisplayText("STUDENT_CREATOR")).toBe("Student");
+    expect(formatDisplayText("STUDENT_CREATOR")).not.toContain("CREATOR");
     expect(formatDisplayText("TEACHER")).toBe("Teacher");
     expect(formatDisplayText("ADMIN")).toBe("Admin");
   });

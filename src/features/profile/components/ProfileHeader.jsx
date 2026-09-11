@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Globe, Menu, MessageCircle, Pencil } from "lucide-react";
+import { Globe, Menu, MessageCircle, Pencil, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
 import { initials } from "@/utils/initials.js";
+import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ProfileHeader({
   profile,
@@ -97,9 +98,24 @@ export default function ProfileHeader({
           </div>
         </div>
         <div className="mt-3">
-          <h1 className="text-2xl font-bold tracking-tight text-text-heading">
-            {profile.name}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-text-heading">
+              {profile.name}
+            </h1>
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
+              title={profile.canCreateCourses ? "Course Creator" : undefined}
+            >
+              {formatDisplayText(profile.accountType) || "Student"}
+              {profile.canCreateCourses && (
+                <Sparkles
+                  size={12}
+                  className="fill-amber-500 text-amber-500 shrink-0"
+                  aria-label="Course Creator"
+                />
+              )}
+            </span>
+          </div>
           <p className="text-sm font-medium text-text-muted">
             @{profile.handle || "unknown"}
           </p>

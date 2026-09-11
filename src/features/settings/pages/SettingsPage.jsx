@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Moon, Sparkles, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Card } from "@/components/ui/card.jsx";
@@ -35,7 +35,10 @@ function SettingRow({ title, description, checked, onChange }) {
 }
 
 export default function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, unlockCreator } = useAuth();
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockMessage, setUnlockMessage] = useState("");
+  const [unlockError, setUnlockError] = useState("");
   const { data: serverSettings } = useGetNotificationSettingsQuery();
   const [updateNotificationSettings] = useUpdateNotificationSettingsMutation();
   const {
@@ -46,6 +49,22 @@ export default function SettingsPage() {
     updateTheme,
   } = useSettings();
   const navigate = useNavigate();
+
+  const handleUnlockCreator = async () => {
+    setIsUnlocking(true);
+    setUnlockError("");
+    setUnlockMessage("");
+    try {
+      await unlockCreator();
+      setUnlockMessage("Course-creation privileges unlocked successfully!");
+    } catch (err) {
+      setUnlockError(
+        err?.data?.error || err?.message || "Failed to unlock course creation privileges."
+      );
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
 
   const notifications = {
     emailEnabled: true,
@@ -143,6 +162,59 @@ export default function SettingsPage() {
                 </div>
               </div>
             </ProfileSection>
+
+            {user?.accountType === "STUDENT" && (
+              <ProfileSection
+                title="Course Creation Privileges"
+                description="Manage your creator permissions to set up classes and study groups."
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-border bg-canvas/50 p-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-text-heading">
+                        Creator Status
+                      </span>
+                      {user?.canCreateCourses ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                          <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" />
+                          Unlocked
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-xs font-medium text-secondary">
+                          Standard Student
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-text-muted sm:text-sm">
+                      {user?.canCreateCourses
+                        ? "You have full privileges to create and manage courses and study groups."
+                        : "Unlock course-creation privileges to build classes and host learning groups."}
+                    </p>
+                  </div>
+                  {!user?.canCreateCourses && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleUnlockCreator}
+                      disabled={isUnlocking}
+                      className="shrink-0 bg-primary hover:bg-primary-hover text-surface font-medium"
+                    >
+                      {isUnlocking ? "Unlocking…" : "Unlock privileges"}
+                    </Button>
+                  )}
+                </div>
+                {unlockMessage && (
+                  <p className="mt-2 text-xs font-medium text-success">
+                    {unlockMessage}
+                  </p>
+                )}
+                {unlockError && (
+                  <p className="mt-2 text-xs font-medium text-destructive">
+                    {unlockError}
+                  </p>
+                )}
+              </ProfileSection>
+            )}
 
             <ProfileSection
               title="Notifications"

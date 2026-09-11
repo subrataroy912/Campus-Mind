@@ -51,6 +51,15 @@ export const profileApi = baseApi.injectEndpoints({
         }
       },
     }),
+    unlockCreator: builder.mutation({
+      query: () => ({
+        url: "/users/me/unlock-creator",
+        method: "POST",
+      }),
+      invalidatesTags: [
+        { type: "Profile", id: "CURRENT" },
+      ],
+    }),
   }),
 });
 
@@ -58,4 +67,5 @@ export const {
   useGetCurrentProfileQuery,
   useGetPublicProfileQuery,
   useUpdateCurrentProfileMutation,
+  useUnlockCreatorMutation,
 } = profileApi;

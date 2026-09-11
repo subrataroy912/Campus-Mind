@@ -27,6 +27,8 @@ export function normalizeAuthResponse(response) {
     profileVisibility:
       payload.profileVisibility ?? nestedUser.profileVisibility,
     accountType: payload.accountType ?? nestedUser.accountType,
+    canCreateCourses:
+      payload.canCreateCourses ?? nestedUser.canCreateCourses,
     firstName: payload.firstName ?? nestedUser.firstName,
     lastName: payload.lastName ?? nestedUser.lastName,
     bio: payload.bio ?? nestedUser.bio ?? nestedUser.about,
@@ -95,6 +97,12 @@ export async function updateProfile(details) {
     await store
       .dispatch(profileApi.endpoints.updateCurrentProfile.initiate(details))
       .unwrap()
+  );
+}
+
+export async function unlockCreator() {
+  return unwrapResponse(
+    await store.dispatch(profileApi.endpoints.unlockCreator.initiate()).unwrap()
   );
 }
 

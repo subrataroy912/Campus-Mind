@@ -13,6 +13,7 @@ import {
   refresh as refreshRequest,
   getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
+  unlockCreator as unlockCreatorRequest,
   logout as logoutRequest,
 } from "../features/auth/api/authService";
 import { useDispatch, useSelector, useStore } from "react-redux";
@@ -302,6 +303,20 @@ export function AuthProvider({ children }) {
           dispatch,
           getProfileUpdateLifecycleEvent(profilePatch)
         );
+        return nextProfile;
+      },
+      async unlockCreator() {
+        const nextProfile = await unlockCreatorRequest();
+        const nextUser = {
+          ...user,
+          ...nextProfile,
+          canCreateCourses: true,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
         return nextProfile;
       },
       async hydrateProfile() {

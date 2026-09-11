@@ -33,6 +33,8 @@ const profileFor = (user) => ({
   firstName: user?.firstName,
   lastName: user?.lastName,
   links: Array.isArray(user?.links) ? user.links : [],
+  canCreateCourses: Boolean(user?.canCreateCourses),
+  accountType: user?.accountType || "STUDENT",
   privacy: {
     discoverable: user?.profileVisibility !== "PRIVATE",
     ...user?.privacy,
@@ -112,6 +114,7 @@ export default function ProfilePage() {
       label: "Account type",
       value: formatDisplayText(profile.accountType) || "—",
       icon: "member",
+      isCreator: Boolean(profile.canCreateCourses),
     },
     {
       label: "Academic level",

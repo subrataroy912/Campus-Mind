@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button.jsx";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
   DAYS,
@@ -10,7 +12,9 @@ import {
 } from "../model/createClassForm.js";
 
 export default function CreateClass() {
-  const { user } = useAuth();
+  const { user, unlockCreator } = useAuth();
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState("");
   const {
     form,
     preview,
@@ -25,7 +29,19 @@ export default function CreateClass() {
     submit,
   } = useCreateClassForm();
 
-  const isStudent = user?.accountType === "STUDENT";
+  const isStudentWithoutCreator = user?.accountType === "STUDENT" && !user?.canCreateCourses;
+
+  const handleUnlock = async () => {
+    setIsUnlocking(true);
+    setUnlockError("");
+    try {
+      await unlockCreator();
+    } catch (err) {
+      setUnlockError(err?.data?.error || err?.message || "Failed to unlock course creation privileges.");
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
@@ -50,19 +66,36 @@ export default function CreateClass() {
           </p>
         </div>
 
-        {isStudent && (
+        {isStudentWithoutCreator && (
           <div
-            className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-200"
+            className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 text-sm text-amber-900 dark:text-amber-200"
             role="alert"
           >
-            <p className="font-semibold">Teacher Account Required</p>
-            <p className="mt-1">
-              Your account is registered as a <strong>Student</strong>. Only Teacher accounts have permission to create classes. If you need to attend a class, you can{" "}
-              <Link to="/dashboard/class/join" className="underline font-medium hover:text-amber-700">
-                join with a class code
-              </Link>
-              .
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="font-semibold text-base flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-500 fill-amber-500 shrink-0" />
+                  Unlock Course Creation
+                </p>
+                <p className="mt-1 text-xs sm:text-sm text-amber-800 dark:text-amber-300">
+                  Your account is registered as a <strong>Student</strong>. Unlock creator privileges to set up classes, lead study groups, or host workshops.
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleUnlock}
+                disabled={isUnlocking}
+                size="sm"
+                className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              >
+                {isUnlocking ? "Unlocking…" : "Unlock course creation"}
+              </Button>
+            </div>
+            {unlockError && (
+              <p className="mt-2 text-xs text-red-600 dark:text-red-300 font-medium">
+                {unlockError}
+              </p>
+            )}
           </div>
         )}
 
@@ -349,8 +382,9 @@ export default function CreateClass() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover sm:w-auto"
+              disabled={isSubmitting || isStudentWithoutCreator}
+              title={isStudentWithoutCreator ? "Unlock course creation privileges above first" : undefined}
+              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
             >
               {isSubmitting ? "Creating class…" : "Create class"}
             </button>
