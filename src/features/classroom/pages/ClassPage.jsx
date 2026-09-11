@@ -415,7 +415,7 @@ function Classwork({ teacher, classId }) {
         ) : (
           groups.map((group) => {
             const groupItems = items.filter((x) => {
-              const normalized = x.dueDate ?? x.dueAt ?? "";
+              const normalized = x?.dueDate ?? x?.dueAt ?? "";
               if (group === "Past") {
                 return (
                   String(normalized).toLowerCase().includes("aug") ||
@@ -800,6 +800,7 @@ function Classwork({ teacher, classId }) {
     </div>
   );
 }
+
 function Members({ classroom, teacher }) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
@@ -809,55 +810,71 @@ function Members({ classroom, teacher }) {
     skip: authStatus === "hydrating" || !classroom.id,
   });
   const members = roster.filter((member) =>
-    member.name.toLowerCase().includes(query.toLowerCase())
+    String(member?.name || member?.displayName || "")
+      .toLowerCase()
+      .includes(query.toLowerCase())
   );
-  const teachers = members.filter((x) => x.role === "teacher");
-  const students = members.filter((x) => x.role === "student");
-  const Row = ({ member }) => (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <div className="relative">
-        <ClassroomAvatar
-          name={member.name}
-          avatar={member.avatar}
-          size="h-10 w-10"
-        />
-        {member.online && (
-          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
-        )}
-      </div>
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-main">
-        {member.name}
-      </span>
-      {member.role === "teacher" && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 text-[11px] font-medium text-secondary">
-          Teacher
-        </span>
-      )}
-      <Button
-        to={`/dashboard/messages?member=${member.id}`}
-        variant="ghost"
-        size="icon-sm"
-        aria-label={`Message ${member.name}`}
-      >
-        <MessageCircle aria-hidden="true" />
-      </Button>
-      {teacher && member.role === "student" && (
+  const teachers = members.filter((x) => {
+    const r = String(x?.role || "").toLowerCase();
+    return r === "teacher" || r === "owner";
+  });
+  const students = members.filter(
+    (x) => String(x?.role || "").toLowerCase() === "student"
+  );
+  const Row = ({ member }) => {
+    const memberName =
+      member?.name ||
+      member?.displayName ||
+      (member?.userId ? `Member (${member.userId.slice(-4)})` : "Class Member");
+    const memberId = member?.id || member?.userId || "";
+    const isTeacherRole =
+      String(member?.role || "").toLowerCase() === "teacher" ||
+      String(member?.role || "").toLowerCase() === "owner";
+    return (
+      <div className="flex items-center gap-3 px-4 py-3">
         <div className="relative">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Manage ${member.name}`}
-            onClick={() =>
-              setConfirming(confirming === member.id ? null : member.id)
-            }
-          >
-            <MoreVertical aria-hidden="true" />
-          </Button>
-          {confirming === member.id && (
-            <div className="absolute right-0 top-9 z-10 w-56 rounded-xl bg-surface p-3 shadow-sm ring-1 ring-border">
-              <p className="text-xs text-text-muted">
-                Remove {member.name} from this class?
-              </p>
+          <ClassroomAvatar
+            name={memberName}
+            avatar={member?.avatar || member?.avatarUrl}
+            size="h-10 w-10"
+          />
+          {member?.online && (
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
+          )}
+        </div>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-main">
+          {memberName}
+        </span>
+        {isTeacherRole && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 text-[11px] font-medium text-secondary">
+            {String(member?.role).toLowerCase() === "owner" ? "Owner" : "Teacher"}
+          </span>
+        )}
+        <Button
+          to={`/dashboard/messages?member=${memberId}`}
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Message ${memberName}`}
+        >
+          <MessageCircle aria-hidden="true" />
+        </Button>
+        {teacher && !isTeacherRole && (
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Manage ${memberName}`}
+              onClick={() =>
+                setConfirming(confirming === memberId ? null : memberId)
+              }
+            >
+              <MoreVertical aria-hidden="true" />
+            </Button>
+            {confirming === memberId && (
+              <div className="absolute right-0 top-9 z-10 w-56 rounded-xl bg-surface p-3 shadow-sm ring-1 ring-border">
+                <p className="text-xs text-text-muted">
+                  Remove {memberName} from this class?
+                </p>
               <div className="mt-2 flex justify-end gap-2">
                 <Button
                   variant="ghost"
@@ -880,6 +897,7 @@ function Members({ classroom, teacher }) {
       )}
     </div>
   );
+  };
   return (
     <section className="mt-4">
       <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">

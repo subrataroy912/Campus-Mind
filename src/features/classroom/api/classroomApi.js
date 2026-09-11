@@ -87,7 +87,21 @@ export const classroomApi = baseApi.injectEndpoints({
       query: (classId) => `/courses/${classId}/roster`,
       transformResponse: (response) => {
         const payload = response?.data ?? response;
-        return Array.isArray(payload) ? payload : payload?.content ?? [];
+        const list = Array.isArray(payload) ? payload : payload?.content ?? [];
+        return list.map((m) => {
+          const role = String(m?.role || "student").toLowerCase();
+          const name =
+            m?.name ||
+            m?.displayName ||
+            m?.fullName ||
+            (m?.userId ? `Member (${m.userId.slice(-4)})` : "Class Member");
+          return {
+            ...m,
+            id: m?.id || m?.userId,
+            name,
+            role,
+          };
+        });
       },
       providesTags: (_result, _error, classId) => [
         { type: "Classrooms", id: `${classId}:roster` },
