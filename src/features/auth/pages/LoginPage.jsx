@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle } from "lucide-react";
 import AuthInput from "../components/AuthInput";
@@ -23,11 +23,37 @@ function LoginPage() {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [storageWarning, setStorageWarning] = useState(false); // Tracks 3rd-party cookie restriction
+  const [storageWarning, setStorageWarning] = useState(false);
 
   const isLoading = authStatus === "loading";
   const errorMessage =
     authError?.data?.error || authError?.message || "Unable to sign in.";
+
+  // Check 3rd-party cookie / storage access permission on initial page load
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkStorageAccess() {
+      if ("hasStorageAccess" in document) {
+        try {
+          const hasAccess = await document.hasStorageAccess();
+          if (isMounted && !hasAccess) {
+            setStorageWarning(true);
+          }
+        } catch {
+          if (isMounted) {
+            setStorageWarning(true);
+          }
+        }
+      }
+    }
+
+    checkStorageAccess();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const startOAuth = (provider) => {
     clearAuthError();
@@ -57,7 +83,7 @@ function LoginPage() {
     e.preventDefault();
     clearAuthError();
 
-    // 1. Check if the Storage Access API is available and evaluate access
+    // Re-verify storage access on submit if not already granted
     if ("requestStorageAccess" in document && "hasStorageAccess" in document) {
       try {
         const hasAccess = await document.hasStorageAccess();
@@ -79,7 +105,6 @@ function LoginPage() {
       }
     }
 
-    // 2. Authentication logic
     try {
       await login(formData);
 
