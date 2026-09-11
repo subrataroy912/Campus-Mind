@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Globe, Menu, MessageCircle, Pencil, Sparkles } from "lucide-react";
+import { Camera, Globe, Menu, MessageCircle, Pencil, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import {
   DropdownMenu,
@@ -18,6 +18,8 @@ export default function ProfileHeader({
   onEdit,
   onPreview,
   sharedClassCount,
+  onAvatarUpload,
+  onBannerUpload,
 }) {
   const copyLink = () =>
     navigator.clipboard?.writeText(
@@ -25,7 +27,7 @@ export default function ProfileHeader({
     );
   return (
     <header className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
-      <div className="h-40 bg-accent/30 sm:h-56">
+      <div className="relative h-40 bg-accent/30 sm:h-56">
         {profile.banner ? (
           <img
             src={profile.banner}
@@ -35,19 +37,59 @@ export default function ProfileHeader({
         ) : (
           <div className="h-full bg-linear-to-r from-accent/20 to-accent/40" />
         )}
+        {isOwner && onBannerUpload && (
+          <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-lg bg-surface/90 px-3 py-1.5 text-xs font-medium text-text-heading shadow-md backdrop-blur-xs transition hover:bg-surface hover:text-primary">
+            <Camera size={14} />
+            <span>Change banner</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  onBannerUpload(file);
+                  e.target.value = "";
+                }
+              }}
+            />
+          </label>
+        )}
       </div>
       <div className="px-4 pb-6 sm:px-7">
         <div className="flex items-center justify-between gap-3">
-          <div className="-mt-10 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-primary text-xl font-bold text-primary-foreground shadow-sm">
-            {profile.avatar ? (
-              <img
-                className="h-20 w-20 object-cover"
-                src={profile.avatar}
-                alt={`${profile.name}'s avatar`}
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              initials(profile.name)
+          <div className="relative -mt-10 flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-surface bg-primary text-xl font-bold text-primary-foreground shadow-sm">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+              {profile.avatar ? (
+                <img
+                  className="h-full w-full object-cover"
+                  src={profile.avatar}
+                  alt={`${profile.name}'s avatar`}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                initials(profile.name)
+              )}
+            </div>
+            {isOwner && onAvatarUpload && (
+              <label
+                title="Change avatar"
+                className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 border-surface bg-surface text-text-muted shadow-sm transition hover:border-primary/40 hover:text-primary"
+              >
+                <Camera size={13} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      onAvatarUpload(file);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </label>
             )}
           </div>
           <div className="flex gap-2">
@@ -149,9 +191,13 @@ export default function ProfileHeader({
           {Array.isArray(profile.links) && profile.links.length > 0 && (
             <div className="mt-3.5 flex flex-wrap gap-2">
               {profile.links.map((link, idx) => {
-                const url = link.startsWith("http://") || link.startsWith("https://") ? link : `https://${link}`;
-                let displayUrl = link.replace(/^https?:\/\/(www\.)?/, "");
+                const rawUrl = typeof link === "object" && link !== null ? link.url : link;
+                if (!rawUrl) return null;
+                const linkName = typeof link === "object" && link !== null && link.name ? link.name : null;
+                const url = rawUrl.startsWith("http://") || rawUrl.startsWith("https://") ? rawUrl : `https://${rawUrl}`;
+                let displayUrl = rawUrl.replace(/^https?:\/\/(www\.)?/, "");
                 if (displayUrl.endsWith("/")) displayUrl = displayUrl.slice(0, -1);
+                const label = linkName || displayUrl;
                 return (
                   <a
                     key={idx}
@@ -161,7 +207,7 @@ export default function ProfileHeader({
                     className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-canvas/60 px-2.5 py-1 text-xs font-medium text-text-main transition hover:border-primary/40 hover:bg-canvas hover:text-primary"
                   >
                     <Globe size={13} className="shrink-0 text-text-muted" />
-                    <span className="max-w-[200px] truncate">{displayUrl}</span>
+                    <span className="max-w-[200px] truncate">{label}</span>
                   </a>
                 );
               })}

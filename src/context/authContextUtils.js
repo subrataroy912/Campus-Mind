@@ -9,7 +9,10 @@ const PROFILE_FIELDS = {
   banner: "bannerUrl",
   city: "city",
   country: "country",
-  batchYear: "gradeLevel",
+  phone: "phone",
+  gender: "gender",
+  dateOfBirth: "dateOfBirth",
+  address: "address",
   profileVisibility: "profileVisibility",
 };
 
@@ -20,7 +23,7 @@ function normalizeImageField(value) {
 }
 
 export function toProfilePatch(formData, currentUser) {
-  return Object.entries(PROFILE_FIELDS).reduce(
+  const patch = Object.entries(PROFILE_FIELDS).reduce(
     (changes, [formField, apiField]) => {
       if (
         (formField === "avatar" && formData.avatarFile) ||
@@ -39,6 +42,10 @@ export function toProfilePatch(formData, currentUser) {
     },
     {}
   );
+  if (formData.links !== undefined) {
+    patch.links = formData.links;
+  }
+  return patch;
 }
 
 export function getProfileUpdateLifecycleEvent(profilePatch) {

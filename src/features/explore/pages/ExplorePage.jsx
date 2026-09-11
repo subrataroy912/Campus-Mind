@@ -67,9 +67,6 @@ export default function ExplorePage() {
   const departments = [
     ...new Set(users.map((item) => item.department).filter(Boolean)),
   ];
-  const batchYears = [
-    ...new Set(users.map((item) => item.batchYear).filter(Boolean)),
-  ];
   const sharedPeople = useMemo(
     () => users.filter((person) => getSharedClassCount(user, person) > 0),
     [user, users]
@@ -92,16 +89,13 @@ export default function ExplorePage() {
         if (personFilter === "all") return true;
         if (personFilter === "shared")
           return getSharedClassCount(user, person) > 0;
-        return (
-          person.department === personFilter ||
-          String(person.batchYear) === personFilter
-        );
+        return person.department === personFilter;
       })
       .filter((person) =>
         matches(
           `${person.name || ""} ${person.handle || ""} ${
             person.department || ""
-          } ${person.batchYear || ""}`,
+          }`,
           searchQuery
         )
       )
@@ -282,15 +276,6 @@ export default function ExplorePage() {
                 onClick={() => handlePersonFilterChange(department)}
               >
                 {department}
-              </FilterButton>
-            ))}
-            {batchYears.map((batchYear) => (
-              <FilterButton
-                key={batchYear}
-                active={personFilter === String(batchYear)}
-                onClick={() => handlePersonFilterChange(String(batchYear))}
-              >
-                Batch {batchYear}
               </FilterButton>
             ))}
           </div>

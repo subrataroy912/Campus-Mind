@@ -22,8 +22,17 @@ function ValidateField(name, value) {
   if (name === "department" && text.trim().length > 50) {
     return "Department must be less than 50 characters.";
   }
-  if (name === "batchYear" && text.trim() && !/^\d{4}$/.test(text.trim())) {
-    return "Batch year must be a 4-digit year.";
+  if (name === "firstName" && text.trim().length > 100) {
+    return "First name must be less than 100 characters.";
+  }
+  if (name === "lastName" && text.trim().length > 100) {
+    return "Last name must be less than 100 characters.";
+  }
+  if (name === "phone" && text.trim().length > 20) {
+    return "Phone number must be 20 characters or less.";
+  }
+  if (name === "address" && text.trim().length > 250) {
+    return "Address must be 250 characters or less.";
   }
   if (name === "avatar" && text.length > 2048) {
     return "Use a hosted image URL shorter than 2048 characters.";

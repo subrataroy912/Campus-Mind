@@ -1,13 +1,34 @@
-import { BookOpen, CalendarDays, GraduationCap, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  CalendarDays,
+  Eye,
+  GraduationCap,
+  Home,
+  MapPin,
+  Phone,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 
-const icons = { program: GraduationCap, focus: BookOpen, member: CalendarDays };
+const icons = {
+  program: GraduationCap,
+  focus: BookOpen,
+  member: CalendarDays,
+  phone: Phone,
+  gender: User,
+  calendar: Calendar,
+  location: MapPin,
+  address: Home,
+  visibility: Eye,
+};
 
 export default function ProfileDetails({ details }) {
   return (
     <dl className="grid gap-4 sm:grid-cols-3">
       {details?.map(({ label, value, icon, isCreator }) => {
-        const Icon = icons[icon];
+        const Icon = icons[icon] || BookOpen;
         const formattedValue =
           typeof value === "string" ? formatDisplayText(value) || value : value;
         return (

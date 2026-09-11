@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -29,12 +29,19 @@ const profileFor = (user) => ({
   bio: user?.about || user?.bio,
   avatar: user?.avatarUrl || user?.avatar_url || user?.avatar,
   banner: user?.bannerUrl || user?.banner_url,
-  batchYear: user?.gradeLevel || user?.batchYear,
   firstName: user?.firstName,
   lastName: user?.lastName,
+  phone: user?.phone,
+  gender: user?.gender,
+  dateOfBirth: user?.dateOfBirth,
+  address: user?.address,
+  city: user?.city,
+  country: user?.country,
+  headline: user?.headline,
   links: Array.isArray(user?.links) ? user.links : [],
   canCreateCourses: Boolean(user?.canCreateCourses),
   accountType: user?.accountType || "STUDENT",
+  profileVisibility: user?.profileVisibility || "PUBLIC",
   privacy: {
     discoverable: user?.profileVisibility !== "PRIVATE",
     ...user?.privacy,
@@ -44,11 +51,12 @@ const profileFor = (user) => ({
 export default function ProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, updateProfile, authStatus } = useAuth();
+  const { user: currentUser, updateProfile, unlockCreator, authStatus } = useAuth();
   const [activeTab, setActiveTab] = useState("classes");
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
   const { classrooms = [] } = useDashboardData();
   const isProfileOwner = !userId || userId === currentUser?.id;
   const isOwner = isProfileOwner && !preview;
@@ -117,21 +125,56 @@ export default function ProfilePage() {
       isCreator: Boolean(profile.canCreateCourses),
     },
     {
-      label: "Academic level",
-      value: formatDisplayText(profile.batchYear) || "—",
-      icon: "program",
-    },
-    {
       label: "Location",
       value: [profile.city, profile.country].filter(Boolean).join(", ") || "—",
-      icon: "focus",
+      icon: "location",
     },
     {
       label: "Profile visibility",
       value: formatDisplayText(profile.profileVisibility || "PUBLIC"),
-      icon: "member",
+      icon: "visibility",
     },
+    ...(profile.phone
+      ? [{ label: "Phone", value: profile.phone, icon: "phone" }]
+      : []),
+    ...(profile.gender
+      ? [{ label: "Gender", value: formatDisplayText(profile.gender), icon: "gender" }]
+      : []),
+    ...(profile.dateOfBirth
+      ? [{ label: "Date of Birth", value: profile.dateOfBirth, icon: "calendar" }]
+      : []),
+    ...(profile.address
+      ? [{ label: "Address", value: profile.address, icon: "address" }]
+      : []),
   ];
+
+  const handleAvatarUpload = async (file) => {
+    try {
+      await updateProfile({ avatarFile: file });
+    } catch (err) {
+      console.error("Failed to upload avatar", err);
+    }
+  };
+
+  const handleBannerUpload = async (file) => {
+    try {
+      await updateProfile({ bannerFile: file });
+    } catch (err) {
+      console.error("Failed to upload banner", err);
+    }
+  };
+
+  const handleUnlockCreator = async () => {
+    setIsUnlocking(true);
+    try {
+      await unlockCreator();
+    } catch (err) {
+      console.error("Failed to unlock creator status", err);
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
   const save = async (formData) => {
     setIsSaving(true);
     try {
@@ -179,10 +222,56 @@ export default function ProfilePage() {
           onEdit={() => setIsEditing(true)}
           onPreview={() => setPreview((p) => !p)}
           sharedClassCount={sharedClassCount}
+          onAvatarUpload={handleAvatarUpload}
+          onBannerUpload={handleBannerUpload}
         />
         <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
           <ProfileDetails details={details} />
         </section>
+        {isOwner && profile.accountType === "STUDENT" && (
+          <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-text-heading">
+                    Course Creator Status
+                  </h2>
+                  {profile.canCreateCourses ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                      <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" />
+                      Creator Privileges Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
+                      Standard Student
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-text-muted">
+                  {profile.canCreateCourses
+                    ? "Your account has course-creation privileges unlocked. This setting is permanent and cannot be changed back."
+                    : "Unlock course-creation privileges to create and manage courses and study groups. Once enabled, this privilege cannot be changed or revoked."}
+                </p>
+              </div>
+              <div className="shrink-0">
+                {profile.canCreateCourses ? (
+                  <Button variant="outline" size="sm" disabled className="opacity-75 cursor-not-allowed">
+                    Privileges Unlocked
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={handleUnlockCreator}
+                    disabled={isUnlocking}
+                  >
+                    <Sparkles size={14} className="mr-1.5" />
+                    {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
         <section className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
           <div className="flex gap-1 border-b border-border p-2" role="tablist">
             <Button

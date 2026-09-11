@@ -293,7 +293,10 @@ export function AuthProvider({ children }) {
           avatar: nextProfile.avatarUrl ?? user?.avatar ?? null,
           banner: nextProfile.bannerUrl ?? user?.banner ?? null,
           bio: nextProfile.about || user?.bio,
-          batchYear: nextProfile.gradeLevel || user?.batchYear,
+          phone: nextProfile.phone || user?.phone,
+          gender: nextProfile.gender || user?.gender,
+          dateOfBirth: nextProfile.dateOfBirth || user?.dateOfBirth,
+          address: nextProfile.address || user?.address,
         };
         commitAuthSession(dispatch, {
           ...store.getState().auth,

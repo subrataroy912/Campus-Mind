@@ -62,8 +62,7 @@ export const exploreApi = baseApi.injectEndpoints({
               "CampusMind member"),
           avatar: u.avatar ?? u.avatarUrl,
           department:
-            u.department ?? u.headline ?? u.gradeLevel ?? "CampusMind learner",
-          batchYear: u.batchYear ?? u.gradeLevel ?? "",
+            u.department ?? u.headline ?? "CampusMind learner",
         }));
       },
       providesTags: [{ type: "Profile", id: "LIST" }],
