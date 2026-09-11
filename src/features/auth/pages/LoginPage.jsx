@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle } from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,10 +22,13 @@ function LoginPage() {
     password: "",
     rememberMe: false,
   });
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [storageWarning, setStorageWarning] = useState(false); // Tracks 3rd-party cookie restriction
+
   const isLoading = authStatus === "loading";
   const errorMessage =
     authError?.data?.error || authError?.message || "Unable to sign in.";
+
   const startOAuth = (provider) => {
     clearAuthError();
     window.location.assign(getOAuthRedirectUrl(provider, "login"));
@@ -38,34 +42,45 @@ function LoginPage() {
     }));
   };
 
+  const requestAccess = async () => {
+    if ("requestStorageAccess" in document) {
+      try {
+        await document.requestStorageAccess();
+        setStorageWarning(false);
+      } catch (err) {
+        console.warn("User or browser rejected storage access:", err);
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearAuthError();
 
-    try {
-      // 1. Check if the Storage Access API is available
-      if (
-        "requestStorageAccess" in document &&
-        "hasStorageAccess" in document
-      ) {
-        try {
-          // Check if we already have permission
-          const hasAccess = await document.hasStorageAccess();
+    // 1. Check if the Storage Access API is available and evaluate access
+    if ("requestStorageAccess" in document && "hasStorageAccess" in document) {
+      try {
+        const hasAccess = await document.hasStorageAccess();
 
-          if (!hasAccess) {
-            // Request cross-site cookie access if we don't have it yet
+        if (!hasAccess) {
+          try {
             await document.requestStorageAccess();
+            setStorageWarning(false);
+          } catch (storageError) {
+            console.warn(
+              "Storage access not granted, proceeding with fallback:",
+              storageError
+            );
+            setStorageWarning(true);
           }
-        } catch (storageError) {
-          // If the browser rejects the prompt automatically, log it and proceed
-          console.warn(
-            "Storage access not granted, proceeding with fallback:",
-            storageError
-          );
         }
+      } catch (err) {
+        setStorageWarning(true);
       }
+    }
 
-      // 2. Run your original authentication logic
+    // 2. Authentication logic
+    try {
       await login(formData);
 
       toast.add({
@@ -91,6 +106,35 @@ function LoginPage() {
       <p className="mt-2 text-text-main">
         Sign in to see what is happening in your classes.
       </p>
+
+      {/* 3rd-party cookie warning banner */}
+      {storageWarning && (
+        <div
+          className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm text-amber-200"
+          role="alert"
+        >
+          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400" />
+          <div className="flex-1 space-y-2">
+            <p className="font-semibold text-amber-300">
+              Cross-site storage blocked
+            </p>
+            <p className="text-xs text-amber-200/90 leading-relaxed">
+              Your browser is blocking third-party storage or cookies. This may
+              prevent your session from staying active across subdomains or embedded
+              views.
+            </p>
+            {"requestStorageAccess" in document && (
+              <button
+                type="button"
+                onClick={requestAccess}
+                className="rounded-md border border-amber-500/40 bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 focus:outline-none"
+              >
+                Grant Storage Access
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {location.state?.registered && (
         <p
