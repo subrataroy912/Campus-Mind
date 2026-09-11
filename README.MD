@@ -9,11 +9,14 @@ npm install
 npm run dev
 ```
 
-Set the API URL in `.env.local` when the backend is not running at the default address:
+Set the API URL in `.env.local` when developing against a local backend:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8080/v1
 ```
+
+Production builds default to `https://m198-backend.onrender.com/v1` unless
+`VITE_API_BASE_URL` is supplied by the deployment environment.
 
 Set `VITE_MAINTENANCE_MODE=true` in `.env.local` to show the server maintenance page across the app while updating the codebase. Set it to `false` or remove it to restore normal routing. Restart Vite after changing environment variables.
 

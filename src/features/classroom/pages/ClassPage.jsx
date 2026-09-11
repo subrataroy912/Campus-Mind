@@ -1110,12 +1110,18 @@ export default function ClassPage() {
   const activeTab = useSelector((state) => state.classroom.activeTab);
   const { classId } = useParams();
   const location = useLocation();
-  const { classroom, error } = useClassroom(classId);
+  const { classroom, error, notFound } = useClassroom(classId);
 
   if (classroom === undefined)
     return (
       <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
         Loading class…
+      </div>
+    );
+  if (notFound)
+    return (
+      <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
+        Course not found.
       </div>
     );
   if (error)

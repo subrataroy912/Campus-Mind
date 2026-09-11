@@ -51,8 +51,11 @@ export function persistApiState(apiState, authState) {
   if (!userId) return;
 
   const queries = Object.fromEntries(
-    Object.entries(apiState.queries || {}).filter(([, query]) =>
-      PERSISTED_ENDPOINTS.has(query.endpointName)
+    Object.entries(apiState.queries || {}).filter(
+      ([, query]) =>
+        PERSISTED_ENDPOINTS.has(query.endpointName) &&
+        query.status === "fulfilled" &&
+        query.data !== undefined
     )
   );
 

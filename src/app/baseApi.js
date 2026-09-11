@@ -8,7 +8,7 @@ import { registerRefreshInvalidator } from "./refreshState.js";
 
 export const apiBaseUrl = (() => {
   const configured = (
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+    import.meta.env.VITE_API_BASE_URL || "https://m198-backend.onrender.com"
   ).replace(/\/+$/, "");
   return configured.endsWith("/v1") ? configured : `${configured}/v1`;
 })();
