@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle, X } from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -13,37 +13,6 @@ import {
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 
-// Helper function to detect device platform synchronously
-function getDevicePlatform() {
-  if (typeof window === "undefined" || typeof navigator === "undefined") {
-    return "other";
-  }
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-    return "ios";
-  }
-  if (/android/i.test(userAgent)) {
-    return "android";
-  }
-  return "other";
-}
-
-// Helper function to test cookie support
-function verifyCookieSupport() {
-  try {
-    if (typeof navigator !== "undefined" && !navigator.cookieEnabled) {
-      return false;
-    }
-    const testKey = "__cookie_test__";
-    document.cookie = `${testKey}=1; SameSite=Lax; path=/`;
-    const isSet = document.cookie.includes(`${testKey}=1`);
-    document.cookie = `${testKey}=; Max-Age=0; path=/`;
-    return isSet;
-  } catch {
-    return false;
-  }
-}
-
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,45 +23,11 @@ function LoginPage() {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [cookieWarning, setCookieWarning] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
-
-  // Initialize platform state directly without calling setState inside useEffect
-  const [devicePlatform] = useState(getDevicePlatform);
+  const [showCookieNotice, setShowCookieNotice] = useState(true);
 
   const isLoading = authStatus === "loading";
   const errorMessage =
     authError?.data?.error || authError?.message || "Unable to sign in.";
-
-  // Check 3rd-party cookie / storage access permission on initial page load
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkCookieAndStorageStatus() {
-      const cookiesWork = verifyCookieSupport();
-      if (!cookiesWork) {
-        if (isMounted) setCookieWarning(true);
-        return;
-      }
-
-      if ("hasStorageAccess" in document) {
-        try {
-          const hasAccess = await document.hasStorageAccess();
-          if (isMounted && !hasAccess) {
-            setCookieWarning(true);
-          }
-        } catch {
-          // Ignored if API is unsupported or blocked
-        }
-      }
-    }
-
-    checkCookieAndStorageStatus();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const startOAuth = (provider) => {
     clearAuthError();
@@ -107,42 +42,9 @@ function LoginPage() {
     }));
   };
 
-  const requestAccess = async () => {
-    if ("requestStorageAccess" in document) {
-      try {
-        await document.requestStorageAccess();
-        setCookieWarning(false);
-      } catch (err) {
-        console.warn("Storage access request failed or dismissed:", err);
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearAuthError();
-
-    if (!verifyCookieSupport()) {
-      setCookieWarning(true);
-      toast.add({
-        title: "Cookies Disabled",
-        description: "Please enable cookies in your browser settings to sign in.",
-        type: "error",
-      });
-      return;
-    }
-
-    if ("requestStorageAccess" in document && "hasStorageAccess" in document) {
-      try {
-        const hasAccess = await document.hasStorageAccess();
-        if (!hasAccess) {
-          await document.requestStorageAccess();
-          setCookieWarning(false);
-        }
-      } catch {
-        // Fall through to standard authentication flow
-      }
-    }
 
     try {
       await login(formData);
@@ -171,73 +73,25 @@ function LoginPage() {
         Sign in to see what is happening in your classes.
       </p>
 
-      {/* Mobile-Friendly Cookie Warning Banner */}
-      {cookieWarning && (
+      {/* 3rd-party cookie notice on page open */}
+      {showCookieNotice && (
         <div
-          className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200"
+          className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm text-amber-200"
           role="alert"
         >
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-semibold text-amber-300">
-                Cookies or Storage Blocked
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-amber-200/90">
-                Your browser is blocking cookies. Signing in requires cookies to keep your session active.
-              </p>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                {"requestStorageAccess" in document && (
-                  <button
-                    type="button"
-                    onClick={requestAccess}
-                    className="rounded-md border border-amber-500/40 bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 focus:outline-none"
-                  >
-                    Grant Access
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowInstructions((prev) => !prev)}
-                  className="flex items-center gap-1 text-xs font-medium text-amber-300 underline hover:text-amber-100"
-                >
-                  {showInstructions ? "Hide instructions" : "How to enable"}
-                  {showInstructions ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-              </div>
-            </div>
+          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+          <div className="flex-1 text-xs leading-relaxed text-amber-200/90">
+            <span className="font-semibold text-amber-300">Notice: </span>
+            Please enable 3rd-party cookies in your browser settings; otherwise, your login session will not stay active.
           </div>
-
-          {showInstructions && (
-            <div className="mt-3 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-amber-100/90">
-              {devicePlatform === "ios" ? (
-                <div>
-                  <p className="font-semibold text-amber-200 mb-1">On iOS (Safari):</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Open <strong>Settings</strong> &gt; <strong>Safari</strong>.</li>
-                    <li>Scroll to <strong>Privacy &amp; Security</strong>.</li>
-                    <li>Turn off <strong>Block All Cookies</strong>.</li>
-                    <li>Turn off <strong>Prevent Cross-Site Tracking</strong>.</li>
-                  </ol>
-                </div>
-              ) : devicePlatform === "android" ? (
-                <div>
-                  <p className="font-semibold text-amber-200 mb-1">On Android (Chrome):</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Open Chrome &gt; Tap the <strong>three dots</strong> (top-right).</li>
-                    <li>Go to <strong>Settings</strong> &gt; <strong>Site settings</strong> &gt; <strong>Cookies</strong>.</li>
-                    <li>Select <strong>Allow cookies</strong> or <strong>Block third-party cookies in Incognito</strong>.</li>
-                  </ol>
-                </div>
-              ) : (
-                <div>
-                  <p className="font-semibold text-amber-200 mb-1">In your browser settings:</p>
-                  <p>Check your browser privacy settings and make sure cookies and site data are permitted.</p>
-                </div>
-              )}
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => setShowCookieNotice(false)}
+            className="text-amber-300/70 hover:text-amber-100 p-0.5 transition-colors focus:outline-none"
+            aria-label="Dismiss cookie notice"
+          >
+            <X size={16} />
+          </button>
         </div>
       )}
 
