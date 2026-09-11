@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -23,36 +23,66 @@ function LoginPage() {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [storageWarning, setStorageWarning] = useState(false);
+  const [cookieWarning, setCookieWarning] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [devicePlatform, setDevicePlatform] = useState("ios"); // 'ios' | 'android' | 'other'
 
   const isLoading = authStatus === "loading";
   const errorMessage =
     authError?.data?.error || authError?.message || "Unable to sign in.";
 
-  // Check 3rd-party cookie / storage access permission on initial page load
-  useEffect(() => {
-    let isMounted = true;
+  // Reliable cross-platform cookie verification test
+  const verifyCookieSupport = () => {
+    try {
+      if (typeof navigator !== "undefined" && !navigator.cookieEnabled) {
+        return false;
+      }
+      const testKey = "__cookie_test__";
+      document.cookie = `${testKey}=1; SameSite=Lax; path=/`;
+      const isSet = document.cookie.includes(`${testKey}=1`);
+      document.cookie = `${testKey}=; Max-Age=0; path=/`;
+      return isSet;
+    } catch {
+      return false;
+    }
+  };
 
-    async function checkStorageAccess() {
+  // Inspect client device and verify cookie readiness on mount
+  useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+      setDevicePlatform("ios");
+    } else if (/android/i.test(userAgent)) {
+      setDevicePlatform("android");
+    } else {
+      setDevicePlatform("other");
+    }
+
+    async function checkCookieAndStorageStatus() {
+      // 1. Direct cookie read/write check
+      const cookiesWork = verifyCookieSupport();
+      if (!cookiesWork) {
+        setCookieWarning(true);
+        return;
+      }
+
+      // 2. Storage Access API check (if loaded in an iframe or cross-origin context)
       if ("hasStorageAccess" in document) {
         try {
           const hasAccess = await document.hasStorageAccess();
-          if (isMounted && !hasAccess) {
-            setStorageWarning(true);
+          if (!hasAccess) {
+            setCookieWarning(true);
+            return;
           }
         } catch {
-          if (isMounted) {
-            setStorageWarning(true);
-          }
+          // Ignored if API is unsupported or blocked by browser policy
         }
       }
+
+      setCookieWarning(false);
     }
 
-    checkStorageAccess();
-
-    return () => {
-      isMounted = false;
-    };
+    checkCookieAndStorageStatus();
   }, []);
 
   const startOAuth = (provider) => {
@@ -72,9 +102,9 @@ function LoginPage() {
     if ("requestStorageAccess" in document) {
       try {
         await document.requestStorageAccess();
-        setStorageWarning(false);
+        setCookieWarning(false);
       } catch (err) {
-        console.warn("User or browser rejected storage access:", err);
+        console.warn("Storage access request failed or dismissed:", err);
       }
     }
   };
@@ -83,25 +113,27 @@ function LoginPage() {
     e.preventDefault();
     clearAuthError();
 
-    // Re-verify storage access on submit if not already granted
+    // Verify cookies before submitting credentials
+    if (!verifyCookieSupport()) {
+      setCookieWarning(true);
+      toast.add({
+        title: "Cookies Disabled",
+        description: "Please enable cookies in your browser settings to sign in.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Attempt Storage Access API prompt if available and ungranted
     if ("requestStorageAccess" in document && "hasStorageAccess" in document) {
       try {
         const hasAccess = await document.hasStorageAccess();
-
         if (!hasAccess) {
-          try {
-            await document.requestStorageAccess();
-            setStorageWarning(false);
-          } catch (storageError) {
-            console.warn(
-              "Storage access not granted, proceeding with fallback:",
-              storageError
-            );
-            setStorageWarning(true);
-          }
+          await document.requestStorageAccess();
+          setCookieWarning(false);
         }
       } catch {
-        setStorageWarning(true);
+        // Fall through to standard authentication flow
       }
     }
 
@@ -132,32 +164,74 @@ function LoginPage() {
         Sign in to see what is happening in your classes.
       </p>
 
-      {/* 3rd-party cookie warning banner */}
-      {storageWarning && (
+      {/* Mobile-Friendly Cookie Warning Banner */}
+      {cookieWarning && (
         <div
-          className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm text-amber-200"
+          className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200"
           role="alert"
         >
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400" />
-          <div className="flex-1 space-y-2">
-            <p className="font-semibold text-amber-300">
-              Cross-site storage blocked
-            </p>
-            <p className="text-xs text-amber-200/90 leading-relaxed">
-              Your browser is blocking third-party storage or cookies. This may
-              prevent your session from staying active across subdomains or embedded
-              views.
-            </p>
-            {"requestStorageAccess" in document && (
-              <button
-                type="button"
-                onClick={requestAccess}
-                className="rounded-md border border-amber-500/40 bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 focus:outline-none"
-              >
-                Grant Storage Access
-              </button>
-            )}
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-amber-300">
+                Cookies or Storage Blocked
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-200/90">
+                Your mobile browser is blocking cookies. Signing in requires cookies to keep your session active.
+              </p>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {"requestStorageAccess" in document && (
+                  <button
+                    type="button"
+                    onClick={requestAccess}
+                    className="rounded-md border border-amber-500/40 bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 focus:outline-none"
+                  >
+                    Grant Access
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowInstructions((prev) => !prev)}
+                  className="flex items-center gap-1 text-xs font-medium text-amber-300 underline hover:text-amber-100"
+                >
+                  {showInstructions ? "Hide instructions" : "How to enable"}
+                  {showInstructions ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Accordion Instructions tailored for iOS vs Android */}
+          {showInstructions && (
+            <div className="mt-3 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-amber-100/90">
+              {devicePlatform === "ios" ? (
+                <div>
+                  <p className="font-semibold text-amber-200 mb-1">On iOS (Safari):</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Open <strong>Settings</strong> &gt; <strong>Safari</strong>.</li>
+                    <li>Scroll to <strong>Privacy &amp; Security</strong>.</li>
+                    <li>Turn off <strong>Block All Cookies</strong>.</li>
+                    <li>Turn off <strong>Prevent Cross-Site Tracking</strong> (if signing in across domains).</li>
+                  </ol>
+                </div>
+              ) : devicePlatform === "android" ? (
+                <div>
+                  <p className="font-semibold text-amber-200 mb-1">On Android (Chrome):</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Open Chrome &gt; Tap the <strong>three dots</strong> (top-right).</li>
+                    <li>Go to <strong>Settings</strong> &gt; <strong>Site settings</strong> &gt; <strong>Cookies</strong>.</li>
+                    <li>Select <strong>Allow cookies</strong> or <strong>Block third-party cookies in Incognito</strong>.</li>
+                  </ol>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-semibold text-amber-200 mb-1">In your browser settings:</p>
+                  <p>Check your browser privacy settings and make sure cookies and site data are permitted.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
