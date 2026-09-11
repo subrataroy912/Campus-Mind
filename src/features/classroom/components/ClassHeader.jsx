@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router";
+import { ArrowLeft } from "lucide-react";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 
 export default function ClassHeader({ classroom }) {
@@ -22,6 +24,17 @@ export default function ClassHeader({ classroom }) {
       <div
         className={`relative h-28 sm:h-36 ${classroom?.theme || "bg-primary"}`}
       >
+        {/* Back Link */}
+        <div className="absolute left-3 top-3">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1.5 rounded-full bg-surface/25 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-surface/40 backdrop-blur-sm shadow-xs"
+            aria-label="Back to dashboard classes"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Classes</span>
+          </Link>
+        </div>
         {/* Settings Dropdown */}
         <div className="absolute right-3 top-3">
           <div className="relative">

@@ -73,46 +73,42 @@ export default function DashboardHomePage() {
         </p>
       </header>
 
-      <section className="mt-8" aria-labelledby="my-classes-heading">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <h2
-              id="my-classes-heading"
-              className="text-xl font-semibold text-text-heading"
-            >
-              My classes
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">
-              Your enrolled learning spaces.
-            </p>
+      {classrooms.length > 0 && (
+        <section className="mt-8" aria-labelledby="my-classes-heading">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <h2
+                id="my-classes-heading"
+                className="text-xl font-semibold text-text-heading"
+              >
+                My classes
+              </h2>
+              <p className="mt-1 text-sm text-text-muted">
+                Your enrolled learning spaces.
+              </p>
+            </div>
+            <span className="text-sm text-text-muted">
+              <Link to="/dashboard/classes">See all</Link>
+            </span>
           </div>
-          <span className="text-sm text-text-muted">
-            <Link to="/dashboard/classes">See all</Link>
-          </span>
-        </div>
 
-        {status === "error" ? (
-          <EmptyState
-            title="We could not load your classes"
-            description="Please refresh the page and try again."
-          />
-        ) : classrooms.length > 0 ? (
-          <ContentList
-            layout="carousel"
-            items={classrooms}
-            renderItem={(classroom) => <ClassCard classroom={classroom} />}
-          />
-        ) : (
-          <EmptyState
-            title="Your class list is ready for you"
-            description="Create a class for your group or join one with a code."
-            action={{ to: "/dashboard/class/join", label: "Join a class" }}
-          />
-        )}
-      </section>
+          {status === "error" ? (
+            <EmptyState
+              title="We could not load your classes"
+              description="Please refresh the page and try again."
+            />
+          ) : (
+            <ContentList
+              layout="carousel"
+              items={classrooms}
+              renderItem={(classroom) => <ClassCard classroom={classroom} />}
+            />
+          )}
+        </section>
+      )}
 
       <section
-        className="mt-10 border-t border-border pt-8"
+        className={`mt-10 ${classrooms.length > 0 ? "border-t border-border pt-8" : "pt-2"}`}
         aria-labelledby="explore-feed-heading"
       >
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">

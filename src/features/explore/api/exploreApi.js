@@ -45,6 +45,29 @@ export const exploreApi = baseApi.injectEndpoints({
       transformResponse: normalizeDiscoveryPage,
       providesTags: [{ type: "CourseRecommendations", id: "LIST" }],
     }),
+    getExplorePeople: builder.query({
+      query: () => ({
+        url: "/users",
+      }),
+      transformResponse: (response) => {
+        const payload = response?.data ?? response;
+        const users = Array.isArray(payload) ? payload : [];
+        return users.map((u) => ({
+          ...u,
+          id: u.id ?? u.userId,
+          name:
+            u.name ||
+            u.displayName ||
+            ([u.firstName, u.lastName].filter(Boolean).join(" ") ||
+              "CampusMind member"),
+          avatar: u.avatar ?? u.avatarUrl,
+          department:
+            u.department ?? u.headline ?? u.gradeLevel ?? "CampusMind learner",
+          batchYear: u.batchYear ?? u.gradeLevel ?? "",
+        }));
+      },
+      providesTags: [{ type: "Profile", id: "LIST" }],
+    }),
   }),
 });
 
@@ -52,4 +75,5 @@ export const {
   useGetExploreFeedQuery,
   useSearchExploreCoursesQuery,
   useGetExploreRecommendationsQuery,
+  useGetExplorePeopleQuery,
 } = exploreApi;

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { ArrowLeft, Eye } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -9,6 +10,7 @@ import {
   getSharedClassCount,
   getSharedClassIds,
 } from "@/utils/sharedClasses.js";
+import { formatDisplayText } from "@/utils/textFormat.js";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import {
   useGetCurrentProfileQuery,
@@ -30,6 +32,7 @@ const profileFor = (user) => ({
   batchYear: user?.gradeLevel || user?.batchYear,
   firstName: user?.firstName,
   lastName: user?.lastName,
+  links: Array.isArray(user?.links) ? user.links : [],
   privacy: {
     discoverable: user?.profileVisibility !== "PRIVATE",
     ...user?.privacy,
@@ -38,6 +41,7 @@ const profileFor = (user) => ({
 
 export default function ProfilePage() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { user: currentUser, updateProfile, authStatus } = useAuth();
   const [activeTab, setActiveTab] = useState("classes");
   const [isEditing, setIsEditing] = useState(false);
@@ -82,7 +86,7 @@ export default function ProfilePage() {
     );
   if (
     !profile ||
-    (isPublicProfileError && !isOwner) ||
+    (isPublicProfileError && !isProfileOwner) ||
     (isCurrentProfileError && isProfileOwner)
   )
     return (
@@ -91,7 +95,7 @@ export default function ProfilePage() {
         description="This profile is unavailable or you do not have permission to view it."
       />
     );
-  if (!isOwner && !profile.privacy.discoverable && sharedClassCount === 0)
+  if (!isProfileOwner && !profile.privacy.discoverable && sharedClassCount === 0)
     return (
       <ProfileMessage
         title="This profile is private"
@@ -106,12 +110,12 @@ export default function ProfilePage() {
     },
     {
       label: "Account type",
-      value: profile.accountType || "—",
+      value: formatDisplayText(profile.accountType) || "—",
       icon: "member",
     },
     {
       label: "Academic level",
-      value: profile.batchYear || "—",
+      value: formatDisplayText(profile.batchYear) || "—",
       icon: "program",
     },
     {
@@ -121,7 +125,7 @@ export default function ProfilePage() {
     },
     {
       label: "Profile visibility",
-      value: profile.profileVisibility || "PUBLIC",
+      value: formatDisplayText(profile.profileVisibility || "PUBLIC"),
       icon: "member",
     },
   ];
@@ -136,6 +140,35 @@ export default function ProfilePage() {
   };
   return (
     <div className="mx-auto min-h-dvh max-w-6xl px-3 py-3 sm:px-6 lg:py-6">
+      {/* Back button */}
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+        >
+          <ArrowLeft size={16} /> Back
+        </Button>
+      </div>
+
+      {preview && (
+        <div className="sticky top-2 z-30 mb-4 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary backdrop-blur-md shadow-sm">
+          <div className="flex items-center gap-2">
+            <Eye size={18} />
+            <span>You are viewing your profile as others see it.</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPreview(false)}
+            className="h-8 bg-surface text-text-heading border-border shadow-xs hover:bg-canvas"
+          >
+            Exit preview
+          </Button>
+        </div>
+      )}
+
       <div className="space-y-4">
         <ProfileHeader
           profile={profile}

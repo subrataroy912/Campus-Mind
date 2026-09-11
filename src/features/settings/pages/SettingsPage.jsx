@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Moon, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Card } from "@/components/ui/card.jsx";
@@ -86,6 +86,17 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-3 sm:p-6">
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+        >
+          <ArrowLeft size={16} /> Back
+        </Button>
+      </div>
+
       <header>
         <p className="text-sm font-semibold text-primary">Account</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">

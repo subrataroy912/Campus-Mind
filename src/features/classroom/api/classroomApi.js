@@ -173,11 +173,20 @@ export const classroomApi = baseApi.injectEndpoints({
       query: () => ({ url: "/courses/cover-upload", method: "POST" }),
     }),
     joinClassroom: builder.mutation({
-      query: ({ courseId, code }) => ({
-        url: `/courses/${courseId}/enrollment`,
-        method: "POST",
-        body: { code },
-      }),
+      query: ({ courseId, code }) => {
+        if (courseId) {
+          return {
+            url: `/courses/${courseId}/enrollment`,
+            method: "POST",
+            body: { code },
+          };
+        }
+        return {
+          url: "/courses/join",
+          method: "POST",
+          body: { code },
+        };
+      },
       transformResponse: normalizeCourse,
       invalidatesTags: (result) => [
         { type: "Classrooms", id: "LIST" },

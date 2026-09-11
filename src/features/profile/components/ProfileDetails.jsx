@@ -1,4 +1,5 @@
 import { BookOpen, CalendarDays, GraduationCap } from "lucide-react";
+import { formatDisplayText } from "@/utils/textFormat.js";
 
 const icons = { program: GraduationCap, focus: BookOpen, member: CalendarDays };
 
@@ -19,7 +20,7 @@ export default function ProfileDetails({ details }) {
                 {label}
               </dt>
               <dd className="mt-1 text-sm font-medium text-text-main">
-                {value}
+                {typeof value === "string" ? formatDisplayText(value) || value : value}
               </dd>
             </div>
           </div>

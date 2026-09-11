@@ -17,10 +17,11 @@ export function mapCreateClassPayload(details = {}) {
 
 export function mapJoinClassPayload({ courseId, code, classCode } = {}) {
   const normalizedCode = formatClassCodeFromInput(code ?? classCode ?? "");
-  return {
-    courseId: courseId ?? "",
-    code: normalizedCode,
-  };
+  const payload = { code: normalizedCode };
+  if (courseId) {
+    payload.courseId = courseId;
+  }
+  return payload;
 }
 
 function formatClassCodeFromInput(value) {
@@ -71,7 +72,13 @@ export async function updateClassroom(courseId, changes) {
   );
 }
 
-export async function joinClassroom(_userId, courseId, code) {
+export async function joinClassroom(_userId, courseIdOrCode, maybeCode) {
+  let courseId = courseIdOrCode;
+  let code = maybeCode;
+  if (maybeCode === undefined) {
+    code = courseIdOrCode;
+    courseId = undefined;
+  }
   const payload = mapJoinClassPayload({ courseId, code });
 
   return unwrapResponse(

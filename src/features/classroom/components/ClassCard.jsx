@@ -1,10 +1,16 @@
 import { Link } from "react-router";
-import { MessageCircle, Users } from "lucide-react";
+import { KeyRound, MessageCircle, Users } from "lucide-react";
+import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ClassCard({ classroom }) {
   const teacher =
     classroom.instructor || classroom.teacher || { name: "CampusMind teacher" };
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
+  const category = classroom.subject
+    ? formatDisplayText(classroom.subject)
+    : classroom.role === "Created"
+    ? "Teaching"
+    : "Class";
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -32,13 +38,13 @@ export default function ClassCard({ classroom }) {
         {/* pr-16 prevents long titles from overlapping the floating avatar */}
         <div className="pr-16">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            {classroom.role === "Created" ? "Teaching" : "Class"}
+            {category}
           </p>
           <h2 className="mt-1 text-lg font-bold text-text-heading line-clamp-1">
             {classroom.title}
           </h2>
           <p className="mt-0.5 text-sm text-text-muted line-clamp-1">
-            {classroom.subtitle}
+            {classroom.subtitle || classroom.section || "Active Class"}
           </p>
         </div>
 
@@ -47,12 +53,15 @@ export default function ClassCard({ classroom }) {
           <span className="font-medium text-text-main">
             with {teacher.name}
           </span>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-semibold text-text-main">
-              {classroom.onlineCount || 0} online
-            </span>
+          <div className="flex items-center gap-2.5">
+            {classroom.code && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 font-mono text-xs font-semibold text-text-muted">
+                <KeyRound size={11} className="text-primary" />
+                {classroom.code}
+              </span>
+            )}
             <span className="inline-flex items-center gap-1 font-medium">
-              <Users size={15} />
+              <Users size={14} />
               {classroom.memberCount || 0}
             </span>
           </div>

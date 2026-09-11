@@ -28,6 +28,7 @@ function getInitialFormData(profile) {
     profileVisibility: profile?.profileVisibility || "PUBLIC",
     avatar: profile?.avatar || "",
     banner: profile?.banner || "",
+    links: Array.isArray(profile?.links) ? [...profile.links] : [],
   };
 }
 
@@ -72,8 +73,12 @@ export function useProfileForm({ profile, isOpen, onClose, onSave }) {
     setErrors(nextErrors);
     setTouched(Object.fromEntries(FORM_FIELDS.map((field) => [field, true])));
     if (Object.keys(nextErrors).length > 0) return;
+    const cleanedLinks = (formData.links || [])
+      .map((l) => (typeof l === "string" ? l.trim() : ""))
+      .filter(Boolean);
     await onSave({
       ...formData,
+      links: cleanedLinks,
       avatarFile: imageFiles.avatar,
       bannerFile: imageFiles.banner,
     });

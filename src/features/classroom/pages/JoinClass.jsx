@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { ArrowLeft } from "lucide-react";
 import { joinClassroom } from "../api/classroomService";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
@@ -15,9 +16,7 @@ export default function JoinClass() {
   const dispatch = useDispatch();
   const { user } = useAuth();
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
-  const [courseId, setCourseId] = useState(
-    () => searchParams.get("courseId") || ""
-  );
+  const optionalCourseId = searchParams.get("courseId") || "";
   const [code, setCode] = useState(() =>
     Array.from(
       { length: CLASS_CODE_LENGTH },
@@ -65,11 +64,10 @@ export default function JoinClass() {
 
   const handleFindClass = async (e) => {
     e.preventDefault();
-    const trimmedCourseId = courseId.trim();
     const classCode = formatClassCode(code);
     const hasCode = code.every(Boolean);
 
-    if (!trimmedCourseId || !hasCode) {
+    if (!hasCode) {
       setStatus("incomplete");
       return;
     }
@@ -77,9 +75,7 @@ export default function JoinClass() {
     setStatus("loading");
     setError("");
     try {
-      // A detail read is membership-protected, so joining must use the
-      // enrollment endpoint directly rather than attempting a preflight GET.
-      const joined = await joinClassroom(user?.id, trimmedCourseId, classCode);
+      const joined = await joinClassroom(user?.id, optionalCourseId || undefined, classCode);
       triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(joined);
       setStatus("joined");
@@ -91,7 +87,6 @@ export default function JoinClass() {
 
   const handleReset = () => {
     setCode(Array.from({ length: CLASS_CODE_LENGTH }, () => ""));
-    setCourseId("");
     setStatus("idle");
     setFoundClass(null);
     setError("");
@@ -101,6 +96,16 @@ export default function JoinClass() {
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md">
+        {/* Back Link */}
+        <div className="mb-6">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to classes</span>
+          </Link>
+        </div>
         {/* Header */}
         <div className="mb-6 text-center sm:mb-8">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-canvas sm:h-14 sm:w-14">
@@ -129,15 +134,6 @@ export default function JoinClass() {
         <div className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-border sm:p-6 lg:p-8">
           {status !== "joined" && (
             <form onSubmit={handleFindClass}>
-              <label className="mb-2 block text-center text-sm font-medium text-text-main">
-                Course ID
-              </label>
-              <input
-                value={courseId}
-                onChange={(event) => setCourseId(event.target.value)}
-                placeholder="Paste the course ID from your teacher"
-                className="mb-5 w-full rounded-lg border border-border px-3 py-2 text-center text-sm text-text-heading outline-none focus:border-primary focus:ring-2 focus:ring-focus"
-              />
               <label className="mb-3 block text-center text-sm font-medium text-text-main">
                 Class code
               </label>
@@ -165,7 +161,7 @@ export default function JoinClass() {
 
               {status === "incomplete" && (
                 <p className="mt-3 text-center text-xs text-secondary">
-                  Enter the course ID and all 8 characters of the class code.
+                  Enter all 8 characters of the class code.
                 </p>
               )}
               {status === "not-found" && (
@@ -220,13 +216,21 @@ export default function JoinClass() {
                   foundClass.teacher?.name ||
                   "CampusMind teacher"}
               </p>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="mt-6 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
-              >
-                Join another class
-              </button>
+              <div className="mt-6 flex w-full flex-col gap-2.5 sm:flex-row sm:justify-center">
+                <Link
+                  to={`/dashboard/classes/${foundClass.id}`}
+                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover"
+                >
+                  Open class
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
+                >
+                  Join another class
+                </button>
+              </div>
             </div>
           )}
         </div>

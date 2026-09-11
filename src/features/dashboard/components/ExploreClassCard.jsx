@@ -1,15 +1,20 @@
 import { Link } from "react-router";
 import { Clock3, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge.jsx";
+import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ExploreClassCard({ classroom }) {
   const activity = classroom.lastActivityAt
     ? new Date(classroom.lastActivityAt).toLocaleDateString()
     : "No recent activity";
 
+  const joinTarget = classroom.code
+    ? `/dashboard/class/join?code=${encodeURIComponent(classroom.code)}`
+    : `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}`;
+
   return (
     <Link
-      to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}`}
+      to={joinTarget}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
     >
       <div className="h-2 w-full bg-primary" />
@@ -20,7 +25,7 @@ export default function ExploreClassCard({ classroom }) {
               variant="secondary"
               className="mb-3 bg-canvas text-text-main border-border"
             >
-              {classroom.subject || "General"}
+              {formatDisplayText(classroom.subject || "General")}
             </Badge>
             <h3 className="text-lg font-bold text-text-heading line-clamp-1">
               {classroom.title}

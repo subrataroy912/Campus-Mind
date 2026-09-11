@@ -1,4 +1,4 @@
-import { Image, UserRound } from "lucide-react";
+import { Image, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "../../../components/ui/button.jsx";
 import { Input } from "../../../components/ui/input.jsx";
 import ValidateField, { MAX_BIO_LENGTH } from "@/utils/ValidateField.jsx";
@@ -140,6 +140,9 @@ export function EditProfileModal({
                     placeholder="your_username"
                   />
                 </div>
+                <p className="mt-1.5 text-xs text-text-muted">
+                  Your handle is unique and helps people find you. You can change it at most twice within a 14-day period.
+                </p>
                 <FieldError id="profile-handle-error" message={errors.handle} />
               </div>
 
@@ -306,6 +309,70 @@ export function EditProfileModal({
                     <option value="PRIVATE">Private</option>
                     <option value="COURSE_MEMBERS">Course members</option>
                   </select>
+                </div>
+
+                <div className="mt-5 border-t border-border pt-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-text-heading">
+                        Social & Web Links
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        Add links to your portfolio, GitHub, LinkedIn, or personal website.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const current = Array.isArray(formData.links) ? formData.links : [];
+                        if (current.length < 5) {
+                          handleChange("links", [...current, ""]);
+                        }
+                      }}
+                      disabled={(formData.links || []).length >= 5}
+                      className="gap-1.5"
+                    >
+                      <Plus size={14} /> Add link
+                    </Button>
+                  </div>
+
+                  {(!formData.links || formData.links.length === 0) ? (
+                    <p className="py-2 text-xs italic text-text-muted">
+                      No links added yet. Click &quot;Add link&quot; to share your profiles.
+                    </p>
+                  ) : (
+                    <div className="space-y-2 mt-3">
+                      {formData.links.map((link, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            placeholder="https://..."
+                            value={link}
+                            onChange={(e) => {
+                              const updated = [...formData.links];
+                              updated[index] = e.target.value;
+                              handleChange("links", updated);
+                            }}
+                            className="text-sm"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 text-text-muted hover:text-destructive"
+                            onClick={() => {
+                              const updated = formData.links.filter((_, i) => i !== index);
+                              handleChange("links", updated);
+                            }}
+                            aria-label={`Remove link ${index + 1}`}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

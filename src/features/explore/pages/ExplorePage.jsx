@@ -8,10 +8,10 @@ import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.j
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import ExplorePersonCard from "../components/ExplorePersonCard.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
+import { useGetExplorePeopleQuery } from "../api/exploreApi.js";
 
 const matches = (value, query) =>
   value.toLowerCase().includes(query.toLowerCase());
-const NO_USERS = [];
 
 export default function ExplorePage() {
   const { user } = useAuth();
@@ -32,7 +32,7 @@ export default function ExplorePage() {
     classFilter,
     page,
   });
-  const users = NO_USERS;
+  const { data: users = [] } = useGetExplorePeopleQuery();
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -310,15 +310,7 @@ export default function ExplorePage() {
               </div>
             </section>
           )}
-          {sharedPeople.length === 0 && !searchQuery ? (
-            <div className="mt-6">
-              <EmptyState
-                title="Join a class to discover classmates"
-                description="Classmates will appear here after you join a learning space."
-                action={{ to: "/dashboard/class/join", label: "Join a class" }}
-              />
-            </div>
-          ) : filteredPeople.length ? (
+          {filteredPeople.length > 0 ? (
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredPeople.map((person) => (
                 <ExplorePersonCard
@@ -332,7 +324,11 @@ export default function ExplorePage() {
             <div className="mt-6">
               <EmptyState
                 title="No people found"
-                description="Try a different search or filter."
+                description={
+                  searchQuery
+                    ? "Try adjusting your search query or department filter."
+                    : "No public profiles are currently discoverable."
+                }
               />
             </div>
           )}

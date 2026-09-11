@@ -23,12 +23,32 @@ export async function updateSettings(nextSettings = {}) {
 }
 
 export async function fetchTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "dark" || saved === "light") {
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.toggle("dark", saved === "dark");
+      }
+      return saved;
+    }
+  } catch {
+    // ignore storage access errors
+  }
   return DEFAULT_THEME;
 }
 
 export async function updateTheme(theme) {
   if (theme !== "light" && theme !== "dark") {
     throw new Error("Unsupported theme.");
+  }
+
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+  } catch {
+    // ignore storage access errors
   }
 
   return theme;

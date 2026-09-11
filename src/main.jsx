@@ -11,6 +11,17 @@ import { Toaster } from "@/components/ui/toast.jsx";
 import { baseApi } from "./app/baseApi.js";
 import { getEventRefreshTargets } from "./features/events/refreshEvents.js";
 
+try {
+  const savedTheme = localStorage.getItem("campus-mind.theme");
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else if (savedTheme === "light") {
+    document.documentElement.classList.remove("dark");
+  }
+} catch {
+  // ignore storage errors
+}
+
 if (maintenanceMode && import.meta.env.DEV) {
   console.log("Application is in maintenance mode!");
 }

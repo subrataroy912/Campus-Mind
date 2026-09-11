@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Link } from "react-router";
+import { ArrowLeft } from "lucide-react";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
   DAYS,
@@ -29,6 +30,16 @@ export default function CreateClass() {
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
+        {/* Back Link */}
+        <div className="mb-6">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to classes</span>
+          </Link>
+        </div>
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">

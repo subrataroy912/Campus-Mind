@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Menu, MessageCircle, Pencil } from "lucide-react";
+import { Globe, Menu, MessageCircle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import {
   DropdownMenu,
@@ -129,6 +129,27 @@ export default function ProfileHeader({
                 </button>
               </p>
             )
+          )}
+          {Array.isArray(profile.links) && profile.links.length > 0 && (
+            <div className="mt-3.5 flex flex-wrap gap-2">
+              {profile.links.map((link, idx) => {
+                const url = link.startsWith("http://") || link.startsWith("https://") ? link : `https://${link}`;
+                let displayUrl = link.replace(/^https?:\/\/(www\.)?/, "");
+                if (displayUrl.endsWith("/")) displayUrl = displayUrl.slice(0, -1);
+                return (
+                  <a
+                    key={idx}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-canvas/60 px-2.5 py-1 text-xs font-medium text-text-main transition hover:border-primary/40 hover:bg-canvas hover:text-primary"
+                  >
+                    <Globe size={13} className="shrink-0 text-text-muted" />
+                    <span className="max-w-[200px] truncate">{displayUrl}</span>
+                  </a>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
