@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setAccessToken, setSession } from "@/features/auth/authSlice.js";
-import { clearLocalAuthSession } from "@/context/authSession.js";
+import {
+  clearLocalAuthSession,
+  isExpiredSessionError,
+} from "@/context/authSession.js";
 
 export const apiBaseUrl = (() => {
   const configured = (
@@ -35,10 +38,7 @@ function prepareCookieHeaders(headers) {
 }
 
 export function shouldForceLogout(endpoint, statusCode) {
-  return (
-    statusCode === 401 ||
-    (statusCode === 404 && String(endpoint).includes("/users/me"))
-  );
+  return isExpiredSessionError({ status: statusCode }, endpoint);
 }
 
 const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
@@ -152,7 +152,7 @@ export const baseQueryWithRefresh = async (args, api, extraOptions) => {
   }
   const accessToken = api.getState().auth?.accessToken;
 
-  if (!validToken(accessToken)) {
+  if (!validToken(accessToken) && api.endpoint !== "logout") {
     return { error: unauthenticatedError() };
   }
   try {

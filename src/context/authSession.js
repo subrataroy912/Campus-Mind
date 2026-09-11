@@ -73,10 +73,13 @@ export function readPersistedSession() {
   return session;
 }
 
-export function isExpiredSessionError(error) {
+export function isExpiredSessionError(error, endpoint) {
   const status =
     error?.status ?? error?.originalStatus ?? error?.response?.status;
-  return status === 401 || status === 404;
+  if (status === 401) return true;
+  if (status !== 404) return false;
+  const target = String(endpoint ?? "");
+  return target.includes("/users/me");
 }
 
 export function getProtectedRouteState(authStatus, isAuthenticated) {
@@ -103,7 +106,7 @@ export async function hydratePersistedSession({
   } catch (error) {
     return {
       status: "failed",
-      expired: isExpiredSessionError(error),
+      expired: isExpiredSessionError(error, "/users/me"),
       error,
     };
   }

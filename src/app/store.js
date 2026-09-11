@@ -19,7 +19,20 @@ import {
   readPersistedApiState,
 } from "./apiCachePersistence.js";
 
-const preloadedApiState = readPersistedApiState({ user: null });
+const persistedSessionUserId = (() => {
+  try {
+    const rawSession = window?.localStorage?.getItem("campus-mind.session");
+    if (!rawSession) return null;
+    const session = JSON.parse(rawSession);
+    return session?.user?.id ?? session?.userId ?? session?.id ?? null;
+  } catch {
+    return null;
+  }
+})();
+
+const preloadedApiState = readPersistedApiState({
+  user: { id: persistedSessionUserId },
+});
 
 const appReducer = {
   auth: authReducer,

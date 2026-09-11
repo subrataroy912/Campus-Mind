@@ -1,6 +1,11 @@
-import { safeLocalStorageRemove } from "@/utils/storage.js";
+import {
+  safeLocalStorageGet,
+  safeLocalStorageRemove,
+  safeParseStorageJson,
+} from "@/utils/storage.js";
 
 const STORAGE_KEY = "campus-mind.api-cache.v1";
+const SESSION_KEY = "campus-mind.session";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PERSISTED_ENDPOINTS = new Set([
   "fetchClassrooms",
@@ -9,8 +14,14 @@ const PERSISTED_ENDPOINTS = new Set([
   "getPublicProfile",
 ]);
 
+function getSessionUserId() {
+  const session = safeParseStorageJson(SESSION_KEY, null);
+  if (!session) return null;
+  return session.user?.id ?? session.userId ?? session.id ?? null;
+}
+
 function getUserId(authState) {
-  return authState?.user?.id ?? null;
+  return authState?.user?.id ?? getSessionUserId();
 }
 
 export function readPersistedApiState(authState) {
@@ -18,14 +29,11 @@ export function readPersistedApiState(authState) {
 
   try {
     const stored = JSON.parse(
-      window.localStorage.getItem(STORAGE_KEY) || "null"
+      safeLocalStorageGet(STORAGE_KEY, "null") || "null"
     );
-    if (
-      !stored ||
-      stored.version !== 1 ||
-      stored.userId !== getUserId(authState)
-    ) {
-      if (stored?.userId !== getUserId(authState)) {
+    const expectedUserId = getUserId(authState);
+    if (!stored || stored.version !== 1 || stored.userId !== expectedUserId) {
+      if (stored?.userId && stored.userId !== expectedUserId) {
         clearPersistedApiState();
       }
       return undefined;

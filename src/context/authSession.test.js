@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   getProtectedRouteState,
   hydratePersistedSession,
+  isExpiredSessionError,
   mergeProfileIntoCurrentSession,
   routeRequiresSessionRestore,
 } from "./authSession.js";
@@ -72,6 +73,12 @@ describe("persisted session bootstrap", () => {
     expect(getProtectedRouteState("hydrating", false)).toBe("hydrating");
     expect(getProtectedRouteState("succeeded", true)).toBe("authenticated");
     expect(getProtectedRouteState("failed", false)).toBe("unauthenticated");
+  });
+
+  it("treats profile 404s as expired only at the authenticated profile endpoint", () => {
+    expect(isExpiredSessionError({ status: 404 }, "/users/me")).toBe(true);
+    expect(isExpiredSessionError({ status: 404 }, "/classes/123")).toBe(false);
+    expect(isExpiredSessionError({ status: 401 }, "/classes/123")).toBe(true);
   });
 
   it("restores sessions only for routes that require authentication", () => {
