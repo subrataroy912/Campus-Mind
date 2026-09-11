@@ -100,7 +100,9 @@ export function useCreateClassForm() {
         state: { enrollmentCode: classroom.code },
       });
     } catch (error) {
-      setSubmissionError(error.message || "Unable to create this class.");
+      setSubmissionError(
+        error?.data?.error || error?.message || "Unable to create this class."
+      );
     } finally {
       setIsSubmitting(false);
     }

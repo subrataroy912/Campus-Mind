@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { normalizeAuthResponse } from "../api/authService.js";
 import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
+import { safeLocalStorageSet } from "@/utils/storage.js";
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
@@ -23,6 +24,11 @@ export default function OAuthCallbackPage() {
       try {
         const hashParams = new URLSearchParams(location.hash.replace(/^#/, ""));
         const params = hashParams.toString() ? hashParams : searchParams;
+        const refreshToken =
+          params.get("refreshToken") || params.get("refresh_token");
+        if (refreshToken) {
+          safeLocalStorageSet("campus-mind.refreshToken", refreshToken);
+        }
         const callback = parseOAuthCallback(params);
         // Tokens are single-use bootstrap data and must not remain in history.
         window.history.replaceState({}, document.title, window.location.pathname);

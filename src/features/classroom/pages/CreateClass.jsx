@@ -1,3 +1,5 @@
+import { useAuth } from "@/context/AuthContext.jsx";
+import { Link } from "react-router";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
   DAYS,
@@ -7,6 +9,7 @@ import {
 } from "../model/createClassForm.js";
 
 export default function CreateClass() {
+  const { user } = useAuth();
   const {
     form,
     preview,
@@ -21,6 +24,8 @@ export default function CreateClass() {
     submit,
   } = useCreateClassForm();
 
+  const isStudent = user?.accountType === "STUDENT";
+
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
@@ -33,6 +38,32 @@ export default function CreateClass() {
             Set up a new class for your students to join.
           </p>
         </div>
+
+        {isStudent && (
+          <div
+            className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-200"
+            role="alert"
+          >
+            <p className="font-semibold">Teacher Account Required</p>
+            <p className="mt-1">
+              Your account is registered as a <strong>Student</strong>. Only Teacher accounts have permission to create classes. If you need to attend a class, you can{" "}
+              <Link to="/dashboard/class/join" className="underline font-medium hover:text-amber-700">
+                join with a class code
+              </Link>
+              .
+            </p>
+          </div>
+        )}
+
+        {submissionError && (
+          <div
+            className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300"
+            role="alert"
+          >
+            <p className="font-semibold">Unable to create class</p>
+            <p className="mt-1">{submissionError}</p>
+          </div>
+        )}
 
         <form
           onSubmit={submit}
