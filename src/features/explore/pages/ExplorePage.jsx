@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -8,12 +8,6 @@ import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.j
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import ExplorePersonCard from "../components/ExplorePersonCard.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
-import {
-  setClassFilter,
-  setPersonFilter,
-  setSearchQuery,
-  setTab,
-} from "../exploreSlice.js";
 
 const matches = (value, query) =>
   value.toLowerCase().includes(query.toLowerCase());
@@ -21,12 +15,13 @@ const NO_USERS = [];
 
 export default function ExplorePage() {
   const { user } = useAuth();
-  const dispatch = useDispatch();
-  const { tab, searchQuery, classFilter, personFilter } = useSelector(
-    (state) => state.explore
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") || "classes";
+  const classFilter = searchParams.get("classFilter") || "all";
+  const personFilter = searchParams.get("personFilter") || "all";
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const {
     classes,
     page: pageData,
@@ -46,6 +41,25 @@ export default function ExplorePage() {
     }, 300);
     return () => window.clearTimeout(timeout);
   }, [searchQuery]);
+
+  const handleClassFilterChange = (filterVal) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (filterVal === "all") next.delete("classFilter");
+      else next.set("classFilter", filterVal);
+      return next;
+    });
+    setPage(0);
+  };
+
+  const handlePersonFilterChange = (filterVal) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (filterVal === "all") next.delete("personFilter");
+      else next.set("personFilter", filterVal);
+      return next;
+    });
+  };
 
   const classSubjects = [
     ...new Set(classes.map((item) => item.subject).filter(Boolean)),
@@ -131,7 +145,7 @@ export default function ExplorePage() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
         <input
           value={searchQuery}
-          onChange={(event) => dispatch(setSearchQuery(event.target.value))}
+          onChange={(event) => setSearchQuery(event.target.value)}
           placeholder="Search public courses"
           aria-label="Search public courses"
           className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-primary"
@@ -142,7 +156,13 @@ export default function ExplorePage() {
           role="tab"
           aria-selected={tab === "classes"}
           variant={tab === "classes" ? "default" : "ghost"}
-          onClick={() => dispatch(setTab("classes"))}
+          onClick={() => {
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              next.delete("tab");
+              return next;
+            });
+          }}
         >
           Classes
         </Button>
@@ -150,7 +170,13 @@ export default function ExplorePage() {
           role="tab"
           aria-selected={tab === "people"}
           variant={tab === "people" ? "default" : "ghost"}
-          onClick={() => dispatch(setTab("people"))}
+          onClick={() => {
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              next.set("tab", "people");
+              return next;
+            });
+          }}
         >
           People
         </Button>
@@ -160,28 +186,19 @@ export default function ExplorePage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <FilterButton
               active={classFilter === "all"}
-              onClick={() => {
-                dispatch(setClassFilter("all"));
-                setPage(0);
-              }}
+              onClick={() => handleClassFilterChange("all")}
             >
               All
             </FilterButton>
             <FilterButton
               active={classFilter === "popular"}
-              onClick={() => {
-                dispatch(setClassFilter("popular"));
-                setPage(0);
-              }}
+              onClick={() => handleClassFilterChange("popular")}
             >
               Popular
             </FilterButton>
             <FilterButton
               active={classFilter === "recommended"}
-              onClick={() => {
-                dispatch(setClassFilter("recommended"));
-                setPage(0);
-              }}
+              onClick={() => handleClassFilterChange("recommended")}
             >
               Recommended
             </FilterButton>
@@ -189,10 +206,7 @@ export default function ExplorePage() {
               <FilterButton
                 key={subject}
                 active={classFilter === subject}
-                onClick={() => {
-                  dispatch(setClassFilter(subject));
-                  setPage(0);
-                }}
+                onClick={() => handleClassFilterChange(subject)}
               >
                 {subject}
               </FilterButton>
@@ -251,13 +265,13 @@ export default function ExplorePage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <FilterButton
               active={personFilter === "all"}
-              onClick={() => dispatch(setPersonFilter("all"))}
+              onClick={() => handlePersonFilterChange("all")}
             >
               All departments
             </FilterButton>
             <FilterButton
               active={personFilter === "shared"}
-              onClick={() => dispatch(setPersonFilter("shared"))}
+              onClick={() => handlePersonFilterChange("shared")}
             >
               Shares a class with you
             </FilterButton>
@@ -265,7 +279,7 @@ export default function ExplorePage() {
               <FilterButton
                 key={department}
                 active={personFilter === department}
-                onClick={() => dispatch(setPersonFilter(department))}
+                onClick={() => handlePersonFilterChange(department)}
               >
                 {department}
               </FilterButton>
@@ -274,7 +288,7 @@ export default function ExplorePage() {
               <FilterButton
                 key={batchYear}
                 active={personFilter === String(batchYear)}
-                onClick={() => dispatch(setPersonFilter(String(batchYear)))}
+                onClick={() => handlePersonFilterChange(String(batchYear))}
               >
                 Batch {batchYear}
               </FilterButton>

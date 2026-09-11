@@ -1,6 +1,5 @@
 import { Fragment, useMemo, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useParams } from "react-router";
+import { useLocation, useParams, useSearchParams } from "react-router";
 import {
   ClipboardList,
   FileText,
@@ -28,7 +27,6 @@ import ClassTabs from "../components/ClassTabs.jsx";
 import ClassQuickLinks from "../components/ClassQuickLinks.jsx";
 import { ClassroomAvatar } from "../components/ClassroomAvatar.jsx";
 import { useClassroom } from "../hooks/useClassroom.js";
-import { setClassroomTab } from "../classroomSlice.js";
 import {
   useGetCourseworkByIdQuery,
   useGetCourseworkListQuery,
@@ -1163,8 +1161,8 @@ function Grades({ teacher }) {
   );
 }
 export default function ClassPage() {
-  const dispatch = useDispatch();
-  const activeTab = useSelector((state) => state.classroom.activeTab);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "home";
   const { classId } = useParams();
   const location = useLocation();
   const { classroom, error, notFound } = useClassroom(classId);
@@ -1207,7 +1205,17 @@ export default function ClassPage() {
         <ClassHeader classroom={classroomWithNewCode} />
         <ClassTabs
           active={activeTab}
-          onChange={(nextTab) => dispatch(setClassroomTab(nextTab))}
+          onChange={(nextTab) => {
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              if (nextTab === "home") {
+                next.delete("tab");
+              } else {
+                next.set("tab", nextTab);
+              }
+              return next;
+            });
+          }}
         />
         {activeTab === "home" && <Home />}
         {activeTab === "classwork" && (

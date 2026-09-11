@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { LogOut, Moon, Sun, UserRound } from "lucide-react";
 
@@ -9,9 +8,11 @@ import { Button } from "@/components/ui/button.jsx";
 import { Switch } from "@/components/ui/switch.jsx";
 import ProfileSection from "@/features/profile/components/ProfileSection.jsx";
 import { useSettings } from "../hooks/useSettings.js";
-import { fetchSettings, updateSettings } from "../api/settingsService.js";
+import {
+  useGetNotificationSettingsQuery,
+  useUpdateNotificationSettingsMutation,
+} from "@/features/notifications/api/notificationsApi.js";
 import { initials } from "@/utils/initials.js";
-import { setNotifications, toggleNotification } from "../settingsSlice.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
@@ -35,8 +36,8 @@ function SettingRow({ title, description, checked, onChange }) {
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
-  const { notifications } = useSelector((state) => state.settings);
-  const dispatch = useDispatch();
+  const { data: serverSettings } = useGetNotificationSettingsQuery();
+  const [updateNotificationSettings] = useUpdateNotificationSettingsMutation();
   const {
     theme,
     isLoading: isThemeLoading,
@@ -46,22 +47,12 @@ export default function SettingsPage() {
   } = useSettings();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let active = true;
-
-    fetchSettings()
-      .then((savedSettings) => {
-        if (!active) return;
-        dispatch(setNotifications(savedSettings.notifications));
-      })
-      .catch(() => {
-        // leave defaults in place when settings cannot be loaded
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [dispatch]);
+  const notifications = {
+    emailEnabled: true,
+    pushEnabled: true,
+    inAppEnabled: true,
+    ...serverSettings,
+  };
 
   const handleToggleNotification = async (key) => {
     const nextNotifications = {
@@ -69,12 +60,10 @@ export default function SettingsPage() {
       [key]: !notifications[key],
     };
 
-    dispatch(toggleNotification(key));
-
     try {
-      await updateSettings({ notifications: nextNotifications });
+      await updateNotificationSettings(nextNotifications).unwrap();
     } catch {
-      dispatch(setNotifications(notifications));
+      // RTK Query handles query cache invalidation on mutation
     }
   };
 

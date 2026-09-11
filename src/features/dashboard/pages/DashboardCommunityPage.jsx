@@ -8,7 +8,7 @@ import {
   Pin,
   Send,
 } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router";
 
 import { useDashboardData } from "../useDashboardData.js";
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
@@ -16,10 +16,6 @@ import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
-import {
-  setCommunityDraft,
-  setCommunityFilter,
-} from "../dashboardSlice.js";
 
 const TYPE_META = {
   announcement: {
@@ -102,10 +98,11 @@ function CommunityPost({ post }) {
 
 export default function DashboardCommunityPage() {
   const { user } = useAuth();
-  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const communityFilter = searchParams.get("filter") || "all";
+  const [draft, setDraft] = useState("");
   const { classrooms = [] } = useDashboardData();
   const { data, isLoading, error } = useCommunityFeed();
-  const { communityFilter, draft } = useSelector((state) => state.dashboard);
 
   const posts = data?.posts ?? EMPTY_FEED;
   const filters = data?.filters ?? EMPTY_FEED;
@@ -165,7 +162,7 @@ export default function DashboardCommunityPage() {
               <div className="flex-1">
                 <textarea
                   value={draft}
-                  onChange={(event) => dispatch(setCommunityDraft(event.target.value))}
+                  onChange={(event) => setDraft(event.target.value)}
                   rows={2}
                   placeholder="Ask a question or share something with your classes…"
                   className="w-full resize-none rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-4 focus:ring-focus"
@@ -174,6 +171,7 @@ export default function DashboardCommunityPage() {
                   <Button
                     size="sm"
                     disabled={!draft.trim()}
+                    onClick={() => setDraft("")}
                     className="gap-1.5"
                   >
                     <Send size={14} aria-hidden="true" />
@@ -194,7 +192,17 @@ export default function DashboardCommunityPage() {
                 key={filter.id}
                 variant={communityFilter === filter.id ? "default" : "outline"}
                 size="sm"
-                onClick={() => dispatch(setCommunityFilter(filter.id))}
+                onClick={() => {
+                  setSearchParams((prev) => {
+                    const next = new URLSearchParams(prev);
+                    if (filter.id === "all") {
+                      next.delete("filter");
+                    } else {
+                      next.set("filter", filter.id);
+                    }
+                    return next;
+                  });
+                }}
                 role="tab"
                 aria-selected={communityFilter === filter.id}
               >
