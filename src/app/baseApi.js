@@ -150,7 +150,11 @@ export const baseQueryWithRefresh = async (args, api, extraOptions) => {
   ) {
     return result.error ? { error: normalizeError(result.error) } : result;
   }
+  const accessToken = api.getState().auth?.accessToken;
 
+  if (!validToken(accessToken)) {
+    return { error: unauthenticatedError() };
+  }
   try {
     await getRefreshPromise(api, extraOptions);
   } catch {
