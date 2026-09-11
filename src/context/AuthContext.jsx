@@ -10,6 +10,7 @@ import { useMatches } from "react-router";
 import {
   login as loginRequest,
   register as registerRequest,
+  refresh as refreshRequest,
   getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
   logout as logoutRequest,
@@ -122,30 +123,17 @@ export function AuthProvider({ children }) {
 
     async function bootstrapSession() {
       try {
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
-          }/v1/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: { accept: "application/json" },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Refresh failed");
-        }
-
-        const payload = await response.json();
-        const refreshed = payload?.data ?? payload;
-        const accessToken = refreshed?.accessToken;
+        const refreshed = await refreshRequest();
+        const accessToken = refreshed.accessToken;
 
         if (!accessToken) {
           throw new Error("Refresh failed");
         }
 
-        commitAuthSession(dispatch, { accessToken, user: userRef.current });
+        commitAuthSession(dispatch, {
+          accessToken,
+          user: refreshed.user ?? userRef.current,
+        });
 
         const profile = await getCurrentProfileRequest();
         if (ignore) return;
@@ -195,6 +183,9 @@ export function AuthProvider({ children }) {
       },
       async completeOAuth({ accessToken, user: nextUser, errorMessage }) {
         if (errorMessage) {
+          // Install the provider-issued token before requesting /users/me. Without
+          // this, the profile request is sent without Authorization on a new OAuth
+          // session and the callback can never complete.
           const error = new Error(errorMessage);
           setAuthState({ status: "failed", error });
           throw error;
@@ -219,9 +210,6 @@ export function AuthProvider({ children }) {
           : null;
 
         resetApiCache(dispatch);
-        // Install the provider-issued token before requesting /users/me. Without
-        // this, the profile request is sent without Authorization on a new OAuth
-        // session and the callback can never complete.
         const provisionalUser = hydratedUser ?? null;
         commitAuthSession(dispatch, {
           accessToken,

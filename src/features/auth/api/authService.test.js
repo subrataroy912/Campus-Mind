@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { logout, normalizeAuthResponse } from "./authService.js";
+import { logout, normalizeAuthResponse, refresh } from "./authService.js";
 import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
@@ -114,6 +114,31 @@ describe("normalizeAuthResponse", () => {
       errorMessage:
         "The social sign-in response contained an invalid user profile.",
     });
+  });
+});
+
+describe("session refresh", () => {
+  it("uses the shared API configuration and cookie credentials", async () => {
+    const requests = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (request) => {
+        requests.push(request);
+        return new Response(
+          JSON.stringify({ data: { accessToken: "refreshed-access" } }),
+          { status: 200, headers: { "content-type": "application/json" } }
+        );
+      })
+    );
+
+    await expect(refresh()).resolves.toEqual({
+      accessToken: "refreshed-access",
+      user: null,
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(new URL(requests[0].url).pathname).toBe("/v1/auth/refresh");
+    expect(requests[0].credentials).toBe("include");
   });
 });
 

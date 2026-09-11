@@ -16,6 +16,12 @@ export const authApi = baseApi.injectEndpoints({
         body: details,
       }),
     }),
+    refresh: builder.mutation({
+      query: () => ({
+        url: "/auth/refresh",
+        method: "POST",
+      }),
+    }),
     logout: builder.mutation({
       query: () => ({
         url: "/auth/logout",

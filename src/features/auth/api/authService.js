@@ -66,6 +66,12 @@ export async function register(details) {
   );
 }
 
+export async function refresh() {
+  return normalizeAuthResponse(
+    await store.dispatch(authApi.endpoints.refresh.initiate()).unwrap()
+  );
+}
+
 export async function getCurrentProfile() {
   return unwrapResponse(
     await store

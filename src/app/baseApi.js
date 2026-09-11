@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setAccessToken, setSession } from "@/features/auth/authSlice.js";
 import { clearLocalAuthSession } from "@/context/authSession.js";
 
-/** The API always exposes versioned routes; callers configure only its origin. */
 export const apiBaseUrl = (() => {
   const configured = (
     import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
@@ -35,7 +34,6 @@ function prepareCookieHeaders(headers) {
   return headers;
 }
 
-// Retained for callers which need to distinguish a missing current profile.
 export function shouldForceLogout(endpoint, statusCode) {
   return (
     statusCode === 401 ||
@@ -88,7 +86,6 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-// Refresh is deliberately separate so it can never inherit a stale bearer token.
 const publicBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
   credentials: "include",
@@ -134,8 +131,6 @@ function getRefreshPromise(api, extraOptions) {
 
   refreshPromise = refreshCredentials(api, extraOptions)
     .catch((error) => {
-      // All waiters share this branch, which makes teardown and the returned
-      // unauthenticated error deterministic even when many requests fail.
       clearLocalAuthSession(api.dispatch);
       throw error?.status === 401 ? error : unauthenticatedError();
     })
@@ -145,7 +140,6 @@ function getRefreshPromise(api, extraOptions) {
   return refreshPromise;
 }
 
-/** Refresh a failed authenticated request once. Refresh itself can never recurse. */
 export const baseQueryWithRefresh = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
   if (
