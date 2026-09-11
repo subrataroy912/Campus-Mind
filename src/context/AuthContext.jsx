@@ -124,6 +124,7 @@ export function AuthProvider({ children }) {
     async function bootstrapSession() {
       try {
         const refreshed = await refreshRequest();
+        if (ignore) return;
         const accessToken = refreshed.accessToken;
 
         if (!accessToken) {
