@@ -118,7 +118,12 @@ export function AuthProvider({ children }) {
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
-        explicitTeardownErrorRef.current = getHydrationFailureError(error);
+        
+        const status = error?.status ?? error?.originalStatus ?? error?.response?.status;
+        const isUnauthenticated = status === 400 || status === 401;
+        const hydrationError = isUnauthenticated ? null : getHydrationFailureError(error);
+
+        explicitTeardownErrorRef.current = hydrationError;
         clearLocalAuthSession(
           dispatch,
           (reason) => {
@@ -126,10 +131,15 @@ export function AuthProvider({ children }) {
           },
           explicitTeardownErrorRef.current
         );
-        setAuthState({
-          status: "failed",
-          error: getHydrationFailureError(error),
-        });
+
+        if (isUnauthenticated) {
+          setAuthState({ status: "succeeded", error: null });
+        } else {
+          setAuthState({
+            status: "failed",
+            error: hydrationError,
+          });
+        }
         explicitTeardownErrorRef.current = null;
       }
     }
