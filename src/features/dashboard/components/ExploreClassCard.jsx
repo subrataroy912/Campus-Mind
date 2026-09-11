@@ -9,7 +9,7 @@ export default function ExploreClassCard({ classroom }) {
 
   return (
     <Link
-      to={`/dashboard/classes/${encodeURIComponent(classroom.courseId)}`}
+      to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
     >
       <div className="h-2 w-full bg-primary" />
