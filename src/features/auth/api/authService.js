@@ -74,8 +74,6 @@ export async function refresh() {
 export async function getCurrentProfile() {
   return unwrapResponse(
     await store
-      // A cached /users/me response cannot validate credentials after a page
-      // reload. Always hit the server for the session bootstrap/OAuth flow.
       .dispatch(
         profileApi.endpoints.getCurrentProfile.initiate(undefined, {
           forceRefetch: true,
