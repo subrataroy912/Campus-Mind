@@ -1,4 +1,5 @@
 import { baseApi } from "@/app/baseApi.js";
+import { safeLocalStorageGet } from "@/utils/storage.js";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,16 +18,24 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
     refresh: builder.mutation({
-      query: () => ({
-        url: "/auth/refresh",
-        method: "POST",
-      }),
+      query: () => {
+        const refreshToken = safeLocalStorageGet("campus-mind.refreshToken");
+        return {
+          url: "/auth/refresh",
+          method: "POST",
+          body: refreshToken ? { refreshToken } : undefined,
+        };
+      },
     }),
     logout: builder.mutation({
-      query: () => ({
-        url: "/auth/logout",
-        method: "POST",
-      }),
+      query: () => {
+        const refreshToken = safeLocalStorageGet("campus-mind.refreshToken");
+        return {
+          url: "/auth/logout",
+          method: "POST",
+          body: refreshToken ? { refreshToken } : undefined,
+        };
+      },
     }),
   }),
 });

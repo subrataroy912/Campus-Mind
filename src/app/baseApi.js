@@ -5,6 +5,10 @@ import {
   isExpiredSessionError,
 } from "@/context/authSession.js";
 import { registerRefreshInvalidator } from "./refreshState.js";
+import {
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+} from "@/utils/storage.js";
 
 export const apiBaseUrl = (() => {
   const configured = (
@@ -104,8 +108,13 @@ function validToken(value) {
 }
 
 async function refreshCredentials(api, extraOptions) {
+  const storedRefreshToken = safeLocalStorageGet("campus-mind.refreshToken") || "";
   const refreshResult = await publicBaseQuery(
-    { url: "/auth/refresh", method: "POST" },
+    { 
+      url: "/auth/refresh", 
+      method: "POST",
+      body: storedRefreshToken ? { refreshToken: storedRefreshToken } : undefined
+    },
     api,
     { ...extraOptions, skipAuthRefresh: true }
   );
@@ -113,6 +122,10 @@ async function refreshCredentials(api, extraOptions) {
 
   if (refreshResult.error || !validToken(refreshed?.accessToken)) {
     throw unauthenticatedError();
+  }
+
+  if (refreshed?.refreshToken) {
+    safeLocalStorageSet("campus-mind.refreshToken", refreshed.refreshToken);
   }
 
   const existingUser = api.getState().auth?.user ?? null;

@@ -5,6 +5,8 @@ import { clearLocalAuthSession } from "@/context/authSession.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
+import { safeLocalStorageSet } from "@/utils/storage.js";
+
 export function normalizeAuthResponse(response) {
   const payload = unwrapResponse(response);
   const nestedUser = payload.user ?? {};
@@ -38,8 +40,14 @@ export function normalizeAuthResponse(response) {
   });
   const user = Object.keys(userFields).length ? userFields : null;
 
+  const refreshToken = payload.refreshToken ?? null;
+  if (refreshToken) {
+    safeLocalStorageSet("campus-mind.refreshToken", refreshToken);
+  }
+
   return {
     accessToken: payload.accessToken ?? payload.token ?? null,
+    refreshToken,
     user,
   };
 }

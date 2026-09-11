@@ -47,6 +47,9 @@ export function parseOAuthCallback(searchParams) {
       searchParams.get("accessToken") ||
       searchParams.get("access_token") ||
       searchParams.get("token"),
+    refreshToken:
+      searchParams.get("refreshToken") ||
+      searchParams.get("refresh_token"),
     user,
     userId: searchParams.get("userId") || searchParams.get("user_id"),
     email: searchParams.get("email"),

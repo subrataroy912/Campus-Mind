@@ -117,6 +117,7 @@ export function clearLocalAuthSession(dispatch, clearContextUser, reason) {
   dispatch(baseApi.util.resetApiState());
   clearPersistedApiState();
   safeLocalStorageRemove(SESSION_KEY);
+  safeLocalStorageRemove("campus-mind.refreshToken");
   if (safeLocalStorageGet(LEGACY_MIGRATION_KEY) !== "1") {
     // Remove legacy auth storage once; delete this migration after legacy builds age out.
     LEGACY_AUTH_STORAGE_KEYS.forEach(safeLocalStorageRemove);
