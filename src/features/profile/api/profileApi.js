@@ -35,17 +35,19 @@ export const profileApi = baseApi.injectEndpoints({
         { type: "Profile", id: "CURRENT" },
         { type: "Classrooms", id: "LIST" },
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(changes, { dispatch, queryFulfilled }) {
+        const { avatarFile, bannerFile, ...profile } = changes;
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData("getCurrentProfile", undefined, (draft) => {
+            Object.assign(draft, profile);
+            if (avatarFile) draft.avatar = URL.createObjectURL(avatarFile);
+            if (bannerFile) draft.bannerUrl = URL.createObjectURL(bannerFile);
+          })
+        );
         try {
           await queryFulfilled;
-          dispatch(
-            profileApi.util.invalidateTags([
-              { type: "Profile", id: "CURRENT" },
-              { type: "Classrooms", id: "LIST" },
-            ])
-          );
         } catch {
-          // The profile mutation will surface the request error to the caller.
+          patchResult.undo();
         }
       },
     }),

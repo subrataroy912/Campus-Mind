@@ -46,6 +46,7 @@ const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
 const PUBLIC_DISCOVERY_ENDPOINTS = new Set([
   "getExploreFeed",
   "searchExploreCourses",
+  "uploadCourseCover",
 ]);
 const UNAUTHENTICATED_ERROR = Object.freeze({
   status: 401,
@@ -219,5 +220,8 @@ export const baseApi = createApi({
     "Attachments",
   ],
   baseQuery: baseQueryWithRefresh,
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
+  keepUnusedDataFor: 300,
   endpoints: () => ({}),
 });

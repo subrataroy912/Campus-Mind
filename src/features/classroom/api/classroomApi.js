@@ -127,6 +127,25 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: result?.id ?? "unknown" },
         ...(discoveryFieldsChanged(changes) ? exploreTags : []),
       ],
+      async onQueryStarted({ courseId, changes }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          classroomApi.util.updateQueryData("findClassroomById", courseId, (draft) => {
+            Object.assign(draft, changes);
+          })
+        );
+        const listPatchResult = dispatch(
+          classroomApi.util.updateQueryData("fetchClassrooms", undefined, (draft) => {
+            const course = draft.find((c) => c.id === courseId);
+            if (course) Object.assign(course, changes);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+          listPatchResult.undo();
+        }
+      },
     }),
     deleteClassroom: builder.mutation({
       query: (courseId) => ({ url: `/courses/${courseId}`, method: "DELETE" }),

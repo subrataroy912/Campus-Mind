@@ -43,12 +43,17 @@ export const courseworkApi = baseApi.injectEndpoints({
       transformResponse: (response) => {
         return { ...response, content: response.content.map(normalizeCoursework) };
       },
+      providesTags: (result, _error, { courseId }) => [
+        { type: "Coursework", id: `LIST-${courseId}` },
+        ...(result?.content?.map((item) => ({ type: "Coursework", id: item.id })) || []),
+      ],
     }),
     getCourseworkById: builder.query({
       query: ({ courseId, courseworkId }) =>
         `/courses/${courseId}/coursework/${courseworkId}`,
       transformResponse: (response) =>
         normalizeCoursework(response?.data ?? response),
+      providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: courseworkId }],
     }),
     createCoursework: builder.mutation({
       query: ({ courseId, payload }) => ({
@@ -58,7 +63,11 @@ export const courseworkApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeCoursework(response?.data ?? response),
-      invalidatesTags: ["Classrooms", "Profile"],
+      invalidatesTags: (result, _error, { courseId }) => [
+        { type: "Coursework", id: `LIST-${courseId}` },
+        "Classrooms", 
+        "Profile"
+      ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -71,27 +80,50 @@ export const courseworkApi = baseApi.injectEndpoints({
     updateCoursework: builder.mutation({
       query: ({ courseId, courseworkId, changes }) => ({ url: `/courses/${courseId}/coursework/${courseworkId}`, method: "PATCH", body: changes }),
       transformResponse: normalizeCoursework,
-      invalidatesTags: ["Coursework", "Classrooms"],
+      invalidatesTags: (result, _error, { courseId, courseworkId }) => [
+        { type: "Coursework", id: courseworkId },
+        { type: "Coursework", id: `LIST-${courseId}` },
+        "Classrooms"
+      ],
+      async onQueryStarted({ courseId, courseworkId, changes }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          courseworkApi.util.updateQueryData("getCourseworkById", { courseId, courseworkId }, (draft) => {
+            Object.assign(draft, changes);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     deleteCoursework: builder.mutation({
       query: ({ courseId, courseworkId }) => ({ url: `/courses/${courseId}/coursework/${courseworkId}`, method: "DELETE" }),
-      invalidatesTags: ["Coursework", "Classrooms"],
+      invalidatesTags: (result, _error, { courseId, courseworkId }) => [
+        { type: "Coursework", id: courseworkId },
+        { type: "Coursework", id: `LIST-${courseId}` },
+        "Classrooms"
+      ],
     }),
     getSubmissionList: builder.query({
       query: ({ courseworkId, page = 0, size = 20 }) => ({ url: `/coursework/${courseworkId}/submissions`, params: { page, size } }),
       transformResponse: (response) => {
         return { ...response, content: response.content.map(normalizeSubmission) };
       },
+      providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: `SUBMISSIONS-${courseworkId}` }],
     }),
     getMySubmission: builder.query({
       query: ({ courseworkId }) => `/coursework/${courseworkId}/submissions/me`,
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
+      providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: `MYSUBMISSION-${courseworkId}` }],
     }),
     getStudentGradebook: builder.query({
       query: ({ courseId, studentId }) =>
         `/analytics/courses/${courseId}/students/${studentId}/gradebook`,
       transformResponse: normalizeGradebook,
+      providesTags: (_result, _error, { courseId, studentId }) => [{ type: "Coursework", id: `GRADEBOOK-${courseId}-${studentId}` }],
     }),
     getCourseAnalyticsSummary: builder.query({
       query: (courseId) => `/analytics/courses/${courseId}/summary`,
@@ -104,6 +136,18 @@ export const courseworkApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
+      async onQueryStarted({ courseworkId, payload }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          courseworkApi.util.updateQueryData("getMySubmission", { courseworkId }, (draft) => {
+            Object.assign(draft, payload, { submitted: payload.submitted ?? true });
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     saveSubmission: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({
@@ -113,6 +157,18 @@ export const courseworkApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
+      async onQueryStarted({ courseworkId, payload }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          courseworkApi.util.updateQueryData("getMySubmission", { courseworkId }, (draft) => {
+            Object.assign(draft, payload);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     gradeSubmission: builder.mutation({
       query: ({ courseworkId, submissionId, payload = {} }) => ({
@@ -122,13 +178,28 @@ export const courseworkApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
-      invalidatesTags: ["Classrooms", "Profile"],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      invalidatesTags: (result, _error, { courseId, studentId }) => [
+        "Classrooms", 
+        "Profile",
+        ...(courseId && studentId ? [{ type: "Coursework", id: `GRADEBOOK-${courseId}-${studentId}` }] : [])
+      ],
+      async onQueryStarted({ courseworkId, submissionId, payload }, { dispatch, queryFulfilled }) {
+        const listPatchResult = dispatch(
+          courseworkApi.util.updateQueryData("getSubmissionList", { courseworkId, page: 0, size: 20 }, (draft) => {
+            if (draft && Array.isArray(draft.content)) {
+              const sub = draft.content.find((s) => s.id === submissionId);
+              if (sub) {
+                if (payload.score !== undefined) sub.score = payload.score;
+                if (payload.status !== undefined) sub.status = payload.status;
+              }
+            }
+          })
+        );
         try {
           await queryFulfilled;
           triggerLifecycleRefresh(dispatch, "submission-graded");
         } catch {
-          // The mutation error is already surfaced to the caller.
+          listPatchResult.undo();
         }
       },
     }),
