@@ -48,6 +48,7 @@ import {
   useGetCourseworkCommentsQuery,
 } from "../api/commentApi.js";
 import { useGetClassroomRosterQuery } from "../api/classroomApi.js";
+import { isTeacherRole } from "../roles.js";
 
 const statusClass = {
   assigned: "bg-canvas text-text-main",
@@ -128,9 +129,12 @@ function Classwork({ teacher, classId }) {
     data: courseworkPage,
     isLoading,
     error,
-  } = useGetCourseworkListQuery({ courseId: classId, page: 0, size: 20 }, {
-    skip: isHydrating || !classId,
-  });
+  } = useGetCourseworkListQuery(
+    { courseId: classId, page: 0, size: 20 },
+    {
+      skip: isHydrating || !classId,
+    }
+  );
   const { data: expandedCoursework } = useGetCourseworkByIdQuery(
     { courseId: classId, courseworkId: expanded },
     { skip: isHydrating || !classId || !expanded }
@@ -141,7 +145,10 @@ function Classwork({ teacher, classId }) {
   const [gradeSubmission] = useGradeSubmissionMutation();
   const [addCourseworkComment] = useAddCourseworkCommentMutation();
   const [addSubmissionComment] = useAddSubmissionCommentMutation();
-  const coursework = useMemo(() => courseworkPage?.content ?? [], [courseworkPage]);
+  const coursework = useMemo(
+    () => courseworkPage?.content ?? [],
+    [courseworkPage]
+  );
   const { data: submissionPage } = useGetSubmissionListQuery(
     { courseworkId: expanded, page: 0, size: 20 },
     { skip: isHydrating || !classId || !expanded || !teacher }
@@ -1124,16 +1131,12 @@ export default function ClassPage() {
       </div>
     );
 
-  const teacher =
-    classroom.role === "Created" ||
-    classroom.role === "teacher" ||
-    classroom.role === "owner" ||
-    classroom.role === "Teacher" ||
-    classroom.role === "Owner";
+  const teacher = isTeacherRole(classroom.role);
 
-  const classroomWithNewCode = classroom.code || !location.state?.enrollmentCode
-    ? classroom
-    : { ...classroom, code: location.state.enrollmentCode };
+  const classroomWithNewCode =
+    classroom.code || !location.state?.enrollmentCode
+      ? classroom
+      : { ...classroom, code: location.state.enrollmentCode };
 
   return (
     <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

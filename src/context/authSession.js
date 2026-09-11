@@ -11,6 +11,7 @@ import { SESSION_KEY } from "../utils/sessionStorage.js";
 
 export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken"];
 const LEGACY_MIGRATION_KEY = "campus-mind.migrated-legacy-auth-keys";
+const EXPIRED_SESSION_404_TARGETS = new Set(["getCurrentProfile", "/users/me"]);
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -76,8 +77,7 @@ export function isExpiredSessionError(error, endpoint) {
     error?.status ?? error?.originalStatus ?? error?.response?.status;
   if (status === 401) return true;
   if (status !== 404) return false;
-  const target = String(endpoint ?? "");
-  return target.includes("/users/me");
+  return EXPIRED_SESSION_404_TARGETS.has(endpoint);
 }
 
 export function getProtectedRouteState(authStatus, isAuthenticated) {

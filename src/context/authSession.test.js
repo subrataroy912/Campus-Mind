@@ -77,7 +77,13 @@ describe("persisted session bootstrap", () => {
 
   it("treats profile 404s as expired only at the authenticated profile endpoint", () => {
     expect(isExpiredSessionError({ status: 404 }, "/users/me")).toBe(true);
+    expect(isExpiredSessionError({ status: 404 }, "getCurrentProfile")).toBe(
+      true
+    );
     expect(isExpiredSessionError({ status: 404 }, "/classes/123")).toBe(false);
+    expect(isExpiredSessionError({ status: 404 }, "/v2/users/me/profile")).toBe(
+      false
+    );
     expect(isExpiredSessionError({ status: 401 }, "/classes/123")).toBe(true);
   });
 
