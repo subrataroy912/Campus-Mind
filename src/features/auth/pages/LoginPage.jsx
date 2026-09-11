@@ -74,7 +74,7 @@ function LoginPage() {
         type: "success",
       });
       navigate("/dashboard", { replace: true });
-    } catch (error) {
+    } catch {
       toast.add({
         title: "Sign-in failed",
         description: "Please check your email and password and try again.",
