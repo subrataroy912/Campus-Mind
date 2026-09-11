@@ -41,15 +41,40 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearAuthError();
+
     try {
+      // 1. Check if the Storage Access API is available
+      if (
+        "requestStorageAccess" in document &&
+        "hasStorageAccess" in document
+      ) {
+        try {
+          // Check if we already have permission
+          const hasAccess = await document.hasStorageAccess();
+
+          if (!hasAccess) {
+            // Request cross-site cookie access if we don't have it yet
+            await document.requestStorageAccess();
+          }
+        } catch (storageError) {
+          // If the browser rejects the prompt automatically, log it and proceed
+          console.warn(
+            "Storage access not granted, proceeding with fallback:",
+            storageError
+          );
+        }
+      }
+
+      // 2. Run your original authentication logic
       await login(formData);
+
       toast.add({
         title: "Welcome back",
         description: "You are signed in and ready to continue.",
         type: "success",
       });
       navigate("/dashboard", { replace: true });
-    } catch {
+    } catch (error) {
       toast.add({
         title: "Sign-in failed",
         description: "Please check your email and password and try again.",
