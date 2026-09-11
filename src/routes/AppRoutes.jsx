@@ -53,7 +53,7 @@ const SettingsPage = lazy(() =>
 );
 const NotFound = lazy(() => import("../pages/NotFoundPage.jsx"));
 
-export const AppRoutes = createBrowserRouter([
+export const appRouteConfig = [
   {
     element: (
       <AuthProvider>
@@ -63,6 +63,8 @@ export const AppRoutes = createBrowserRouter([
     children: [
       {
         element: <PublicRoute />,
+        // Public pages still need restored auth state to redirect signed-in users.
+        handle: { requiresSessionRestore: true },
         children: [
           {
             path: "/",
@@ -116,6 +118,7 @@ export const AppRoutes = createBrowserRouter([
 
       {
         element: <ProtectedRoute />,
+        // Protected pages must wait for session restoration before rendering.
         handle: { requiresSessionRestore: true },
         children: [
           {
@@ -174,11 +177,16 @@ export const AppRoutes = createBrowserRouter([
           },
         ],
       },
+      // Server-down does not depend on authentication and may render immediately.
       {
         path: "/server-down",
         element: <ServerDown />,
       },
+      // The catch-all is also auth-independent and may render immediately.
       { path: "*", element: <NotFound /> },
     ],
   },
-]);
+];
+
+export const AppRoutes =
+  typeof document === "undefined" ? null : createBrowserRouter(appRouteConfig);
