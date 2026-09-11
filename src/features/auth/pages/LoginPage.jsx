@@ -13,6 +13,37 @@ import {
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 
+// Helper function to detect device platform synchronously
+function getDevicePlatform() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return "other";
+  }
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+    return "ios";
+  }
+  if (/android/i.test(userAgent)) {
+    return "android";
+  }
+  return "other";
+}
+
+// Helper function to test cookie support
+function verifyCookieSupport() {
+  try {
+    if (typeof navigator !== "undefined" && !navigator.cookieEnabled) {
+      return false;
+    }
+    const testKey = "__cookie_test__";
+    document.cookie = `${testKey}=1; SameSite=Lax; path=/`;
+    const isSet = document.cookie.includes(`${testKey}=1`);
+    document.cookie = `${testKey}=; Max-Age=0; path=/`;
+    return isSet;
+  } catch {
+    return false;
+  }
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,64 +56,42 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [cookieWarning, setCookieWarning] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [devicePlatform, setDevicePlatform] = useState("ios"); // 'ios' | 'android' | 'other'
+
+  // Initialize platform state directly without calling setState inside useEffect
+  const [devicePlatform] = useState(getDevicePlatform);
 
   const isLoading = authStatus === "loading";
   const errorMessage =
     authError?.data?.error || authError?.message || "Unable to sign in.";
 
-  // Reliable cross-platform cookie verification test
-  const verifyCookieSupport = () => {
-    try {
-      if (typeof navigator !== "undefined" && !navigator.cookieEnabled) {
-        return false;
-      }
-      const testKey = "__cookie_test__";
-      document.cookie = `${testKey}=1; SameSite=Lax; path=/`;
-      const isSet = document.cookie.includes(`${testKey}=1`);
-      document.cookie = `${testKey}=; Max-Age=0; path=/`;
-      return isSet;
-    } catch {
-      return false;
-    }
-  };
-
-  // Inspect client device and verify cookie readiness on mount
+  // Check 3rd-party cookie / storage access permission on initial page load
   useEffect(() => {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-      setDevicePlatform("ios");
-    } else if (/android/i.test(userAgent)) {
-      setDevicePlatform("android");
-    } else {
-      setDevicePlatform("other");
-    }
+    let isMounted = true;
 
     async function checkCookieAndStorageStatus() {
-      // 1. Direct cookie read/write check
       const cookiesWork = verifyCookieSupport();
       if (!cookiesWork) {
-        setCookieWarning(true);
+        if (isMounted) setCookieWarning(true);
         return;
       }
 
-      // 2. Storage Access API check (if loaded in an iframe or cross-origin context)
       if ("hasStorageAccess" in document) {
         try {
           const hasAccess = await document.hasStorageAccess();
-          if (!hasAccess) {
+          if (isMounted && !hasAccess) {
             setCookieWarning(true);
-            return;
           }
         } catch {
-          // Ignored if API is unsupported or blocked by browser policy
+          // Ignored if API is unsupported or blocked
         }
       }
-
-      setCookieWarning(false);
     }
 
     checkCookieAndStorageStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const startOAuth = (provider) => {
@@ -113,7 +122,6 @@ function LoginPage() {
     e.preventDefault();
     clearAuthError();
 
-    // Verify cookies before submitting credentials
     if (!verifyCookieSupport()) {
       setCookieWarning(true);
       toast.add({
@@ -124,7 +132,6 @@ function LoginPage() {
       return;
     }
 
-    // Attempt Storage Access API prompt if available and ungranted
     if ("requestStorageAccess" in document && "hasStorageAccess" in document) {
       try {
         const hasAccess = await document.hasStorageAccess();
@@ -177,7 +184,7 @@ function LoginPage() {
                 Cookies or Storage Blocked
               </p>
               <p className="mt-1 text-xs leading-relaxed text-amber-200/90">
-                Your mobile browser is blocking cookies. Signing in requires cookies to keep your session active.
+                Your browser is blocking cookies. Signing in requires cookies to keep your session active.
               </p>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -202,7 +209,6 @@ function LoginPage() {
             </div>
           </div>
 
-          {/* Accordion Instructions tailored for iOS vs Android */}
           {showInstructions && (
             <div className="mt-3 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-amber-100/90">
               {devicePlatform === "ios" ? (
@@ -212,7 +218,7 @@ function LoginPage() {
                     <li>Open <strong>Settings</strong> &gt; <strong>Safari</strong>.</li>
                     <li>Scroll to <strong>Privacy &amp; Security</strong>.</li>
                     <li>Turn off <strong>Block All Cookies</strong>.</li>
-                    <li>Turn off <strong>Prevent Cross-Site Tracking</strong> (if signing in across domains).</li>
+                    <li>Turn off <strong>Prevent Cross-Site Tracking</strong>.</li>
                   </ol>
                 </div>
               ) : devicePlatform === "android" ? (
