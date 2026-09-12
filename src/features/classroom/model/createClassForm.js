@@ -25,16 +25,16 @@ export const GRADE_LEVELS = [
   "Grade 10",
   "Grade 11",
   "Grade 12",
-  "College / Adult",
+  "College",
+  "Other",
 ];
 
 export const THEME_COLORS = [
-  { name: "Indigo", value: "bg-primary" },
-  { name: "Emerald", value: "bg-success" },
-  { name: "Rose", value: "bg-secondary" },
-  { name: "Amber", value: "bg-secondary" },
-  { name: "Sky", value: "bg-accent" },
-  { name: "Violet", value: "bg-primary" },
+  { name: "Slate", value: "bg-slate-900 text-white" },
+  { name: "Indigo", value: "bg-indigo-600 text-white" },
+  { name: "Emerald", value: "bg-emerald-600 text-white" },
+  { name: "Violet", value: "bg-violet-600 text-white" },
+  { name: "Amber", value: "bg-amber-500 text-slate-950" },
 ];
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

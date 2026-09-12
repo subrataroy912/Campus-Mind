@@ -31,7 +31,8 @@ export default function CreateClass() {
     submit,
   } = useCreateClassForm();
 
-  const isStudentWithoutCreator = user?.accountType === "STUDENT" && !user?.canCreateCourses;
+  const isStudentWithoutCreator =
+    user?.accountType === "STUDENT" && !user?.canCreateCourses;
 
   const handleUnlock = async () => {
     setIsUnlocking(true);
@@ -39,7 +40,11 @@ export default function CreateClass() {
     try {
       await unlockCreator();
     } catch (err) {
-      setUnlockError(err?.data?.error || err?.message || "Failed to unlock course creation privileges.");
+      setUnlockError(
+        err?.data?.error ||
+          err?.message ||
+          "Failed to unlock course creation privileges."
+      );
     } finally {
       setIsUnlocking(false);
     }
@@ -80,7 +85,9 @@ export default function CreateClass() {
                   Unlock Course Creation
                 </p>
                 <p className="mt-1 text-xs sm:text-sm text-amber-800 dark:text-amber-300">
-                  Your account is registered as a <strong>Student</strong>. Unlock creator privileges to set up classes, lead study groups, or host workshops.
+                  Your account is registered as a <strong>Student</strong>.
+                  Unlock creator privileges to set up classes, lead study
+                  groups, or host workshops.
                 </p>
               </div>
               <Button
@@ -120,7 +127,10 @@ export default function CreateClass() {
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <label className="text-sm font-medium text-text-main">
-                  Class cover banner <span className="text-xs text-text-muted font-normal">(optional)</span>
+                  Class cover banner{" "}
+                  <span className="text-xs text-text-muted font-normal">
+                    (optional)
+                  </span>
                 </label>
                 {preview && (
                   <button
@@ -201,10 +211,14 @@ export default function CreateClass() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-heading">
-                      Class logo / icon <span className="text-xs text-text-muted font-normal">(optional)</span>
+                      Class logo / icon{" "}
+                      <span className="text-xs text-text-muted font-normal">
+                        (optional)
+                      </span>
                     </p>
                     <p className="text-xs text-text-muted mt-0.5">
-                      Square avatar displayed on class cards, explore feed, and classroom header.
+                      Square avatar displayed on class cards, explore feed, and
+                      classroom header.
                     </p>
                   </div>
                 </div>
@@ -452,7 +466,11 @@ export default function CreateClass() {
             <button
               type="submit"
               disabled={isSubmitting || isStudentWithoutCreator}
-              title={isStudentWithoutCreator ? "Unlock course creation privileges above first" : undefined}
+              title={
+                isStudentWithoutCreator
+                  ? "Unlock course creation privileges above first"
+                  : undefined
+              }
               className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
             >
               {isSubmitting ? "Creating class…" : "Create class"}

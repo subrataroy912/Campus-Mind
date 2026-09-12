@@ -51,7 +51,12 @@ const profileFor = (user) => ({
 export default function ProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser, updateProfile, unlockCreator, authStatus } = useAuth();
+  const {
+    user: currentUser,
+    updateProfile,
+    unlockCreator,
+    authStatus,
+  } = useAuth();
   const [activeTab, setActiveTab] = useState("classes");
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -79,7 +84,7 @@ export default function ProfilePage() {
     : publicProfile;
   const profile = useMemo(
     () => viewedUser && profileFor(viewedUser),
-    [viewedUser],
+    [viewedUser]
   );
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
@@ -105,7 +110,11 @@ export default function ProfilePage() {
         description="This profile is unavailable or you do not have permission to view it."
       />
     );
-  if (!isProfileOwner && !profile.privacy.discoverable && sharedClassCount === 0)
+  if (
+    !isProfileOwner &&
+    !profile.privacy.discoverable &&
+    sharedClassCount === 0
+  )
     return (
       <ProfileMessage
         title="This profile is private"
@@ -138,10 +147,22 @@ export default function ProfilePage() {
       ? [{ label: "Phone", value: profile.phone, icon: "phone" }]
       : []),
     ...(profile.gender
-      ? [{ label: "Gender", value: formatDisplayText(profile.gender), icon: "gender" }]
+      ? [
+          {
+            label: "Gender",
+            value: formatDisplayText(profile.gender),
+            icon: "gender",
+          },
+        ]
       : []),
     ...(profile.dateOfBirth
-      ? [{ label: "Date of Birth", value: profile.dateOfBirth, icon: "calendar" }]
+      ? [
+          {
+            label: "Date of Birth",
+            value: profile.dateOfBirth,
+            icon: "calendar",
+          },
+        ]
       : []),
     ...(profile.address
       ? [{ label: "Address", value: profile.address, icon: "address" }]
@@ -228,35 +249,39 @@ export default function ProfilePage() {
         <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
           <ProfileDetails details={details} />
         </section>
-        {isOwner && profile.accountType === "STUDENT" && !profile.canCreateCourses && (
-          <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-semibold text-text-heading">
-                    Course Creator Status
-                  </h2>
-                  <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
-                    Standard Student
-                  </span>
+        {isOwner &&
+          profile.accountType === "STUDENT" &&
+          !profile.canCreateCourses && (
+            <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-text-heading">
+                      Course Creator Status
+                    </h2>
+                    <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
+                      Standard Student
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-muted">
+                    Unlock course-creation privileges to create and manage
+                    courses and study groups. Once enabled, this privilege
+                    cannot be changed or revoked.
+                  </p>
                 </div>
-                <p className="text-sm text-text-muted">
-                  Unlock course-creation privileges to create and manage courses and study groups. Once enabled, this privilege cannot be changed or revoked.
-                </p>
+                <div className="shrink-0">
+                  <Button
+                    size="sm"
+                    onClick={handleUnlockCreator}
+                    disabled={isUnlocking}
+                  >
+                    <Sparkles size={14} className="mr-1.5" />
+                    {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
+                  </Button>
+                </div>
               </div>
-              <div className="shrink-0">
-                <Button
-                  size="sm"
-                  onClick={handleUnlockCreator}
-                  disabled={isUnlocking}
-                >
-                  <Sparkles size={14} className="mr-1.5" />
-                  {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
-                </Button>
-              </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
         <section className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
           <div className="flex gap-1 border-b border-border p-2" role="tablist">
             <Button
