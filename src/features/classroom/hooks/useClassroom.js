@@ -9,7 +9,8 @@ import { clearPersistedApiState } from "@/app/apiCachePersistence.js";
 import { getCourseNotFoundDetails } from "../api/classroomErrors.js";
 
 export function useClassroom(classId) {
-  const { authStatus } = useAuth();
+  const { user, authStatus } = useAuth();
+  const userId = user?.id;
   const skip = authStatus === "hydrating" || !classId;
 
   const {
@@ -30,9 +31,9 @@ export function useClassroom(classId) {
     );
   }, [classrooms, classId]);
 
-  // If detailData 404s or is not loaded yet, and not in cachedCourse, check public course endpoint
+  // Only check public course endpoint if detailData failed with 404 (user is not an enrolled member)
   const shouldFetchPublic = Boolean(
-    !cachedCourse && (error?.status === 404 || (!detailData && classId))
+    !cachedCourse && error?.status === 404
   );
 
   const { data: publicCourse } = useGetPublicCourseQuery(classId, {
@@ -40,9 +41,9 @@ export function useClassroom(classId) {
   });
 
   const classroom = useMemo(() => {
+    if (cachedCourse) return cachedCourse;
     const fromDetail = detailData?.data ?? detailData;
     if (fromDetail) return fromDetail;
-    if (cachedCourse) return cachedCourse;
     if (publicCourse) {
       const name =
         publicCourse.title ?? publicCourse.name ?? "Untitled class";
@@ -60,20 +61,37 @@ export function useClassroom(classId) {
       };
     }
     return undefined;
-  }, [detailData, cachedCourse, publicCourse, classId]);
+  }, [cachedCourse, detailData, publicCourse, classId]);
 
   const isEnrolled = useMemo(() => {
+    // 1. If course is found in user's enrolled classrooms list
     if (cachedCourse) return true;
-    if (classroom?.isEnrolled === false || classroom?.role === "VIEWER") {
+    if (classrooms?.some((c) => c.id === classId || c.courseId === classId)) {
+      return true;
+    }
+
+    // 2. If current user is the owner or teacher of this course
+    if (
+      userId &&
+      (classroom?.ownerId === userId || classroom?.teacherId === userId)
+    ) {
+      return true;
+    }
+
+    // 3. If course explicitly states enrollment status
+    if (classroom?.isEnrolled === true || classroom?.enrolled === true) {
+      return true;
+    }
+    if (
+      classroom?.isEnrolled === false ||
+      classroom?.enrolled === false ||
+      classroom?.role === "VIEWER"
+    ) {
       return false;
     }
-    if (classrooms) {
-      return classrooms.some(
-        (c) => c.id === classId || c.courseId === classId
-      );
-    }
-    return Boolean(classroom && classroom.role !== "VIEWER");
-  }, [cachedCourse, classroom, classrooms, classId]);
+
+    return Boolean(classroom && classroom.role && classroom.role !== "VIEWER");
+  }, [cachedCourse, classrooms, userId, classroom, classId]);
 
   const notFoundDetails = !publicCourse ? getCourseNotFoundDetails(error, classId) : null;
 

@@ -1313,6 +1313,14 @@ export default function ClassPage() {
       await joinClassroom(user?.id, { courseId: classId });
       triggerLifecycleRefresh("course:joined", { courseId: classId });
     } catch (err) {
+      const status = err?.status ?? err?.originalStatus;
+      if (
+        status === 409 ||
+        err?.data?.error?.toLowerCase()?.includes("already")
+      ) {
+        triggerLifecycleRefresh("course:joined", { courseId: classId });
+        return;
+      }
       setJoinError(
         err?.data?.error || err?.message || "Failed to join class. Please try again."
       );
