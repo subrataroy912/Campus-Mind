@@ -44,12 +44,7 @@ export default function DashboardHeader() {
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <div className="sm:hidden">
-          <BrandLogo compact fetchPriority="high" />
-        </div>
-        <div className="hidden sm:inline-flex">
-          <BrandLogo fetchPriority="high" />
-        </div>
+        <BrandLogo fetchPriority="high" />
       </div>
 
       {/* User Profile and Logout */}
