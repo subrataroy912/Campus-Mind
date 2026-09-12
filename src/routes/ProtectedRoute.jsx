@@ -11,15 +11,18 @@ export default function ProtectedRoute() {
   if (routeState === "hydrating") {
     return (
       <main
-        className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background"
+        className="flex min-h-screen flex-col bg-canvas p-4 sm:p-6"
         role="status"
         aria-live="polite"
+        aria-label="Restoring session"
       >
-        {/* Animated Loading Circle */}
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary" />
-
-        {/* Screen Reader Only text for accessibility */}
-        <span className="sr-only">Loading your session…</span>
+        <div className="mx-auto w-full max-w-6xl space-y-4">
+          <div className="h-14 w-full rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border animate-pulse flex items-center justify-between">
+            <div className="h-6 w-32 rounded-lg bg-border/50" />
+            <div className="h-8 w-8 rounded-full bg-border/50" />
+          </div>
+          <div className="h-64 w-full rounded-2xl bg-surface p-6 shadow-xs ring-1 ring-border animate-pulse" />
+        </div>
       </main>
     );
   }

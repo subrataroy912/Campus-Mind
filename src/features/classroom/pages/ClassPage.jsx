@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import ClassHeader from "../components/ClassHeader.jsx";
 import ClassTabs from "../components/ClassTabs.jsx";
 import ClassQuickLinks from "../components/ClassQuickLinks.jsx";
+import ClassPageSkeleton from "../components/ClassPageSkeleton.jsx";
 import { useClassroom } from "../hooks/useClassroom.js";
 import { joinClassroom } from "../api/classroomService.js";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
@@ -55,14 +56,7 @@ export default function ClassPage() {
   };
 
   if (isLoading && !classroom) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm font-medium">Loading classroom…</p>
-        </div>
-      </div>
-    );
+    return <ClassPageSkeleton />;
   }
 
   if (notFound) {

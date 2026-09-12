@@ -1,10 +1,24 @@
+import { memo } from "react";
 import { Link } from "react-router";
 import { Globe, KeyRound, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 import { getClassTheme } from "../utils/classTheme.js";
+import { classroomApi } from "../api/classroomApi.js";
+import { store } from "@/app/store.js";
 
-export default function ClassCard({ classroom }) {
+function ClassCard({ classroom }) {
   const classTheme = getClassTheme(classroom);
+
+  const handlePrefetch = () => {
+    if (classroom?.id) {
+      store.dispatch(
+        classroomApi.util.prefetch("findClassroomById", classroom.id, {
+          force: false,
+        })
+      );
+    }
+  };
+
   const teacherObj =
     classroom.instructor ||
     classroom.teacher ||
@@ -29,7 +43,11 @@ export default function ClassCard({ classroom }) {
   ).toLowerCase();
 
   return (
-    <article className="w-full h-full flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      className="w-full h-full flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+    >
       
       {/* Banner & Floating Logo */}
       <div className={`relative h-24 w-full shrink-0 ${classTheme.gradientClass}`}>
@@ -38,6 +56,8 @@ export default function ClassCard({ classroom }) {
             <img
               src={classroom.coverUrl || classroom.cover}
               alt={`${classroom.title} cover`}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           )}
@@ -49,6 +69,8 @@ export default function ClassCard({ classroom }) {
             <img
               src={classroom.logo || classroom.logoUrl}
               alt={`${classroom.title} avatar`}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           ) : (
@@ -143,5 +165,6 @@ export default function ClassCard({ classroom }) {
       </div>
     </article>
   );
-
 }
+
+export default memo(ClassCard);

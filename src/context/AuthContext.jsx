@@ -31,6 +31,10 @@ import {
   getProfileUpdateLifecycleEvent,
   toProfilePatch,
 } from "./authContextUtils.js";
+import {
+  selectAccessToken,
+  selectCurrentUser,
+} from "../features/auth/authSelectors.js";
 
 const AuthContext = createContext(null);
 
@@ -47,14 +51,14 @@ export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const store = useStore();
   const matches = useMatches();
-  const session = useSelector((state) => state.auth);
+  const user = useSelector(selectCurrentUser);
+  const accessToken = useSelector(selectAccessToken);
   const requiresSessionRestore = shouldAttemptSessionRestore(matches);
-  const user = session.user;
   const userRef = useRef(user);
   const explicitTeardownErrorRef = useRef(null);
   const [authState, setAuthState] = useState(() => ({
     status:
-      requiresSessionRestore && !session.accessToken
+      requiresSessionRestore && !accessToken
         ? "hydrating"
         : "succeeded",
     error: null,
@@ -80,7 +84,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let ignore = false;
-    const hasAccessToken = Boolean(session.accessToken);
+    const hasAccessToken = Boolean(accessToken);
     if (!requiresSessionRestore || hasAccessToken) {
       setAuthState((current) =>
         current.status === "succeeded" && current.error === null
@@ -156,7 +160,7 @@ export function AuthProvider({ children }) {
     return () => {
       ignore = true;
     };
-  }, [dispatch, requiresSessionRestore, session.accessToken, store]);
+  }, [accessToken, dispatch, requiresSessionRestore, store]);
 
   const value = useMemo(
     () => ({
@@ -164,7 +168,7 @@ export function AuthProvider({ children }) {
       // A persisted user is only authenticated after its profile has been
       // validated and its credentials are installed in Redux.
       isAuthenticated:
-        authState.status === "succeeded" && Boolean(session.accessToken),
+        authState.status === "succeeded" && Boolean(accessToken),
       authStatus: authState.status,
       authError: authState.error,
       clearAuthError() {
@@ -354,7 +358,7 @@ export function AuthProvider({ children }) {
         });
       },
     }),
-    [authState, dispatch, session.accessToken, store, user]
+    [authState, dispatch, accessToken, store, user]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

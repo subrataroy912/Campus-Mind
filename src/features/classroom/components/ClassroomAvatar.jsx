@@ -23,6 +23,8 @@ export function ClassroomAvatar({
         <img
           src={safeAvatar}
           alt={name}
+          loading="lazy"
+          decoding="async"
           className="h-full w-full rounded-full object-cover"
         />
       ) : (

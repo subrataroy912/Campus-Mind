@@ -18,6 +18,7 @@ import {
 } from "../api/profileApi.js";
 import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
+import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 
 const profileFor = (user) => ({
@@ -108,12 +109,7 @@ export default function ProfilePage() {
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
   if (isCurrentProfileLoading || isPublicProfileLoading)
-    return (
-      <ProfileMessage
-        title="Loading profile"
-        description="Fetching the latest profile information."
-      />
-    );
+    return <ProfilePageSkeleton />;
   if (
     !profile ||
     (isPublicProfileError && !isProfileOwner) ||

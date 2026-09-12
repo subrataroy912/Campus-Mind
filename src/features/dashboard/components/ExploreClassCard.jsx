@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ArrowRight, Globe, KeyRound, Lock, Loader2, X } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
@@ -55,7 +55,7 @@ const renderAccessBadge = (type = "OPEN") => {
   );
 };
 
-export default function ExploreClassCard({
+function ExploreClassCard({
   classroom,
   className = "",
 }) {
@@ -162,6 +162,8 @@ export default function ExploreClassCard({
               src={cover}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
             />
           )}
@@ -179,6 +181,8 @@ export default function ExploreClassCard({
                 src={logo}
                 alt=""
                 aria-hidden="true"
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -384,3 +388,5 @@ export default function ExploreClassCard({
     </>
   );
 }
+
+export default memo(ExploreClassCard);

@@ -60,20 +60,45 @@ export function persistApiState(apiState, authState) {
   );
 
   try {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        version: 1,
-        userId,
-        savedAt: Date.now(),
-        apiState: {
-          ...apiState,
-          queries,
-          mutations: {},
-          subscriptions: {},
-        },
-      })
-    );
+    const payload = {
+      version: 1,
+      userId,
+      savedAt: Date.now(),
+      apiState: {
+        ...apiState,
+        queries,
+        mutations: {},
+        subscriptions: {},
+      },
+    };
+
+    let serialized = JSON.stringify(payload);
+    const MAX_BYTES = 50 * 1024; // 50 KB budget
+
+    if (serialized.length > MAX_BYTES) {
+      // Exceeds 50 KB budget: progressively retain only the most critical queries
+      const priorityOrder = [
+        "getCurrentProfile",
+        "fetchClassrooms",
+        "findClassroomById",
+        "getPublicProfile",
+      ];
+      const trimmedQueries = {};
+      for (const endpoint of priorityOrder) {
+        for (const [key, q] of Object.entries(queries)) {
+          if (q.endpointName === endpoint) {
+            trimmedQueries[key] = q;
+          }
+        }
+        payload.apiState.queries = trimmedQueries;
+        serialized = JSON.stringify(payload);
+        if (serialized.length <= MAX_BYTES) break;
+      }
+    }
+
+    if (serialized.length <= 50 * 1024) {
+      window.localStorage.setItem(STORAGE_KEY, serialized);
+    }
   } catch {
     // Storage can be unavailable or full; memory caching still works.
   }

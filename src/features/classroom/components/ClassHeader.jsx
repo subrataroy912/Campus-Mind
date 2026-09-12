@@ -50,6 +50,8 @@ export default function ClassHeader({
           <img
             src={classroom.coverUrl || classroom.cover}
             alt={`${classroom?.title || "Class"} banner`}
+            fetchPriority="high"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
@@ -111,6 +113,8 @@ export default function ClassHeader({
               <img
                 src={classroom.logo || classroom.logoUrl}
                 alt={`${classroom?.title || "Class"} logo`}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             ) : (

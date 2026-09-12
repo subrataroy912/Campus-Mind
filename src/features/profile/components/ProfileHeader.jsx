@@ -32,6 +32,8 @@ export default function ProfileHeader({
           <img
             src={profile.banner}
             alt="Profile banner"
+            fetchPriority="high"
+            decoding="async"
             className="block h-full w-full object-cover"
           />
         ) : (
@@ -66,6 +68,8 @@ export default function ProfileHeader({
                   src={profile.avatar}
                   alt={`${profile.name}'s avatar`}
                   referrerPolicy="no-referrer"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 initials(profile.name)
