@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import ValidateField from "@/utils/ValidateField.jsx";
+import ValidateField from "../utils/profileValidation.js";
 
 const FORM_FIELDS = [
   "firstName",

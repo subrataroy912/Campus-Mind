@@ -1,7 +1,6 @@
 import { store } from "@/app/store.js";
 import { courseworkApi } from "./courseworkApi.js";
-
-const unwrapResponse = (response) => response?.data ?? response;
+import { unwrapResponse } from "@/lib/apiUtils.js";
 
 export function mapCourseworkPayload(payload = {}) {
   const type = String(payload.type ?? "ASSIGNMENT").toUpperCase();

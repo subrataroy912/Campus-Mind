@@ -1,4 +1,4 @@
-const unwrapResponse = (response) => response?.data ?? response;
+import { unwrapResponse } from "@/lib/apiUtils.js";
 
 export function buildUploadRequestBody(file = {}) {
   return {

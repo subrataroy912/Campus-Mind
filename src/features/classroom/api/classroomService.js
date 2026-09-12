@@ -1,7 +1,6 @@
 import { store } from "@/app/store.js";
 import { classroomApi } from "./classroomApi.js";
-
-const unwrapResponse = (response) => response?.data ?? response;
+import { unwrapResponse } from "@/lib/apiUtils.js";
 
 export function mapCreateClassPayload(details = {}) {
   const rawAccessType = (details.accessType || "").toUpperCase();

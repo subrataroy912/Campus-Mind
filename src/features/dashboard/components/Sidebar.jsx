@@ -1,7 +1,7 @@
 import { Link, NavLink } from "react-router";
-import {Button} from "@/components/ui/button.jsx";
-import { SIDEBAR_NAV_ITEMS } from "../../../config/navigation";
-import { getNavLinkStyles } from "../../../utils/routeHelpers";
+import { Button } from "@/components/ui/button.jsx";
+import { SIDEBAR_NAV_ITEMS } from "@/config/navigation.js";
+import { getNavLinkStyles } from "@/utils/routeHelpers.js";
 import { Plus, Settings, Ticket } from "lucide-react";
 
 export default function Sidebar({

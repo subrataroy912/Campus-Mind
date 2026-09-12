@@ -1,7 +1,7 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "../../../components/ui/button.jsx";
 import { Input } from "../../../components/ui/input.jsx";
-import { MAX_BIO_LENGTH } from "@/utils/ValidateField.jsx";
+import { MAX_BIO_LENGTH } from "../utils/profileValidation.js";
 import {
   Dialog,
   DialogContent,

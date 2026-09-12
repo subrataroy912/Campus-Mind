@@ -2,10 +2,8 @@ import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
 import { clearLocalAuthSession, setStoredSessionHint } from "@/context/authSession.js";
-
-const unwrapResponse = (response) => response?.data ?? response;
-
 import { safeLocalStorageSet } from "@/utils/storage.js";
+import { unwrapResponse } from "@/lib/apiUtils.js";
 
 export function normalizeAuthResponse(response) {
   const payload = unwrapResponse(response);
