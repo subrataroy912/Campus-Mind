@@ -1,3 +1,5 @@
+import BrandLogo from "@/components/common/BrandLogo.jsx";
+
 export default function SessionBootstrapSkeleton() {
   return (
     <main
@@ -7,9 +9,9 @@ export default function SessionBootstrapSkeleton() {
       aria-label="Restoring session"
     >
       <div className="mx-auto w-full max-w-6xl space-y-4">
-        <div className="flex h-14 w-full animate-pulse items-center justify-between rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border">
-          <div className="h-6 w-32 rounded-lg bg-border/50" />
-          <div className="h-8 w-8 rounded-full bg-border/50" />
+        <div className="flex h-14 w-full items-center justify-between rounded-2xl bg-surface px-4 py-2 shadow-xs ring-1 ring-border">
+          <BrandLogo fetchPriority="high" />
+          <div className="h-8 w-8 animate-pulse rounded-full bg-border/50" />
         </div>
         <div className="h-64 w-full animate-pulse rounded-2xl bg-surface p-6 shadow-xs ring-1 ring-border" />
       </div>
