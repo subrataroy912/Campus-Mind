@@ -41,9 +41,11 @@ export function useClassroom(classId) {
   });
 
   const classroom = useMemo(() => {
-    if (cachedCourse) return cachedCourse;
     const fromDetail = detailData?.data ?? detailData;
-    if (fromDetail) return fromDetail;
+    if (fromDetail) {
+      return cachedCourse ? { ...cachedCourse, ...fromDetail } : fromDetail;
+    }
+    if (cachedCourse) return cachedCourse;
     if (publicCourse) {
       const name =
         publicCourse.title ?? publicCourse.name ?? "Untitled class";
@@ -58,6 +60,8 @@ export function useClassroom(classId) {
         role: "VIEWER",
         isEnrolled: false,
         theme: "bg-primary",
+        logo: publicCourse.logoUrl ?? publicCourse.logo ?? null,
+        logoUrl: publicCourse.logoUrl ?? publicCourse.logo ?? null,
       };
     }
     return undefined;

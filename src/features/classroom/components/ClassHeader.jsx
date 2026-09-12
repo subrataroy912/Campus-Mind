@@ -99,9 +99,9 @@ export default function ClassHeader({
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5">
           {/* Floating Logo */}
           <div className="-mt-12 h-20 w-20 z-20 shrink-0 overflow-hidden rounded-2xl border-4 border-surface bg-canvas shadow-sm sm:-mt-14 sm:h-24 sm:w-24">
-            {classroom?.logo ? (
+            {classroom?.logo || classroom?.logoUrl ? (
               <img
-                src={classroom.logo}
+                src={classroom.logo || classroom.logoUrl}
                 alt={`${classroom?.title || "Class"} logo`}
                 className="h-full w-full object-cover"
               />
@@ -112,16 +112,35 @@ export default function ClassHeader({
             )}
           </div>
 
-          {/* Title and Subtitle */}
-          <div className="mb-1 sm:mb-2">
+          {/* Title, Subtitle, and Badges */}
+          <div className="mb-1 sm:mb-2 space-y-1.5">
             <h1 className="text-xl font-bold text-text-heading sm:text-2xl line-clamp-1">
               {classroom?.title || "Class"}
             </h1>
-            <p className="mt-1 text-sm font-medium text-text-muted line-clamp-1">
+            <p className="text-sm font-medium text-text-muted line-clamp-1">
               {classroom?.section || classroom?.subtitle}
               {(classroom?.section || classroom?.subtitle) && teacherName ? " · " : ""}
               {teacherName}
             </p>
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              {classroom?.subject && (
+                <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                  {classroom.subject}
+                </span>
+              )}
+              {(classroom?.targetGrade || classroom?.gradeLevel) && (
+                <span className="inline-flex items-center rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted border border-border">
+                  {classroom.targetGrade || classroom.gradeLevel}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted border border-border">
+                <ClassroomIcon
+                  name={accessType === "open" ? "globe" : accessType === "code" ? "key" : "lock"}
+                  className="h-3 w-3 text-text-muted"
+                />
+                <span className="capitalize">{accessType}</span>
+              </span>
+            </div>
           </div>
         </div>
 
