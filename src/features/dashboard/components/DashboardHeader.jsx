@@ -8,6 +8,7 @@ import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { logoutFromHeader } from "./headerLogout.js";
+import NotificationsMenu from "@/features/notifications/components/NotificationsMenu.jsx";
 
 export default function DashboardHeader() {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export default function DashboardHeader() {
 
       {/* User Profile and Logout */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <NotificationsMenu />
         <Link
           to="/dashboard/profile"
           className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main transition-colors hover:bg-canvas"

@@ -7,7 +7,7 @@ export function reportWebVitals(onPerfEntry) {
       onFCP(onPerfEntry);
       onTTFB(onPerfEntry);
     }).catch(() => {});
-  } else if (import.meta.env.DEV) {
+  } else {
     import('web-vitals').then(({ onCLS, onINP, onLCP, onFCP, onTTFB }) => {
       const logMetric = (metric) => {
         console.log(

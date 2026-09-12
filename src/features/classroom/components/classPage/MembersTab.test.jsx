@@ -25,6 +25,13 @@ vi.mock("../../api/classroomApi.js", () => ({
     if (classId === "empty-course") {
       return { data: [], isLoading: false };
     }
+    if (classId === "large-roster") {
+      const largeList = [{ id: "t-1", name: "Head Teacher", role: "teacher" }];
+      for (let i = 1; i <= 55; i++) {
+        largeList.push({ id: `s-${i}`, name: `Student ${i}`, role: "student" });
+      }
+      return { data: largeList, isLoading: false };
+    }
     return {
       data: [
         { id: "u-1", name: "Alice Teacher", role: "teacher" },
@@ -95,5 +102,24 @@ describe("MembersTab", () => {
       />
     );
     expect(html).toContain("Code disabled");
+  });
+
+  it("applies windowing and renders expand button when student count exceeds 50", () => {
+    const html = renderToString(
+      <MembersTab
+        classroom={{
+          id: "large-roster",
+          memberCount: 56,
+        }}
+        isEnrolled={true}
+        teacher={false}
+      />
+    );
+    expect(html).toContain("Students (");
+    expect(html).toContain("55");
+    expect(html).toContain("Show all 55 students");
+    expect(html).toContain("Student 50");
+    // Beyond 50 should be windowed out initially
+    expect(html).not.toContain("Student 51");
   });
 });
