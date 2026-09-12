@@ -4,13 +4,17 @@ import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ClassCard({ classroom }) {
   const teacher =
-    classroom.instructor || classroom.teacher || { name: "CampusMind teacher" };
+    classroom.instructor ||
+    classroom.teacher ||
+    (classroom.teacherName || classroom.ownerName
+      ? { name: classroom.teacherName || classroom.ownerName }
+      : null);
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
   const category = classroom.subject
     ? formatDisplayText(classroom.subject)
     : classroom.role === "Created"
     ? "Teaching"
-    : "Class";
+    : "";
   const accessType = (
     classroom.accessType ||
     (classroom.visibility === "PUBLIC" ? "open" : "code")
@@ -21,6 +25,16 @@ export default function ClassCard({ classroom }) {
       
       {/* Banner & Floating Logo */}
       <div className={`relative h-24 w-full ${classroom.theme || "bg-primary"}`}>
+        <div className="absolute inset-0 overflow-hidden">
+          {(classroom.coverUrl || classroom.cover) && (
+            <img
+              src={classroom.coverUrl || classroom.cover}
+              alt={`${classroom.title} cover`}
+              className="h-full w-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
         {/* Floating Avatar */}
         <div className="absolute -bottom-8 right-5 z-10 h-16 w-16 overflow-hidden rounded-full border-4 border-surface bg-canvas shadow-sm">
           {classroom.logo ? (
@@ -41,22 +55,30 @@ export default function ClassCard({ classroom }) {
       <div className="flex-1 p-5 pt-4">
         {/* pr-16 prevents long titles from overlapping the floating avatar */}
         <div className="pr-16">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            {category}
-          </p>
+          {category && (
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              {category}
+            </p>
+          )}
           <h2 className="mt-1 text-lg font-bold text-text-heading line-clamp-1">
             {classroom.title}
           </h2>
-          <p className="mt-0.5 text-sm text-text-muted line-clamp-1">
-            {classroom.subtitle || classroom.section || "Active Class"}
-          </p>
+          {(classroom.subtitle || classroom.section) && (
+            <p className="mt-0.5 text-sm text-text-muted line-clamp-1">
+              {classroom.subtitle || classroom.section}
+            </p>
+          )}
         </div>
 
         {/* Stats & Teacher */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-text-muted">
-          <span className="font-medium text-text-main">
-            with {teacher.name}
-          </span>
+          {teacher?.name ? (
+            <span className="font-medium text-text-main">
+              with {teacher.name}
+            </span>
+          ) : (
+            <span />
+          )}
           <div className="flex items-center gap-2.5">
             {accessType === "invite" ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted">

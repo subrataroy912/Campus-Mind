@@ -1,191 +1,385 @@
-import { Link } from "react-router";
-import {
-  Code2,
-  Brain,
-  Shield,
-  TrendingUp,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { ArrowRight, Globe, KeyRound, Lock, Loader2, X } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
-import {
-  LaptopIllustration,
-  BrainIllustration,
-  ShieldIllustration,
-  ChartIllustration,
-} from "./ExploreClassIllustration.jsx";
-import { getIllustrationForSubject } from "./exploreClassHelper.js";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { joinClassroom } from "@/features/classroom/api/classroomService.js";
 
-const THEME_CONFIG = {
-  orange: {
-    cardBg: "bg-[#FFF7F2] dark:bg-[#2A1D1A]/60",
-    border: "border-[#FFE5D6] dark:border-[#523226]",
-    hoverBorder: "hover:border-[#F97316]/50",
-    badgeBg: "bg-white/80 dark:bg-zinc-800/80 shadow-xs",
-    iconColor: "text-[#E85D3B]",
-    buttonBg: "bg-[#E85D3B] hover:bg-[#D44B29] text-white",
-    Illustration: LaptopIllustration,
-    defaultIcon: Code2,
-  },
-  emerald: {
-    cardBg: "bg-[#F0FAF5] dark:bg-[#162720]/60",
-    border: "border-[#D4EFE3] dark:border-[#234E3C]",
-    hoverBorder: "hover:border-[#10B981]/50",
-    badgeBg: "bg-white/80 dark:bg-zinc-800/80 shadow-xs",
-    iconColor: "text-[#1F7A5E]",
-    buttonBg: "bg-[#1F7A5E] hover:bg-[#17624B] text-white",
-    Illustration: BrainIllustration,
-    defaultIcon: Brain,
-  },
-  purple: {
-    cardBg: "bg-[#F7F3FD] dark:bg-[#231A33]/60",
-    border: "border-[#E7DCFC] dark:border-[#47346A]",
-    hoverBorder: "hover:border-[#8B5CF6]/50",
-    badgeBg: "bg-white/80 dark:bg-zinc-800/80 shadow-xs",
-    iconColor: "text-[#5E48A2]",
-    buttonBg: "bg-[#5E48A2] hover:bg-[#4E3989] text-white",
-    Illustration: ShieldIllustration,
-    defaultIcon: Shield,
-  },
-  blue: {
-    cardBg: "bg-[#F1F7FE] dark:bg-[#192438]/60",
-    border: "border-[#D6E7FC] dark:border-[#274670]",
-    hoverBorder: "hover:border-[#3B82F6]/50",
-    badgeBg: "bg-white/80 dark:bg-zinc-800/80 shadow-xs",
-    iconColor: "text-[#2F7BE5]",
-    buttonBg: "bg-[#2F7BE5] hover:bg-[#2067CB] text-white",
-    Illustration: ChartIllustration,
-    defaultIcon: TrendingUp,
-  },
+const formatLearners = (count) => {
+  const value = Number(count);
+  if (!Number.isFinite(value) || value <= 0) return "0 learners";
+  if (value === 1) return "1 learner";
+  if (value >= 1000)
+    return `${(value / 1000).toFixed(1).replace(".0", "")}k learners`;
+  return `${value} learners`;
 };
 
-/**
- * ExploreClassCard matching high-fidelity design.
- * Can accept either a standard course object ('classroom' prop) or standalone topic fields.
- */
-export default function ExploreClassCard({
-  classroom,
-  title,
-  subject,
-  learnersText,
-  target: customTarget,
-  theme: customTheme,
-  className = "",
-}) {
-  const { classrooms = [] } = useDashboardData();
+const getInitials = (text = "") => {
+  const words = text
+    .replace(/[^\w\s]/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return "CL";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+};
 
-  // Determine values from either classroom prop or direct props
-  const effectiveTitle = classroom ? classroom.title : title || "Course";
-  const effectiveSubject = classroom
-    ? classroom.subject || "General"
-    : subject || "General";
+const renderAccessBadge = (type = "OPEN") => {
+  const normalized = (type || "OPEN").toUpperCase();
 
-  const rawLearners =
-    classroom?.enrollmentCount != null
-      ? Number(classroom.enrollmentCount)
-      : null;
-
-  const effectiveLearners =
-    learnersText ||
-    (rawLearners != null
-      ? rawLearners >= 1000
-        ? (rawLearners / 1000).toFixed(1).replace(/\.0$/, "") + "k learners"
-        : rawLearners + " learners"
-      : "1.2k learners");
-
-  const detectedConfig = getIllustrationForSubject(
-    effectiveSubject,
-    effectiveTitle
-  );
-  const themeKey = customTheme || detectedConfig.theme || "orange";
-  const theme = THEME_CONFIG[themeKey] || THEME_CONFIG.orange;
-  const CardIllustration = theme.Illustration;
-  const IconGlyph = theme.defaultIcon || Sparkles;
-
-  // Routing resolution
-  let target = customTarget;
-  if (!target && classroom) {
-    const courseId = classroom.courseId || classroom.id;
-    const isEnrolled = classrooms.some(
-      (c) => c.id === courseId || c.courseId === courseId
+  if (normalized === "INVITE") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-900/80 text-zinc-100 backdrop-blur-xs border border-white/10 shadow-xs">
+        <Lock size={10} aria-hidden="true" />
+        <span>Invite only</span>
+      </span>
     );
-    const accessType = (classroom.accessType || "OPEN").toUpperCase();
-
-    if (isEnrolled || accessType === "OPEN") {
-      target = `/dashboard/classes/${courseId}`;
-    } else if (accessType === "INVITE") {
-      target = `/dashboard/class/join?courseId=${encodeURIComponent(
-        courseId
-      )}&accessType=invite`;
-    } else {
-      target = classroom.code
-        ? `/dashboard/class/join?courseId=${encodeURIComponent(
-            courseId
-          )}&accessType=code&code=${encodeURIComponent(classroom.code)}`
-        : `/dashboard/class/join?courseId=${encodeURIComponent(
-            courseId
-          )}&accessType=code`;
-    }
   }
 
-  if (!target) {
-    target = `/dashboard/explore?subject=${encodeURIComponent(
-      effectiveSubject
-    )}`;
+  if (normalized === "CODE") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-600/90 text-white backdrop-blur-xs shadow-xs">
+        <KeyRound size={10} aria-hidden="true" />
+        <span>Code</span>
+      </span>
+    );
   }
 
   return (
-    <div
-      className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${theme.cardBg} ${theme.border} ${theme.hoverBorder} ${className}`}
-    >
-      {/* Main content wrapper */}
-      <div className="flex flex-1 items-start justify-between p-5">
-        {/* Left column: Badge, Title, Learners count, and Explore button */}
-        <div className="flex flex-col justify-between h-full pr-2 z-10">
-          <div>
-            {/* Category Icon Badge */}
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-full border border-black/5 ${theme.badgeBg} ${theme.iconColor} mb-3 transition-transform group-hover:scale-105`}
+    <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-600/90 text-white backdrop-blur-xs shadow-xs">
+      <Globe size={10} aria-hidden="true" />
+      <span>Public</span>
+    </span>
+  );
+};
+
+export default function ExploreClassCard({
+  classroom,
+  className = "",
+}) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { classrooms = [] } = useDashboardData();
+
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [joinError, setJoinError] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+
+  const courseId =
+    classroom?.courseId ??
+    classroom?.id ??
+    classroom?.classId ??
+    classroom?._id ??
+    "";
+
+  const cardTitle = classroom?.title || "Class";
+  const cardSubject = classroom?.subject || "";
+  const cover = classroom?.coverUrl || classroom?.cover || null;
+  const logo = classroom?.logoUrl || classroom?.logo || null;
+  const accessType = (classroom?.accessType || "OPEN").toUpperCase();
+
+  const isEnrolled = classrooms.some(
+    (item) =>
+      item.id === courseId ||
+      item.courseId === courseId ||
+      item.classId === courseId
+  );
+
+  const learners = formatLearners(
+    classroom?.enrollmentCount ?? classroom?.memberCount ?? 0
+  );
+
+  const handleOpenClick = (e) => {
+    if (e) e.preventDefault();
+    if (!courseId) return;
+
+    // 1. If enrolled or public open access, directly open class page
+    if (isEnrolled || accessType === "OPEN") {
+      navigate(`/dashboard/classes/${courseId}`);
+      return;
+    }
+
+    // 2. If code required, prompt user to enter class code
+    if (accessType === "CODE") {
+      setJoinError("");
+      setCode("");
+      setIsCodeModalOpen(true);
+      return;
+    }
+
+    // 3. If invite only, inform user
+    if (accessType === "INVITE") {
+      setIsInviteModalOpen(true);
+      return;
+    }
+
+    navigate(`/dashboard/classes/${courseId}`);
+  };
+
+  const handleJoinByCode = async (e) => {
+    e.preventDefault();
+    const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode) {
+      setJoinError("Please enter a class code.");
+      return;
+    }
+
+    setIsJoining(true);
+    setJoinError("");
+    try {
+      await joinClassroom(user?.id, courseId, cleanCode);
+      setIsCodeModalOpen(false);
+      navigate(`/dashboard/classes/${courseId}`);
+    } catch (err) {
+      const msg =
+        err?.data?.error ||
+        err?.data?.message ||
+        err?.message ||
+        "Invalid class code or failed to join class.";
+      setJoinError(msg);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  return (
+    <>
+      <article
+        className={[
+          "group flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs",
+          "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40",
+          className,
+        ].join(" ")}
+      >
+        {/* Cover Header & Floating/Overlay Logo */}
+        <div className="relative h-14 w-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5 dark:from-primary/30 dark:to-zinc-900">
+          {cover && (
+            <img
+              src={cover}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
+
+          {/* Access Type Badge */}
+          <div className="absolute top-2 right-2 z-10">
+            {renderAccessBadge(accessType)}
+          </div>
+
+          {/* Logo - always above on cover */}
+          <div className="absolute bottom-2 left-2.5 z-10 flex h-7.5 w-7.5 sm:h-8 sm:w-8 items-center justify-center overflow-hidden rounded-md border border-white/70 dark:border-zinc-700 bg-surface shadow-xs">
+            {logo ? (
+              <img
+                src={logo}
+                alt=""
+                aria-hidden="true"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-[11px] font-bold text-primary">
+                {getInitials(cardTitle)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Main Body */}
+        <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={handleOpenClick}
+              className="block text-left w-full group-hover:text-primary transition-colors cursor-pointer"
             >
-              <IconGlyph size={18} strokeWidth={2.2} />
+              <h3
+                title={cardTitle}
+                className="text-xs sm:text-sm font-bold leading-tight text-text-heading truncate"
+              >
+                {cardTitle}
+              </h3>
+            </button>
+            {cardSubject && (
+              <p className="mt-0.5 text-[11px] text-text-muted truncate">
+                {cardSubject}
+              </p>
+            )}
+          </div>
+
+          {/* Bottom Row */}
+          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-[11px] text-text-muted">
+            <span className="truncate">{learners}</span>
+            <button
+              type="button"
+              onClick={handleOpenClick}
+              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs hover:bg-primary-hover active:scale-95 transition-all cursor-pointer"
+            >
+              <span>Open</span>
+              <ArrowRight size={11} />
+            </button>
+          </div>
+        </div>
+      </article>
+
+      {/* Code Prompt Modal for AccessType === CODE */}
+      {isCodeModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in-0 duration-150"
+          onClick={() => !isJoining && setIsCodeModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                  <KeyRound size={18} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-text-heading truncate">
+                    Enter Class Code
+                  </h3>
+                  <p className="text-xs text-text-muted truncate">
+                    Code required to join this class
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCodeModalOpen(false)}
+                disabled={isJoining}
+                className="rounded-lg p-1 text-text-muted hover:bg-canvas hover:text-text-heading cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X size={16} />
+              </button>
             </div>
 
-            {/* Course / Topic Title */}
-            <h3 className="text-base sm:text-lg font-bold text-text-heading line-clamp-1 tracking-tight group-hover:text-primary transition-colors">
-              {effectiveTitle}
-            </h3>
-
-            {/* Learners Count */}
-            <p className="mt-0.5 text-xs text-text-muted font-normal">
-              {effectiveLearners}
+            <p className="mt-3 text-xs text-text-muted">
+              Enter the code provided by your instructor to join{" "}
+              <span className="font-semibold text-text-heading">{cardTitle}</span>.
             </p>
-          </div>
 
-          {/* Explore Pill Button */}
-          <div className="mt-4">
-            <Link
-              to={target}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 active:scale-95 ${theme.buttonBg}`}
-            >
-              <span>Explore</span>
-              <ArrowRight
-                size={13}
-                strokeWidth={2.4}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
-            </Link>
+            <form onSubmit={handleJoinByCode} className="mt-4 space-y-3">
+              <div>
+                <input
+                  type="text"
+                  autoFocus
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value.toUpperCase());
+                    setJoinError("");
+                  }}
+                  placeholder="e.g. ABCD1234"
+                  maxLength={16}
+                  className="w-full rounded-lg border border-border bg-canvas px-3 py-2 text-center font-mono text-base font-semibold tracking-wider text-text-heading uppercase outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                {joinError && (
+                  <p className="mt-1.5 text-xs text-destructive">{joinError}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <Link
+                  to={`/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code`}
+                  onClick={() => setIsCodeModalOpen(false)}
+                  className="text-[11px] text-text-muted hover:text-primary hover:underline"
+                >
+                  Dedicated join page
+                </Link>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCodeModalOpen(false)}
+                    disabled={isJoining}
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-muted hover:bg-canvas hover:text-text-heading cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!code.trim() || isJoining}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
+                  >
+                    {isJoining ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin" />
+                        <span>Joining…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Join & Open</span>
+                        <ArrowRight size={13} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
+      )}
 
-        {/* Right column: 3D Illustration */}
-        <div className="shrink-0 flex items-center justify-center -mr-2 -mt-1 select-none pointer-events-none transition-transform duration-200 group-hover:scale-105">
-          <img
-            src={classroom.coverUrl}
-            alt={effectiveTitle}
-            className="h-full w-full object-cover"
-          />
+      {/* Invite Only Modal for AccessType === INVITE */}
+      {isInviteModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in-0 duration-150"
+          onClick={() => setIsInviteModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 shrink-0">
+                  <Lock size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-text-heading">
+                    Invite Only Class
+                  </h3>
+                  <p className="text-xs text-text-muted">Private learning space</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsInviteModalOpen(false)}
+                className="rounded-lg p-1 text-text-muted hover:bg-canvas hover:text-text-heading cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="mt-3 text-xs text-text-muted leading-relaxed">
+              <span className="font-semibold text-text-heading">{cardTitle}</span>{" "}
+              is an invite-only class. Only invited members can access
+              this course. Please request an invitation link or code from the
+              instructor.
+            </p>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsInviteModalOpen(false)}
+                className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover cursor-pointer"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

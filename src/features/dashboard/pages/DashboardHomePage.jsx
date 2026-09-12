@@ -10,37 +10,6 @@ import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.j
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
-const CURATED_EXPLORE_TOPICS = [
-  {
-    title: "Web Development",
-    subject: "Web Development",
-    learnersText: "2.4k learners",
-    theme: "orange",
-    target: "/dashboard/explore?subject=Web%20Development",
-  },
-  {
-    title: "AI & Machine Learning",
-    subject: "AI & Machine Learning",
-    learnersText: "1.8k learners",
-    theme: "emerald",
-    target: "/dashboard/explore?subject=AI%20%26%20Machine%20Learning",
-  },
-  {
-    title: "Cyber Security",
-    subject: "Cyber Security",
-    learnersText: "950 learners",
-    theme: "purple",
-    target: "/dashboard/explore?subject=Cyber%20Security",
-  },
-  {
-    title: "Data Science",
-    subject: "Data Science",
-    learnersText: "1.2k learners",
-    theme: "blue",
-    target: "/dashboard/explore?subject=Data%20Science",
-  },
-];
-
 export default function DashboardHomePage() {
   const { authStatus } = useAuth();
   const {
@@ -58,43 +27,23 @@ export default function DashboardHomePage() {
 
   const displayExploreCards = useMemo(() => {
     const joinedCourseIds = new Set(
-      classrooms.map((classroom) => classroom.id || classroom.courseId)
+      classrooms.map(
+        (classroom) =>
+          classroom.id || classroom.courseId || classroom.classId
+      )
     );
 
-    const available = exploreClassrooms.filter(
-      (classroom) => !joinedCourseIds.has(classroom.courseId || classroom.id)
+    // Prioritize unjoined public courses, followed by joined public courses from the database
+    const unjoined = exploreClassrooms.filter(
+      (c) =>
+        !joinedCourseIds.has(c.courseId || c.id || c.classId)
+    );
+    const joined = exploreClassrooms.filter(
+      (c) =>
+        joinedCourseIds.has(c.courseId || c.id || c.classId)
     );
 
-    // If we have at least 4 available public courses, use them
-    if (available.length >= 4) {
-      return available.slice(0, 4).map((c) => ({ classroom: c }));
-    }
-
-    // Otherwise, combine available courses with curated topics to always have 4 cards
-    const cards = available.map((c) => ({ classroom: c }));
-    for (const curated of CURATED_EXPLORE_TOPICS) {
-      if (cards.length >= 4) break;
-      const alreadyHas = cards.some(
-        (card) =>
-          card.classroom &&
-          (card.classroom.subject?.toLowerCase() === curated.subject.toLowerCase() ||
-           card.classroom.title?.toLowerCase() === curated.title.toLowerCase())
-      );
-      if (!alreadyHas) {
-        cards.push(curated);
-      }
-    }
-
-    // In case deduplication leaves fewer than 4, fill sequentially from curated topics
-    let idx = 0;
-    while (cards.length < 4 && idx < CURATED_EXPLORE_TOPICS.length) {
-      if (!cards.includes(CURATED_EXPLORE_TOPICS[idx])) {
-        cards.push(CURATED_EXPLORE_TOPICS[idx]);
-      }
-      idx++;
-    }
-
-    return cards;
+    return [...unjoined, ...joined].slice(0, 4);
   }, [classrooms, exploreClassrooms]);
 
   // Handle global loading states for both dashboard data and profile
@@ -204,23 +153,20 @@ export default function DashboardHomePage() {
               description="Please check your connection or try again later."
             />
           </div>
-        ) : (
+        ) : displayExploreCards.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {displayExploreCards.map((card, idx) => (
-              <div key={card.classroom?.courseId || card.classroom?.id || card.title || idx}>
-                {card.classroom ? (
-                  <ExploreClassCard classroom={card.classroom} />
-                ) : (
-                  <ExploreClassCard
-                    title={card.title}
-                    subject={card.subject}
-                    learnersText={card.learnersText}
-                    theme={card.theme}
-                    target={card.target}
-                  />
-                )}
+            {displayExploreCards.map((classroom) => (
+              <div key={classroom.courseId || classroom.id}>
+                <ExploreClassCard classroom={classroom} />
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="mt-6">
+            <EmptyState
+              title="No public classes available"
+              description="There are currently no public classes to explore. Create a class to get started!"
+            />
           </div>
         )}
       </section>

@@ -16,6 +16,8 @@ export function mapCreateClassPayload(details = {}) {
     section: details.section ?? "",
     subject: details.subject ?? "",
     description: details.description ?? "",
+    coverUrl: details.coverUrl ?? null,
+    logoUrl: details.logoUrl ?? null,
     accessType,
     visibility:
       details.visibility ??
@@ -71,6 +73,14 @@ export async function requestCourseCoverUpload() {
   return unwrapResponse(
     await store
       .dispatch(classroomApi.endpoints.requestCourseCoverUpload.initiate())
+      .unwrap()
+  );
+}
+
+export async function requestCourseLogoUpload() {
+  return unwrapResponse(
+    await store
+      .dispatch(classroomApi.endpoints.requestCourseLogoUpload.initiate())
       .unwrap()
   );
 }

@@ -1,16 +1,28 @@
 import { baseApi } from "@/app/baseApi.js";
 
-const normalizeDiscoveryCourse = (course = {}) => ({
-  courseId: course.courseId,
-  id: course.courseId,
-  title: course.title ?? "Untitled course",
-  subject: course.subject ?? "",
-  tags: Array.isArray(course.tags) ? course.tags : [],
-  enrollmentCount: course.enrollmentCount ?? 0,
-  popularityScore: course.popularityScore ?? 0,
-  lastActivityAt: course.lastActivityAt ?? null,
-  accessType: (course.accessType || "OPEN").toUpperCase(),
-});
+const normalizeDiscoveryCourse = (course = {}) => {
+  const courseId =
+    course.courseId ??
+    course.id ??
+    course._id ??
+    course.classId ??
+    null;
+
+  return {
+    courseId,
+    id: courseId,
+    title: course.title ?? course.name ?? "Untitled course",
+    subject: course.subject ?? "",
+    tags: Array.isArray(course.tags) ? course.tags : [],
+    coverUrl: course.coverUrl ?? course.cover ?? null,
+    logoUrl: course.logoUrl ?? course.logo ?? null,
+    logo: course.logoUrl ?? course.logo ?? null,
+    enrollmentCount: course.enrollmentCount ?? course.memberCount ?? 0,
+    popularityScore: course.popularityScore ?? 0,
+    lastActivityAt: course.lastActivityAt ?? null,
+    accessType: (course.accessType || "OPEN").toUpperCase(),
+  };
+};
 
 export const normalizeDiscoveryPage = (response = {}) => {
   const page = response?.data ?? response;

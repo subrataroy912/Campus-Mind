@@ -21,6 +21,8 @@ describe("mapCreateClassPayload", () => {
       section: "Period 3",
       subject: "Mathematics",
       description: "Advanced algebra",
+      coverUrl: null,
+      logoUrl: null,
       accessType: "OPEN",
       visibility: "PUBLIC",
     });
@@ -35,6 +37,8 @@ describe("mapCreateClassPayload", () => {
       section: "",
       subject: "",
       description: "",
+      coverUrl: null,
+      logoUrl: null,
       accessType: "INVITE",
       visibility: "PRIVATE",
     });
@@ -49,6 +53,8 @@ describe("mapCreateClassPayload", () => {
       section: "",
       subject: "",
       description: "",
+      coverUrl: null,
+      logoUrl: null,
       accessType: "CODE",
       visibility: "PRIVATE",
     });

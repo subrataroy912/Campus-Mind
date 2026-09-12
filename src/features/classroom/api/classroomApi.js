@@ -44,10 +44,10 @@ const normalizeCourse = (response = {}) => {
     popularity: course.popularity ?? course.popularityScore ?? 0,
     coverUrl: course.coverUrl ?? course.cover_image_url ?? null,
     logo:
+      course.logoUrl ??
       course.logo ??
       course.avatarUrl ??
       course.imageUrl ??
-      course.coverUrl ??
       null,
     theme: course.theme ?? "bg-primary",
   };
@@ -176,6 +176,9 @@ export const classroomApi = baseApi.injectEndpoints({
     requestCourseCoverUpload: builder.mutation({
       query: () => ({ url: "/courses/cover-upload", method: "POST" }),
     }),
+    requestCourseLogoUpload: builder.mutation({
+      query: () => ({ url: "/courses/logo-upload", method: "POST" }),
+    }),
     joinClassroom: builder.mutation({
       query: ({ courseId, code }) => {
         if (courseId) {
@@ -231,6 +234,7 @@ export const {
   useFindClassroomByIdQuery,
   useGetClassroomRosterQuery,
   useRequestCourseCoverUploadMutation,
+  useRequestCourseLogoUploadMutation,
   useUpdateClassroomMutation,
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,

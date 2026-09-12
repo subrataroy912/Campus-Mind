@@ -52,4 +52,5 @@ export const INITIAL_CLASS_FORM = {
   accessType: "invite",
   theme: THEME_COLORS[0].value,
   coverImage: null,
+  logoImage: null,
 };

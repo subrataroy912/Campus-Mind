@@ -31,9 +31,9 @@ export function useClassroom(classId) {
     );
   }, [classrooms, classId]);
 
-  // Only check public course endpoint if detailData failed with 404 (user is not an enrolled member)
+  // Check public course endpoint if detailData failed with 404 or 403 (user is not an enrolled member)
   const shouldFetchPublic = Boolean(
-    !cachedCourse && error?.status === 404
+    !cachedCourse && (error?.status === 404 || error?.status === 403 || error?.originalStatus === 404 || error?.originalStatus === 403)
   );
 
   const { data: publicCourse } = useGetPublicCourseQuery(classId, {

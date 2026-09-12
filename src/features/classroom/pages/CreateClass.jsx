@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Link } from "react-router";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Camera, Image as ImageIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
@@ -18,6 +18,7 @@ export default function CreateClass() {
   const {
     form,
     preview,
+    logoPreview,
     errors,
     submitted,
     submissionError,
@@ -25,6 +26,7 @@ export default function CreateClass() {
     update,
     toggleDay,
     handleImageUpload,
+    handleLogoUpload,
     reset,
     submit,
   } = useCreateClassForm();
@@ -113,56 +115,123 @@ export default function CreateClass() {
           onSubmit={submit}
           className="space-y-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6 lg:p-8"
         >
-          {/* Cover image / theme */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-text-main">
-              Class theme / cover image
-            </label>
-            <div
-              className={`relative flex h-32 w-full items-center justify-center overflow-hidden rounded-xl sm:h-40 ${
-                preview ? "" : form.theme
-              }`}
-            >
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="Cover preview"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-lg font-semibold text-surface/90 sm:text-xl">
-                  {form.className || "Your class name"}
-                </span>
-              )}
-              <label className="absolute bottom-2 right-2 cursor-pointer rounded-lg bg-surface/90 px-3 py-1.5 text-xs font-medium text-text-main shadow hover:bg-surface">
-                Upload image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-            {!preview && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {THEME_COLORS.map((c, index) => (
+          {/* Cover image & Class Logo Section */}
+          <div className="space-y-4">
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-sm font-medium text-text-main">
+                  Class cover banner <span className="text-xs text-text-muted font-normal">(optional)</span>
+                </label>
+                {preview && (
                   <button
-                    key={index}
                     type="button"
-                    onClick={() => update("theme", c.value)}
-                    className={`h-7 w-7 rounded-full ${
-                      c.value
-                    } ring-offset-2 transition ${
-                      form.theme === c.value
-                        ? "ring-2 ring-text-heading"
-                        : "ring-1 ring-border"
-                    }`}
-                    aria-label={c.name}
-                  />
-                ))}
+                    onClick={() => {
+                      update("coverImage", null);
+                    }}
+                    className="text-xs text-text-muted hover:text-red-500 transition-colors"
+                  >
+                    Remove cover
+                  </button>
+                )}
               </div>
-            )}
+              <div
+                className={`relative flex h-32 w-full items-center justify-center overflow-hidden rounded-xl sm:h-40 ${
+                  preview ? "" : form.theme
+                }`}
+              >
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="Cover preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-semibold text-surface/90 sm:text-xl">
+                    {form.className || "Your class name"}
+                  </span>
+                )}
+                <label className="absolute bottom-2 right-2 cursor-pointer rounded-lg bg-surface/90 px-3 py-1.5 text-xs font-medium text-text-main shadow hover:bg-surface flex items-center gap-1.5 backdrop-blur-xs transition">
+                  <ImageIcon className="h-3.5 w-3.5" />
+                  <span>{preview ? "Change cover" : "Upload cover"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              {!preview && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {THEME_COLORS.map((c, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => update("theme", c.value)}
+                      className={`h-7 w-7 rounded-full ${
+                        c.value
+                      } ring-offset-2 transition ${
+                        form.theme === c.value
+                          ? "ring-2 ring-text-heading"
+                          : "ring-1 ring-border"
+                      }`}
+                      aria-label={c.name}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Class Logo / Avatar Upload */}
+            <div className="rounded-xl border border-border bg-canvas/40 p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-border bg-surface shadow-xs">
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt="Class logo preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-primary/10 text-base font-bold text-primary">
+                        {form.className?.slice(0, 2)?.toUpperCase() || "CL"}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-text-heading">
+                      Class logo / icon <span className="text-xs text-text-muted font-normal">(optional)</span>
+                    </p>
+                    <p className="text-xs text-text-muted mt-0.5">
+                      Square avatar displayed on class cards, explore feed, and classroom header.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <label className="cursor-pointer rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-main shadow-xs hover:bg-canvas flex items-center gap-1.5 transition">
+                    <Camera className="h-3.5 w-3.5" />
+                    <span>{logoPreview ? "Change logo" : "Upload logo"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  {logoPreview && (
+                    <button
+                      type="button"
+                      onClick={() => update("logoImage", null)}
+                      className="text-xs text-text-muted hover:text-red-500 transition-colors px-2 py-1"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Class name + Section */}

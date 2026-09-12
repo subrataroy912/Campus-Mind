@@ -14,7 +14,11 @@ export default function ClassHeader({
   const teacherName =
     typeof classroom?.teacher === "string"
       ? classroom.teacher
-      : classroom?.teacher?.name || classroom?.instructor?.name || "CampusMind teacher";
+      : classroom?.teacher?.name ||
+        classroom?.instructor?.name ||
+        classroom?.teacherName ||
+        classroom?.ownerName ||
+        "";
 
   const accessType = (
     classroom?.accessType ||
@@ -37,8 +41,16 @@ export default function ClassHeader({
     <div className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
       {/* Banner Section */}
       <div
-        className={`relative h-28 sm:h-36 ${classroom?.theme || "bg-primary"}`}
+        className={`relative h-28 sm:h-36 overflow-hidden ${classroom?.theme || "bg-primary"}`}
       >
+        {(classroom?.coverUrl || classroom?.cover) && (
+          <img
+            src={classroom.coverUrl || classroom.cover}
+            alt={`${classroom?.title || "Class"} banner`}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-black/20" />
         {/* Back Link */}
         <div className="absolute left-3 top-3">
           <Link
@@ -87,20 +99,23 @@ export default function ClassHeader({
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5">
           {/* Floating Logo */}
           <div className="-mt-12 h-20 w-20 z-20 shrink-0 overflow-hidden rounded-2xl border-4 border-surface bg-canvas shadow-sm sm:-mt-14 sm:h-24 sm:w-24">
-            <img
-              src={
-                classroom?.logo ||
-                "https://testingbot.com/free-online-tools/random-avatar/100"
-              }
-              alt={`${classroom?.title || "Class"} logo`}
-              className="h-full w-full object-cover"
-            />
+            {classroom?.logo ? (
+              <img
+                src={classroom.logo}
+                alt={`${classroom?.title || "Class"} logo`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center bg-primary/10 text-xl font-bold text-primary">
+                {classroom?.title?.slice(0, 2)?.toUpperCase() || "CL"}
+              </div>
+            )}
           </div>
 
           {/* Title and Subtitle */}
           <div className="mb-1 sm:mb-2">
             <h1 className="text-xl font-bold text-text-heading sm:text-2xl line-clamp-1">
-              {classroom?.title || "Untitled Class"}
+              {classroom?.title || "Class"}
             </h1>
             <p className="mt-1 text-sm font-medium text-text-muted line-clamp-1">
               {classroom?.section || classroom?.subtitle}

@@ -153,6 +153,7 @@ function UpcomingPanel({ items }) {
 function Classwork({
   teacher,
   classId,
+  classroom,
   isEnrolled = true,
   onJoin,
   isJoining = false,
@@ -233,11 +234,10 @@ function Classwork({
         attachments,
         submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
         totalCount:
-          item.totalCount ??
-          (item.submittedCount ? item.submittedCount + 2 : 24),
+          item.totalCount ?? classroom?.memberCount ?? 0,
       };
     });
-  }, [coursework]);
+  }, [coursework, classroom?.memberCount]);
 
   const groups = ["This week", "Upcoming", "Past"];
 
@@ -1425,6 +1425,7 @@ export default function ClassPage() {
           <Classwork
             teacher={teacher}
             classId={classId}
+            classroom={classroom}
             isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}

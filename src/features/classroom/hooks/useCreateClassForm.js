@@ -6,6 +6,7 @@ import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
   createClassroom,
   requestCourseCoverUpload,
+  requestCourseLogoUpload,
   updateClassroom,
 } from "../api/classroomService.js";
 import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
@@ -17,6 +18,7 @@ export function useCreateClassForm() {
   const { user } = useAuth();
   const [form, setForm] = useState(INITIAL_CLASS_FORM);
   const [preview, setPreview] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
@@ -44,6 +46,14 @@ export function useCreateClassForm() {
     setPreview(URL.createObjectURL(optimizedFile));
   };
 
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const optimizedFile = await optimizeImage(file, 600);
+    update("logoImage", optimizedFile);
+    setLogoPreview(URL.createObjectURL(optimizedFile));
+  };
+
   const validate = () => {
     const nextErrors = {};
     if (!form.className.trim())
@@ -57,6 +67,7 @@ export function useCreateClassForm() {
   const reset = () => {
     setForm(INITIAL_CLASS_FORM);
     setPreview(null);
+    setLogoPreview(null);
     setErrors({});
     setSubmitted(false);
     setSubmissionError("");
@@ -73,6 +84,9 @@ export function useCreateClassForm() {
     setSubmissionError("");
     try {
       let coverUrl = null;
+      let logoUrl = null;
+
+      // Upload cover image if provided (optional)
       if (form.coverImage) {
         const upload = await requestCourseCoverUpload();
         const body = new FormData();
@@ -88,12 +102,38 @@ export function useCreateClassForm() {
         if (!response.ok) throw new Error("Unable to upload the class cover.");
         coverUrl = (await response.json()).secure_url;
       }
-      // The course API only accepts the cover URL on PATCH. Create first so the
-      // generated course ID is available for the signed Cloudinary result.
-      const classroom = await createClassroom(user?.id, form);
-      const savedClassroom = coverUrl
-        ? await updateClassroom(classroom.id, { coverUrl })
+
+      // Upload logo image if provided (optional)
+      if (form.logoImage) {
+        const upload = await requestCourseLogoUpload();
+        const body = new FormData();
+        body.append("file", form.logoImage);
+        body.append("api_key", upload.uploadApiKey);
+        body.append("timestamp", String(upload.uploadTimestamp));
+        body.append("signature", upload.uploadSignature);
+        body.append("public_id", upload.publicId);
+        const response = await fetch(upload.uploadUrl, {
+          method: "POST",
+          body,
+        });
+        if (!response.ok) throw new Error("Unable to upload the class logo.");
+        logoUrl = (await response.json()).secure_url;
+      }
+
+      const classroom = await createClassroom(user?.id, {
+        ...form,
+        coverUrl,
+        logoUrl,
+      });
+
+      const updates = {};
+      if (coverUrl && !classroom.coverUrl) updates.coverUrl = coverUrl;
+      if (logoUrl && !classroom.logoUrl) updates.logoUrl = logoUrl;
+
+      const savedClassroom = Object.keys(updates).length > 0
+        ? await updateClassroom(classroom.id, updates)
         : classroom;
+
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
       navigate(`/dashboard/classes/${savedClassroom.id}`, {
@@ -111,6 +151,7 @@ export function useCreateClassForm() {
   return {
     form,
     preview,
+    logoPreview,
     errors,
     submitted,
     submissionError,
@@ -118,6 +159,7 @@ export function useCreateClassForm() {
     update,
     toggleDay,
     handleImageUpload,
+    handleLogoUpload,
     reset,
     submit,
   };
