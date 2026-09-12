@@ -30,8 +30,13 @@ export default function JoinClass() {
     publicCourse?.accessType ||
     (publicCourse?.visibility === "PUBLIC" ? "OPEN" : "CODE");
 
-  const isOpenCourse = Boolean(optionalCourseId && effectiveAccessType === "OPEN");
-  const isInviteCourse = Boolean(optionalCourseId && effectiveAccessType === "INVITE");
+  const isOpenCourse = Boolean(
+    optionalCourseId &&
+      (effectiveAccessType === "OPEN" || publicCourse?.visibility === "PUBLIC")
+  );
+  const isInviteCourse = Boolean(
+    optionalCourseId && effectiveAccessType === "INVITE"
+  );
 
   const [code, setCode] = useState(() =>
     Array.from(

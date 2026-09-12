@@ -80,7 +80,12 @@ function Chip({ status }) {
     </span>
   );
 }
-function Home({ isEnrolled = true, onJoin, isJoining = false }) {
+function Home({ isEnrolled = true, onJoin, isJoining = false, classroom }) {
+  const accessType = (
+    classroom?.accessType ||
+    (classroom?.visibility === "PUBLIC" ? "open" : "code")
+  ).toLowerCase();
+
   return (
     <div className="mt-4 space-y-4">
       {!isEnrolled && (
@@ -89,21 +94,33 @@ function Home({ isEnrolled = true, onJoin, isJoining = false }) {
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
                 <Globe className="h-3.5 w-3.5" />
-                Public Course Preview
+                Course Preview
               </div>
               <h3 className="text-base font-semibold text-text-heading">
-                You are previewing this public course
+                You are previewing this course
               </h3>
               <p className="text-sm text-text-muted">
                 Join now to participate in discussions, access class materials, submit coursework, and connect with members.
               </p>
             </div>
-            {onJoin && (
+            {accessType === "invite" ? (
+              <span className="shrink-0 text-xs font-medium text-text-muted">
+                Invite only
+              </span>
+            ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
+              <Button
+                to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
+                className="shrink-0 gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                Join with Code
+              </Button>
+            ) : onJoin ? (
               <Button onClick={onJoin} loading={isJoining} className="shrink-0 gap-2">
                 <UserPlus className="h-4 w-4" />
                 Join Class
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       )}
@@ -1296,7 +1313,9 @@ export default function ClassPage() {
       await joinClassroom(user?.id, { courseId: classId });
       triggerLifecycleRefresh("course:joined", { courseId: classId });
     } catch (err) {
-      setJoinError(err?.message || "Failed to join class. Please try again.");
+      setJoinError(
+        err?.data?.error || err?.message || "Failed to join class. Please try again."
+      );
     } finally {
       setIsJoining(false);
     }
@@ -1391,6 +1410,7 @@ export default function ClassPage() {
             isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}
+            classroom={classroom}
           />
         )}
         {activeTab === "classwork" && (

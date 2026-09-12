@@ -112,14 +112,29 @@ export default function ClassHeader({
 
         {/* Action Button based on Enrollment / Access Type */}
         {!isEnrolled ? (
-          <button
-            onClick={onJoin}
-            disabled={isJoining}
-            className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>{isJoining ? "Joining class…" : "Join Class"}</span>
-          </button>
+          accessType === "invite" ? (
+            <div className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas/70 px-4 py-2 text-sm font-medium text-text-muted sm:mb-2 sm:w-auto sm:self-auto">
+              <ClassroomIcon name="lock" className="h-4 w-4 text-text-muted" />
+              <span>Invite only</span>
+            </div>
+          ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
+            <Link
+              to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
+              className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Join with Code</span>
+            </Link>
+          ) : (
+            <button
+              onClick={onJoin}
+              disabled={isJoining}
+              className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>{isJoining ? "Joining class…" : "Join Class"}</span>
+            </button>
+          )
         ) : accessType === "invite" ? (
           <div className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas/70 px-4 py-2 text-sm font-medium text-text-muted sm:mb-2 sm:w-auto sm:self-auto">
             <ClassroomIcon name="lock" className="h-4 w-4 text-text-muted" />

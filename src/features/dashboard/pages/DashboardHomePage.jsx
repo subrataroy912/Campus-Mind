@@ -107,53 +107,60 @@ export default function DashboardHomePage() {
         </section>
       )}
 
-      <section
-        className={`mt-10 ${classrooms.length > 0 ? "border-t border-border pt-8" : "pt-2"}`}
-        aria-labelledby="explore-feed-heading"
-      >
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <div className="flex items-center gap-2 text-primary">
-              <Compass size={18} aria-hidden="true" />
-              <p className="text-sm font-semibold">Class feed</p>
-            </div>
-            <h2
-              id="explore-feed-heading"
-              className="mt-1 text-xl font-semibold text-text-heading"
-            >
-              Find your next learning space
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">
-              Explore public courses ranked by popularity and recent activity.
-            </p>
-          </div>
-          <Link
-            to="/dashboard/explore"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            See all
-          </Link>
-        </div>
-
-        {status === "error" ? (
-          <div className="mt-6">
-            <EmptyState
-              title="We could not load the class feed"
-              description="Please check your connection or try again later."
-            />
-          </div>
-        ) : feedClasses.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {feedClasses.map((classroom) => (
-              <div key={classroom.courseId}>
-                <ExploreClassCard classroom={classroom} />
+      {classrooms.length > 0 && (
+        <section
+          className="mt-10 border-t border-border pt-8"
+          aria-labelledby="explore-feed-heading"
+        >
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <div className="flex items-center gap-2 text-primary">
+                <Compass size={18} aria-hidden="true" />
+                <p className="text-sm font-semibold">Class feed</p>
               </div>
-            ))}
+              <h2
+                id="explore-feed-heading"
+                className="mt-1 text-xl font-semibold text-text-heading"
+              >
+                Find your next learning space
+              </h2>
+              <p className="mt-1 text-sm text-text-muted">
+                Explore public courses ranked by popularity and recent activity.
+              </p>
+            </div>
+            <Link
+              to="/dashboard/explore"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              See all
+            </Link>
           </div>
-        ) : (
-          <></>
-        )}
-      </section>
+
+          {status === "error" ? (
+            <div className="mt-6">
+              <EmptyState
+                title="We could not load the class feed"
+                description="Please check your connection or try again later."
+              />
+            </div>
+          ) : feedClasses.length > 0 ? (
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {feedClasses.map((classroom) => (
+                <div key={classroom.courseId}>
+                  <ExploreClassCard classroom={classroom} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6">
+              <EmptyState
+                title="No classes available"
+                description="There are currently no public classes to explore. Check back later!"
+              />
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
