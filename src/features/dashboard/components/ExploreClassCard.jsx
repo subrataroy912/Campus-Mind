@@ -1,5 +1,12 @@
 import { Link } from "react-router";
-import { Code2, Brain, Shield, TrendingUp, Sparkles, ArrowRight } from "lucide-react";
+import {
+  Code2,
+  Brain,
+  Shield,
+  TrendingUp,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import {
   LaptopIllustration,
@@ -69,7 +76,9 @@ export default function ExploreClassCard({
 
   // Determine values from either classroom prop or direct props
   const effectiveTitle = classroom ? classroom.title : title || "Course";
-  const effectiveSubject = classroom ? classroom.subject || "General" : subject || "General";
+  const effectiveSubject = classroom
+    ? classroom.subject || "General"
+    : subject || "General";
 
   const rawLearners =
     classroom?.enrollmentCount != null
@@ -84,7 +93,10 @@ export default function ExploreClassCard({
         : rawLearners + " learners"
       : "1.2k learners");
 
-  const detectedConfig = getIllustrationForSubject(effectiveSubject, effectiveTitle);
+  const detectedConfig = getIllustrationForSubject(
+    effectiveSubject,
+    effectiveTitle
+  );
   const themeKey = customTheme || detectedConfig.theme || "orange";
   const theme = THEME_CONFIG[themeKey] || THEME_CONFIG.orange;
   const CardIllustration = theme.Illustration;
@@ -102,16 +114,24 @@ export default function ExploreClassCard({
     if (isEnrolled || accessType === "OPEN") {
       target = `/dashboard/classes/${courseId}`;
     } else if (accessType === "INVITE") {
-      target = `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=invite`;
+      target = `/dashboard/class/join?courseId=${encodeURIComponent(
+        courseId
+      )}&accessType=invite`;
     } else {
       target = classroom.code
-        ? `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code&code=${encodeURIComponent(classroom.code)}`
-        : `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code`;
+        ? `/dashboard/class/join?courseId=${encodeURIComponent(
+            courseId
+          )}&accessType=code&code=${encodeURIComponent(classroom.code)}`
+        : `/dashboard/class/join?courseId=${encodeURIComponent(
+            courseId
+          )}&accessType=code`;
     }
   }
 
   if (!target) {
-    target = `/dashboard/explore?subject=${encodeURIComponent(effectiveSubject)}`;
+    target = `/dashboard/explore?subject=${encodeURIComponent(
+      effectiveSubject
+    )}`;
   }
 
   return (
@@ -148,14 +168,22 @@ export default function ExploreClassCard({
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 active:scale-95 ${theme.buttonBg}`}
             >
               <span>Explore</span>
-              <ArrowRight size={13} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight
+                size={13}
+                strokeWidth={2.4}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
         </div>
 
         {/* Right column: 3D Illustration */}
         <div className="shrink-0 flex items-center justify-center -mr-2 -mt-1 select-none pointer-events-none transition-transform duration-200 group-hover:scale-105">
-          <CardIllustration className="w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-sm" />
+          <img
+            src={classroom.coverUrl}
+            alt={effectiveTitle}
+            className="h-full w-full object-cover"
+          />
         </div>
       </div>
     </div>
