@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router'
 
-function BrandLogo({ compact = false, className = '' }) {
+function BrandLogo({ compact = false, className = '', fetchPriority = 'auto' }) {
   const location = useLocation()
   const isHome = location.pathname === '/'
 
@@ -23,6 +23,7 @@ function BrandLogo({ compact = false, className = '' }) {
           width="40"
           height="40"
           decoding="async"
+          fetchPriority={fetchPriority}
           className="h-9 w-9 shrink-0 object-contain sm:h-10 sm:w-10"
         />
 

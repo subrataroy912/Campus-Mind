@@ -45,10 +45,10 @@ export default function DashboardHeader() {
         </button>
 
         <div className="sm:hidden">
-          <BrandLogo compact />
+          <BrandLogo compact fetchPriority="high" />
         </div>
         <div className="hidden sm:inline-flex">
-          <BrandLogo />
+          <BrandLogo fetchPriority="high" />
         </div>
       </div>
 
