@@ -16,10 +16,11 @@ export default function EmptyState({
         </p>
       )}
       {action && (
-        <Button to={action.to} className="mt-5">
+        <Button to={action.to} onClick={action.onClick} className="mt-5">
           {action.label}
         </Button>
       )}
+
     </div>
   );
 }

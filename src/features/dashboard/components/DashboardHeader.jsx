@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { Menu, X, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { Menu, X, Loader2, LogOut } from "lucide-react";
 
 import BrandLogo from "../../../components/common/BrandLogo";
 import Sidebar from "./Sidebar.jsx";
 import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { logoutFromHeader } from "./headerLogout.js";
 
 export default function DashboardHeader() {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { authStatus } = useAuth();
+  const { authStatus, logout } = useAuth();
   const { data: profile, isLoading } = useGetCurrentProfileQuery(undefined, {
     skip: authStatus === "hydrating",
   });
@@ -75,6 +77,14 @@ export default function DashboardHeader() {
             {isLoading ? "Loading..." : profile?.displayName || "Profile"}
           </span>
         </Link>
+        <button
+          onClick={() => logoutFromHeader(logout, navigate)}
+          aria-label="Sign out"
+          title="Sign out"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-canvas hover:text-text-main cursor-pointer"
+        >
+          <LogOut size={16} aria-hidden="true" />
+        </button>
       </div>
 
       {/* Mobile Drawer & Backdrop */}

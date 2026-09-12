@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { useGetClassroomRosterQuery } from "../../api/classroomApi.js";
+import {
+  useGetClassroomRosterQuery,
+  useUpdateClassroomMutation,
+  useRemoveCourseMemberMutation,
+} from "../../api/classroomApi.js";
+
 
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
 const MemberRow = React.memo(function MemberRow({
@@ -12,6 +17,8 @@ const MemberRow = React.memo(function MemberRow({
   teacher,
   confirming,
   setConfirming,
+  onRemove,
+  isRemoving,
 }) {
   const memberName =
     member?.name ||
@@ -73,6 +80,7 @@ const MemberRow = React.memo(function MemberRow({
                 <Button
                   variant="ghost"
                   size="sm"
+                  disabled={isRemoving}
                   onClick={() => setConfirming(null)}
                 >
                   Cancel
@@ -80,7 +88,8 @@ const MemberRow = React.memo(function MemberRow({
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => setConfirming(null)}
+                  loading={isRemoving}
+                  onClick={() => onRemove(memberId)}
                 >
                   Remove
                 </Button>
@@ -93,6 +102,7 @@ const MemberRow = React.memo(function MemberRow({
   );
 });
 
+
 export function MembersTab({
   classroom,
   teacher,
@@ -102,8 +112,38 @@ export function MembersTab({
 }) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
-  const [inviteEnabled, setInviteEnabled] = useState(true);
+  const [removingId, setRemovingId] = useState(null);
   const { authStatus } = useAuth();
+
+  const [updateClassroom, { isLoading: isUpdatingInvite }] = useUpdateClassroomMutation();
+  const [removeCourseMember] = useRemoveCourseMemberMutation();
+
+  const handleToggleInvite = async () => {
+    const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;
+    try {
+      await updateClassroom({
+        courseId: classroom?.id,
+        changes: { enrollmentEnabled: !isCurrentlyEnabled },
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to update invite code setting", err);
+    }
+  };
+
+  const handleRemoveMember = async (memberId) => {
+    try {
+      setRemovingId(memberId);
+      await removeCourseMember({
+        courseId: classroom?.id,
+        userId: memberId,
+      }).unwrap();
+      setConfirming(null);
+    } catch (err) {
+      console.error("Failed to remove member", err);
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   const { data: roster = [] } = useGetClassroomRosterQuery(classroom?.id, {
     skip: authStatus === "hydrating" || !classroom?.id || !isEnrolled,
@@ -156,6 +196,8 @@ export function MembersTab({
     );
   }
 
+  const enrollmentCode = classroom?.code || classroom?.enrollmentCode;
+
   return (
     <section className="mt-4">
       <div className="rounded-2xl bg-surface p-5 shadow-xs ring-1 ring-border sm:p-6 space-y-6">
@@ -171,17 +213,20 @@ export function MembersTab({
               {classroom?.memberCount || roster.length} members enrolled in this class
             </p>
           </div>
-          {teacher && classroom?.code && (
+          {teacher && enrollmentCode && (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setInviteEnabled(!inviteEnabled)}
+                loading={isUpdatingInvite}
+                onClick={handleToggleInvite}
                 className="rounded-xl gap-1.5"
               >
                 <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
-                  {inviteEnabled ? `Code: ${classroom.code}` : "Code disabled"}
+                  {classroom?.enrollmentEnabled !== false
+                    ? `Code: ${enrollmentCode}`
+                    : "Code disabled"}
                 </span>
               </Button>
             </div>
@@ -221,6 +266,8 @@ export function MembersTab({
                       teacher={teacher}
                       confirming={confirming}
                       setConfirming={setConfirming}
+                      onRemove={handleRemoveMember}
+                      isRemoving={removingId === (m.id || m.userId)}
                     />
                   ))}
                 </div>
@@ -240,6 +287,8 @@ export function MembersTab({
                       teacher={teacher}
                       confirming={confirming}
                       setConfirming={setConfirming}
+                      onRemove={handleRemoveMember}
+                      isRemoving={removingId === (m.id || m.userId)}
                     />
                   ))}
                 </div>
@@ -251,3 +300,4 @@ export function MembersTab({
     </section>
   );
 }
+

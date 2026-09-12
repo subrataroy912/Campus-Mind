@@ -43,9 +43,7 @@ export default function ClassHeader({
     <div className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
       {/* Banner Section */}
       <div
-        className={`relative h-28 sm:h-36 overflow-hidden ${
-          classTheme.gradientClass
-        }`}
+        className={`relative h-28 sm:h-36 overflow-hidden ${classTheme.gradientClass}`}
       >
         {(classroom?.coverUrl || classroom?.cover) && (
           <img

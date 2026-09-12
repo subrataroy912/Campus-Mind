@@ -157,6 +157,7 @@ export default function ClassPage() {
             onJoin={handleJoin}
             isJoining={isJoining}
             classroom={classroom}
+            teacher={teacher}
           />
         )}
 

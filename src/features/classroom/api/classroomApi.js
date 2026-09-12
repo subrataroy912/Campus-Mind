@@ -226,6 +226,16 @@ export const classroomApi = baseApi.injectEndpoints({
         ...exploreTags,
       ],
     }),
+    removeCourseMember: builder.mutation({
+      query: ({ courseId, userId }) => ({
+        url: `/courses/${courseId}/members/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { courseId }) => [
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: `${courseId}:roster` },
+      ],
+    }),
   }),
 });
 
@@ -238,6 +248,8 @@ export const {
   useUpdateClassroomMutation,
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,
+  useRemoveCourseMemberMutation,
   useCreateClassroomMutation,
   useJoinClassroomMutation,
 } = classroomApi;
+

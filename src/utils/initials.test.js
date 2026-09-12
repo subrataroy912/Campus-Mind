@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { initials } from "./utils/initials.js";
-import { formatClassCode, normalizeClassCode } from "./utils/classCode.js";
+import { initials } from "./initials.js";
+import { formatClassCode, normalizeClassCode } from "./classCode.js";
 
 describe("initials() utility test suite", () => {
   it("should extract two uppercase initials from a full name", () => {

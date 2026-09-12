@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router";
 import {
   BookOpen,
@@ -14,17 +15,52 @@ import {
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
+import ClassPostBox from "../ClassPostBox.jsx";
+import ClassFeedPost from "../ClassFeedPost.jsx";
+import {
+  useGetCourseworkListQuery,
+  useCreateCourseworkMutation,
+} from "../../api/courseworkApi.js";
 
 export function ClassHomeTab({
   isEnrolled = true,
   onJoin,
   isJoining = false,
   classroom,
+  teacher = false,
 }) {
+  const courseId = classroom?.id;
+
+  const { data: courseworkPage, isLoading: isLoadingCoursework } =
+    useGetCourseworkListQuery(
+      { courseId, page: 0, size: 50 },
+      { skip: !courseId || !isEnrolled }
+    );
+
+  const [createCoursework] = useCreateCourseworkMutation();
+
+  const announcements = useMemo(() => {
+    const list = courseworkPage?.content ?? [];
+    return list.filter((item) => item.type === "ANNOUNCEMENT");
+  }, [courseworkPage]);
+
+  const handlePostAnnouncement = async (text) => {
+    if (!text?.trim() || !courseId) return;
+    await createCoursework({
+      courseId,
+      payload: {
+        type: "ANNOUNCEMENT",
+        title: "Announcement",
+        description: text.trim(),
+      },
+    }).unwrap();
+  };
+
   const accessType = (
     classroom?.accessType ||
     (classroom?.visibility === "PUBLIC" ? "open" : "code")
   ).toLowerCase();
+
 
   const teacherName =
     typeof classroom?.teacher === "string"
@@ -213,13 +249,43 @@ export function ClassHomeTab({
 
       {/* Class Stream & Updates */}
       <div className="space-y-4">
-        <h3 className="text-base font-bold text-text-heading">
-          Class Stream & Updates
-        </h3>
-        <EmptyState
-          title="No class updates yet"
-          description="Announcements, discussions, and class updates will appear here when your instructor posts them."
-        />
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-text-heading">
+            Class Stream & Updates
+          </h3>
+          {announcements.length > 0 && (
+            <span className="text-xs font-medium text-text-muted">
+              {announcements.length} update{announcements.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+
+        {teacher && isEnrolled && (
+          <ClassPostBox onSubmit={handlePostAnnouncement} />
+        )}
+
+        {isLoadingCoursework && announcements.length === 0 ? (
+          <div className="rounded-2xl bg-surface p-6 text-center text-sm text-text-muted ring-1 ring-border shadow-xs">
+            Loading class updates…
+          </div>
+        ) : announcements.length === 0 ? (
+          <EmptyState
+            title="No class updates yet"
+            description="Announcements, discussions, and class updates will appear here when your instructor posts them."
+          />
+        ) : (
+          <div className="space-y-3">
+            {announcements.map((post) => (
+              <ClassFeedPost
+                key={post.id}
+                post={{
+                  ...post,
+                  teacherName,
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

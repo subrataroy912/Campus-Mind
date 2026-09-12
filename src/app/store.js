@@ -23,13 +23,13 @@ const combinedReducer = combineReducers(appReducer);
 
 function rootReducer(state, action) {
   if (
-    action.type !== forcedSignOut.type &&
-    action.type !== clearCredentials.type
+    action.type === forcedSignOut.type ||
+    action.type === clearCredentials.type
   ) {
-    return combinedReducer(state, action);
+    // UI is intentionally retained because its preferences are device-scoped.
+    return combinedReducer({ ui: state?.ui }, action);
   }
 
-  // UI is intentionally retained because its preferences are device-scoped.
   return combinedReducer(state, action);
 }
 

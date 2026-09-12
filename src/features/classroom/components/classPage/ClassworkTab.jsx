@@ -3,9 +3,18 @@ import { ClipboardList, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { useGetCourseworkListQuery } from "../../api/courseworkApi.js";
+import {
+  useGetCourseworkListQuery,
+  useCreateCourseworkMutation,
+} from "../../api/courseworkApi.js";
 import { CourseworkCard } from "./CourseworkCard.jsx";
 import { UpcomingPanel } from "./UpcomingPanel.jsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.jsx";
 
 const GROUPS = ["This week", "Upcoming", "Past"];
 
@@ -20,6 +29,53 @@ export function ClassworkTab({
   const { authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
   const [createOpen, setCreateOpen] = useState(false);
+  const [createType, setCreateType] = useState(null);
+  const [formTitle, setFormTitle] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formDueDate, setFormDueDate] = useState("");
+  const [formPoints, setFormPoints] = useState("100");
+  const [createError, setCreateError] = useState("");
+
+  const [createCoursework, { isLoading: isCreating }] = useCreateCourseworkMutation();
+
+  const handleCloseDialog = () => {
+    setCreateType(null);
+    setFormTitle("");
+    setFormDescription("");
+    setFormDueDate("");
+    setFormPoints("100");
+    setCreateError("");
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    if (!formTitle.trim()) {
+      setCreateError("Title is required");
+      return;
+    }
+    setCreateError("");
+    const payload = {
+      type: createType,
+      title: formTitle.trim(),
+      description: formDescription.trim(),
+    };
+    if (createType === "ASSIGNMENT") {
+      if (formDueDate) {
+        payload.dueAt = new Date(formDueDate).toISOString();
+      }
+      if (formPoints) {
+        payload.maximumPoints = Number(formPoints) || 100;
+      }
+    }
+    try {
+      await createCoursework({ courseId: classId, payload }).unwrap();
+      handleCloseDialog();
+    } catch (err) {
+      setCreateError(
+        err?.data?.message || err?.data?.error || "Failed to create coursework"
+      );
+    }
+  };
 
   const {
     data: courseworkPage,
@@ -162,14 +218,20 @@ export function ClassworkTab({
               </Button>
               {createOpen && (
                 <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl bg-surface p-1 shadow-lg ring-1 ring-border">
-                  {["Assignment", "Quiz", "Material"].map((type) => (
+                  {[
+                    { label: "Assignment", type: "ASSIGNMENT" },
+                    { label: "Material", type: "MATERIAL" },
+                  ].map(({ label, type }) => (
                     <Button
                       key={type}
                       variant="ghost"
                       className="w-full justify-start text-xs font-medium rounded-lg"
-                      onClick={() => setCreateOpen(false)}
+                      onClick={() => {
+                        setCreateType(type);
+                        setCreateOpen(false);
+                      }}
                     >
-                      {type}
+                      {label}
                     </Button>
                   ))}
                 </div>
@@ -181,9 +243,14 @@ export function ClassworkTab({
         {items.length === 0 ? (
           <EmptyState
             title="No classwork posted yet"
-            description="Assignments, quizzes, and learning materials will appear here when assigned."
+            description="Assignments and learning materials will appear here when assigned."
             action={
-              teacher ? { label: "Create your first assignment" } : undefined
+              teacher
+                ? {
+                    label: "Create your first assignment",
+                    onClick: () => setCreateType("ASSIGNMENT"),
+                  }
+                : undefined
             }
           />
         ) : (
@@ -214,6 +281,106 @@ export function ClassworkTab({
       </main>
 
       <UpcomingPanel items={items} />
+
+      {createType && (
+        <Dialog
+          open={Boolean(createType)}
+          onOpenChange={(open) => !open && handleCloseDialog()}
+        >
+          <DialogContent className="max-w-lg bg-surface p-6">
+            <DialogHeader>
+              <DialogTitle>
+                Create {createType === "ASSIGNMENT" ? "Assignment" : "Material"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateSubmit} className="mt-4 space-y-4">
+              {createError && (
+                <p className="rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
+                  {createError}
+                </p>
+              )}
+              <div>
+                <label className="block text-xs font-medium text-text-heading mb-1">
+                  Title <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder={
+                    createType === "ASSIGNMENT"
+                      ? "e.g. Problem Set 1"
+                      : "e.g. Week 1 Lecture Slides"
+                  }
+                  className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-text-heading mb-1">
+                  {createType === "ASSIGNMENT" ? "Instructions" : "Description"}
+                </label>
+                <textarea
+                  rows={3}
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder={
+                    createType === "ASSIGNMENT"
+                      ? "Describe instructions or questions…"
+                      : "Add notes or resource details…"
+                  }
+                  className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                />
+              </div>
+
+              {createType === "ASSIGNMENT" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-text-heading mb-1">
+                      Due Date
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formDueDate}
+                      onChange={(e) => setFormDueDate(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-text-heading mb-1">
+                      Points
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formPoints}
+                      onChange={(e) => setFormPoints(e.target.value)}
+                      placeholder="100"
+                      className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={isCreating}
+                  onClick={handleCloseDialog}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" loading={isCreating}>
+                  Publish
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
+
