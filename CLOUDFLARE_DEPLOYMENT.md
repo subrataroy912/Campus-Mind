@@ -32,6 +32,7 @@ Fill in the deployment settings:
 - **Framework preset**: `Vite`
 - **Build command**: `npm run build`
 - **Build output directory**: `dist`
+- **Deploy command**: *(Leave completely EMPTY / BLANK — do NOT enter `npx wrangler deploy`)*
 - **Root directory**: `/` (leave empty or as `/`)
 
 ### Step 4: Add Environment Variables
