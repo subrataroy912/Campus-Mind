@@ -29,13 +29,16 @@ export const GRADE_LEVELS = [
   "Other",
 ];
 
-export const THEME_COLORS = [
-  { name: "Slate", value: "bg-slate-900 text-white" },
-  { name: "Indigo", value: "bg-indigo-600 text-white" },
-  { name: "Emerald", value: "bg-emerald-600 text-white" },
-  { name: "Violet", value: "bg-violet-600 text-white" },
-  { name: "Amber", value: "bg-amber-500 text-slate-950" },
-];
+import { CLASSROOM_THEMES } from "../utils/classTheme.js";
+
+export const THEME_COLORS = CLASSROOM_THEMES.map((t) => ({
+  id: t.id,
+  name: t.name,
+  value: t.id,
+  swatchClass: t.swatchClass,
+  colorHex: t.colorHex,
+  gradientClass: t.gradientClass,
+}));
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -52,7 +55,7 @@ export const INITIAL_CLASS_FORM = {
   startTime: "",
   endTime: "",
   accessType: "invite",
-  theme: THEME_COLORS[0].value,
+  theme: "indigo",
   coverImage: null,
   logoImage: null,
 };

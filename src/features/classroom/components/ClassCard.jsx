@@ -1,8 +1,10 @@
 import { Link } from "react-router";
 import { Globe, KeyRound, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
+import { getClassTheme } from "../utils/classTheme.js";
 
 export default function ClassCard({ classroom }) {
+  const classTheme = getClassTheme(classroom);
   const teacher =
     classroom.instructor ||
     classroom.teacher ||
@@ -24,7 +26,7 @@ export default function ClassCard({ classroom }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       
       {/* Banner & Floating Logo */}
-      <div className={`relative h-24 w-full ${classroom.theme || "bg-primary"}`}>
+      <div className={`relative h-24 w-full ${classTheme.gradientClass}`}>
         <div className="absolute inset-0 overflow-hidden">
           {(classroom.coverUrl || classroom.cover) && (
             <img
@@ -33,13 +35,13 @@ export default function ClassCard({ classroom }) {
               className="h-full w-full object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute inset-0 bg-black/15" />
         </div>
         {/* Floating Avatar */}
         <div className="absolute -bottom-8 right-5 z-10 h-16 w-16 overflow-hidden rounded-full border-4 border-surface bg-canvas shadow-sm">
-          {classroom.logo ? (
+          {classroom.logo || classroom.logoUrl ? (
             <img
-              src={classroom.logo}
+              src={classroom.logo || classroom.logoUrl}
               alt={`${classroom.title} avatar`}
               className="h-full w-full object-cover"
             />

@@ -49,7 +49,7 @@ const normalizeCourse = (response = {}) => {
       course.avatarUrl ??
       course.imageUrl ??
       null,
-    theme: course.theme ?? "bg-primary",
+    theme: course.theme ?? null,
   };
 };
 

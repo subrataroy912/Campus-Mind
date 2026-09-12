@@ -18,6 +18,7 @@ export function mapCreateClassPayload(details = {}) {
     description: details.description ?? "",
     coverUrl: details.coverUrl ?? null,
     logoUrl: details.logoUrl ?? null,
+    theme: details.theme ?? null,
     accessType,
     visibility:
       details.visibility ??

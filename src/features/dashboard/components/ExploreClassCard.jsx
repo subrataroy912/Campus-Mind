@@ -4,6 +4,7 @@ import { ArrowRight, Globe, KeyRound, Lock, Loader2, X } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/classroom/api/classroomService.js";
+import { getClassTheme } from "@/features/classroom/utils/classTheme.js";
 
 const formatLearners = (count) => {
   const value = Number(count);
@@ -80,6 +81,7 @@ export default function ExploreClassCard({
   const cover = classroom?.coverUrl || classroom?.cover || null;
   const logo = classroom?.logoUrl || classroom?.logo || null;
   const accessType = (classroom?.accessType || "OPEN").toUpperCase();
+  const classTheme = getClassTheme(classroom);
 
   const isEnrolled = classrooms.some(
     (item) =>
@@ -102,26 +104,25 @@ export default function ExploreClassCard({
       return;
     }
 
-    // 2. If code required, prompt user to enter class code
+    // 2. If access type is CODE, open code prompt dialog
     if (accessType === "CODE") {
-      setJoinError("");
-      setCode("");
       setIsCodeModalOpen(true);
       return;
     }
 
-    // 3. If invite only, inform user
+    // 3. If access type is INVITE, show invite only modal
     if (accessType === "INVITE") {
       setIsInviteModalOpen(true);
       return;
     }
 
+    // Fallback: direct navigation
     navigate(`/dashboard/classes/${courseId}`);
   };
 
   const handleJoinByCode = async (e) => {
-    e.preventDefault();
-    const cleanCode = code.trim().toUpperCase();
+    if (e) e.preventDefault();
+    const cleanCode = code.trim();
     if (!cleanCode) {
       setJoinError("Please enter a class code.");
       return;
@@ -155,7 +156,7 @@ export default function ExploreClassCard({
         ].join(" ")}
       >
         {/* Cover Header & Floating/Overlay Logo */}
-        <div className="relative h-14 w-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5 dark:from-primary/30 dark:to-zinc-900">
+        <div className={`relative h-14 w-full ${cover ? "bg-canvas" : classTheme.gradientClass}`}>
           {cover && (
             <img
               src={cover}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
+import { getClassTheme } from "../utils/classTheme.js";
 
 export default function ClassHeader({
   classroom,
@@ -11,6 +12,7 @@ export default function ClassHeader({
 }) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const classTheme = getClassTheme(classroom);
   const teacherName =
     typeof classroom?.teacher === "string"
       ? classroom.teacher
@@ -18,7 +20,7 @@ export default function ClassHeader({
         classroom?.instructor?.name ||
         classroom?.teacherName ||
         classroom?.ownerName ||
-        "";
+        "CampusMind Instructor";
 
   const accessType = (
     classroom?.accessType ||
@@ -26,9 +28,10 @@ export default function ClassHeader({
   ).toLowerCase();
 
   const handleCopy = () => {
-    let textToCopy = classroom?.code || "";
+    let textToCopy = classroom?.code || classroom?.enrollmentCode || "";
     if (accessType === "open") {
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
       textToCopy = `${origin}/join?courseId=${classroom?.id || ""}`;
     }
     if (!textToCopy) return;
@@ -36,12 +39,13 @@ export default function ClassHeader({
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
-
   return (
     <div className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
       {/* Banner Section */}
       <div
-        className={`relative h-28 sm:h-36 overflow-hidden ${classroom?.theme || "bg-primary"}`}
+        className={`relative h-28 sm:h-36 overflow-hidden ${
+          classTheme.gradientClass
+        }`}
       >
         {(classroom?.coverUrl || classroom?.cover) && (
           <img
@@ -50,12 +54,15 @@ export default function ClassHeader({
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-black/20" />
+        {/* Scrim: Subtle overall dimming + top gradient for button contrast */}
+        <div className="absolute inset-0 bg-black/15" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
+
         {/* Back Link */}
-        <div className="absolute left-3 top-3">
+        <div className="absolute left-3 top-3 z-10">
           <Link
             to="/dashboard"
-            className="flex items-center gap-1.5 rounded-full bg-surface/25 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-surface/40 backdrop-blur-sm shadow-xs"
+            className="flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-black/45 backdrop-blur-md shadow-xs border border-white/15"
             aria-label="Back to dashboard classes"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -63,12 +70,12 @@ export default function ClassHeader({
           </Link>
         </div>
         {/* Settings Dropdown */}
-        <div className="absolute right-3 top-3">
+        <div className="absolute right-3 top-3 z-10">
           <div className="relative">
             <button
               onClick={() => setMenuOpen((open) => !open)}
               aria-label="Class settings"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/20 text-surface transition hover:bg-surface/30 backdrop-blur-sm"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white transition hover:bg-black/45 backdrop-blur-md border border-white/15 shadow-xs"
             >
               <ClassroomIcon name="settings" className="h-5 w-5" />
             </button>
@@ -119,7 +126,9 @@ export default function ClassHeader({
             </h1>
             <p className="text-sm font-medium text-text-muted line-clamp-1">
               {classroom?.section || classroom?.subtitle}
-              {(classroom?.section || classroom?.subtitle) && teacherName ? " · " : ""}
+              {(classroom?.section || classroom?.subtitle) && teacherName
+                ? " · "
+                : ""}
               {teacherName}
             </p>
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
@@ -135,7 +144,13 @@ export default function ClassHeader({
               )}
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted border border-border">
                 <ClassroomIcon
-                  name={accessType === "open" ? "globe" : accessType === "code" ? "key" : "lock"}
+                  name={
+                    accessType === "open"
+                      ? "globe"
+                      : accessType === "code"
+                      ? "key"
+                      : "lock"
+                  }
                   className="h-3 w-3 text-text-muted"
                 />
                 <span className="capitalize">{accessType}</span>
@@ -153,7 +168,9 @@ export default function ClassHeader({
             </div>
           ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
             <Link
-              to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
+              to={`/dashboard/class/join?courseId=${encodeURIComponent(
+                classroom?.id || ""
+              )}&accessType=code`}
               className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
             >
               <UserPlus className="h-4 w-4" />
@@ -181,7 +198,9 @@ export default function ClassHeader({
           >
             <ClassroomIcon
               name={copied ? "check" : "link"}
-              className={`h-4 w-4 ${copied ? "text-success" : "text-text-muted"}`}
+              className={`h-4 w-4 ${
+                copied ? "text-success" : "text-text-muted"
+              }`}
             />
             {copied ? (
               <span className="text-success">Link copied!</span>
@@ -196,14 +215,18 @@ export default function ClassHeader({
           >
             <ClassroomIcon
               name={copied ? "check" : "copy"}
-              className={`h-4 w-4 ${copied ? "text-success" : "text-text-muted"}`}
+              className={`h-4 w-4 ${
+                copied ? "text-success" : "text-text-muted"
+              }`}
             />
             {copied ? (
               <span className="text-success">Copied to clipboard</span>
             ) : (
               <span>
                 Class code:{" "}
-                <span className="font-mono text-primary">{classroom?.code}</span>
+                <span className="font-mono text-primary">
+                  {classroom?.code}
+                </span>
               </span>
             )}
           </button>

@@ -15,6 +15,7 @@ describe("mapCreateClassPayload", () => {
         room: "Room 204",
         description: "Advanced algebra",
         accessType: "open",
+        theme: "indigo",
       })
     ).toEqual({
       title: "Algebra II",
@@ -23,6 +24,7 @@ describe("mapCreateClassPayload", () => {
       description: "Advanced algebra",
       coverUrl: null,
       logoUrl: null,
+      theme: "indigo",
       accessType: "OPEN",
       visibility: "PUBLIC",
     });
@@ -39,6 +41,7 @@ describe("mapCreateClassPayload", () => {
       description: "",
       coverUrl: null,
       logoUrl: null,
+      theme: null,
       accessType: "INVITE",
       visibility: "PRIVATE",
     });
@@ -55,6 +58,7 @@ describe("mapCreateClassPayload", () => {
       description: "",
       coverUrl: null,
       logoUrl: null,
+      theme: null,
       accessType: "CODE",
       visibility: "PRIVATE",
     });

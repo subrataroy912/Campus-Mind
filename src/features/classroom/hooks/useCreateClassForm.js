@@ -151,9 +151,10 @@ export function useCreateClassForm() {
       if (coverUrl && !classroom.coverUrl) updates.coverUrl = coverUrl;
       if (logoUrl && !classroom.logoUrl) updates.logoUrl = logoUrl;
 
-      const savedClassroom = Object.keys(updates).length > 0
-        ? await updateClassroom(classroom.id, updates)
-        : classroom;
+      const savedClassroom =
+        Object.keys(updates).length > 0
+          ? await updateClassroom(classroom.id, updates)
+          : classroom;
 
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);

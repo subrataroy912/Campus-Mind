@@ -45,7 +45,9 @@ export default function ClassPage() {
         return;
       }
       setJoinError(
-        err?.data?.error || err?.message || "Failed to join class. Please try again."
+        err?.data?.error ||
+          err?.message ||
+          "Failed to join class. Please try again."
       );
     } finally {
       setIsJoining(false);
@@ -71,11 +73,14 @@ export default function ClassPage() {
             Classroom Not Found
           </h2>
           <p className="mt-2 text-sm text-text-muted">
-            This classroom is unavailable or you are not enrolled as a member yet.
+            This classroom is unavailable or you are not enrolled as a member
+            yet.
           </p>
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
             <Link
-              to={`/dashboard/class/join?courseId=${encodeURIComponent(classId || "")}`}
+              to={`/dashboard/class/join?courseId=${encodeURIComponent(
+                classId || ""
+              )}`}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover shadow-xs"
             >
               Join this class
