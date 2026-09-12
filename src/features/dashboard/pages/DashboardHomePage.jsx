@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Compass, Loader2 } from "lucide-react";
+import { Compass, Loader2, ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 
 import { useDashboardData } from "../useDashboardData.js";
@@ -9,6 +9,37 @@ import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
+
+const CURATED_EXPLORE_TOPICS = [
+  {
+    title: "Web Development",
+    subject: "Web Development",
+    learnersText: "2.4k learners",
+    theme: "orange",
+    target: "/dashboard/explore?subject=Web%20Development",
+  },
+  {
+    title: "AI & Machine Learning",
+    subject: "AI & Machine Learning",
+    learnersText: "1.8k learners",
+    theme: "emerald",
+    target: "/dashboard/explore?subject=AI%20%26%20Machine%20Learning",
+  },
+  {
+    title: "Cyber Security",
+    subject: "Cyber Security",
+    learnersText: "950 learners",
+    theme: "purple",
+    target: "/dashboard/explore?subject=Cyber%20Security",
+  },
+  {
+    title: "Data Science",
+    subject: "Data Science",
+    learnersText: "1.2k learners",
+    theme: "blue",
+    target: "/dashboard/explore?subject=Data%20Science",
+  },
+];
 
 export default function DashboardHomePage() {
   const { authStatus } = useAuth();
@@ -25,16 +56,45 @@ export default function DashboardHomePage() {
     status,
   } = useDashboardData();
 
-  const feedClasses = useMemo(() => {
+  const displayExploreCards = useMemo(() => {
     const joinedCourseIds = new Set(
-      classrooms.map((classroom) => classroom.id)
+      classrooms.map((classroom) => classroom.id || classroom.courseId)
     );
 
     const available = exploreClassrooms.filter(
-      (classroom) => !joinedCourseIds.has(classroom.courseId)
+      (classroom) => !joinedCourseIds.has(classroom.courseId || classroom.id)
     );
 
-    return available.slice(0, 3);
+    // If we have at least 4 available public courses, use them
+    if (available.length >= 4) {
+      return available.slice(0, 4).map((c) => ({ classroom: c }));
+    }
+
+    // Otherwise, combine available courses with curated topics to always have 4 cards
+    const cards = available.map((c) => ({ classroom: c }));
+    for (const curated of CURATED_EXPLORE_TOPICS) {
+      if (cards.length >= 4) break;
+      const alreadyHas = cards.some(
+        (card) =>
+          card.classroom &&
+          (card.classroom.subject?.toLowerCase() === curated.subject.toLowerCase() ||
+           card.classroom.title?.toLowerCase() === curated.title.toLowerCase())
+      );
+      if (!alreadyHas) {
+        cards.push(curated);
+      }
+    }
+
+    // In case deduplication leaves fewer than 4, fill sequentially from curated topics
+    let idx = 0;
+    while (cards.length < 4 && idx < CURATED_EXPLORE_TOPICS.length) {
+      if (!cards.includes(CURATED_EXPLORE_TOPICS[idx])) {
+        cards.push(CURATED_EXPLORE_TOPICS[idx]);
+      }
+      idx++;
+    }
+
+    return cards;
   }, [classrooms, exploreClassrooms]);
 
   // Handle global loading states for both dashboard data and profile
@@ -107,60 +167,63 @@ export default function DashboardHomePage() {
         </section>
       )}
 
-      {classrooms.length > 0 && (
-        <section
-          className="mt-10 border-t border-border pt-8"
-          aria-labelledby="explore-feed-heading"
-        >
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <section
+        className="mt-10 border-t border-border pt-8"
+        aria-labelledby="explore-feed-heading"
+      >
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400 mt-0.5 shrink-0">
+              <Compass size={18} aria-hidden="true" />
+            </div>
             <div>
-              <div className="flex items-center gap-2 text-primary">
-                <Compass size={18} aria-hidden="true" />
-                <p className="text-sm font-semibold">Class feed</p>
-              </div>
               <h2
                 id="explore-feed-heading"
-                className="mt-1 text-xl font-semibold text-text-heading"
+                className="text-xl font-bold tracking-tight text-text-heading"
               >
-                Find your next learning space
+                Discover something new
               </h2>
-              <p className="mt-1 text-sm text-text-muted">
-                Explore public courses ranked by popularity and recent activity.
+              <p className="mt-0.5 text-sm text-text-muted">
+                Explore popular topics to grow your skills.
               </p>
             </div>
-            <Link
-              to="/dashboard/explore"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              See all
-            </Link>
           </div>
+          <Link
+            to="/dashboard/explore"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-text-heading hover:text-primary transition-colors"
+          >
+            <span>See all</span>
+            <ArrowRight size={14} />
+          </Link>
+        </div>
 
-          {status === "error" ? (
-            <div className="mt-6">
-              <EmptyState
-                title="We could not load the class feed"
-                description="Please check your connection or try again later."
-              />
-            </div>
-          ) : feedClasses.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {feedClasses.map((classroom) => (
-                <div key={classroom.courseId}>
-                  <ExploreClassCard classroom={classroom} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-6">
-              <EmptyState
-                title="No classes available"
-                description="There are currently no public classes to explore. Check back later!"
-              />
-            </div>
-          )}
-        </section>
-      )}
+        {status === "error" ? (
+          <div className="mt-6">
+            <EmptyState
+              title="We could not load the class feed"
+              description="Please check your connection or try again later."
+            />
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {displayExploreCards.map((card, idx) => (
+              <div key={card.classroom?.courseId || card.classroom?.id || card.title || idx}>
+                {card.classroom ? (
+                  <ExploreClassCard classroom={card.classroom} />
+                ) : (
+                  <ExploreClassCard
+                    title={card.title}
+                    subject={card.subject}
+                    learnersText={card.learnersText}
+                    theme={card.theme}
+                    target={card.target}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
