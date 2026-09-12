@@ -4,6 +4,7 @@ import {
   ClipboardList,
   FileText,
   FlaskConical,
+  Globe,
   MessageCircle,
   MoreVertical,
   Paperclip,
@@ -11,6 +12,7 @@ import {
   Search,
   Ticket,
   Upload,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -27,6 +29,8 @@ import ClassTabs from "../components/ClassTabs.jsx";
 import ClassQuickLinks from "../components/ClassQuickLinks.jsx";
 import { ClassroomAvatar } from "../components/ClassroomAvatar.jsx";
 import { useClassroom } from "../hooks/useClassroom.js";
+import { joinClassroom } from "../api/classroomService.js";
+import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
   useGetCourseworkByIdQuery,
   useGetCourseworkListQuery,
@@ -76,9 +80,33 @@ function Chip({ status }) {
     </span>
   );
 }
-function Home() {
+function Home({ isEnrolled = true, onJoin, isJoining = false }) {
   return (
     <div className="mt-4 space-y-4">
+      {!isEnrolled && (
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-text-main">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                <Globe className="h-3.5 w-3.5" />
+                Public Course Preview
+              </div>
+              <h3 className="text-base font-semibold text-text-heading">
+                You are previewing this public course
+              </h3>
+              <p className="text-sm text-text-muted">
+                Join now to participate in discussions, access class materials, submit coursework, and connect with members.
+              </p>
+            </div>
+            {onJoin && (
+              <Button onClick={onJoin} loading={isJoining} className="shrink-0 gap-2">
+                <UserPlus className="h-4 w-4" />
+                Join Class
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
       <EmptyState
         title="No class updates yet"
         description="Announcements and discussions will appear here when your class creates them."
@@ -105,7 +133,13 @@ function UpcomingPanel({ items }) {
     </aside>
   );
 }
-function Classwork({ teacher, classId }) {
+function Classwork({
+  teacher,
+  classId,
+  isEnrolled = true,
+  onJoin,
+  isJoining = false,
+}) {
   const { authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
   const [expanded, setExpanded] = useState(null);
@@ -132,7 +166,7 @@ function Classwork({ teacher, classId }) {
   } = useGetCourseworkListQuery(
     { courseId: classId, page: 0, size: 20 },
     {
-      skip: isHydrating || !classId,
+      skip: isHydrating || !classId || !isEnrolled,
     }
   );
   const { data: expandedCoursework } = useGetCourseworkByIdQuery(
@@ -360,6 +394,28 @@ function Classwork({ teacher, classId }) {
       setGradingError(requestError?.message || "Unable to send feedback.");
     }
   };
+
+  if (!isEnrolled) {
+    return (
+      <div className="mt-4 rounded-2xl border border-dashed border-border bg-surface p-10 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+          <ClipboardList className="h-6 w-6" />
+        </div>
+        <h3 className="text-base font-semibold text-text-heading">
+          Classwork is reserved for enrolled students
+        </h3>
+        <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+          Join this class to access assignments, view learning materials, and submit coursework.
+        </p>
+        {onJoin && (
+          <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2">
+            <UserPlus className="h-4 w-4" />
+            Join Class
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   if (isLoading && !coursework.length) {
     return (
@@ -807,13 +863,19 @@ function Classwork({ teacher, classId }) {
   );
 }
 
-function Members({ classroom, teacher }) {
+function Members({
+  classroom,
+  teacher,
+  isEnrolled = true,
+  onJoin,
+  isJoining = false,
+}) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [inviteEnabled, setInviteEnabled] = useState(true);
   const { authStatus } = useAuth();
   const { data: roster = [] } = useGetClassroomRosterQuery(classroom.id, {
-    skip: authStatus === "hydrating" || !classroom.id,
+    skip: authStatus === "hydrating" || !classroom.id || !isEnrolled,
   });
   const members = roster.filter((member) =>
     String(member?.name || member?.displayName || "")
@@ -904,6 +966,31 @@ function Members({ classroom, teacher }) {
     </div>
   );
   };
+
+  if (!isEnrolled) {
+    return (
+      <section className="mt-4">
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+            <UserPlus className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-semibold text-text-heading">
+            Class roster is only available to members
+          </h3>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+            Join this class to view students and teachers and connect with classmates.
+          </p>
+          {onJoin && (
+            <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2">
+              <UserPlus className="h-4 w-4" />
+              Join Class
+            </Button>
+          )}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="mt-4">
       <div className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
@@ -980,22 +1067,51 @@ function Members({ classroom, teacher }) {
     </section>
   );
 }
-function Grades({ teacher }) {
+function Grades({
+  teacher,
+  isEnrolled = true,
+  onJoin,
+  isJoining = false,
+}) {
   const [selected, setSelected] = useState(null);
   const { classId } = useParams();
   const { user, authStatus } = useAuth();
   const { data: studentRows = [] } = useGetStudentGradebookQuery(
     { courseId: classId, studentId: user?.id },
-    { skip: authStatus === "hydrating" || teacher || !user?.id }
+    { skip: authStatus === "hydrating" || teacher || !user?.id || !isEnrolled }
   );
   const { data: teacherRows = [] } = useGetTeacherGradebookQuery(classId, {
-    skip: authStatus === "hydrating" || !teacher || !classId,
+    skip: authStatus === "hydrating" || !teacher || !classId || !isEnrolled,
   });
   const { data: summary } = useGetCourseAnalyticsSummaryQuery(classId, {
-    skip: authStatus === "hydrating" || !classId,
+    skip: authStatus === "hydrating" || !teacher || !classId || !isEnrolled,
   });
 
   const rows = teacher ? teacherRows : studentRows;
+
+  if (!isEnrolled) {
+    return (
+      <section className="mt-4">
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+            <ClipboardList className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-semibold text-text-heading">
+            Gradebook is reserved for enrolled students
+          </h3>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+            Join this class to track your grades, missing assignments, and class standing.
+          </p>
+          {onJoin && (
+            <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2">
+              <UserPlus className="h-4 w-4" />
+              Join Class
+            </Button>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   const metrics = teacher
     ? [
@@ -1165,12 +1281,34 @@ export default function ClassPage() {
   const activeTab = searchParams.get("tab") || "home";
   const { classId } = useParams();
   const location = useLocation();
-  const { classroom, error, notFound } = useClassroom(classId);
+  const { user } = useAuth();
+  const { classroom, error, notFound, isEnrolled, isLoading } =
+    useClassroom(classId);
 
-  if (classroom === undefined)
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState("");
+
+  const handleJoin = async () => {
+    if (!classId || isJoining) return;
+    setIsJoining(true);
+    setJoinError("");
+    try {
+      await joinClassroom(user?.id, { courseId: classId });
+      triggerLifecycleRefresh("course:joined", { courseId: classId });
+    } catch (err) {
+      setJoinError(err?.message || "Failed to join class. Please try again.");
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  if (isLoading && !classroom)
     return (
       <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
-        Loading class…
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm">Loading class…</p>
+        </div>
       </div>
     );
   if (notFound)
@@ -1223,7 +1361,17 @@ export default function ClassPage() {
   return (
     <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <ClassHeader classroom={classroomWithNewCode} />
+        {joinError && (
+          <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+            {joinError}
+          </div>
+        )}
+        <ClassHeader
+          classroom={classroomWithNewCode}
+          isEnrolled={isEnrolled}
+          onJoin={handleJoin}
+          isJoining={isJoining}
+        />
         <ClassTabs
           active={activeTab}
           onChange={(nextTab) => {
@@ -1238,15 +1386,40 @@ export default function ClassPage() {
             });
           }}
         />
-        {activeTab === "home" && <Home />}
+        {activeTab === "home" && (
+          <Home
+            isEnrolled={isEnrolled}
+            onJoin={handleJoin}
+            isJoining={isJoining}
+          />
+        )}
         {activeTab === "classwork" && (
-          <Classwork teacher={teacher} classId={classId} />
+          <Classwork
+            teacher={teacher}
+            classId={classId}
+            isEnrolled={isEnrolled}
+            onJoin={handleJoin}
+            isJoining={isJoining}
+          />
         )}
         {activeTab === "quick-links" && <ClassQuickLinks teacher={teacher} />}
         {activeTab === "members" && (
-          <Members classroom={classroom} teacher={teacher} />
+          <Members
+            classroom={classroom}
+            teacher={teacher}
+            isEnrolled={isEnrolled}
+            onJoin={handleJoin}
+            isJoining={isJoining}
+          />
         )}
-        {activeTab === "grades" && <Grades teacher={teacher} />}
+        {activeTab === "grades" && (
+          <Grades
+            teacher={teacher}
+            isEnrolled={isEnrolled}
+            onJoin={handleJoin}
+            isJoining={isJoining}
+          />
+        )}
       </div>
     </div>
   );

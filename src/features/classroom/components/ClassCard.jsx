@@ -66,7 +66,7 @@ export default function ClassCard({ classroom }) {
             ) : accessType === "open" ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                 <Globe size={11} className="text-primary" />
-                Open
+                Public
               </span>
             ) : classroom.code ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 font-mono text-xs font-semibold text-text-muted">

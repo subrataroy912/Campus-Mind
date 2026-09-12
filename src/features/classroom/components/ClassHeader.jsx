@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 
-export default function ClassHeader({ classroom }) {
+export default function ClassHeader({
+  classroom,
+  isEnrolled = true,
+  onJoin,
+  isJoining = false,
+}) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const teacherName =
@@ -105,8 +110,17 @@ export default function ClassHeader({ classroom }) {
           </div>
         </div>
 
-        {/* Action Button based on Access Type */}
-        {accessType === "invite" ? (
+        {/* Action Button based on Enrollment / Access Type */}
+        {!isEnrolled ? (
+          <button
+            onClick={onJoin}
+            disabled={isJoining}
+            className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>{isJoining ? "Joining class…" : "Join Class"}</span>
+          </button>
+        ) : accessType === "invite" ? (
           <div className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas/70 px-4 py-2 text-sm font-medium text-text-muted sm:mb-2 sm:w-auto sm:self-auto">
             <ClassroomIcon name="lock" className="h-4 w-4 text-text-muted" />
             <span>Invite only</span>
