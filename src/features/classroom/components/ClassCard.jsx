@@ -6,7 +6,7 @@ import { getClassTheme } from "../utils/classTheme.js";
 import { classroomApi } from "../api/classroomApi.js";
 import { store } from "@/app/store.js";
 
-function ClassCard({ classroom }) {
+function ClassCard({ classroom, priority = false }) {
   const classTheme = getClassTheme(classroom);
 
   const handlePrefetch = () => {
@@ -56,8 +56,9 @@ function ClassCard({ classroom }) {
             <img
               src={classroom.coverUrl || classroom.cover}
               alt={`${classroom.title} cover`}
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
               decoding="async"
+              fetchPriority={priority ? "high" : "auto"}
               className="h-full w-full object-cover"
             />
           )}

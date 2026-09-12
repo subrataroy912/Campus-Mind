@@ -110,7 +110,9 @@ export default function DashboardHomePage() {
             <ContentList
               layout="carousel"
               items={classrooms}
-              renderItem={(classroom) => <ClassCard classroom={classroom} />}
+              renderItem={(classroom, index) => (
+                <ClassCard classroom={classroom} priority={index === 0} />
+              )}
             />
           )}
         </section>
