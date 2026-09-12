@@ -63,10 +63,13 @@ function LoginPage() {
         type: "success",
       });
       navigate("/dashboard", { replace: true });
-    } catch {
+    } catch (err) {
       toast.add({
         title: "Sign-in failed",
-        description: "Please check your email and password and try again.",
+        description:
+          err?.data?.error ||
+          err?.message ||
+          "Please check your email and password and try again.",
         type: "error",
       });
     }

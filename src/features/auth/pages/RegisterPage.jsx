@@ -60,10 +60,13 @@ export default function RegisterPage() {
         type: "success",
       });
       navigate("/auth/login", { replace: true, state: { registered: true } });
-    } catch {
+    } catch (err) {
       toast.add({
         title: "Registration failed",
-        description: "Please review the form and try again.",
+        description:
+          err?.data?.error ||
+          err?.message ||
+          "Please review the form and try again.",
         type: "error",
       });
     }

@@ -24,7 +24,11 @@ export async function handleOAuthFailure({ completeOAuth, errorMessage }) {
 export function parseOAuthCallback(searchParams) {
   const oauthError = searchParams.get("error");
   const errorMessage =
-    oauthError === "oauth_failed" ? "OAuth sign-in failed." : oauthError;
+    oauthError === "oauth_failed"
+      ? "OAuth sign-in failed."
+      : oauthError === "unverified_email"
+      ? "Your social account email is missing or unverified by the provider. Please verify your email with the provider and try again."
+      : oauthError;
 
   if (errorMessage) return { errorMessage };
 
