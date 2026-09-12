@@ -348,15 +348,25 @@ export default function ProfilePage() {
     </div>
   );
 }
-function ProfileMessage({ title, description }) {
+
+function ProfileMessage({
+  title = "Loading profile...",
+  description = "Please wait while we fetch your information.",
+}) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-canvas p-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-2xl font-bold text-text-heading">{title}</h1>
-        <p className="mt-2 text-sm text-text-muted">{description}</p>
-        <Button to="/dashboard" variant="outline" className="mt-5">
-          Back to dashboard
-        </Button>
+    <div className="grid min-h-dvh place-items-center bg-canvas p-6">
+      <div className="flex flex-col items-center text-center">
+        {/* Modern Spinner */}
+        <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+
+        {/* Text */}
+        <h2 className="mt-4 text-base font-medium text-text-heading">
+          {title}
+        </h2>
+
+        {description && (
+          <p className="mt-1 text-sm text-text-muted">{description}</p>
+        )}
       </div>
     </div>
   );
