@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useRef, useState } from "react";
-import { useLocation, useParams, useSearchParams } from "react-router";
+import { Link, useLocation, useParams, useSearchParams } from "react-router";
 import {
   ClipboardList,
   FileText,
@@ -1175,8 +1175,29 @@ export default function ClassPage() {
     );
   if (notFound)
     return (
-      <div className="grid min-h-screen place-items-center bg-canvas text-text-muted">
-        Course not found.
+      <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4 text-center">
+        <div className="max-w-md rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-border">
+          <h2 className="text-lg font-semibold text-text-heading">
+            Classroom Not Found
+          </h2>
+          <p className="mt-2 text-sm text-text-muted">
+            This classroom is unavailable or you are not enrolled as a member yet.
+          </p>
+          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
+            <Link
+              to={`/dashboard/class/join?courseId=${encodeURIComponent(classId || "")}`}
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover"
+            >
+              Join this class
+            </Link>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
+            >
+              Back to classes
+            </Link>
+          </div>
+        </div>
       </div>
     );
   if (error)

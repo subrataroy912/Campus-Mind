@@ -70,17 +70,20 @@ export const exploreApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Profile", id: "LIST" }],
     }),
     getPublicCourse: builder.query({
-      query: (courseId) => ({
-        url: `/explore/courses/${courseId}`,
-      }),
+      query: (courseId) => `/explore/courses/${courseId}`,
       transformResponse: (response) => {
         const payload = response?.data ?? response;
         return {
           ...payload,
-          accessType: (payload?.accessType || (payload?.visibility === "PUBLIC" ? "OPEN" : "CODE")).toUpperCase(),
+          accessType: (
+            payload?.accessType ||
+            (payload?.visibility === "PUBLIC" ? "OPEN" : "CODE")
+          ).toUpperCase(),
         };
       },
-      providesTags: (_res, _err, courseId) => [{ type: "Classrooms", id: courseId }],
+      providesTags: (_res, _err, courseId) => [
+        { type: "PublicCourse", id: courseId },
+      ],
     }),
   }),
 });

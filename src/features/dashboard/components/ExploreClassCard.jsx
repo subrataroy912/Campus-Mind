@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { Clock3, Globe, KeyRound, Lock, Users } from "lucide-react";
@@ -13,27 +14,30 @@ export default function ExploreClassCard({ classroom }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isJoining, setIsJoining] = useState(false);
+
+  const courseId = classroom.courseId || classroom.id;
 
   const activity = classroom.lastActivityAt
     ? new Date(classroom.lastActivityAt).toLocaleDateString()
     : "No recent activity";
 
   const isEnrolled = classrooms.some(
-    (c) => c.id === classroom.courseId || c.courseId === classroom.courseId
+    (c) => c.id === courseId || c.courseId === courseId
   );
   const accessType = (classroom.accessType || "OPEN").toUpperCase();
 
   let target;
   if (isEnrolled) {
-    target = `/dashboard/classes/${classroom.courseId}`;
+    target = `/dashboard/classes/${courseId}`;
   } else if (accessType === "OPEN") {
-    target = `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=open`;
+    target = `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=open`;
   } else if (accessType === "INVITE") {
-    target = `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=invite`;
+    target = `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=invite`;
   } else {
     target = classroom.code
-      ? `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=code&code=${encodeURIComponent(classroom.code)}`
-      : `/dashboard/class/join?courseId=${encodeURIComponent(classroom.courseId)}&accessType=code`;
+      ? `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code&code=${encodeURIComponent(classroom.code)}`
+      : `/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code`;
   }
 
   const handleClick = async (e) => {
@@ -42,12 +46,26 @@ export default function ExploreClassCard({ classroom }) {
     }
     if (accessType === "OPEN") {
       e.preventDefault();
+      if (isJoining) return;
+      setIsJoining(true);
       try {
-        await joinClassroom(user?.id, classroom.courseId);
+        await joinClassroom(user?.id, { courseId });
         triggerLifecycleRefresh(dispatch, "course-created");
-        navigate(`/dashboard/classes/${classroom.courseId}`);
-      } catch {
-        navigate(`/dashboard/classes/${classroom.courseId}`);
+        navigate(`/dashboard/classes/${courseId}`);
+      } catch (err) {
+        if (err?.status === 409) {
+          // Already enrolled, go directly to the class
+          navigate(`/dashboard/classes/${courseId}`);
+        } else {
+          // Redirect to join page where they can see the class status or retry
+          navigate(
+            `/dashboard/class/join?courseId=${encodeURIComponent(
+              courseId
+            )}&accessType=open`
+          );
+        }
+      } finally {
+        setIsJoining(false);
       }
     }
   };

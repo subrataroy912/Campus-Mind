@@ -67,5 +67,17 @@ describe("mapCreateClassPayload", () => {
     ).toEqual({
       courseId: "course-open-direct",
     });
+
+    expect(
+      mapJoinClassPayload({ courseId: "6aa4583ab463bdd7707f1556", code: "" })
+    ).toEqual({
+      courseId: "6aa4583ab463bdd7707f1556",
+    });
+
+    expect(
+      mapJoinClassPayload({ code: "ABCDEFGH" })
+    ).toEqual({
+      code: "ABCDEFGH",
+    });
   });
 });

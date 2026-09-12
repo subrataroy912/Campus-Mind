@@ -93,6 +93,14 @@ export async function joinClassroom(_userId, courseIdOrCode, maybeCode) {
   } else if (maybeCode !== undefined) {
     courseId = courseIdOrCode;
     code = maybeCode;
+  } else if (
+    typeof courseIdOrCode === "string" &&
+    (/^[0-9a-fA-F]{24}$/.test(courseIdOrCode.trim()) ||
+      /^[0-9a-fA-F-]{36}$/.test(courseIdOrCode.trim()) ||
+      courseIdOrCode.trim().length > 16)
+  ) {
+    courseId = courseIdOrCode.trim();
+    code = undefined;
   } else {
     code = courseIdOrCode;
     courseId = undefined;
