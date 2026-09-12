@@ -124,6 +124,7 @@ export function MembersTab({
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
+  const [showAllStudents, setShowAllStudents] = useState(false);
   const { authStatus } = useAuth();
 
   const [updateClassroom, { isLoading: isUpdatingInvite }] = useUpdateClassroomMutation();
@@ -291,7 +292,7 @@ export function MembersTab({
                   Students ({students.length})
                 </h3>
                 <div className="grid overflow-hidden rounded-2xl ring-1 ring-border divide-y divide-border bg-surface sm:grid-cols-2 sm:divide-x">
-                  {students.map((m) => (
+                  {(showAllStudents ? students : students.slice(0, 50)).map((m) => (
                     <MemberRow
                       key={m.id}
                       member={m}
@@ -303,6 +304,20 @@ export function MembersTab({
                     />
                   ))}
                 </div>
+                {students.length > 50 && (
+                  <div className="pt-2 text-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAllStudents((prev) => !prev)}
+                      className="rounded-xl text-xs"
+                    >
+                      {showAllStudents
+                        ? "Show fewer students"
+                        : `Show all ${students.length} students`}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

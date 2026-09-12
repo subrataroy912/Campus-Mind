@@ -5,6 +5,8 @@ import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/classroom/api/classroomService.js";
 import { getClassTheme } from "@/features/classroom/utils/classTheme.js";
+import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { store } from "@/app/store.js";
 
 const formatLearners = (count) => {
   const value = Number(count);
@@ -146,9 +148,21 @@ function ExploreClassCard({
     }
   };
 
+  const handlePrefetch = () => {
+    if (courseId) {
+      store.dispatch(
+        classroomApi.util.prefetch("findClassroomById", courseId, {
+          force: false,
+        })
+      );
+    }
+  };
+
   return (
     <>
       <article
+        onMouseEnter={handlePrefetch}
+        onFocus={handlePrefetch}
         className={[
           "group flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs",
           "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40",

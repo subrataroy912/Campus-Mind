@@ -71,6 +71,7 @@ export function ClassMediaSection({
             <img
               src={preview}
               alt="Cover preview"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           ) : (
@@ -144,6 +145,7 @@ export function ClassMediaSection({
                 <img
                   src={logoPreview}
                   alt="Class logo preview"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
               ) : (

@@ -64,6 +64,8 @@ export default function DashboardHeader() {
               <img
                 src={safeAvatarUrl}
                 alt={`${profile?.displayName || "User"}'s avatar`}
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
                 referrerPolicy="no-referrer"
               />

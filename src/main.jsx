@@ -10,6 +10,7 @@ import ServerDown from "./pages/ServerDown.jsx";
 import { Toaster } from "@/components/ui/toast.jsx";
 import { baseApi } from "./app/baseApi.js";
 import { getEventRefreshTargets } from "./features/events/refreshEvents.js";
+import { reportWebVitals } from "./utils/reportWebVitals.js";
 
 try {
   const savedTheme = localStorage.getItem("campus-mind.theme");
@@ -47,3 +48,5 @@ createRoot(document.getElementById("root")).render(
     )}
   </>
 );
+
+reportWebVitals();

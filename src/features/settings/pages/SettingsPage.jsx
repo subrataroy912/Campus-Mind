@@ -160,6 +160,8 @@ export default function SettingsPage() {
                     <img
                       src={user.avatar}
                       alt={`${user?.name || "User"}'s avatar`}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   ) : (

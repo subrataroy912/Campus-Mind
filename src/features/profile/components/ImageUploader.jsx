@@ -75,6 +75,7 @@ export default function ImageUploader({
           <img
             src={preview}
             alt={`${label} preview`}
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (

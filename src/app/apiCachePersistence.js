@@ -11,6 +11,7 @@ const PERSISTED_ENDPOINTS = new Set([
   "findClassroomById",
   "getCurrentProfile",
   "getPublicProfile",
+  "listNotifications",
 ]);
 
 function getUserId(authState) {
@@ -82,6 +83,7 @@ export function persistApiState(apiState, authState) {
         "fetchClassrooms",
         "findClassroomById",
         "getPublicProfile",
+        "listNotifications",
       ];
       const trimmedQueries = {};
       for (const endpoint of priorityOrder) {

@@ -5,11 +5,28 @@ import { Button } from "@/components/ui/button.jsx";
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import { initials } from "@/utils/initials.js";
 import { formatDisplayText } from "@/utils/textFormat.js";
+import { profileApi } from "@/features/profile/api/profileApi.js";
+import { store } from "@/app/store.js";
 
 function ExplorePersonCard({ person, currentUser }) {
   const sharedClassCount = getSharedClassCount(currentUser, person);
+
+  const handlePrefetch = () => {
+    if (person?.id) {
+      store.dispatch(
+        profileApi.util.prefetch("getPublicProfile", person.id, {
+          force: false,
+        })
+      );
+    }
+  };
+
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-border bg-surface p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-md">
+    <article
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+      className="flex h-full flex-col rounded-2xl border border-border bg-surface p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+    >
       <div className="flex items-start gap-3">
         {person.avatar ? (
           <img
