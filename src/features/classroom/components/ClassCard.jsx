@@ -23,10 +23,10 @@ export default function ClassCard({ classroom }) {
   ).toLowerCase();
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="w-full h-full flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       
       {/* Banner & Floating Logo */}
-      <div className={`relative h-24 w-full ${classTheme.gradientClass}`}>
+      <div className={`relative h-24 w-full shrink-0 ${classTheme.gradientClass}`}>
         <div className="absolute inset-0 overflow-hidden">
           {(classroom.coverUrl || classroom.cover) && (
             <img
@@ -54,34 +54,36 @@ export default function ClassCard({ classroom }) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-5 pt-4">
+      <div className="flex-1 flex flex-col justify-between p-5 pt-4 min-w-0">
         {/* pr-16 prevents long titles from overlapping the floating avatar */}
-        <div className="pr-16">
-          {category && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              {category}
-            </p>
-          )}
-          <h2 className="mt-1 text-lg font-bold text-text-heading line-clamp-1">
+        <div className="pr-16 min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary truncate min-h-[1rem]">
+            {category || "\u00A0"}
+          </p>
+          <h2
+            className="mt-1 text-lg font-bold text-text-heading line-clamp-1"
+            title={classroom.title}
+          >
             {classroom.title}
           </h2>
-          {(classroom.subtitle || classroom.section) && (
-            <p className="mt-0.5 text-sm text-text-muted line-clamp-1">
-              {classroom.subtitle || classroom.section}
-            </p>
-          )}
+          <p className="mt-0.5 text-sm text-text-muted line-clamp-1 min-h-[1.25rem]">
+            {classroom.subtitle || classroom.section || "\u00A0"}
+          </p>
         </div>
 
         {/* Stats & Teacher */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-text-muted">
+        <div className="mt-5 flex items-center justify-between gap-2 border-t border-border pt-4 text-sm text-text-muted">
           {teacher?.name ? (
-            <span className="font-medium text-text-main">
+            <span
+              className="font-medium text-text-main truncate max-w-[130px] sm:max-w-[150px] text-xs sm:text-sm"
+              title={`with ${teacher.name}`}
+            >
               with {teacher.name}
             </span>
           ) : (
-            <span />
+            <span className="text-xs text-text-muted italic">Self-paced</span>
           )}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 shrink-0">
             {accessType === "invite" ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-2 py-0.5 text-xs font-medium text-text-muted">
                 <Lock size={11} className="text-text-muted" />
@@ -98,7 +100,7 @@ export default function ClassCard({ classroom }) {
                 {classroom.code}
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1 font-medium">
+            <span className="inline-flex items-center gap-1 font-medium text-xs sm:text-sm">
               <Users size={14} />
               {classroom.memberCount || 0}
             </span>
@@ -107,7 +109,7 @@ export default function ClassCard({ classroom }) {
       </div>
 
       {/* Footer / Actions */}
-      <div className="flex items-center justify-between bg-canvas/60 px-5 py-3 border-t border-border/50">
+      <div className="shrink-0 flex items-center justify-between bg-canvas/60 px-5 py-3 border-t border-border/50">
         <span className="inline-flex items-center gap-1.5 text-sm text-text-muted">
           <MessageCircle size={15} />
           {unread ? (
@@ -125,4 +127,5 @@ export default function ClassCard({ classroom }) {
       </div>
     </article>
   );
+
 }
