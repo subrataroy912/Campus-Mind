@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router";
 import { MessageCircle, MoreVertical, Search, Ticket, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -34,6 +35,7 @@ const MemberRow = React.memo(function MemberRow({
       <div className="relative">
         <ClassroomAvatar
           name={memberName}
+          userId={memberId}
           avatar={member?.avatar || member?.avatarUrl}
           size="h-10 w-10"
         />
@@ -41,9 +43,18 @@ const MemberRow = React.memo(function MemberRow({
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
         )}
       </div>
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-main">
-        {memberName}
-      </span>
+      {memberId ? (
+        <Link
+          to={`/dashboard/profile/${memberId}`}
+          className="min-w-0 flex-1 truncate text-sm font-medium text-text-main hover:text-primary hover:underline transition-colors"
+        >
+          {memberName}
+        </Link>
+      ) : (
+        <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-main">
+          {memberName}
+        </span>
+      )}
       {isTeacherRole && (
         <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2.5 py-0.5 text-[11px] font-semibold text-secondary">
           {String(member?.role).toLowerCase() === "owner" ? "Owner" : "Teacher"}

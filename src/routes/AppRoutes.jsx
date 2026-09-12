@@ -161,7 +161,7 @@ export const appRouteConfig = [
           },
           {
             path: "/dashboard/classes",
-            element: <Navigate to="/dashboard" replace />,
+            element: <Navigate to="/dashboard/profile?tab=classes" replace />,
           },
           {
             path: "/dashboard/profile",

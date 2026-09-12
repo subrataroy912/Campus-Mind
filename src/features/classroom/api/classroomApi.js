@@ -75,7 +75,6 @@ export const classroomApi = baseApi.injectEndpoints({
             ]
           : [{ type: "Classrooms", id: "LIST" }],
       keepUnusedDataFor: 300,
-      refetchOnMountOrArgChange: 300,
     }),
     findClassroomById: builder.query({
       query: (classId) => `/courses/${classId}`,
@@ -85,7 +84,6 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: classId },
       ],
       keepUnusedDataFor: 300,
-      refetchOnMountOrArgChange: 300,
     }),
     getClassroomRoster: builder.query({
       query: (classId) => `/courses/${classId}/roster`,

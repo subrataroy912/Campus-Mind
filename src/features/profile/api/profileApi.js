@@ -6,7 +6,6 @@ export const profileApi = baseApi.injectEndpoints({
       query: () => "/users/me",
       providesTags: [{ type: "Profile", id: "CURRENT" }],
       keepUnusedDataFor: 300,
-      refetchOnMountOrArgChange: 300,
     }),
     getPublicProfile: builder.query({
       query: (userId) => `/users/${userId}`,
@@ -14,7 +13,6 @@ export const profileApi = baseApi.injectEndpoints({
         { type: "Profile", id: userId },
       ],
       keepUnusedDataFor: 300,
-      refetchOnMountOrArgChange: 300,
     }),
     updateCurrentProfile: builder.mutation({
       query: (changes) => {

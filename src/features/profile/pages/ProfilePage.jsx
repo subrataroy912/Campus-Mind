@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { ArrowLeft, Eye, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
@@ -50,6 +50,7 @@ const profileFor = (user) => ({
 
 export default function ProfilePage() {
   const { userId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
     user: currentUser,
@@ -57,7 +58,21 @@ export default function ProfilePage() {
     unlockCreator,
     authStatus,
   } = useAuth();
-  const [activeTab, setActiveTab] = useState("classes");
+  const activeTab = searchParams.get("tab") || "classes";
+  const setActiveTab = (tab) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (tab === "classes") {
+          next.delete("tab");
+        } else {
+          next.set("tab", tab);
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  };
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -246,7 +261,7 @@ export default function ProfilePage() {
           onAvatarUpload={handleAvatarUpload}
           onBannerUpload={handleBannerUpload}
         />
-        <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
+        <section>
           <ProfileDetails details={details} />
         </section>
         {isOwner &&

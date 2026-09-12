@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 import {
@@ -17,6 +18,13 @@ export default function ClassFeedPost({ post, pinned = false }) {
         post.creatorName ||
         post.teacherName ||
         "Instructor";
+
+  const authorId =
+    (typeof post.author === "object" ? post.author?.id : null) ||
+    post.authorId ||
+    post.creatorId ||
+    post.teacherId ||
+    null;
 
   const content = post.description || post.content || post.title || "";
   const displayTime = post.createdAt
@@ -59,12 +67,21 @@ export default function ClassFeedPost({ post, pinned = false }) {
         </div>
       )}
       <div className="flex gap-3">
-        <ClassroomAvatar name={authorName} />
+        <ClassroomAvatar name={authorName} userId={authorId} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-sm font-semibold text-text-heading">
-              {authorName}
-            </span>
+            {authorId ? (
+              <Link
+                to={`/dashboard/profile/${authorId}`}
+                className="text-sm font-semibold text-text-heading hover:text-primary hover:underline transition-colors"
+              >
+                {authorName}
+              </Link>
+            ) : (
+              <span className="text-sm font-semibold text-text-heading">
+                {authorName}
+              </span>
+            )}
             {displayTime && (
               <span className="text-xs text-text-muted">{displayTime}</span>
             )}
@@ -105,13 +122,31 @@ export default function ClassFeedPost({ post, pinned = false }) {
                       comment.author?.name ||
                       comment.authorName ||
                       "Class Member";
+                    const commenterId =
+                      comment.author?.id ||
+                      comment.authorId ||
+                      comment.userId ||
+                      null;
                     return (
                       <div key={comment.id} className="flex gap-2 text-sm">
-                        <ClassroomAvatar name={commentAuthor} size="h-7 w-7" />
+                        <ClassroomAvatar
+                          name={commentAuthor}
+                          userId={commenterId}
+                          size="h-7 w-7"
+                        />
                         <div className="rounded-xl bg-canvas px-3 py-2 text-text-main">
-                          <span className="font-semibold text-text-heading text-xs">
-                            {commentAuthor}{" "}
-                          </span>
+                          {commenterId ? (
+                            <Link
+                              to={`/dashboard/profile/${commenterId}`}
+                              className="font-semibold text-text-heading text-xs hover:text-primary hover:underline transition-colors"
+                            >
+                              {commentAuthor}
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-text-heading text-xs">
+                              {commentAuthor}{" "}
+                            </span>
+                          )}
                           <p className="text-xs sm:text-sm">{comment.content}</p>
                         </div>
                       </div>

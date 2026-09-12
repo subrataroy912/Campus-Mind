@@ -5,12 +5,18 @@ import { getClassTheme } from "../utils/classTheme.js";
 
 export default function ClassCard({ classroom }) {
   const classTheme = getClassTheme(classroom);
-  const teacher =
+  const teacherObj =
     classroom.instructor ||
     classroom.teacher ||
     (classroom.teacherName || classroom.ownerName
       ? { name: classroom.teacherName || classroom.ownerName }
       : null);
+  const teacherId =
+    (typeof teacherObj === "object" ? teacherObj?.id : null) ||
+    classroom.teacherId ||
+    classroom.ownerId ||
+    null;
+  const teacher = teacherObj;
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
   const category = classroom.subject
     ? formatDisplayText(classroom.subject)
@@ -74,12 +80,22 @@ export default function ClassCard({ classroom }) {
         {/* Stats & Teacher */}
         <div className="mt-5 flex items-center justify-between gap-2 border-t border-border pt-4 text-sm text-text-muted">
           {teacher?.name ? (
-            <span
-              className="font-medium text-text-main truncate max-w-[130px] sm:max-w-[150px] text-xs sm:text-sm"
-              title={`with ${teacher.name}`}
-            >
-              with {teacher.name}
-            </span>
+            teacherId ? (
+              <Link
+                to={`/dashboard/profile/${teacherId}`}
+                className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-[130px] sm:max-w-[150px] text-xs sm:text-sm"
+                title={`with ${teacher.name}`}
+              >
+                with {teacher.name}
+              </Link>
+            ) : (
+              <span
+                className="font-medium text-text-main truncate max-w-[130px] sm:max-w-[150px] text-xs sm:text-sm"
+                title={`with ${teacher.name}`}
+              >
+                with {teacher.name}
+              </span>
+            )
           ) : (
             <span className="text-xs text-text-muted italic">Self-paced</span>
           )}

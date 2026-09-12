@@ -134,6 +134,7 @@ export default function ClassPage() {
           isEnrolled={isEnrolled}
           onJoin={handleJoin}
           isJoining={isJoining}
+          teacher={teacher}
         />
 
         <ClassTabs

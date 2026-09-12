@@ -9,6 +9,7 @@ export default function ClassHeader({
   isEnrolled = true,
   onJoin,
   isJoining = false,
+  teacher = false,
 }) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -67,35 +68,37 @@ export default function ClassHeader({
             <span>Classes</span>
           </Link>
         </div>
-        {/* Settings Dropdown */}
-        <div className="absolute right-3 top-3 z-10">
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-label="Class settings"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white transition hover:bg-black/45 backdrop-blur-md border border-white/15 shadow-xs"
-            >
-              <ClassroomIcon name="settings" className="h-5 w-5" />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-11 z-10 w-52 overflow-hidden rounded-lg bg-surface py-1 shadow-lg ring-1 ring-border">
-                {[
-                  "Edit class details",
-                  "Change theme",
-                  "Notification preferences",
-                ].map((label) => (
-                  <button
-                    key={label}
-                    onClick={() => setMenuOpen(false)}
-                    className="block w-full px-3.5 py-2 text-left text-sm text-text-main hover:bg-canvas transition-colors"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
+        {/* Settings Dropdown - Only visible to teachers / instructors */}
+        {teacher && (
+          <div className="absolute right-3 top-3 z-10">
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-label="Class settings"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white transition hover:bg-black/45 backdrop-blur-md border border-white/15 shadow-xs cursor-pointer"
+              >
+                <ClassroomIcon name="settings" className="h-5 w-5" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-11 z-10 w-52 overflow-hidden rounded-lg bg-surface py-1 shadow-lg ring-1 ring-border">
+                  {[
+                    "Edit class details",
+                    "Change theme",
+                    "Notification preferences",
+                  ].map((label) => (
+                    <button
+                      key={label}
+                      onClick={() => setMenuOpen(false)}
+                      className="block w-full px-3.5 py-2 text-left text-sm text-text-main hover:bg-canvas transition-colors cursor-pointer"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Content Section */}
@@ -206,7 +209,7 @@ export default function ClassHeader({
               <span>Copy join link</span>
             )}
           </button>
-        ) : (
+        ) : teacher ? (
           <button
             onClick={handleCopy}
             className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-border/50 sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"
@@ -228,6 +231,11 @@ export default function ClassHeader({
               </span>
             )}
           </button>
+        ) : (
+          <div className="flex w-full items-center justify-center gap-2 self-start rounded-xl border border-border bg-canvas/70 px-4 py-2 text-sm font-medium text-text-muted sm:mb-2 sm:w-auto sm:self-auto">
+            <ClassroomIcon name="check" className="h-4 w-4 text-success" />
+            <span className="text-text-heading font-semibold">Enrolled</span>
+          </div>
         )}
       </div>
     </div>

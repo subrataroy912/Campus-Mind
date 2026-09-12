@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   BookOpen,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
+import { CollapsibleSection } from "@/components/common/CollapsibleSection.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
 import ClassPostBox from "../ClassPostBox.jsx";
 import ClassFeedPost from "../ClassFeedPost.jsx";
@@ -29,6 +30,7 @@ export function ClassHomeTab({
   classroom,
   teacher = false,
 }) {
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const courseId = classroom?.id;
 
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
@@ -143,15 +145,31 @@ export function ClassHomeTab({
       )}
 
       {/* Course Overview & Metadata Card */}
-      <div className="rounded-2xl bg-surface p-5 ring-1 ring-border shadow-xs sm:p-6 space-y-5">
+      <CollapsibleSection
+        title="About this class"
+        subtitle={classroom?.subject ? `${classroom.subject} · ${classroom.title}` : undefined}
+        defaultExpanded={true}
+        className="space-y-5"
+        contentClassName="space-y-5"
+      >
         <div>
-          <h2 className="text-lg font-bold text-text-heading">
-            About this class
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-text-main whitespace-pre-line">
+          <p
+            className={`text-sm leading-relaxed text-text-main whitespace-pre-line ${
+              !descriptionExpanded ? "line-clamp-4" : ""
+            }`}
+          >
             {classroom?.description?.trim() ||
               "No detailed description provided for this class yet. Check back soon for course syllabus, goals, and announcements."}
           </p>
+          {classroom?.description && classroom.description.length > 200 && (
+            <button
+              type="button"
+              onClick={() => setDescriptionExpanded((prev) => !prev)}
+              className="mt-2 text-xs font-semibold text-primary hover:underline focus:outline-hidden"
+            >
+              {descriptionExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2 border-t border-border">
@@ -224,13 +242,23 @@ export function ClassHomeTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-border">
           <div className="flex items-center gap-3">
             <ClassroomAvatar
+              userId={classroom?.teacherId || classroom?.ownerId}
               name={teacherName}
               avatar={teacherAvatar}
               size="h-11 w-11"
             />
             <div>
               <p className="text-xs font-medium text-text-muted">Instructor</p>
-              <p className="text-sm font-bold text-text-heading">{teacherName}</p>
+              {classroom?.teacherId || classroom?.ownerId ? (
+                <Link
+                  to={`/dashboard/profile/${classroom.teacherId || classroom.ownerId}`}
+                  className="text-sm font-bold text-text-heading hover:text-primary hover:underline transition-colors"
+                >
+                  {teacherName}
+                </Link>
+              ) : (
+                <p className="text-sm font-bold text-text-heading">{teacherName}</p>
+              )}
             </div>
           </div>
 
@@ -245,7 +273,7 @@ export function ClassHomeTab({
             </div>
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Class Stream & Updates */}
       <div className="space-y-4">

@@ -97,7 +97,7 @@ export default function DashboardHomePage() {
               </p>
             </div>
             <span className="text-sm text-text-muted">
-              <Link to="/dashboard/classes">See all</Link>
+              <Link to="/dashboard/profile?tab=classes">See all</Link>
             </span>
           </div>
 
