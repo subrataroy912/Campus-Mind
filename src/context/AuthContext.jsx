@@ -24,7 +24,7 @@ import {
   commitAuthSession,
   mergeProfileIntoCurrentSession,
   clearLocalAuthSession,
-  routeRequiresSessionRestore,
+  shouldAttemptSessionRestore,
 } from "./authSession.js";
 import {
   getHydrationFailureError,
@@ -47,15 +47,18 @@ export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const store = useStore();
   const matches = useMatches();
-  const requiresSessionRestore = routeRequiresSessionRestore(matches);
   const session = useSelector((state) => state.auth);
+  const requiresSessionRestore = shouldAttemptSessionRestore(matches);
   const user = session.user;
   const userRef = useRef(user);
   const explicitTeardownErrorRef = useRef(null);
-  const [authState, setAuthState] = useState({
-    status: "hydrating",
+  const [authState, setAuthState] = useState(() => ({
+    status:
+      requiresSessionRestore && !session.accessToken
+        ? "hydrating"
+        : "succeeded",
     error: null,
-  });
+  }));
 
   useEffect(() => {
     userRef.current = user;
@@ -79,7 +82,11 @@ export function AuthProvider({ children }) {
     let ignore = false;
     const hasAccessToken = Boolean(session.accessToken);
     if (!requiresSessionRestore || hasAccessToken) {
-      setAuthState({ status: "succeeded", error: null });
+      setAuthState((current) =>
+        current.status === "succeeded" && current.error === null
+          ? current
+          : { status: "succeeded", error: null }
+      );
       return () => {
         ignore = true;
       };

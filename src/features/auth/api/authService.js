@@ -1,7 +1,7 @@
 import { store } from "@/app/store.js";
 import { authApi } from "./authApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
-import { clearLocalAuthSession } from "@/context/authSession.js";
+import { clearLocalAuthSession, setStoredSessionHint } from "@/context/authSession.js";
 
 const unwrapResponse = (response) => response?.data ?? response;
 
@@ -45,6 +45,7 @@ export function normalizeAuthResponse(response) {
   const refreshToken = payload.refreshToken ?? null;
   if (refreshToken) {
     safeLocalStorageSet("campus-mind.refreshToken", refreshToken);
+    setStoredSessionHint(true);
   }
 
   return {

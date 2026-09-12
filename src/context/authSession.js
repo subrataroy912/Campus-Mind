@@ -10,8 +10,25 @@ import {
 import { SESSION_KEY } from "../utils/sessionStorage.js";
 
 export const LEGACY_AUTH_STORAGE_KEYS = ["accessToken"];
+export const HAS_SESSION_KEY = "campus-mind.hasSession";
+export const REFRESH_TOKEN_STORAGE_KEY = "campus-mind.refreshToken";
 const LEGACY_MIGRATION_KEY = "campus-mind.migrated-legacy-auth-keys";
 const EXPIRED_SESSION_404_TARGETS = new Set(["getCurrentProfile", "/users/me"]);
+
+export function hasStoredSessionHint() {
+  return (
+    safeLocalStorageGet(HAS_SESSION_KEY) === "true" ||
+    Boolean(safeLocalStorageGet(REFRESH_TOKEN_STORAGE_KEY))
+  );
+}
+
+export function setStoredSessionHint(hasSession = true) {
+  if (hasSession) {
+    safeLocalStorageSet(HAS_SESSION_KEY, "true");
+  } else {
+    safeLocalStorageRemove(HAS_SESSION_KEY);
+  }
+}
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -46,6 +63,7 @@ export function commitAuthSession(dispatch, record) {
   if (!session) {
     throw new Error("Cannot commit an invalid authenticated session.");
   }
+  setStoredSessionHint(true);
   dispatch(setSession(session));
   return session;
 }
@@ -86,7 +104,27 @@ export function getProtectedRouteState(authStatus, isAuthenticated) {
 }
 
 export function routeRequiresSessionRestore(matches) {
-  return matches.some((match) => match.handle?.requiresSessionRestore === true);
+  return (
+    Array.isArray(matches) &&
+    matches.some((match) => match.handle?.requiresSessionRestore === true)
+  );
+}
+
+export function shouldAttemptSessionRestore(
+  matches,
+  hasSessionHint = hasStoredSessionHint()
+) {
+  if (!routeRequiresSessionRestore(matches)) {
+    return false;
+  }
+  if (hasSessionHint) {
+    return true;
+  }
+  return matches.some(
+    (match) =>
+      match.handle?.isProtected === true ||
+      Boolean(match.pathname?.startsWith("/dashboard"))
+  );
 }
 
 export async function hydratePersistedSession({
@@ -117,7 +155,8 @@ export function clearLocalAuthSession(dispatch, clearContextUser, reason) {
   dispatch(baseApi.util.resetApiState());
   clearPersistedApiState();
   safeLocalStorageRemove(SESSION_KEY);
-  safeLocalStorageRemove("campus-mind.refreshToken");
+  safeLocalStorageRemove(REFRESH_TOKEN_STORAGE_KEY);
+  setStoredSessionHint(false);
   if (safeLocalStorageGet(LEGACY_MIGRATION_KEY) !== "1") {
     // Remove legacy auth storage once; delete this migration after legacy builds age out.
     LEGACY_AUTH_STORAGE_KEYS.forEach(safeLocalStorageRemove);

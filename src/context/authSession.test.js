@@ -1,10 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
+  clearLocalAuthSession,
+  commitAuthSession,
   getProtectedRouteState,
+  hasStoredSessionHint,
   hydratePersistedSession,
   isExpiredSessionError,
   mergeProfileIntoCurrentSession,
   routeRequiresSessionRestore,
+  setStoredSessionHint,
+  shouldAttemptSessionRestore,
+  HAS_SESSION_KEY,
+  REFRESH_TOKEN_STORAGE_KEY,
 } from "./authSession.js";
 
 const persistedSession = {
@@ -99,5 +106,108 @@ describe("persisted session bootstrap", () => {
         { handle: { requiresSessionRestore: true } },
       ])
     ).toBe(true);
+  });
+});
+
+function createStorage() {
+  const values = new Map();
+  return {
+    getItem(key) {
+      return values.get(key) ?? null;
+    },
+    removeItem(key) {
+      values.delete(key);
+    },
+    setItem(key, value) {
+      values.set(key, String(value));
+    },
+    clear() {
+      values.clear();
+    },
+  };
+}
+
+describe("session hint management", () => {
+  let localStorage;
+
+  beforeEach(() => {
+    localStorage = createStorage();
+    vi.stubGlobal("window", { localStorage });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("checks stored session hint from hasSession key or refreshToken", () => {
+    expect(hasStoredSessionHint()).toBe(false);
+
+    setStoredSessionHint(true);
+    expect(hasStoredSessionHint()).toBe(true);
+
+    setStoredSessionHint(false);
+    expect(hasStoredSessionHint()).toBe(false);
+
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, "test-refresh-token");
+    expect(hasStoredSessionHint()).toBe(true);
+  });
+
+  it("sets session hint when commitAuthSession succeeds", () => {
+    const dispatch = vi.fn();
+    commitAuthSession(dispatch, {
+      accessToken: "token-123",
+      user: { id: "user-1" },
+    });
+
+    expect(localStorage.getItem(HAS_SESSION_KEY)).toBe("true");
+    expect(dispatch).toHaveBeenCalled();
+  });
+
+  it("clears session hint and refresh token when clearLocalAuthSession is called", () => {
+    localStorage.setItem(HAS_SESSION_KEY, "true");
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, "token-123");
+
+    const dispatch = vi.fn();
+    clearLocalAuthSession(dispatch);
+
+    expect(localStorage.getItem(HAS_SESSION_KEY)).toBeNull();
+    expect(localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY)).toBeNull();
+  });
+});
+
+describe("conditional session restoration", () => {
+  const publicRoutes = [
+    { pathname: "/", handle: { requiresSessionRestore: true } },
+    { pathname: "/auth/login", handle: { requiresSessionRestore: true } },
+    { pathname: "/auth/register", handle: { requiresSessionRestore: true } },
+  ];
+
+  const protectedRoutes = [
+    { pathname: "/dashboard", handle: { requiresSessionRestore: true, isProtected: true } },
+    { pathname: "/dashboard/classes/1", handle: { requiresSessionRestore: true } },
+  ];
+
+  it("skips restoration when route does not require it", () => {
+    expect(shouldAttemptSessionRestore([{ pathname: "/server-down" }], true)).toBe(false);
+    expect(shouldAttemptSessionRestore([{ pathname: "/404" }], false)).toBe(false);
+  });
+
+  it("skips restoration on public routes when no session hint exists", () => {
+    publicRoutes.forEach((route) => {
+      expect(shouldAttemptSessionRestore([route], false)).toBe(false);
+    });
+  });
+
+  it("attempts restoration on public routes when a session hint exists", () => {
+    publicRoutes.forEach((route) => {
+      expect(shouldAttemptSessionRestore([route], true)).toBe(true);
+    });
+  });
+
+  it("always attempts restoration on protected routes even without a session hint", () => {
+    protectedRoutes.forEach((route) => {
+      expect(shouldAttemptSessionRestore([route], false)).toBe(true);
+      expect(shouldAttemptSessionRestore([route], true)).toBe(true);
+    });
   });
 });

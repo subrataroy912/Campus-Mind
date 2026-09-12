@@ -181,6 +181,8 @@ describe("logout", () => {
     const localStorage = createStorage();
     vi.stubGlobal("window", { localStorage });
     localStorage.setItem("campus-mind.session", "session");
+    localStorage.setItem("campus-mind.hasSession", "true");
+    localStorage.setItem("campus-mind.refreshToken", "refresh-token");
     localStorage.setItem("campus-mind.api-cache.v1", "cache");
     localStorage.setItem("campus-mind.migrated-legacy-auth-keys", "0");
     LEGACY_AUTH_STORAGE_KEYS.forEach((key) =>
@@ -190,6 +192,8 @@ describe("logout", () => {
     clearLocalAuthSession(store.dispatch);
 
     expect(localStorage.getItem("campus-mind.session")).toBeNull();
+    expect(localStorage.getItem("campus-mind.hasSession")).toBeNull();
+    expect(localStorage.getItem("campus-mind.refreshToken")).toBeNull();
     expect(localStorage.getItem("campus-mind.api-cache.v1")).toBeNull();
     LEGACY_AUTH_STORAGE_KEYS.forEach((key) => {
       expect(localStorage.getItem(key)).toBeNull();

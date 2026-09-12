@@ -119,7 +119,7 @@ export const appRouteConfig = [
       {
         element: <ProtectedRoute />,
         // Protected pages must wait for session restoration before rendering.
-        handle: { requiresSessionRestore: true },
+        handle: { requiresSessionRestore: true, isProtected: true },
         children: [
           {
             path: "/dashboard",

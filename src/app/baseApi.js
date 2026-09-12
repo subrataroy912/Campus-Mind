@@ -3,6 +3,7 @@ import { setAccessToken, setSession } from "@/features/auth/authSlice.js";
 import {
   clearLocalAuthSession,
   isExpiredSessionError,
+  setStoredSessionHint,
 } from "@/context/authSession.js";
 import { registerRefreshInvalidator } from "./refreshState.js";
 import {
@@ -127,6 +128,7 @@ async function refreshCredentials(api, extraOptions) {
   if (refreshed?.refreshToken) {
     safeLocalStorageSet("campus-mind.refreshToken", refreshed.refreshToken);
   }
+  setStoredSessionHint(true);
 
   const existingUser = api.getState().auth?.user ?? null;
   const nextAccessToken = refreshed.accessToken;
