@@ -56,10 +56,21 @@ export function useCreateClassForm() {
 
   const validate = () => {
     const nextErrors = {};
-    if (!form.className.trim())
+    if (!form.className.trim()) {
       nextErrors.className = "Class name is required.";
-    if (!form.subject) nextErrors.subject = "Select a subject.";
-    if (!form.gradeLevel) nextErrors.gradeLevel = "Select a grade level.";
+    }
+    if (!form.subject) {
+      nextErrors.subject = "Select a subject.";
+    } else if (form.subject === "Other" && !form.customSubject?.trim()) {
+      nextErrors.customSubject = "Please enter your custom subject.";
+    }
+
+    if (!form.gradeLevel) {
+      nextErrors.gradeLevel = "Select a target grade.";
+    } else if (form.gradeLevel === "Other" && !form.customGradeLevel?.trim()) {
+      nextErrors.customGradeLevel = "Please enter your custom target grade.";
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -120,8 +131,18 @@ export function useCreateClassForm() {
         logoUrl = (await response.json()).secure_url;
       }
 
+      const effectiveSubject =
+        form.subject === "Other" ? form.customSubject?.trim() : form.subject;
+      const effectiveGradeLevel =
+        form.gradeLevel === "Other"
+          ? form.customGradeLevel?.trim()
+          : form.gradeLevel;
+
       const classroom = await createClassroom(user?.id, {
         ...form,
+        subject: effectiveSubject,
+        gradeLevel: effectiveGradeLevel,
+        targetGrade: effectiveGradeLevel,
         coverUrl,
         logoUrl,
       });
