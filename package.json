@@ -7,8 +7,7 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "deploy": "wrangler pages deploy dist",
-    "deploy:ci": "npm run build && wrangler pages deploy dist",
+    "deploy": "wrangler deploy",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
