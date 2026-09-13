@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import checker from "vite-plugin-checker";
 
 export default defineConfig({
+  base: "/",
   plugins: [
     react(),
     tailwindcss(),
@@ -31,16 +32,10 @@ export default defineConfig({
             if (id.includes("react-router")) {
               return "vendor-router";
             }
-            if (
-              id.includes("react/") ||
-              id.includes("react-dom/")
-            ) {
+            if (id.includes("react/") || id.includes("react-dom/")) {
               return "vendor-react";
             }
-            if (
-              id.includes("@reduxjs/toolkit") ||
-              id.includes("react-redux")
-            ) {
+            if (id.includes("@reduxjs/toolkit") || id.includes("react-redux")) {
               return "vendor-redux";
             }
             if (id.includes("lucide-react") || id.includes("react-icons")) {

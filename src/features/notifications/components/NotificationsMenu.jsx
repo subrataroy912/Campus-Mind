@@ -39,7 +39,7 @@ export default function NotificationsMenu() {
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-96 p-0 sm:w-[450px]">
+      <DropdownMenuContent align="end" className="w-96 p-0 sm:w-112.5">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-3">
           <span className="font-bold text-sm text-text-heading">
@@ -71,8 +71,8 @@ export default function NotificationsMenu() {
                 onMarkRead={(id) => markRead(id)}
                 onClick={(item) => {
                   if (item.link) {
-                    setOpen(false); // Closes menu when navigating
-                    navigate(item.link);
+                    setOpen(false);
+                    navigate(item.link); /*TODO :: have to change it.*/
                   }
                 }}
               />
@@ -83,16 +83,7 @@ export default function NotificationsMenu() {
     </DropdownMenu>
   );
 }
-/**
- * Reusable notification item row/card
- *
- * @param {Object} props
- * @param {Object} props.notification - Notification data object
- * @param {(id: string) => void} [props.onMarkRead] - Callback when "Mark as read" is clicked
- * @param {(notification: Object) => void} [props.onClick] - Callback when the card itself is clicked (e.g. navigation)
- * @param {"sm" | "md" | "lg"} [props.size="md"] - Size preset
- * @param {string} [props.className] - Additional wrapper classes
- */
+
 function NotificationItem({
   notification,
   onMarkRead,
@@ -100,97 +91,255 @@ function NotificationItem({
   size = "md",
   className = "",
 }) {
-  const id = notification?.id || notification?._id;
-  const isUnread = !notification?.read && !notification?.isRead;
-  const title = notification?.title || notification?.subject || "Notification";
-  const message =
-    notification?.message || notification?.content || notification?.body || "";
+  const {
+    id,
+    type,
+    title = "Notification",
+    message = "",
+    resourceType,
+    resourceId,
+    read,
+    createdAt,
+  } = notification || {};
 
-  // Size styling presets
-  const sizeStyles =
-    {
-      sm: {
-        padding: "p-2.5 gap-2.5",
-        title: "text-xs",
-        message: "text-[11px] mt-0.5",
-        iconSize: 13,
-        buttonPadding: "p-0.5",
-      },
-      md: {
-        padding: "p-3 gap-3",
-        title: "text-xs font-semibold",
-        message: "text-xs mt-0.5",
-        iconSize: 14,
-        buttonPadding: "p-1",
-      },
-      lg: {
-        padding: "p-4 gap-4",
-        title: "text-sm font-semibold",
-        message: "text-sm mt-1",
-        iconSize: 16,
-        buttonPadding: "p-1.5",
-      },
-    }[size] || sizeStyles.md;
+  const isUnread = !read;
+
+  const sizeStyles = {
+    sm: {
+      container: "px-3 py-2.5",
+      gap: "gap-2.5",
+      title: "text-xs",
+      message: "text-[11px] leading-4 mt-0.5",
+      meta: "text-[10px] mt-1.5",
+      badge: "text-[9px] px-1.5 py-0.5",
+      icon: 13,
+      button: "h-6 w-6",
+    },
+    md: {
+      container: "px-4 py-3",
+      gap: "gap-3",
+      title: "text-sm",
+      message: "text-xs leading-5 mt-0.5",
+      meta: "text-[11px] mt-1.5",
+      badge: "text-[9px] px-1.5 py-0.5",
+      icon: 14,
+      button: "h-7 w-7",
+    },
+    lg: {
+      container: "px-5 py-4",
+      gap: "gap-4",
+      title: "text-sm",
+      message: "text-sm leading-5 mt-1",
+      meta: "text-xs mt-2",
+      badge: "text-[10px] px-2 py-0.5",
+      icon: 16,
+      button: "h-8 w-8",
+    },
+  }[size] || {
+    container: "px-4 py-3",
+    gap: "gap-3",
+    title: "text-sm",
+    message: "text-xs leading-5 mt-0.5",
+    meta: "text-[11px] mt-1.5",
+    badge: "text-[9px] px-1.5 py-0.5",
+    icon: 14,
+    button: "h-7 w-7",
+  };
 
   const handleCardClick = () => {
-    if (onClick) onClick(notification);
+    onClick?.(notification);
   };
 
   const handleMarkRead = (e) => {
     e.stopPropagation();
-    if (onMarkRead && id) onMarkRead(id);
+
+    if (onMarkRead && id) {
+      onMarkRead(id);
+    }
   };
 
   return (
     <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       onClick={handleCardClick}
-      className={`flex items-start justify-between transition-colors ${
-        sizeStyles.padding
-      } ${
-        isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-canvas/50"
-      } ${onClick ? "cursor-pointer" : ""} ${className}`}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      className={[
+        "group relative flex items-start gap-3",
+        "border-b border-border/50 last:border-b-0",
+        "transition-all duration-150",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+        sizeStyles.container,
+        onClick && "cursor-pointer",
+        isUnread
+          ? ["bg-primary/[0.035]", "hover:bg-primary/[0.07]"]
+          : ["bg-transparent", "hover:bg-muted/30"],
+        className,
+      ]
+        .flat()
+        .filter(Boolean)
+        .join(" ")}
     >
+      {/* Unread indicator */}
+      <div
+        className={[
+          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+          "transition-all duration-200",
+          isUnread
+            ? "bg-primary shadow-[0_0_0_3px] shadow-primary/10"
+            : "bg-transparent",
+        ].join(" ")}
+        aria-hidden="true"
+      />
+
+      {/* Content */}
       <div className="min-w-0 flex-1">
-        <p className={`text-text-heading line-clamp-1 ${sizeStyles.title}`}>
-          {title}
-        </p>
+        {/* Title + Type */}
+        <div className="flex min-w-0 items-center gap-2">
+          <p
+            className={[
+              "min-w-0 flex-1 truncate text-text-heading",
+              sizeStyles.title,
+              isUnread ? "font-semibold" : "font-medium",
+            ].join(" ")}
+          >
+            {title}
+          </p>
+
+          {type && (
+            <span
+              className={[
+                "shrink-0 rounded-md",
+                "bg-muted/40 text-text-muted",
+                "border border-border/40",
+                "font-mono font-medium uppercase tracking-wide",
+                sizeStyles.badge,
+              ].join(" ")}
+            >
+              {type.replace(/_/g, " ")}
+            </span>
+          )}
+        </div>
+
+        {/* Message */}
         {message && (
-          <p className={`text-text-muted line-clamp-2 ${sizeStyles.message}`}>
+          <p
+            className={[
+              "line-clamp-2 text-text-muted",
+              sizeStyles.message,
+            ].join(" ")}
+          >
             {message}
           </p>
         )}
+
+        {/* Metadata */}
+        {(createdAt || (resourceType && resourceId)) && (
+          <div
+            className={[
+              "flex min-w-0 items-center gap-1.5",
+              "text-text-muted/70",
+              sizeStyles.meta,
+            ].join(" ")}
+          >
+            {createdAt && (
+              <time dateTime={createdAt}>{formatRelativeTime(createdAt)}</time>
+            )}
+
+            {createdAt && resourceType && resourceId && (
+              <span aria-hidden="true">·</span>
+            )}
+
+            {resourceType && resourceId && (
+              <span className="min-w-0 truncate">
+                {resourceType}:{" "}
+                <span className="font-mono text-text-muted/80">
+                  {resourceId}
+                </span>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
+      {/* Mark as read */}
       {isUnread && onMarkRead && (
         <button
           type="button"
           onClick={handleMarkRead}
           title="Mark as read"
-          aria-label="Mark as read"
-          className={`shrink-0 rounded text-text-muted hover:text-primary transition-colors cursor-pointer ${sizeStyles.buttonPadding}`}
+          aria-label={`Mark "${title}" as read`}
+          className={[
+            "shrink-0 rounded-md",
+            "flex items-center justify-center",
+            "text-text-muted/60",
+            "opacity-0 group-hover:opacity-100",
+            "focus:opacity-100",
+            "hover:bg-primary/10 hover:text-primary",
+            "active:scale-95",
+            "transition-all duration-150",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+            sizeStyles.button,
+          ].join(" ")}
         >
-          <Check size={sizeStyles.iconSize} />
+          <Check size={sizeStyles.icon} strokeWidth={2} />
         </button>
       )}
     </div>
   );
 }
+
+function formatRelativeTime(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const diffInSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  return `${Math.floor(diffInSeconds / 86400)}d ago`;
+}
+
 const DUMMY_NOTIFICATIONS = [
   {
-    id: "notif-001",
-    title: "New Assignment Published",
+    id: "notif-98f2b1a4-6c3e-4d5f-9e7a-1234567890ab",
+    type: "ASSIGNMENT_GRADED",
+    title: "Assignment Graded: Distributed Systems Lab 3",
     message:
-      "Week 3: Advanced React Architecture has been posted to your classes.",
-    read: false,
-    createdAt: "2026-09-13T10:30:00.000Z",
-    link: "/classes/react-architecture",
+      "Prof. Sarah Jenkins returned your submission with feedback: 'Excellent concurrency model! (96/100)'",
+    resourceType: "SUBMISSION",
+    resourceId: "sub-2026-8812",
+    read: true,
+    readAt: "2026-09-13T10:15:30Z",
+    createdAt: "2026-09-13T08:00:00Z",
   },
   {
-    id: "notif-002",
-    title: "Class Invitation",
-    message: "Prof. Sarah Jenkins invited you to join Distributed Systems 401.",
+    id: "notif-55a1e8c9-7d2b-4b10-8a90-fedcba098765",
+    type: "CLASS_MENTION",
+    title: "Mentioned in CS401 Study Group",
+    message:
+      "Alex Chen tagged you in a discussion: '@you check out the lecture notes on Raft consensus before tomorrow.'",
+    resourceType: "POST_COMMENT",
+    resourceId: "post-77419",
     read: true,
-    createdAt: "2026-09-12T16:45:00.000Z",
-    link: "/classes/distributed-systems",
+    readAt: null,
+    createdAt: "2026-09-13T12:30:00Z",
+  },
+  {
+    id: "notif-11c3d5e7-9a8f-4123-bcde-456789abcdef",
+    type: "NEW_ANNOUNCEMENT",
+    title: "New Stream Announcement",
+    message:
+      "Dr. Martinez posted an update: 'Tomorrow's Advanced Algorithms seminar has been moved to Lecture Hall B.'",
+    resourceType: "ANNOUNCEMENT",
+    resourceId: "ann-40912",
+    read: true,
+    readAt: null,
+    createdAt: "2026-09-13T13:05:12Z",
   },
 ];

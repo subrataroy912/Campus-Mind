@@ -1,6 +1,7 @@
 import { ArrowRight, BookOpen, HeartHandshake, Users } from "lucide-react";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import { Button } from "../components/ui/button.jsx";
+import { routes } from "@/routes/paths.js";
 
 const features = [
   {
@@ -26,7 +27,7 @@ export default function GetStartedPage() {
       <div className="mx-auto max-w-6xl">
         <header className="flex items-center justify-between py-3">
           <BrandLogo />
-          <Button to="/auth/login" variant="ghost" className="px-4">
+          <Button to={routes.auth.login} variant="ghost" className="px-4">
             Sign in
           </Button>
         </header>
@@ -44,7 +45,7 @@ export default function GetStartedPage() {
               learning easier—without making school feel more complicated.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button to="/auth/register" className="px-6" size="lg">
+              <Button to={routes.auth.register} className="px-6" size="lg">
                 Get Started <ArrowRight size={18} />
               </Button>
             </div>

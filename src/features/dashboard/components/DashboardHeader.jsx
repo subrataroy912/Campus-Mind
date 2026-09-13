@@ -45,7 +45,7 @@ export default function DashboardHeader() {
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <BrandLogo fetchPriority="high" />
+        <BrandLogo fetchPriority="high" to={routes.dashboard} />
       </div>
 
       {/* User Profile and Logout */}
