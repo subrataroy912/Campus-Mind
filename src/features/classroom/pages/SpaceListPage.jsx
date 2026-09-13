@@ -45,7 +45,7 @@ export default function SpaceListPage() {
             <Ticket size={14} aria-hidden="true" />
             <span>Join with code</span>
           </Button>
-          {user?.canCreateCourses && (
+          {(user?.canCreateCourses || user?.isAdmin) && (
             <Button
               to={routes.spaces.new}
               size="sm"

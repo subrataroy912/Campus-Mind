@@ -17,7 +17,7 @@ export default function CreatorRoute({ children, redirectTo = routes.dashboard }
     return <Navigate to={routes.auth.login} replace />;
   }
 
-  if (!user?.canCreateCourses) {
+  if (!user?.canCreateCourses && !user?.isAdmin) {
     return <Navigate to={redirectTo} replace />;
   }
 

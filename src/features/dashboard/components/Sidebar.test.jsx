@@ -42,4 +42,12 @@ describe("Sidebar navigation and creator gating", () => {
     expect(html).toContain(routes.spaces.new);
     expect(html).toContain("Join with code");
   });
+
+  it("renders 'Create a space' button when user is an admin", () => {
+    mockUser = { id: "u1", canCreateCourses: false, isAdmin: true };
+    const html = renderToString(<Sidebar />);
+    expect(html).toContain("Create a space");
+    expect(html).toContain(routes.spaces.new);
+    expect(html).toContain("Join with code");
+  });
 });

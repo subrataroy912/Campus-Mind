@@ -66,7 +66,7 @@ export default function Sidebar({
           <Ticket size={17} aria-hidden="true" />
           <span className={compact ? "hidden" : ""}>Join with code</span>
         </Button>
-        {user?.canCreateCourses && (
+        {(user?.canCreateCourses || user?.isAdmin) && (
           <Button
             to={routes.spaces.new}
             className={`w-full ${

@@ -1,4 +1,4 @@
-﻿import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import CreatorRoute from "./CreatorRoute.jsx";
@@ -59,6 +59,17 @@ describe("CreatorRoute access control", () => {
       authStatus: "authenticated",
       isAuthenticated: true,
       user: { id: "u1", canCreateCourses: true },
+    };
+    const html = renderToString(<CreatorRoute />);
+    expect(html).toContain("Outlet Content");
+    expect(html).not.toContain('data-to="/dashboard"');
+  });
+
+  it("renders outlet for admin users even without canCreateCourses", () => {
+    mockAuthState = {
+      authStatus: "authenticated",
+      isAuthenticated: true,
+      user: { id: "u1", canCreateCourses: false, isAdmin: true },
     };
     const html = renderToString(<CreatorRoute />);
     expect(html).toContain("Outlet Content");
