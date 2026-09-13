@@ -51,37 +51,26 @@ export default function GetStartedPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-semibold text-primary">
-              Today at CampusMind
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-text-heading">
-              A little clarity for a busy week.
-            </h2>
-            <div className="mt-6 space-y-3">
-              {[
-                "Review Algebra II notes",
-                "Join the history discussion",
-                "Save the physics practice set",
-              ].map((item, index) => (
-                <div
-                  className="flex items-center gap-3 rounded-xl bg-canvas p-3"
-                  key={item}
-                >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-sm font-bold text-surface">
-                    {index + 1}
-                  </span>
-                  <span className="font-medium text-text-main">{item}</span>
-                </div>
-              ))}
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-3 shadow-sm sm:p-4">
+            <div className="overflow-hidden rounded-2xl bg-white p-1">
+              <img
+                src="/images/illustrations/learning-ecosystem.jpg"
+                alt="CampusMind learning and collaboration ecosystem"
+                className="w-full rounded-xl object-cover"
+                loading="eager"
+              />
             </div>
-          </aside>
+            <div className="mt-3 flex items-center justify-between px-2 text-xs text-text-muted">
+              <span className="font-semibold text-primary">Interactive Learning</span>
+              <span>Classes · Community · Collaboration</span>
+            </div>
+          </div>
         </section>
 
         <section className="grid gap-4 pb-12 md:grid-cols-3">
           {features.map(({ icon: Icon, title, text }) => (
             <article
-              className="rounded-2xl border border-border bg-surface p-6"
+              className="rounded-2xl border border-border bg-surface p-6 shadow-xs"
               key={title}
             >
               <Icon className="text-primary" aria-hidden="true" />
@@ -91,6 +80,39 @@ export default function GetStartedPage() {
               <p className="mt-2 leading-6 text-text-muted">{text}</p>
             </article>
           ))}
+        </section>
+
+        {/* Diverse community showcase banner */}
+        <section className="mb-12 overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+          <div className="grid items-center gap-8 p-6 sm:p-10 lg:grid-cols-2">
+            <div>
+              <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                Inclusive Community
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
+                A welcoming space for every learner
+              </h2>
+              <p className="mt-3 text-base leading-7 text-text-muted">
+                From first-year study groups to collaborative course projects, CampusMind brings students, teachers, and mentors together in one inclusive space.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button to={routes.auth.register} size="lg">
+                  Join the Community
+                </Button>
+                <Button to={routes.explore} variant="outline" size="lg">
+                  Explore Courses
+                </Button>
+              </div>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-white p-1.5 shadow-xs">
+              <img
+                src="/images/illustrations/diverse-campus.jpg"
+                alt="Diverse CampusMind community of students and educators"
+                className="w-full rounded-xl object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
         </section>
       </div>
       <footer className="py-6 text-center text-sm text-text-muted">
