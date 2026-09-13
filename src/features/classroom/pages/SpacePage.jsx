@@ -162,10 +162,10 @@ export default function SpacePage() {
       : { ...classroom, code: location.state.enrollmentCode };
 
   return (
-    <div className="min-h-screen bg-canvas px-3 py-4 sm:px-5 sm:py-5 lg:px-7">
-      <div className="mx-auto max-w-6xl space-y-3">
+    <div className="min-h-screen bg-canvas px-2.5 py-2.5 sm:px-4 sm:py-3.5 lg:px-6">
+      <div className="mx-auto max-w-5xl space-y-2.5 sm:space-y-3">
         {joinError && (
-          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">
             {joinError}
           </div>
         )}
@@ -180,6 +180,7 @@ export default function SpacePage() {
 
         <ClassTabs
           active={activeTab}
+          spaceType={classroom?.spaceType}
           onChange={(nextTab) => {
             setSearchParams((prev) => {
               const next = new URLSearchParams(prev);
@@ -214,7 +215,9 @@ export default function SpacePage() {
           />
         )}
 
-        {activeTab === "quick-links" && <ClassQuickLinks teacher={teacher} />}
+        {activeTab === "quick-links" && (
+          <ClassQuickLinks classroom={classroom} teacher={teacher} />
+        )}
 
         {activeTab === "members" && (
           <MembersTab

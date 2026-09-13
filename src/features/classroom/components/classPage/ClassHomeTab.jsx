@@ -7,10 +7,13 @@ import {
   ExternalLink,
   Globe,
   GraduationCap,
+  Layers,
   MapPin,
   Shield,
+  Tag,
   UserPlus,
   Users,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -23,6 +26,15 @@ import {
   useCreateCourseworkMutation,
 } from "../../api/courseworkApi.js";
 import { routes } from "@/routes/paths";
+
+const SPACE_LABELS = {
+  ACADEMIC_CLASS: "Class",
+  STUDY_GROUP: "Study Group",
+  CLUB_SOCIETY: "Club & Society",
+  PROJECT_TEAM: "Project Team",
+  DEPARTMENT_COHORT: "Cohort",
+  COMMUNITY_HUB: "Community Hub",
+};
 
 export function ClassHomeTab({
   isEnrolled = true,
@@ -64,7 +76,6 @@ export function ClassHomeTab({
     (classroom?.visibility === "PUBLIC" ? "open" : "code")
   ).toLowerCase();
 
-
   const teacherName =
     typeof classroom?.teacher === "string"
       ? classroom.teacher
@@ -72,7 +83,7 @@ export function ClassHomeTab({
         classroom?.instructor?.name ||
         classroom?.teacherName ||
         classroom?.ownerName ||
-        "CampusMind Instructor";
+        "CampusMind Facilitator";
 
   const teacherAvatar =
     classroom?.teacher?.avatarUrl ||
@@ -80,13 +91,17 @@ export function ClassHomeTab({
     classroom?.ownerAvatarUrl ||
     null;
 
-  const targetGrade = classroom?.targetGrade || classroom?.gradeLevel;
+  const spaceTypeLabel = SPACE_LABELS[classroom?.spaceType] || "Space";
+  const location = classroom?.location || classroom?.room;
+  const isOnline = classroom?.meetingType === "ONLINE";
   const isMeetingLink =
-    classroom?.room &&
-    (classroom.room.startsWith("http://") ||
-      classroom.room.startsWith("https://") ||
-      classroom.room.includes("zoom.us") ||
-      classroom.room.includes("meet.google"));
+    location &&
+    (location.startsWith("http://") ||
+      location.startsWith("https://") ||
+      location.includes("zoom.us") ||
+      location.includes("meet.google"));
+
+  const tags = Array.isArray(classroom?.tags) ? classroom.tags : [];
 
   const scheduleText = (() => {
     if (classroom?.schedule) return classroom.schedule;
@@ -102,189 +117,206 @@ export function ClassHomeTab({
   })();
 
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-3 space-y-3.5">
       {/* Preview Banner for Non-Enrolled Users */}
       {!isEnrolled && (
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-text-main shadow-xs">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                <Globe className="h-3.5 w-3.5" />
-                Course Preview
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 sm:p-4 text-text-main shadow-xs">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-0.5">
+              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                <Globe className="h-3 w-3" />
+                Space Preview
               </div>
-              <h3 className="text-base font-semibold text-text-heading">
-                You are previewing this course
+              <h3 className="text-sm sm:text-base font-semibold text-text-heading">
+                You are previewing this space
               </h3>
-              <p className="text-sm text-text-muted max-w-xl">
-                Join now to participate in class discussions, access assignments and resources, submit coursework, and connect with your instructor and classmates.
+              <p className="text-xs text-text-muted max-w-xl leading-relaxed">
+                Join now to participate in group discussions, access shared resources, submit coursework, and connect with peers.
               </p>
             </div>
             {accessType === "invite" ? (
-              <span className="shrink-0 rounded-xl border border-border bg-canvas px-4 py-2 text-xs font-medium text-text-muted">
+              <span className="shrink-0 rounded-lg border border-border bg-canvas px-3 py-1.5 text-xs font-medium text-text-muted">
                 Invite only
               </span>
             ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
               <Link
                 to={`${routes.classes.join}?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-primary-hover"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover"
               >
-                <UserPlus className="h-4 w-4" />
+                <UserPlus className="h-3.5 w-3.5" />
                 <span>Join with Code</span>
               </Link>
             ) : onJoin ? (
               <Button
                 onClick={onJoin}
                 disabled={isJoining}
-                className="shrink-0 gap-2 rounded-xl font-medium"
+                size="sm"
+                className="shrink-0 gap-1.5 rounded-lg text-xs font-semibold h-8"
               >
-                <UserPlus className="h-4 w-4" />
-                <span>{isJoining ? "Joining…" : "Join Class"}</span>
+                <UserPlus className="h-3.5 w-3.5" />
+                <span>{isJoining ? "Joining•" : "Join Space"}</span>
               </Button>
             ) : null}
           </div>
         </div>
       )}
 
-      {/* Course Overview & Metadata Card */}
+      {/* Space Overview & Metadata Card */}
       <CollapsibleSection
-        title="About this class"
-        subtitle={classroom?.subject ? `${classroom.subject} · ${classroom.title}` : undefined}
+        title="About this space"
+        subtitle={`${spaceTypeLabel} • ${classroom?.subject || classroom?.title || ""}`}
         defaultExpanded={true}
-        className="space-y-5"
-        contentClassName="space-y-5"
+        className="space-y-3"
+        contentClassName="space-y-3"
       >
         <div>
           <p
-            className={`text-sm leading-relaxed text-text-main whitespace-pre-line ${
-              !descriptionExpanded ? "line-clamp-4" : ""
+            className={`text-xs sm:text-sm leading-relaxed text-text-main whitespace-pre-line ${
+              !descriptionExpanded ? "line-clamp-3" : ""
             }`}
           >
             {classroom?.description?.trim() ||
-              "No detailed description provided for this class yet. Check back soon for course syllabus, goals, and announcements."}
+              "No detailed description provided for this space yet. Check back soon for goals, schedule, and updates."}
           </p>
-          {classroom?.description && classroom.description.length > 200 && (
+          {classroom?.description && classroom.description.length > 180 && (
             <button
               type="button"
               onClick={() => setDescriptionExpanded((prev) => !prev)}
-              className="mt-2 text-xs font-semibold text-primary hover:underline focus:outline-hidden"
+              className="mt-1 text-[11px] font-semibold text-primary hover:underline focus:outline-hidden cursor-pointer"
             >
               {descriptionExpanded ? "Show less" : "Show more"}
             </button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2 border-t border-border">
-          {/* Subject */}
-          <div className="flex items-start gap-3 rounded-xl bg-canvas/50 p-3 border border-border/60">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary shrink-0">
-              <BookOpen className="h-4 w-4" />
+        {/* Dense 4-col metadata grid */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 pt-2 border-t border-border">
+          {/* Space Type / Category */}
+          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
+            <div className="grid h-7 w-7 place-items-center rounded-md bg-primary/10 text-primary shrink-0">
+              <Layers className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-text-muted">Subject</p>
-              <p className="mt-0.5 text-sm font-semibold text-text-heading truncate">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Type</p>
+              <p className="text-xs font-semibold text-text-heading truncate">
+                {spaceTypeLabel}
+              </p>
+            </div>
+          </div>
+
+          {/* Subject / Domain */}
+          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
+            <div className="grid h-7 w-7 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <BookOpen className="h-3.5 w-3.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Domain</p>
+              <p className="text-xs font-semibold text-text-heading truncate">
                 {classroom?.subject || "General"}
               </p>
             </div>
           </div>
 
-          {/* Target Grade */}
-          <div className="flex items-start gap-3 rounded-xl bg-canvas/50 p-3 border border-border/60">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-              <GraduationCap className="h-4 w-4" />
+          {/* Location / Meeting format */}
+          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
+            <div className="grid h-7 w-7 place-items-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+              {isOnline ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-text-muted">Target Grade</p>
-              <p className="mt-0.5 text-sm font-semibold text-text-heading truncate">
-                {targetGrade || "All Levels"}
-              </p>
-            </div>
-          </div>
-
-          {/* Room / Location / Meeting link */}
-          <div className="flex items-start gap-3 rounded-xl bg-canvas/50 p-3 border border-border/60">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-              <MapPin className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-text-muted">Location / Room</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Format</p>
               {isMeetingLink ? (
                 <a
-                  href={classroom.room}
+                  href={location}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline truncate"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline truncate"
                 >
-                  <span className="truncate">Online Meeting</span>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
+                  <span className="truncate">Online Room</span>
+                  <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                 </a>
               ) : (
-                <p className="mt-0.5 text-sm font-semibold text-text-heading truncate">
-                  {classroom?.room || "Not specified"}
+                <p className="text-xs font-semibold text-text-heading truncate">
+                  {location || (classroom?.meetingType === "ONLINE" ? "Online" : "In-Person")}
                 </p>
               )}
             </div>
           </div>
 
           {/* Schedule */}
-          <div className="flex items-start gap-3 rounded-xl bg-canvas/50 p-3 border border-border/60">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
-              <Clock className="h-4 w-4" />
+          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
+            <div className="grid h-7 w-7 place-items-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400 shrink-0">
+              <Clock className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-text-muted">Schedule</p>
-              <p className="mt-0.5 text-sm font-semibold text-text-heading truncate">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Schedule</p>
+              <p className="text-xs font-semibold text-text-heading truncate">
                 {scheduleText || "Flexible / Async"}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Tags Row if present */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1 pt-1 text-xs text-text-muted">
+            <Tag className="h-3 w-3 text-text-muted/70 mr-0.5" />
+            {tags.map((t) => (
+              <span
+                key={t}
+                className="rounded-md bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-text-main border border-border"
+              >
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Teacher Profile & Enrollment Stats Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-border">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-border">
+          <div className="flex items-center gap-2.5">
             <ClassroomAvatar
               userId={classroom?.teacherId || classroom?.ownerId}
               name={teacherName}
               avatar={teacherAvatar}
-              size="h-11 w-11"
+              size="h-8 w-8 sm:h-9 sm:w-9"
             />
             <div>
-              <p className="text-xs font-medium text-text-muted">Instructor</p>
+              <p className="text-[10px] font-medium text-text-muted">Lead / Facilitator</p>
               {classroom?.teacherId || classroom?.ownerId ? (
                 <Link
                   to={routes.user(classroom.teacherId || classroom.ownerId)}
-                  className="text-sm font-bold text-text-heading hover:text-primary hover:underline transition-colors"
+                  className="text-xs font-bold text-text-heading hover:text-primary hover:underline transition-colors"
                 >
                   {teacherName}
                 </Link>
               ) : (
-                <p className="text-sm font-bold text-text-heading">{teacherName}</p>
+                <p className="text-xs font-bold text-text-heading">{teacherName}</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-text-muted">
-            <div className="flex items-center gap-1.5 font-medium">
-              <Users className="h-4 w-4 text-primary" />
-              <span>{classroom?.memberCount ?? 0} enrolled members</span>
+          <div className="flex items-center gap-3 text-xs text-text-muted">
+            <div className="flex items-center gap-1 font-medium">
+              <Users className="h-3.5 w-3.5 text-primary" />
+              <span>{classroom?.memberCount ?? 0} members</span>
             </div>
-            <div className="flex items-center gap-1.5 font-medium">
-              <Shield className="h-4 w-4 text-primary" />
-              <span className="capitalize">{accessType} Enrollment</span>
+            <div className="flex items-center gap-1 font-medium">
+              <Shield className="h-3.5 w-3.5 text-primary" />
+              <span className="capitalize">{accessType} Access</span>
             </div>
           </div>
         </div>
       </CollapsibleSection>
 
-      {/* Class Stream & Updates */}
-      <div className="space-y-4">
+      {/* Space Stream & Announcements */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-text-heading">
-            Class Stream & Updates
+          <h3 className="text-sm sm:text-base font-bold text-text-heading">
+            Space Stream & Updates
           </h3>
           {announcements.length > 0 && (
             <span className="text-xs font-medium text-text-muted">
-              {announcements.length} update{announcements.length === 1 ? "" : "s"}
+              {announcements.length} post{announcements.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
@@ -294,16 +326,16 @@ export function ClassHomeTab({
         )}
 
         {isLoadingCoursework && announcements.length === 0 ? (
-          <div className="rounded-2xl bg-surface p-6 text-center text-sm text-text-muted ring-1 ring-border shadow-xs">
-            Loading class updates…
+          <div className="rounded-xl bg-surface p-5 text-center text-xs text-text-muted ring-1 ring-border shadow-xs">
+            Loading space updates•
           </div>
         ) : announcements.length === 0 ? (
           <EmptyState
-            title="No class updates yet"
-            description="Announcements, discussions, and class updates will appear here when your instructor posts them."
+            title="No updates posted yet"
+            description="Announcements, project updates, and discussions will appear here when posted."
           />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {announcements.map((post) => (
               <ClassFeedPost
                 key={post.id}

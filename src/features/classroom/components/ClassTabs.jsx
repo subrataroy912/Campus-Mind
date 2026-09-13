@@ -1,17 +1,28 @@
 import { CLASS_TABS } from "../data/classPageData.js";
 
-export default function ClassTabs({ active, onChange }) {
+export default function ClassTabs({ active, onChange, spaceType = "ACADEMIC_CLASS" }) {
+  const isAcademic = spaceType === "ACADEMIC_CLASS";
+
+  const visibleTabs = CLASS_TABS.filter((tab) => {
+    if (tab.academicOnly && !isAcademic) return false;
+    return true;
+  });
+
   return (
-    <div className="mt-4 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-sm ring-1 ring-border sm:gap-2">
-      {CLASS_TABS.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onChange(tab.id)}
-          className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition ${active === tab.id ? "bg-primary text-surface" : "text-text-main hover:bg-canvas"}`}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="mt-2.5 sm:mt-3 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-xs ring-1 ring-border">
+      {visibleTabs.map((tab) => {
+        const label = (!isAcademic && tab.altLabel) ? tab.altLabel : tab.label;
+        const isActive = active === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${isActive ? "bg-surface text-text-heading shadow-xs" : "text-text-muted hover:text-text-heading hover:bg-surface/50"}`}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

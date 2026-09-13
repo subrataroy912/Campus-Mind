@@ -31,6 +31,11 @@ const normalizeCourse = (response = {}) => {
     subtitle: course.section ?? course.subtitle ?? course.term ?? "",
     section: course.section ?? course.subtitle ?? "",
     code: course.code ?? course.enrollmentCode ?? course.classCode ?? "",
+    spaceType: course.spaceType || "ACADEMIC_CLASS",
+    meetingType: course.meetingType || "IN_PERSON",
+    location: course.location || "",
+    tags: Array.isArray(course.tags) ? course.tags : [],
+    links: Array.isArray(course.links) ? course.links : [],
     accessType: (
       course.accessType ||
       (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
@@ -171,6 +176,14 @@ export const classroomApi = baseApi.injectEndpoints({
         ...exploreTags,
       ],
     }),
+    archiveClassroom: builder.mutation({
+      query: (courseId) => ({ url: `/courses/${courseId}/archive`, method: "POST" }),
+      invalidatesTags: [
+        { type: "Classrooms", id: "LIST" },
+        { type: "Profile", id: "CURRENT" },
+        ...exploreTags,
+      ],
+    }),
     requestCourseCoverUpload: builder.mutation({
       query: () => ({ url: "/courses/cover-upload", method: "POST" }),
     }),
@@ -245,6 +258,7 @@ export const {
   useRequestCourseLogoUploadMutation,
   useUpdateClassroomMutation,
   useDeleteClassroomMutation,
+  useArchiveClassroomMutation,
   useLeaveClassroomMutation,
   useRemoveCourseMemberMutation,
   useCreateClassroomMutation,
