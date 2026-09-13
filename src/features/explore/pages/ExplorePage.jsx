@@ -35,7 +35,7 @@ export default function ExplorePage() {
     page,
     keepPreviousData: true,
   });
-  const { data: users = [] } = useGetExplorePeopleQuery();
+  const { data: users = [], isLoading: isLoadingUsers } = useGetExplorePeopleQuery();
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -70,7 +70,7 @@ export default function ExplorePage() {
   const departments = [
     ...new Set(users.map((item) => item.department).filter(Boolean)),
   ];
-  const sharedPeople = useMemo(
+  const _sharedPeople = useMemo(
     () => users.filter((person) => getSharedClassCount(user, person) > 0),
     [user, users]
   );
@@ -347,24 +347,14 @@ export default function ExplorePage() {
               </FilterButton>
             ))}
           </div>
-          {sharedPeople.length > 0 && (
-            <section className="mt-6">
-              <h2 className="text-lg font-semibold text-text-heading">
-                People in your classes
-              </h2>
-              <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {sharedPeople.map((person) => (
-                  <ExplorePersonCard
-                    key={person.id}
-                    person={person}
-                    currentUser={user}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-          {filteredPeople.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoadingUsers ? (
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="h-40 rounded-2xl border border-border bg-surface p-4 animate-pulse" />
+              ))}
+            </div>
+          ) : filteredPeople.length > 0 ? (
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredPeople.map((person) => (
                 <ExplorePersonCard
                   key={person.id}

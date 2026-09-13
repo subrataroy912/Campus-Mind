@@ -25,7 +25,7 @@ function ExplorePersonCard({ person, currentUser }) {
     <article
       onMouseEnter={handlePrefetch}
       onFocus={handlePrefetch}
-      className="flex h-full flex-col rounded-2xl border border-border bg-surface p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+      className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-xs transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
     >
       <div className="flex items-start gap-3">
         {person.avatar ? (
@@ -34,15 +34,15 @@ function ExplorePersonCard({ person, currentUser }) {
             alt=""
             loading="lazy"
             decoding="async"
-            className="h-12 w-12 rounded-full border border-border object-cover"
+            className="h-10 w-10 rounded-full border border-border object-cover"
           />
         ) : (
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+          <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
             {initials(person.name || "CampusMind member")}
           </div>
         )}
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-bold text-text-heading">
+          <h3 className="truncate text-sm font-bold text-text-heading">
             {person.name || "CampusMind member"}
           </h3>
           <p className="truncate text-sm text-text-muted">
@@ -59,9 +59,9 @@ function ExplorePersonCard({ person, currentUser }) {
         </Badge>
         {sharedClassCount > 0 && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Shares {sharedClassCount} {sharedClassCount === 1 ? "class" : "classes"} with you</span>}
       </div>
-      <div className="mt-6 flex gap-2 border-t border-border pt-4">
+      <div className="mt-4 flex gap-2 border-t border-border pt-3">
         <Button to={routes.user(person.id)} variant="outline" size="sm">View profile</Button>
-        {sharedClassCount > 0 && <Button to={routes.messages} size="sm"><MessageCircle aria-hidden="true" />Message</Button>}
+        <Button to={`${routes.messages}?member=${person.id}`} size="sm" className="gap-1.5"><MessageCircle className="h-3.5 w-3.5" aria-hidden="true" /><span>Message</span></Button>
       </div>
     </article>
   );
