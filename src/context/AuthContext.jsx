@@ -247,11 +247,20 @@ export function AuthProvider({ children }) {
           const { rememberMe: _rememberMe, ...loginCredentials } = credentials;
           const response = await loginRequest(loginCredentials);
           const { accessToken, user: nextUser } = response;
+          let profile = null;
+          try {
+            profile = await getCurrentProfileRequest();
+          } catch {
+            // Profile fetch is optional fallback
+          }
           const hydratedUser = {
             ...nextUser,
-            avatar: nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
-            banner: nextUser?.banner ?? nextUser?.bannerUrl ?? null,
-            displayName: nextUser?.displayName ?? nextUser?.name,
+            ...(profile || {}),
+            avatar: profile?.avatarUrl ?? nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
+            banner: profile?.bannerUrl ?? nextUser?.banner ?? nextUser?.bannerUrl ?? null,
+            displayName: profile?.displayName ?? nextUser?.displayName ?? nextUser?.name,
+            canCreateCourses: Boolean(profile?.canCreateCourses ?? nextUser?.canCreateCourses),
+            isAdmin: Boolean(profile?.isAdmin ?? nextUser?.isAdmin),
           };
           resetApiCache(dispatch);
           commitAuthSession(dispatch, {
@@ -270,11 +279,20 @@ export function AuthProvider({ children }) {
         try {
           const result = await registerRequest(details);
           if (result.accessToken && result.user) {
+            let profile = null;
+            try {
+              profile = await getCurrentProfileRequest();
+            } catch {
+              // optional fallback
+            }
             const hydratedUser = {
               ...result.user,
-              avatar: result.user?.avatar ?? result.user?.avatarUrl ?? null,
-              banner: result.user?.banner ?? result.user?.bannerUrl ?? null,
-              displayName: result.user?.displayName ?? result.user?.name,
+              ...(profile || {}),
+              avatar: profile?.avatarUrl ?? result.user?.avatar ?? result.user?.avatarUrl ?? null,
+              banner: profile?.bannerUrl ?? result.user?.banner ?? result.user?.bannerUrl ?? null,
+              displayName: profile?.displayName ?? result.user?.displayName ?? result.user?.name,
+              canCreateCourses: Boolean(profile?.canCreateCourses ?? result.user?.canCreateCourses),
+              isAdmin: Boolean(profile?.isAdmin ?? result.user?.isAdmin),
             };
             resetApiCache(dispatch);
             commitAuthSession(dispatch, {

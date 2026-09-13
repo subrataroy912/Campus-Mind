@@ -21,23 +21,26 @@ export default function DashboardSavedPage() {
   } = useSavedItems();
 
   return (
-    <div className="min-h-screen bg-canvas py-2 px-2 sm:py-4 sm:px-3 lg:px-4">
+    <div className="min-h-screen bg-canvas py-3 px-2 sm:py-5 sm:px-4 lg:px-6">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-sm font-semibold text-primary">
+        <div className="mb-4 sm:mb-5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
             Saved
+          </p>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
+            Bookmarks & Collections
           </h1>
-          <p className="mt-1 text-sm text-text-muted sm:text-base">
+          <p className="mt-1 text-xs text-text-muted sm:text-sm">
             Posts, resources, and assignments you've bookmarked for later.
           </p>
         </div>
 
         {/* Quick search */}
-        <div className="mb-5">
-          <div className="relative">
+        <div className="mb-4">
+          <div className="relative max-w-md">
             <svg
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -54,15 +57,15 @@ export default function DashboardSavedPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search your saved items…"
-              className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text-heading outline-none transition focus:ring-2 focus:ring-focus"
+              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-xs text-text-heading outline-none transition focus:ring-1 focus:ring-primary"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
                 aria-label="Clear search"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

@@ -19,7 +19,7 @@ import {
   MembersTab,
 } from "../components/classPage/index.js";
 
-export default function ClassPage() {
+export default function SpacePage() {
   const { classId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -162,10 +162,10 @@ export default function ClassPage() {
       : { ...classroom, code: location.state.enrollmentCode };
 
   return (
-    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-4">
+    <div className="min-h-screen bg-canvas px-3 py-4 sm:px-5 sm:py-5 lg:px-7">
+      <div className="mx-auto max-w-6xl space-y-3">
         {joinError && (
-          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
             {joinError}
           </div>
         )}

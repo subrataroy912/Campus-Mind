@@ -29,5 +29,5 @@ export const selectIsAdmin = createSelector(
 
 export const selectCanCreateCourses = createSelector(
   [selectCurrentUser],
-  (user) => Boolean(user?.canCreateCourses)
+  (user) => Boolean(user?.canCreateCourses || user?.isAdmin)
 );

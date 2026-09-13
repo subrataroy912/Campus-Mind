@@ -9,15 +9,15 @@ import {
   requestCourseLogoUpload,
   updateClassroom,
 } from "../api/classroomService.js";
-import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
+import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
 import { routes } from "@/routes/paths.js";
 
-export function useCreateClassForm() {
+export function useCreateSpaceForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
-  const [form, setForm] = useState(INITIAL_CLASS_FORM);
+  const [form, setForm] = useState(INITIAL_SPACE_FORM);
   const [preview, setPreview] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [errors, setErrors] = useState({});
@@ -58,18 +58,22 @@ export function useCreateClassForm() {
   const validate = () => {
     const nextErrors = {};
     if (!form.className.trim()) {
-      nextErrors.className = "Class name is required.";
+      nextErrors.className = "Space name is required.";
     }
+    const isAcademicClass = form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
+
     if (!form.subject) {
-      nextErrors.subject = "Select a subject.";
+      nextErrors.subject = "Select a subject or category.";
     } else if (form.subject === "Other" && !form.customSubject?.trim()) {
       nextErrors.customSubject = "Please enter your custom subject.";
     }
 
-    if (!form.gradeLevel) {
-      nextErrors.gradeLevel = "Select a target grade.";
-    } else if (form.gradeLevel === "Other" && !form.customGradeLevel?.trim()) {
-      nextErrors.customGradeLevel = "Please enter your custom target grade.";
+    if (isAcademicClass) {
+      if (!form.gradeLevel) {
+        nextErrors.gradeLevel = "Select a target grade.";
+      } else if (form.gradeLevel === "Other" && !form.customGradeLevel?.trim()) {
+        nextErrors.customGradeLevel = "Please enter your custom target grade.";
+      }
     }
 
     setErrors(nextErrors);
@@ -77,7 +81,7 @@ export function useCreateClassForm() {
   };
 
   const reset = () => {
-    setForm(INITIAL_CLASS_FORM);
+    setForm(INITIAL_SPACE_FORM);
     setPreview(null);
     setLogoPreview(null);
     setErrors({});
@@ -111,7 +115,7 @@ export function useCreateClassForm() {
           method: "POST",
           body,
         });
-        if (!response.ok) throw new Error("Unable to upload the class cover.");
+        if (!response.ok) throw new Error("Unable to upload the space cover.");
         coverUrl = (await response.json()).secure_url;
       }
 
@@ -128,7 +132,7 @@ export function useCreateClassForm() {
           method: "POST",
           body,
         });
-        if (!response.ok) throw new Error("Unable to upload the class logo.");
+        if (!response.ok) throw new Error("Unable to upload the space logo.");
         logoUrl = (await response.json()).secure_url;
       }
 
@@ -141,6 +145,10 @@ export function useCreateClassForm() {
 
       const classroom = await createClassroom(user?.id, {
         ...form,
+        title: form.className,
+        spaceType: form.spaceType || "ACADEMIC_CLASS",
+        meetingType: form.meetingType || "IN_PERSON",
+        location: form.location || form.room,
         subject: effectiveSubject,
         gradeLevel: effectiveGradeLevel,
         targetGrade: effectiveGradeLevel,
@@ -159,12 +167,12 @@ export function useCreateClassForm() {
 
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
-      navigate(routes.classes.detail(savedClassroom.id), {
+      navigate(routes.spaces.detail(savedClassroom.id), {
         state: { enrollmentCode: classroom.code },
       });
     } catch (error) {
       setSubmissionError(
-        error?.data?.error || error?.message || "Unable to create this class."
+        error?.data?.error || error?.message || "Unable to create this space."
       );
     } finally {
       setIsSubmitting(false);
@@ -187,3 +195,6 @@ export function useCreateClassForm() {
     submit,
   };
 }
+
+export const useCreateClassForm = useCreateSpaceForm;
+

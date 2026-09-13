@@ -40,17 +40,17 @@ const OAuthCallbackPage = lazy(() =>
   import("../features/auth/pages/OAuthCallbackPage.jsx")
 );
 
-const ClassListPage = lazy(() =>
-  import("../features/classroom/pages/ClassListPage.jsx")
+const SpaceListPage = lazy(() =>
+  import("../features/classroom/pages/SpaceListPage.jsx")
 );
-const ClassPage = lazy(() =>
-  import("../features/classroom/pages/ClassPage.jsx")
+const SpacePage = lazy(() =>
+  import("../features/classroom/pages/SpacePage.jsx")
 );
-const CreateClassPage = lazy(() =>
-  import("../features/classroom/pages/CreateClass.jsx")
+const CreateSpacePage = lazy(() =>
+  import("../features/classroom/pages/CreateSpace.jsx")
 );
-const JoinClassPage = lazy(() =>
-  import("../features/classroom/pages/JoinClass.jsx")
+const JoinSpacePage = lazy(() =>
+  import("../features/classroom/pages/JoinSpace.jsx")
 );
 const ProfilePage = lazy(() =>
   import("../features/profile/pages/ProfilePage.jsx")
@@ -115,15 +115,37 @@ export const appRouteConfig = [
               { path: routes.saved, element: <DashboardSavedPage /> },
               { path: routes.explore, element: <ExplorePage /> },
 
-              // Classes
-              { path: routes.classes.list, element: <ClassListPage /> },
-              { path: routes.classes.join, element: <JoinClassPage /> },
-              { path: routes.classes.detail(), element: <ClassPage /> },
+              // Spaces (formerly Classes)
+              { path: routes.spaces.list, element: <SpaceListPage /> },
+              { path: routes.spaces.join, element: <JoinSpacePage /> },
+              { path: routes.spaces.detail(), element: <SpacePage /> },
               {
                 element: <CreatorRoute />,
                 children: [
-                  { path: routes.classes.new, element: <CreateClassPage /> },
+                  { path: routes.spaces.new, element: <CreateSpacePage /> },
                 ],
+              },
+
+              /* Backward-Compatible Redirects for legacy /classes/* paths */
+              {
+                path: "/classes",
+                element: <Navigate to={routes.spaces.list} replace />,
+              },
+              {
+                path: "/classes/join",
+                element: <Navigate to={routes.spaces.join} replace />,
+              },
+              {
+                path: "/classes/new",
+                element: <Navigate to={routes.spaces.new} replace />,
+              },
+              {
+                path: "/classes/:classId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.spaces.detail(params.classId)}
+                  />
+                ),
               },
 
               // Users & Profile

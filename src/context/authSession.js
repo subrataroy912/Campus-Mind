@@ -86,6 +86,8 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
     name: profile.displayName || current.user?.name,
     avatar: profile.avatarUrl ?? current.user?.avatar ?? null,
     banner: profile.bannerUrl ?? current.user?.banner ?? null,
+    canCreateCourses: Boolean(profile.canCreateCourses ?? current.user?.canCreateCourses),
+    isAdmin: Boolean(profile.isAdmin ?? current.user?.isAdmin),
   };
   return { ...current, user };
 }

@@ -65,42 +65,42 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-6">
+    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
       <header>
-        <p className="text-sm font-semibold text-primary">
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">
           Your learning space
         </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
+        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
           Welcome back, {profile?.displayName?.split(" ")[0] || "there"}.
         </h1>
-        <p className="mt-2 max-w-2xl text-text-muted">
-          Keep up with your classes, then discover a new space to learn with the
+        <p className="mt-1 max-w-2xl text-xs text-text-muted sm:text-sm">
+          Keep up with your spaces, then discover a new space to connect with the
           CampusMind community.
         </p>
       </header>
 
       {classrooms.length > 0 && (
-        <section className="mt-8" aria-labelledby="my-classes-heading">
-          <div className="mb-4 flex items-center justify-between gap-4">
+        <section className="mt-5 sm:mt-6" aria-labelledby="my-classes-heading">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2
                 id="my-classes-heading"
-                className="text-xl font-semibold text-text-heading"
+                className="text-base font-bold text-text-heading sm:text-lg"
               >
-                My classes
+                My spaces
               </h2>
-              <p className="mt-1 text-sm text-text-muted">
-                Your enrolled learning spaces.
+              <p className="text-[12px] text-text-muted">
+                Your joined learning and campus spaces.
               </p>
             </div>
-            <span className="text-sm text-text-muted">
-              <Link to={routes.profile.tab("classes")}>See all</Link>
+            <span className="text-xs text-text-muted hover:text-primary">
+              <Link to={routes.spaces.list}>See all</Link>
             </span>
           </div>
 
           {status === "error" ? (
             <EmptyState
-              title="We could not load your classes"
+              title="We could not load your spaces"
               description="Please refresh the page and try again."
             />
           ) : (
@@ -116,39 +116,39 @@ export default function DashboardHomePage() {
       )}
 
       <section
-        className="mt-10 border-t border-border pt-8"
+        className="mt-6 border-t border-border pt-5 sm:mt-8 sm:pt-6"
         aria-labelledby="explore-feed-heading"
       >
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400 mt-0.5 shrink-0">
-              <Compass size={18} aria-hidden="true" />
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400 mt-0.5 shrink-0">
+              <Compass size={15} aria-hidden="true" />
             </div>
             <div>
               <h2
                 id="explore-feed-heading"
-                className="text-xl font-bold tracking-tight text-text-heading"
+                className="text-base font-bold tracking-tight text-text-heading sm:text-lg"
               >
                 Discover something new
               </h2>
-              <p className="mt-0.5 text-sm text-text-muted">
-                Explore popular topics to grow your skills.
+              <p className="text-[12px] text-text-muted">
+                Explore popular topics and groups to grow your skills.
               </p>
             </div>
           </div>
           <Link
-            to={routes.profile.tab("classes")}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-text-heading hover:text-primary transition-colors"
+            to={routes.spaces.list}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-text-heading hover:text-primary transition-colors"
           >
             <span>See all</span>
-            <ArrowRight size={14} />
+            <ArrowRight size={13} />
           </Link>
         </div>
 
         {status === "error" ? (
           <div className="mt-6">
             <EmptyState
-              title="We could not load the class feed"
+              title="We could not load the spaces feed"
               description="Please check your connection or try again later."
             />
           </div>
@@ -163,8 +163,8 @@ export default function DashboardHomePage() {
         ) : (
           <div className="mt-6">
             <EmptyState
-              title="No public classes available"
-              description="There are currently no public classes to explore. Create a class to get started!"
+              title="No public spaces available"
+              description="There are currently no public spaces to explore. Create a space to get started!"
             />
           </div>
         )}
