@@ -130,10 +130,17 @@ export const CourseworkCard = React.memo(function CourseworkCard({
 
   return (
     <div>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-canvas/60"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsOpen((prev) => !prev);
+          }
+        }}
+        className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-canvas/60 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 select-none"
         aria-expanded={isOpen}
       >
         <div
@@ -175,7 +182,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
           )}
           <StatusChip uiStatus={currentItem.uiStatus ?? "assigned"} />
         </div>
-      </button>
+      </div>
 
       {isOpen && (
         <div className="border-t border-border bg-canvas/40 px-4 py-4 space-y-4 transition-all">
