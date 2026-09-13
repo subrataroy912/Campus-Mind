@@ -20,6 +20,7 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import { routes } from "@/routes/paths.js";
 
 const profileFor = (user) => ({
   ...user,
@@ -52,11 +53,7 @@ export default function ProfilePage() {
   const { userId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const {
-    user: currentUser,
-    updateProfile,
-    authStatus,
-  } = useAuth();
+  const { user: currentUser, updateProfile, authStatus } = useAuth();
   const activeTab = searchParams.get("tab") || "classes";
   const setActiveTab = (tab) => {
     setSearchParams(
@@ -264,7 +261,7 @@ export default function ProfilePage() {
               <EmptyState
                 title="No saved items yet"
                 description="Save posts and resources to find them quickly later."
-                action={{ to: "/dashboard/saved", label: "Browse saved items" }}
+                action={{ to: routes.saved, label: "Browse saved items" }}
               />
             ) : classes.length ? (
               <ContentList
@@ -286,7 +283,7 @@ export default function ProfilePage() {
                 }
                 action={
                   isOwner
-                    ? { to: "/dashboard/class/join", label: "Join a class" }
+                    ? { to: routes.explore, label: "Join a class" }
                     : undefined
                 }
               />

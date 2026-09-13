@@ -2,8 +2,8 @@ import { Link, NavLink } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { SIDEBAR_NAV_ITEMS } from "@/config/navigation.js";
-import { getNavLinkStyles } from "@/utils/routeHelpers.js";
 import { Plus, Settings, Ticket } from "lucide-react";
+import { SidebarLink } from "./SidebarLink";
 
 export default function Sidebar({
   compact = false,
@@ -28,20 +28,13 @@ export default function Sidebar({
           <ul className="space-y-1">
             {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
               <li key={to}>
-                <NavLink
+                <SidebarLink
                   to={to}
-                  end={to === "/dashboard"}
-                  className={(navState) =>
-                    `${getNavLinkStyles(navState)} ${
-                      compact ? "justify-center px-0" : ""
-                    }`
-                  }
-                  onClick={onNavigate}
-                  title={compact ? label : undefined}
-                >
-                  <Icon size={20} className="shrink-0" />
-                  <span className={compact ? "hidden" : ""}>{label}</span>
-                </NavLink>
+                  label={label}
+                  Icon={Icon}
+                  compact={compact}
+                  onNavigate={onNavigate}
+                />
               </li>
             ))}
           </ul>
@@ -64,7 +57,9 @@ export default function Sidebar({
         <Button
           to="/dashboard/class/join"
           variant="outline"
-          className={`w-full ${compact ? "justify-center p-0" : "justify-start"}`}
+          className={`w-full ${
+            compact ? "justify-center p-0" : "justify-start"
+          }`}
           title={compact ? "Join with code" : undefined}
         >
           <Ticket size={17} aria-hidden="true" />
@@ -73,7 +68,9 @@ export default function Sidebar({
         {user?.canCreateCourses && (
           <Button
             to="/dashboard/class/create"
-            className={`w-full ${compact ? "justify-center p-0" : "justify-start"}`}
+            className={`w-full ${
+              compact ? "justify-center p-0" : "justify-start"
+            }`}
             title={compact ? "Create a class" : undefined}
           >
             <Plus size={17} aria-hidden="true" />

@@ -9,7 +9,7 @@ import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
-
+import { routes } from "@/routes/paths.js";
 export default function DashboardHomePage() {
   const { authStatus } = useAuth();
   const {
@@ -28,19 +28,16 @@ export default function DashboardHomePage() {
   const displayExploreCards = useMemo(() => {
     const joinedCourseIds = new Set(
       classrooms.map(
-        (classroom) =>
-          classroom.id || classroom.courseId || classroom.classId
+        (classroom) => classroom.id || classroom.courseId || classroom.classId
       )
     );
 
     // Prioritize unjoined public courses, followed by joined public courses from the database
     const unjoined = exploreClassrooms.filter(
-      (c) =>
-        !joinedCourseIds.has(c.courseId || c.id || c.classId)
+      (c) => !joinedCourseIds.has(c.courseId || c.id || c.classId)
     );
-    const joined = exploreClassrooms.filter(
-      (c) =>
-        joinedCourseIds.has(c.courseId || c.id || c.classId)
+    const joined = exploreClassrooms.filter((c) =>
+      joinedCourseIds.has(c.courseId || c.id || c.classId)
     );
 
     return [...unjoined, ...joined].slice(0, 4);
@@ -97,7 +94,7 @@ export default function DashboardHomePage() {
               </p>
             </div>
             <span className="text-sm text-text-muted">
-              <Link to="/dashboard/profile?tab=classes">See all</Link>
+              <Link to={routes.profile.tab("classes")}>See all</Link>
             </span>
           </div>
 
@@ -140,7 +137,7 @@ export default function DashboardHomePage() {
             </div>
           </div>
           <Link
-            to="/dashboard/explore"
+            to={routes.profile.tab("classes")}
             className="inline-flex items-center gap-1 text-sm font-semibold text-text-heading hover:text-primary transition-colors"
           >
             <span>See all</span>

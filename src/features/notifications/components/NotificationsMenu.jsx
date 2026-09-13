@@ -5,21 +5,24 @@ import { useMarkNotificationReadMutation } from "../api/notificationsApi.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
+import { useNavigate } from "react-router";
 
 export default function NotificationsMenu() {
   const [open, setOpen] = useState(false);
-  const { data: response, isLoading } = useNotificationsPolling({ interval: 30000 });
+  const navigate = useNavigate();
+
+  const { data: response, isLoading } = useNotificationsPolling({
+    interval: 30000,
+  });
   const [markRead] = useMarkNotificationReadMutation();
 
-  const notifications = Array.isArray(response)
+  const apiData = Array.isArray(response)
     ? response
-    : response?.content || response?.data || [];
-
+    : response?.content || response?.data;
+  const notifications =
+    apiData && apiData.length > 0 ? apiData : DUMMY_NOTIFICATIONS;
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
 
   return (
@@ -35,11 +38,13 @@ export default function NotificationsMenu() {
           </span>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0 sm:w-96">
+
+      <DropdownMenuContent align="end" className="w-96 p-0 sm:w-[450px]">
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-3">
-          <DropdownMenuLabel className="p-0 font-bold text-text-heading">
+          <span className="font-bold text-sm text-text-heading">
             Notifications
-          </DropdownMenuLabel>
+          </span>
           {unreadCount > 0 && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
               {unreadCount} new
@@ -47,6 +52,7 @@ export default function NotificationsMenu() {
           )}
         </div>
 
+        {/* Body list */}
         <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
           {isLoading ? (
             <div className="flex items-center justify-center py-8 text-text-muted">
@@ -57,40 +63,134 @@ export default function NotificationsMenu() {
               No new notifications
             </div>
           ) : (
-            notifications.map((n) => {
-              const id = n.id || n._id;
-              const isUnread = !n.read && !n.isRead;
-              return (
-                <div
-                  key={id}
-                  className={`flex items-start justify-between gap-3 p-3 transition-colors ${
-                    isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-canvas/50"
-                  }`}
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-text-heading line-clamp-1">
-                      {n.title || n.subject || "Notification"}
-                    </p>
-                    <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
-                      {n.message || n.content || n.body || ""}
-                    </p>
-                  </div>
-                  {isUnread && (
-                    <button
-                      onClick={() => markRead(id)}
-                      title="Mark as read"
-                      aria-label="Mark as read"
-                      className="shrink-0 p-1 text-text-muted hover:text-primary transition-colors cursor-pointer"
-                    >
-                      <Check size={14} />
-                    </button>
-                  )}
-                </div>
-              );
-            })
+            notifications.map((n) => (
+              <NotificationItem
+                key={n.id || n._id}
+                notification={n}
+                size="md"
+                onMarkRead={(id) => markRead(id)}
+                onClick={(item) => {
+                  if (item.link) {
+                    setOpen(false); // Closes menu when navigating
+                    navigate(item.link);
+                  }
+                }}
+              />
+            ))
           )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
+/**
+ * Reusable notification item row/card
+ *
+ * @param {Object} props
+ * @param {Object} props.notification - Notification data object
+ * @param {(id: string) => void} [props.onMarkRead] - Callback when "Mark as read" is clicked
+ * @param {(notification: Object) => void} [props.onClick] - Callback when the card itself is clicked (e.g. navigation)
+ * @param {"sm" | "md" | "lg"} [props.size="md"] - Size preset
+ * @param {string} [props.className] - Additional wrapper classes
+ */
+function NotificationItem({
+  notification,
+  onMarkRead,
+  onClick,
+  size = "md",
+  className = "",
+}) {
+  const id = notification?.id || notification?._id;
+  const isUnread = !notification?.read && !notification?.isRead;
+  const title = notification?.title || notification?.subject || "Notification";
+  const message =
+    notification?.message || notification?.content || notification?.body || "";
+
+  // Size styling presets
+  const sizeStyles =
+    {
+      sm: {
+        padding: "p-2.5 gap-2.5",
+        title: "text-xs",
+        message: "text-[11px] mt-0.5",
+        iconSize: 13,
+        buttonPadding: "p-0.5",
+      },
+      md: {
+        padding: "p-3 gap-3",
+        title: "text-xs font-semibold",
+        message: "text-xs mt-0.5",
+        iconSize: 14,
+        buttonPadding: "p-1",
+      },
+      lg: {
+        padding: "p-4 gap-4",
+        title: "text-sm font-semibold",
+        message: "text-sm mt-1",
+        iconSize: 16,
+        buttonPadding: "p-1.5",
+      },
+    }[size] || sizeStyles.md;
+
+  const handleCardClick = () => {
+    if (onClick) onClick(notification);
+  };
+
+  const handleMarkRead = (e) => {
+    e.stopPropagation();
+    if (onMarkRead && id) onMarkRead(id);
+  };
+
+  return (
+    <div
+      onClick={handleCardClick}
+      className={`flex items-start justify-between transition-colors ${
+        sizeStyles.padding
+      } ${
+        isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-canvas/50"
+      } ${onClick ? "cursor-pointer" : ""} ${className}`}
+    >
+      <div className="min-w-0 flex-1">
+        <p className={`text-text-heading line-clamp-1 ${sizeStyles.title}`}>
+          {title}
+        </p>
+        {message && (
+          <p className={`text-text-muted line-clamp-2 ${sizeStyles.message}`}>
+            {message}
+          </p>
+        )}
+      </div>
+
+      {isUnread && onMarkRead && (
+        <button
+          type="button"
+          onClick={handleMarkRead}
+          title="Mark as read"
+          aria-label="Mark as read"
+          className={`shrink-0 rounded text-text-muted hover:text-primary transition-colors cursor-pointer ${sizeStyles.buttonPadding}`}
+        >
+          <Check size={sizeStyles.iconSize} />
+        </button>
+      )}
+    </div>
+  );
+}
+const DUMMY_NOTIFICATIONS = [
+  {
+    id: "notif-001",
+    title: "New Assignment Published",
+    message:
+      "Week 3: Advanced React Architecture has been posted to your classes.",
+    read: false,
+    createdAt: "2026-09-13T10:30:00.000Z",
+    link: "/classes/react-architecture",
+  },
+  {
+    id: "notif-002",
+    title: "Class Invitation",
+    message: "Prof. Sarah Jenkins invited you to join Distributed Systems 401.",
+    read: true,
+    createdAt: "2026-09-12T16:45:00.000Z",
+    link: "/classes/distributed-systems",
+  },
+];
