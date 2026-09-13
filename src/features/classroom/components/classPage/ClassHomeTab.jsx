@@ -41,22 +41,34 @@ export function ClassHomeTab({
   onJoin,
   isJoining = false,
   classroom,
-  teacher = false,
+  _teacher = false,
 }) {
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const courseId = classroom?.id;
 
+  const accessType = (
+    classroom?.accessType ||
+    (classroom?.visibility === "PUBLIC" ? "open" : "code")
+  ).toLowerCase();
+
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
     useGetCourseworkListQuery(
       { courseId, page: 0, size: 50 },
-      { skip: !courseId || (!isEnrolled && accessType !== "open") }
+      { skip: !courseId }
     );
 
   const [createCoursework] = useCreateCourseworkMutation();
 
+  // Show both ANNOUNCEMENT posts and any stream updates
   const announcements = useMemo(() => {
     const list = courseworkPage?.content ?? [];
-    return list.filter((item) => item.type === "ANNOUNCEMENT");
+    return list.filter(
+      (item) =>
+        item.type === "ANNOUNCEMENT" ||
+        item.type === "MATERIAL" ||
+        item.type === "ASSIGNMENT" ||
+        !item.type
+    );
   }, [courseworkPage]);
 
   const handlePostAnnouncement = async (text) => {
@@ -71,11 +83,6 @@ export function ClassHomeTab({
       },
     }).unwrap();
   };
-
-  const accessType = (
-    classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "open" : "code")
-  ).toLowerCase();
 
   const teacherName =
     typeof classroom?.teacher === "string"
@@ -322,7 +329,7 @@ export function ClassHomeTab({
           )}
         </div>
 
-        {teacher && isEnrolled && (
+        {isEnrolled && (
           <ClassPostBox onSubmit={handlePostAnnouncement} />
         )}
 
