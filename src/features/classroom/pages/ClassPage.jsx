@@ -44,14 +44,21 @@ export default function ClassPage() {
 
   const isEnrolled = isUserEnrolled(classroom, user?.id);
 
-  const rawAccessType = (classroom?.accessType || (classroom?.visibility === "PUBLIC" ? "OPEN" : "CODE")).toUpperCase();
-  const isCodeProtected = rawAccessType === "CODE" && classroom?.visibility !== "PUBLIC";
+  const rawAccessType = (
+    classroom?.accessType ||
+    (classroom?.visibility === "PUBLIC" ? "OPEN" : "CODE")
+  ).toUpperCase();
+  const isCodeProtected =
+    rawAccessType === "CODE" && classroom?.visibility !== "PUBLIC";
 
   const handleJoin = async (overrideCode) => {
     if (!classId) return;
 
     // If this classroom requires a code and no code was provided yet, open the modal
-    const effectiveCode = typeof overrideCode === "string" ? overrideCode.trim() : classCodeInput.trim();
+    const effectiveCode =
+      typeof overrideCode === "string"
+        ? overrideCode.trim()
+        : classCodeInput.trim();
     if (isCodeProtected && !effectiveCode) {
       setLocalJoinError("");
       setIsCodeModalOpen(true);

@@ -34,6 +34,21 @@ vi.mock("@/features/dashboard/useDashboardData.js", () => ({
   }),
 }));
 
+let mockPublicProfileState = {
+  data: {
+    id: "target-user-456",
+    displayName: "Secret User",
+    profileVisibility: "PRIVATE",
+    phone: "+1 555-0199",
+    address: "123 Classified St",
+    gender: "FEMALE",
+    dateOfBirth: "2000-01-01",
+  },
+  isLoading: false,
+  isError: false,
+  error: null,
+};
+
 // Mock profile API queries
 vi.mock("./api/profileApi.js", () => ({
   useGetCurrentProfileQuery: () => ({
@@ -41,19 +56,7 @@ vi.mock("./api/profileApi.js", () => ({
     isLoading: false,
     isError: false,
   }),
-  useGetPublicProfileQuery: () => ({
-    data: {
-      id: "target-user-456",
-      displayName: "Secret User",
-      profileVisibility: "PRIVATE",
-      phone: "+1 555-0199",
-      address: "123 Classified St",
-      gender: "FEMALE",
-      dateOfBirth: "2000-01-01",
-    },
-    isLoading: false,
-    isError: false,
-  }),
+  useGetPublicProfileQuery: () => mockPublicProfileState,
   useUpdateCurrentProfileMutation: () => [vi.fn(), { isLoading: false }],
   useUnlockCreatorMutation: () => [vi.fn(), { isLoading: false }],
 }));
@@ -66,6 +69,21 @@ vi.mock("@/utils/sharedClasses.js", () => ({
 
 describe("ProfilePage privacy access control", () => {
   it("renders 'This profile is private' and completely blocks contact/sensitive details for unauthorized viewers", () => {
+    mockPublicProfileState = {
+      data: {
+        id: "target-user-456",
+        displayName: "Secret User",
+        profileVisibility: "PRIVATE",
+        phone: "+1 555-0199",
+        address: "123 Classified St",
+        gender: "FEMALE",
+        dateOfBirth: "2000-01-01",
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    };
+
     const html = renderToString(<ProfilePage />);
 
     // Private profile placeholder must be rendered
@@ -79,5 +97,30 @@ describe("ProfilePage privacy access control", () => {
     expect(html).not.toContain("123 Classified St");
     expect(html).not.toContain("2000-01-01");
     expect(html).not.toContain("Personal &amp; Account Information");
+  });
+
+  it("renders proper private/unavailable UI when public profile returns 404 or error", () => {
+    mockPublicProfileState = {
+      data: null,
+      isLoading: false,
+      isError: true,
+      error: { status: 404, data: { error: "Profile not found" } },
+    };
+
+    const html = renderToString(<ProfilePage />);
+
+    // Proper message and badges
+    expect(html).toContain("This profile is private or unavailable");
+    expect(html).toContain(
+      "This profile is private, unavailable, or you do not have permission to view it."
+    );
+    expect(html).toContain("Private / Unavailable");
+
+    // Action buttons
+    expect(html).toContain("Go Back");
+    expect(html).toContain("Back to Dashboard");
+
+    // Must NOT contain an active spinning loader
+    expect(html).not.toContain("animate-spin");
   });
 });
