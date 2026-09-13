@@ -1,6 +1,6 @@
-import React from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router";
-import { Plus, Ticket, Loader2 } from "lucide-react";
+import { Plus, Ticket, Loader2, Filter } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
@@ -9,32 +9,54 @@ import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
 
+const FILTER_OPTIONS = [
+  { value: "ALL", label: "All Spaces" },
+  { value: "ACADEMIC_CLASS", label: "Classes" },
+  { value: "STUDY_GROUP", label: "Study Groups" },
+  { value: "CLUB_SOCIETY", label: "Clubs" },
+  { value: "PROJECT_TEAM", label: "Projects" },
+  { value: "COMMUNITY_HUB", label: "Community" },
+];
+
 export default function SpaceListPage() {
   const { user } = useAuth();
+  const [selectedType, setSelectedType] = useState("ALL");
+
   const { classrooms = [], status } = useDashboardData({
     includeExplore: false,
   });
 
+  const filteredSpaces = useMemo(() => {
+    if (selectedType === "ALL") return classrooms;
+    return classrooms.filter((c) => (c.spaceType || "ACADEMIC_CLASS") === selectedType);
+  }, [classrooms, selectedType]);
+
   if (status === "loading" || status === "idle") {
     return (
       <div className="flex h-64 w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-6xl p-2.5 sm:p-4 lg:p-5 space-y-3.5">
+      {/* Header Bar */}
+      <header className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Your Campus Spaces</p>
-          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
-            Spaces
-          </h1>
-          <p className="text-xs text-text-muted sm:text-sm">
-            All the spaces you are currently a member of, facilitating, or leading.
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-heading">
+              Spaces
+            </h1>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              {classrooms.length}
+            </span>
+          </div>
+          <p className="text-xs text-text-muted mt-0.5">
+            Spaces you are enrolled in, facilitating, or leading across campus.
           </p>
         </div>
+
         <div className="flex items-center gap-2">
           <Button
             to={routes.classes.join}
@@ -42,23 +64,53 @@ export default function SpaceListPage() {
             size="sm"
             className="h-8 gap-1.5 text-xs rounded-lg"
           >
-            <Ticket size={14} aria-hidden="true" />
+            <Ticket size={13} aria-hidden="true" />
             <span>Join with code</span>
           </Button>
           {(user?.canCreateCourses || user?.isAdmin) && (
             <Button
               to={routes.spaces.new}
               size="sm"
-              className="h-8 gap-1.5 text-xs rounded-lg"
+              className="h-8 gap-1.5 text-xs rounded-lg font-semibold"
             >
-              <Plus size={14} aria-hidden="true" />
+              <Plus size={13} aria-hidden="true" />
               <span>Create space</span>
             </Button>
           )}
         </div>
       </header>
 
-      <section className="mt-5 sm:mt-6">
+      {/* Filter Tabs - Compact High-Density Pills */}
+      {classrooms.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+          {FILTER_OPTIONS.map((opt) => {
+            const count =
+              opt.value === "ALL"
+                ? classrooms.length
+                : classrooms.filter((c) => (c.spaceType || "ACADEMIC_CLASS") === opt.value).length;
+            if (opt.value !== "ALL" && count === 0) return null;
+
+            const isSelected = selectedType === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => setSelectedType(opt.value)}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${isSelected ? "bg-primary text-white shadow-xs" : "bg-canvas text-text-muted border border-border hover:bg-surface hover:text-text-heading"}`}
+              >
+                <span>{opt.label}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${isSelected ? "bg-white/20 text-white" : "bg-surface text-text-muted"}`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Space Cards Grid */}
+      <section>
         {status === "error" ? (
           <EmptyState
             title="We could not load your spaces"
@@ -70,10 +122,14 @@ export default function SpaceListPage() {
             description="Join an existing space with an invite code or create a space."
             action={{ to: routes.classes.join, label: "Join a space" }}
           />
+        ) : filteredSpaces.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-xs text-text-muted">
+            No spaces found in this category.
+          </div>
         ) : (
           <ContentList
             layout="grid"
-            items={classrooms}
+            items={filteredSpaces}
             renderItem={(classroom) => <ClassCard classroom={classroom} />}
           />
         )}

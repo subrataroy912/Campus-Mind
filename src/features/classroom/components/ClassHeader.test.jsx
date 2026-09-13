@@ -9,6 +9,14 @@ vi.mock("react-router", () => ({
       {children}
     </a>
   ),
+  useNavigate: () => vi.fn(),
+}));
+
+vi.mock("../api/classroomApi.js", () => ({
+  useArchiveClassroomMutation: () => [vi.fn(), { isLoading: false }],
+  useDeleteClassroomMutation: () => [vi.fn(), { isLoading: false }],
+  useLeaveClassroomMutation: () => [vi.fn(), { isLoading: false }],
+  useUpdateClassroomMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 describe("ClassHeader privacy and role checks", () => {
