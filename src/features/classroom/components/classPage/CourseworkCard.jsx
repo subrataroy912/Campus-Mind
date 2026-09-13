@@ -22,6 +22,7 @@ const statusClass = {
   "due-soon": "bg-primary/10 text-primary border border-primary/20",
   missing: "bg-destructive/10 text-destructive border border-destructive/20",
   done: "bg-success/10 text-success border border-success/20",
+  draft: "bg-muted text-text-muted border border-border",
 };
 
 const statusLabel = {
@@ -29,6 +30,7 @@ const statusLabel = {
   "due-soon": "Due soon",
   missing: "Missing",
   done: "Done",
+  draft: "Draft",
 };
 
 const typeIcon = {
@@ -37,14 +39,14 @@ const typeIcon = {
   material: FileText,
 };
 
-function StatusChip({ status }) {
+function StatusChip({ uiStatus }) {
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-        statusClass[status] || statusClass.assigned
+        statusClass[uiStatus] || statusClass.assigned
       }`}
     >
-      {statusLabel[status] || "Assigned"}
+      {statusLabel[uiStatus] || "Assigned"}
     </span>
   );
 }
@@ -58,7 +60,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
   const [isOpen, setIsOpen] = useState(false);
   const [uploadedAttachments, setUploadedAttachments] = useState([]);
 
-  // Queries only run when item is expanded
+  // Fetch full detail only when expanded; skip for drafts on initial load too.
   const { data: detailItem } = useGetCourseworkByIdQuery(
     { courseId: classId, courseworkId: item.id },
     { skip: isHydrating || !classId || !item.id || !isOpen }
@@ -67,11 +69,30 @@ export const CourseworkCard = React.memo(function CourseworkCard({
   const currentItem = detailItem || item;
   const itemType = (currentItem.type || "assignment").toLowerCase();
   const Icon = typeIcon[itemType] ?? ClipboardList;
+  const isDraft = currentItem.status === "DRAFT";
 
   const allAttachments = [
     ...(currentItem.attachments || []),
     ...uploadedAttachments,
   ];
+
+  // Prefer the pre-formatted string from ClassworkTab; fall back for detail pane.
+  const dueDateLabel =
+    currentItem.formattedDueDate ??
+    (currentItem.dueAt
+      ? (() => {
+          const d = new Date(currentItem.dueAt);
+          if (isNaN(d.getTime())) return null;
+          const now = new Date();
+          return d.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            ...(d.getFullYear() !== now.getFullYear() ? { year: "numeric" } : {}),
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        })()
+      : null);
 
   return (
     <div>
@@ -81,16 +102,34 @@ export const CourseworkCard = React.memo(function CourseworkCard({
         className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-canvas/60"
         aria-expanded={isOpen}
       >
-        <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary shrink-0">
+        <div
+          className={`grid h-8 w-8 place-items-center rounded-lg shrink-0 ${
+            isDraft
+              ? "bg-muted text-text-muted"
+              : "bg-primary/10 text-primary"
+          }`}
+        >
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-sm text-text-heading truncate">
             {currentItem.title}
           </p>
-          <p className="mt-0.5 text-xs text-text-muted">{currentItem.dueDate}</p>
+          {dueDateLabel && (
+            <p className="mt-0.5 text-xs text-text-muted">
+              Due {dueDateLabel}
+            </p>
+          )}
         </div>
-        <StatusChip status={currentItem.status} />
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Draft badge for teachers */}
+          {teacher && isDraft && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+              Draft
+            </span>
+          )}
+          <StatusChip uiStatus={currentItem.uiStatus ?? "assigned"} />
+        </div>
       </button>
 
       {isOpen && (
@@ -150,3 +189,4 @@ export const CourseworkCard = React.memo(function CourseworkCard({
     </div>
   );
 });
+

@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.jsx";
+import { formatDueDate } from "@/utils/dateFormat.js";
 
 const GROUPS = ["This week", "Upcoming", "Past"];
 
@@ -47,28 +48,30 @@ export function ClassworkTab({
     setCreateError("");
   };
 
-  const handleCreateSubmit = async (e) => {
+  const buildPayload = (publishImmediately) => {
+    const payload = {
+      type: createType,
+      title: formTitle.trim(),
+      description: formDescription.trim(),
+      // Tell the backend to publish immediately or keep as draft.
+      status: publishImmediately ? "PUBLISHED" : "DRAFT",
+    };
+    if (createType === "ASSIGNMENT") {
+      if (formDueDate) payload.dueAt = new Date(formDueDate).toISOString();
+      if (formPoints) payload.maximumPoints = Number(formPoints) || 100;
+    }
+    return payload;
+  };
+
+  const handleCreateSubmit = async (e, publishImmediately = true) => {
     e.preventDefault();
     if (!formTitle.trim()) {
       setCreateError("Title is required");
       return;
     }
     setCreateError("");
-    const payload = {
-      type: createType,
-      title: formTitle.trim(),
-      description: formDescription.trim(),
-    };
-    if (createType === "ASSIGNMENT") {
-      if (formDueDate) {
-        payload.dueAt = new Date(formDueDate).toISOString();
-      }
-      if (formPoints) {
-        payload.maximumPoints = Number(formPoints) || 100;
-      }
-    }
     try {
-      await createCoursework({ courseId: classId, payload }).unwrap();
+      await createCoursework({ courseId: classId, payload: buildPayload(publishImmediately) }).unwrap();
       handleCloseDialog();
     } catch (err) {
       setCreateError(
@@ -93,11 +96,11 @@ export function ClassworkTab({
     [courseworkPage]
   );
 
-  // Normalize coursework items once
+  // Normalise list items once. Keep the backend `status` (PUBLISHED/DRAFT/ARCHIVED)
+  // intact and compute a separate `uiStatus` used only by the status chip.
   const items = useMemo(() => {
     return coursework.map((item) => {
       const dueAt = item.dueAt ?? item.dueDate ?? null;
-      const itemStatus = item.status ?? (dueAt ? "assigned" : "done");
       const attachments = Array.isArray(item.attachments)
         ? item.attachments.map((file) =>
             typeof file === "string"
@@ -106,13 +109,22 @@ export function ClassworkTab({
           )
         : [];
 
+      // uiStatus drives the status chip — distinct from publication status.
+      const uiStatus = (() => {
+        if (item.status === "DRAFT") return "draft";
+        const ts = item.temporalStatus;
+        if (ts === "THIS_WEEK") return "due-soon";
+        if (ts === "PAST") return "missing";
+        return "assigned"; // UPCOMING or NO_DUE_DATE
+      })();
+
       return {
         ...item,
         title: item.title ?? item.name,
         instructions: item.instructions ?? item.description ?? "",
-        dueDate: item.dueDate ?? dueAt ?? "No due date",
+        formattedDueDate: formatDueDate(dueAt),
         dueAt,
-        status: itemStatus,
+        uiStatus,
         attachments,
         submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
         totalCount: item.totalCount ?? classroom?.memberCount ?? 0,
@@ -120,7 +132,8 @@ export function ClassworkTab({
     });
   }, [coursework, classroom?.memberCount]);
 
-  // Memoize grouping so dates are not re-parsed on every render
+  // Memoize grouping so dates are not re-parsed on every render.
+  // DRAFT items are handled separately in the Drafts section above.
   const groupedItems = useMemo(() => {
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -132,6 +145,9 @@ export function ClassworkTab({
     };
 
     items.forEach((item) => {
+      // Drafts appear in their own section, not in the time-based groups.
+      if (item.status === "DRAFT") return;
+
       if (item?.temporalStatus) {
         if (item.temporalStatus === "THIS_WEEK") {
           result["This week"].push(item);
@@ -254,29 +270,58 @@ export function ClassworkTab({
             }
           />
         ) : (
-          GROUPS.map((group) => {
-            const groupList = groupedItems[group] ?? [];
-            if (!groupList.length) return null;
+          <>
+            {/* Drafts section — visible to staff only */}
+            {teacher && (() => {
+              const drafts = items.filter((i) => i.status === "DRAFT");
+              if (!drafts.length) return null;
+              return (
+                <section className="space-y-3">
+                  <h2 className="flex items-center gap-2 text-base font-bold text-text-heading">
+                    Drafts
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+                      {drafts.length}
+                    </span>
+                  </h2>
+                  <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border divide-y divide-border">
+                    {drafts.map((item) => (
+                      <CourseworkCard
+                        key={item.id}
+                        item={item}
+                        classId={classId}
+                        teacher={teacher}
+                        isHydrating={isHydrating}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
 
-            return (
-              <section key={group} className="space-y-3">
-                <h2 className="text-base font-bold text-text-heading">
-                  {group}
-                </h2>
-                <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border divide-y divide-border">
-                  {groupList.map((item) => (
-                    <CourseworkCard
-                      key={item.id}
-                      item={item}
-                      classId={classId}
-                      teacher={teacher}
-                      isHydrating={isHydrating}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })
+            {/* Published groups */}
+            {GROUPS.map((group) => {
+              const groupList = groupedItems[group] ?? [];
+              if (!groupList.length) return null;
+              return (
+                <section key={group} className="space-y-3">
+                  <h2 className="text-base font-bold text-text-heading">
+                    {group}
+                  </h2>
+                  <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border divide-y divide-border">
+                    {groupList.map((item) => (
+                      <CourseworkCard
+                        key={item.id}
+                        item={item}
+                        classId={classId}
+                        teacher={teacher}
+                        isHydrating={isHydrating}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </>
         )}
       </main>
 
@@ -363,7 +408,7 @@ export function ClassworkTab({
                 </div>
               )}
 
-              <div className="mt-6 flex justify-end gap-2">
+              <div className="mt-6 flex items-center justify-between gap-2">
                 <Button
                   type="button"
                   variant="ghost"
@@ -372,9 +417,20 @@ export function ClassworkTab({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" loading={isCreating}>
-                  Publish
-                </Button>
+                <div className="flex gap-2">
+                  {/* Save as draft — only teachers ever see drafts */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isCreating}
+                    onClick={(e) => handleCreateSubmit(e, false)}
+                  >
+                    Save Draft
+                  </Button>
+                  <Button type="submit" loading={isCreating}>
+                    Publish
+                  </Button>
+                </div>
               </div>
             </form>
           </DialogContent>
@@ -383,4 +439,3 @@ export function ClassworkTab({
     </div>
   );
 }
-
