@@ -46,6 +46,10 @@ vi.mock("../../api/courseworkApi.js", () => ({
   useGetSubmissionListQuery: () => ({ data: { content: [] } }),
   useGradeSubmissionMutation: () => [vi.fn()],
   useStartSubmissionMutation: () => [vi.fn()],
+  useUpdateCourseworkMutation: () => [vi.fn(), { isLoading: false }],
+  useDeleteCourseworkMutation: () => [vi.fn(), { isLoading: false }],
+  useGetMySubmissionQuery: () => ({ data: null }),
+  useSaveSubmissionMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 vi.mock("../../api/commentApi.js", () => ({

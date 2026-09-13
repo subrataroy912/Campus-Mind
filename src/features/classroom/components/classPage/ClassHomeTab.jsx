@@ -49,7 +49,7 @@ export function ClassHomeTab({
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
     useGetCourseworkListQuery(
       { courseId, page: 0, size: 50 },
-      { skip: !courseId || !isEnrolled }
+      { skip: !courseId || (!isEnrolled && accessType !== "open") }
     );
 
   const [createCoursework] = useCreateCourseworkMutation();
@@ -67,6 +67,7 @@ export function ClassHomeTab({
         type: "ANNOUNCEMENT",
         title: "Announcement",
         description: text.trim(),
+        status: "PUBLISHED",
       },
     }).unwrap();
   };
