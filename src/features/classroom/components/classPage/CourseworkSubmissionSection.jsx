@@ -1,7 +1,12 @@
 import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
-import { useStartSubmissionMutation } from "../../api/courseworkApi.js";
+import {
+  useStartSubmissionMutation,
+  useGetMySubmissionQuery,
+  useSaveSubmissionMutation,
+} from "../../api/courseworkApi.js";
+import { CheckCircle, Clock } from "lucide-react";
 import {
   useCompleteUploadMutation,
   useRequestUploadUrlMutation,
@@ -14,7 +19,7 @@ import {
 export function CourseworkSubmissionSection({
   classId,
   item,
-  uploadedAttachments,
+  _uploadedAttachments,
   setUploadedAttachments,
 }) {
   const [draftSubmission, setDraftSubmission] = useState("");
@@ -23,7 +28,13 @@ export function CourseworkSubmissionSection({
   const [submissionError, setSubmissionError] = useState("");
   const fileInputRef = useRef(null);
 
+  const { data: mySubmission } = useGetMySubmissionQuery(
+    { courseworkId: item?.id },
+    { skip: !item?.id }
+  );
+
   const [startSubmission] = useStartSubmissionMutation();
+  const [saveSubmission] = useSaveSubmissionMutation();
   const [requestUploadUrl] = useRequestUploadUrlMutation();
   const [completeUpload] = useCompleteUploadMutation();
 
@@ -80,24 +91,28 @@ export function CourseworkSubmissionSection({
     }
   };
 
+  const isTurnedIn = mySubmission?.status === "TURNED_IN" || mySubmission?.status === "GRADED";
+
   const handleSubmit = async () => {
     if (!classId || !item?.id) return;
     setIsSubmitting(true);
     setSubmissionError("");
 
     try {
-      await startSubmission({
+      if (!mySubmission) {
+        await startSubmission({ courseworkId: item.id }).unwrap();
+      }
+      await saveSubmission({
         courseworkId: item.id,
         payload: {
-          content: draftSubmission,
-          submitted: true,
-          attachments: uploadedAttachments,
+          answerText: draftSubmission.trim(),
+          status: "TURNED_IN",
         },
       }).unwrap();
       setDraftSubmission("");
     } catch (requestError) {
       setSubmissionError(
-        requestError?.message || "Unable to submit this assignment right now."
+        requestError?.data?.message || requestError?.message || "Unable to submit this assignment right now."
       );
     } finally {
       setIsSubmitting(false);
@@ -106,6 +121,30 @@ export function CourseworkSubmissionSection({
 
   return (
     <div className="space-y-3 pt-2 border-t border-border">
+      {mySubmission && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-canvas/70 px-3 py-2 text-xs border border-border">
+          <div className="flex items-center gap-1.5 font-medium">
+            {isTurnedIn ? (
+              <CheckCircle className="h-4 w-4 text-success" />
+            ) : (
+              <Clock className="h-4 w-4 text-amber-500" />
+            )}
+            <span className="text-text-heading font-semibold">
+              Status: {mySubmission.status || "Assigned"}
+            </span>
+            {mySubmission.late && (
+              <span className="rounded-md bg-destructive/10 text-destructive px-1.5 py-0.5 text-[10px] font-bold">
+                Late
+              </span>
+            )}
+          </div>
+          {mySubmission.score != null && (
+            <div className="font-bold text-success">
+              Grade: {mySubmission.score} / {item.maximumPoints || 100}
+            </div>
+          )}
+        </div>
+      )}
       <textarea
         value={draftSubmission}
         onChange={(e) => setDraftSubmission(e.target.value)}
@@ -142,9 +181,9 @@ export function CourseworkSubmissionSection({
         <Button
           size="sm"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isTurnedIn}
         >
-          {isSubmitting ? "Submitting…" : "Turn In"}
+          {isSubmitting ? "Submitting…" : isTurnedIn ? "Submitted" : "Turn In"}
         </Button>
       </div>
     </div>

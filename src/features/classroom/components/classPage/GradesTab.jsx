@@ -97,7 +97,7 @@ export function GradesTab({
 
   if (!isEnrolled) {
     return (
-      <section className="mt-4">
+      <section className="mt-2">
         <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center shadow-xs">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
             <Award className="h-6 w-6" />
@@ -120,7 +120,7 @@ export function GradesTab({
   }
 
   return (
-    <section className="mt-4 space-y-6">
+    <section className="mt-4 space-y-3.5">
       <header>
         <p className="text-xs font-bold uppercase tracking-wider text-primary">
           Academic Progress
@@ -135,7 +135,7 @@ export function GradesTab({
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {metrics.map(([label, value]) => (
           <div
             key={label}
