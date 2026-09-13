@@ -7,7 +7,7 @@ import {
   Globe,
   Check,
 } from "lucide-react";
-import { SPACE_TYPES } from "../../model/createClassForm.js";
+import { SPACE_TYPES } from "../../model/createSpaceForm.js";
 
 const ICON_MAP = {
   GraduationCap,

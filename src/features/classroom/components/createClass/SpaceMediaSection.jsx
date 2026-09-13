@@ -1,8 +1,8 @@
 import { Camera, Image as ImageIcon, Trash2 } from "lucide-react";
-import { THEME_COLORS } from "../../model/createClassForm.js";
+import { THEME_COLORS } from "../../model/createSpaceForm.js";
 import { getClassTheme } from "../../utils/classTheme.js";
 
-export function ClassMediaSection({
+export function SpaceMediaSection({
   form,
   preview,
   logoPreview,

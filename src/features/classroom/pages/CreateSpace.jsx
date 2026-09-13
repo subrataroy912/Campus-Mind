@@ -1,18 +1,18 @@
 import { Link } from "react-router";
 import { ArrowLeft, Loader2, PlusCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
-import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
+import { useCreateSpaceForm } from "../hooks/useCreateSpaceForm.js";
 import {
   SpaceTypeSelector,
-  ClassMediaSection,
-  ClassBasicInfoSection,
-  ClassAcademicSection,
-  ClassScheduleSection,
-  ClassAccessTypeSection,
+  SpaceMediaSection,
+  SpaceBasicInfoSection,
+  SpaceAcademicSection,
+  SpaceScheduleSection,
+  SpaceAccessTypeSection,
 } from "../components/createClass/index.js";
 import { routes } from "@/routes/paths.js";
 
-export default function CreateClass() {
+export default function CreateSpace() {
   const {
     form,
     preview,
@@ -27,7 +27,7 @@ export default function CreateClass() {
     handleLogoUpload,
     reset,
     submit,
-  } = useCreateClassForm();
+  } = useCreateSpaceForm();
 
   return (
     <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">

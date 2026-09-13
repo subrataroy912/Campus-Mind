@@ -1,6 +1,6 @@
-import { DAYS, MEETING_TYPES } from "../../model/createClassForm.js";
+import { DAYS, MEETING_TYPES } from "../../model/createSpaceForm.js";
 
-export function ClassScheduleSection({ form, update, toggleDay }) {
+export function SpaceScheduleSection({ form, update, toggleDay }) {
   const currentMeetingType = form.meetingType || "IN_PERSON";
 
   return (

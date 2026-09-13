@@ -21,7 +21,7 @@ const ACCESS_OPTIONS = [
   },
 ];
 
-export function ClassAccessTypeSection({ form, update }) {
+export function SpaceAccessTypeSection({ form, update }) {
   return (
     <div className="space-y-3">
       <div>

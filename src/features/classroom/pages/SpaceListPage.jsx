@@ -9,7 +9,7 @@ import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
 
-export default function ClassListPage() {
+export default function SpaceListPage() {
   const { user } = useAuth();
   const { classrooms = [], status } = useDashboardData({
     includeExplore: false,

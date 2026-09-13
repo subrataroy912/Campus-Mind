@@ -40,17 +40,17 @@ const OAuthCallbackPage = lazy(() =>
   import("../features/auth/pages/OAuthCallbackPage.jsx")
 );
 
-const ClassListPage = lazy(() =>
-  import("../features/classroom/pages/ClassListPage.jsx")
+const SpaceListPage = lazy(() =>
+  import("../features/classroom/pages/SpaceListPage.jsx")
 );
-const ClassPage = lazy(() =>
-  import("../features/classroom/pages/ClassPage.jsx")
+const SpacePage = lazy(() =>
+  import("../features/classroom/pages/SpacePage.jsx")
 );
-const CreateClassPage = lazy(() =>
-  import("../features/classroom/pages/CreateClass.jsx")
+const CreateSpacePage = lazy(() =>
+  import("../features/classroom/pages/CreateSpace.jsx")
 );
-const JoinClassPage = lazy(() =>
-  import("../features/classroom/pages/JoinClass.jsx")
+const JoinSpacePage = lazy(() =>
+  import("../features/classroom/pages/JoinSpace.jsx")
 );
 const ProfilePage = lazy(() =>
   import("../features/profile/pages/ProfilePage.jsx")
@@ -116,13 +116,13 @@ export const appRouteConfig = [
               { path: routes.explore, element: <ExplorePage /> },
 
               // Spaces (formerly Classes)
-              { path: routes.spaces.list, element: <ClassListPage /> },
-              { path: routes.spaces.join, element: <JoinClassPage /> },
-              { path: routes.spaces.detail(), element: <ClassPage /> },
+              { path: routes.spaces.list, element: <SpaceListPage /> },
+              { path: routes.spaces.join, element: <JoinSpacePage /> },
+              { path: routes.spaces.detail(), element: <SpacePage /> },
               {
                 element: <CreatorRoute />,
                 children: [
-                  { path: routes.spaces.new, element: <CreateClassPage /> },
+                  { path: routes.spaces.new, element: <CreateSpacePage /> },
                 ],
               },
 

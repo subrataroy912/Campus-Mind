@@ -105,7 +105,7 @@ export const THEME_COLORS = CLASSROOM_THEMES.map((t) => ({
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export const INITIAL_CLASS_FORM = {
+export const INITIAL_SPACE_FORM = {
   spaceType: "ACADEMIC_CLASS",
   className: "",
   section: "",
@@ -126,3 +126,6 @@ export const INITIAL_CLASS_FORM = {
   coverImage: null,
   logoImage: null,
 };
+
+export const INITIAL_CLASS_FORM = INITIAL_SPACE_FORM;
+

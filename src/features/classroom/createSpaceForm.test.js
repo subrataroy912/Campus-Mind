@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   GRADE_LEVELS,
+  INITIAL_SPACE_FORM,
   INITIAL_CLASS_FORM,
   SUBJECTS,
-} from "./model/createClassForm.js";
+} from "./model/createSpaceForm.js";
 import { mapCreateClassPayload } from "./api/classroomService.js";
 
 describe("createClassForm model", () => {

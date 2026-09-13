@@ -15,7 +15,7 @@ import {
   normalizeClassCode,
 } from "@/utils/classCode.js";
 
-export default function JoinClass() {
+export default function JoinSpace() {
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const { user } = useAuth();

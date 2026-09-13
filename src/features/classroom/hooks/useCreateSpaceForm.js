@@ -9,15 +9,15 @@ import {
   requestCourseLogoUpload,
   updateClassroom,
 } from "../api/classroomService.js";
-import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
+import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
 import { routes } from "@/routes/paths.js";
 
-export function useCreateClassForm() {
+export function useCreateSpaceForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
-  const [form, setForm] = useState(INITIAL_CLASS_FORM);
+  const [form, setForm] = useState(INITIAL_SPACE_FORM);
   const [preview, setPreview] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [errors, setErrors] = useState({});
@@ -81,7 +81,7 @@ export function useCreateClassForm() {
   };
 
   const reset = () => {
-    setForm(INITIAL_CLASS_FORM);
+    setForm(INITIAL_SPACE_FORM);
     setPreview(null);
     setLogoPreview(null);
     setErrors({});
@@ -195,3 +195,6 @@ export function useCreateClassForm() {
     submit,
   };
 }
+
+export const useCreateClassForm = useCreateSpaceForm;
+

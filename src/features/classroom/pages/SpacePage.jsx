@@ -19,7 +19,7 @@ import {
   MembersTab,
 } from "../components/classPage/index.js";
 
-export default function ClassPage() {
+export default function SpacePage() {
   const { classId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();

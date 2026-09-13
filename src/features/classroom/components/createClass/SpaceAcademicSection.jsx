@@ -1,6 +1,6 @@
-import { GRADE_LEVELS, SUBJECTS, SPACE_TYPES } from "../../model/createClassForm.js";
+import { GRADE_LEVELS, SUBJECTS, SPACE_TYPES } from "../../model/createSpaceForm.js";
 
-export function ClassAcademicSection({ form, errors, update }) {
+export function SpaceAcademicSection({ form, errors, update }) {
   const isCustomSubject = form.subject === "Other";
   const isCustomGrade = form.gradeLevel === "Other";
   const spaceTypeMeta =
