@@ -223,8 +223,8 @@ export function ClassworkTab({
   }
 
   return (
-    <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
-      <main className="space-y-6">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
+      <main className="space-y-4">
         {teacher && (
           <div className="flex justify-end">
             <div className="relative">
@@ -332,13 +332,13 @@ export function ClassworkTab({
           open={Boolean(createType)}
           onOpenChange={(open) => !open && handleCloseDialog()}
         >
-          <DialogContent className="max-w-lg bg-surface p-6">
+          <DialogContent className="max-w-lg bg-surface p-4 sm:p-5">
             <DialogHeader>
               <DialogTitle>
                 Create {createType === "ASSIGNMENT" ? "Assignment" : "Material"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateSubmit} className="mt-4 space-y-4">
+            <form onSubmit={handleCreateSubmit} className="mt-3 space-y-3">
               {createError && (
                 <p className="rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
                   {createError}
@@ -408,7 +408,7 @@ export function ClassworkTab({
                 </div>
               )}
 
-              <div className="mt-6 flex items-center justify-between gap-2">
+              <div className="mt-4 flex items-center justify-between gap-2">
                 <Button
                   type="button"
                   variant="ghost"

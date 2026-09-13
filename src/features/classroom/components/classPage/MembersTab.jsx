@@ -32,13 +32,13 @@ const MemberRow = React.memo(function MemberRow({
     String(member?.role || "").toLowerCase() === "owner";
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 hover:bg-canvas/50 transition-colors">
+    <div className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-canvas/50 transition-colors">
       <div className="relative">
         <ClassroomAvatar
           name={memberName}
           userId={memberId}
           avatar={member?.avatar || member?.avatarUrl}
-          size="h-10 w-10"
+          size="h-8 w-8"
         />
         {member?.online && (
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
