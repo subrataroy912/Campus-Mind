@@ -82,7 +82,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 1: Media & Branding */}
-          <ClassMediaSection
+          <SpaceMediaSection
             form={form}
             preview={preview}
             logoPreview={logoPreview}
@@ -94,7 +94,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 2: Basic Info */}
-          <ClassBasicInfoSection
+          <SpaceBasicInfoSection
             form={form}
             errors={errors}
             update={update}
@@ -103,7 +103,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 3: Academic/Focus Details */}
-          <ClassAcademicSection
+          <SpaceAcademicSection
             form={form}
             errors={errors}
             update={update}
@@ -112,7 +112,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 4: Schedule & Meeting Details */}
-          <ClassScheduleSection
+          <SpaceScheduleSection
             form={form}
             update={update}
             toggleDay={toggleDay}
@@ -121,7 +121,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 5: Access & Membership Type */}
-          <ClassAccessTypeSection
+          <SpaceAccessTypeSection
             form={form}
             update={update}
           />
