@@ -4,7 +4,14 @@ import {
   FileText,
   FlaskConical,
   Paperclip,
+  Send,
+  Trash2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button.jsx";
+import {
+  useUpdateCourseworkMutation,
+  useDeleteCourseworkMutation,
+} from "../../api/courseworkApi.js";
 import {
   Attachment,
   AttachmentContent,
@@ -59,6 +66,33 @@ export const CourseworkCard = React.memo(function CourseworkCard({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [uploadedAttachments, setUploadedAttachments] = useState([]);
+  const [updateCoursework, { isLoading: isPublishing }] = useUpdateCourseworkMutation();
+  const [deleteCoursework, { isLoading: isDeleting }] = useDeleteCourseworkMutation();
+
+  const handlePublishDraft = async (e) => {
+    e.stopPropagation();
+    try {
+      await updateCoursework({
+        courseId: classId,
+        courseworkId: item.id,
+        changes: { status: "PUBLISHED" },
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to publish draft", err);
+    }
+  };
+
+  const handleDeleteItem = async (e) => {
+    e.stopPropagation();
+    try {
+      await deleteCoursework({
+        courseId: classId,
+        courseworkId: item.id,
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to delete item", err);
+    }
+  };
 
   // Fetch full detail only when expanded; skip for drafts on initial load too.
   const { data: detailItem } = useGetCourseworkByIdQuery(
@@ -122,11 +156,22 @@ export const CourseworkCard = React.memo(function CourseworkCard({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {/* Draft badge for teachers */}
+          {/* Draft badge & action for teachers */}
           {teacher && isDraft && (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-              Draft
-            </span>
+            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                Draft
+              </span>
+              <Button
+                size="sm"
+                onClick={handlePublishDraft}
+                disabled={isPublishing}
+                className="h-6 px-2 text-[11px] font-semibold gap-1 bg-primary text-white hover:bg-primary-hover rounded-md cursor-pointer"
+              >
+                <Send className="h-2.5 w-2.5" />
+                <span>{isPublishing ? "Publishing…" : "Publish Now"}</span>
+              </Button>
+            </div>
           )}
           <StatusChip uiStatus={currentItem.uiStatus ?? "assigned"} />
         </div>
@@ -184,6 +229,21 @@ export const CourseworkCard = React.memo(function CourseworkCard({
             courseId={classId}
             courseworkId={item.id}
           />
+
+          {teacher && (
+            <div className="flex justify-end pt-2 border-t border-border">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDeleteItem}
+                disabled={isDeleting}
+                className="text-destructive hover:bg-destructive/10 text-xs gap-1.5 h-7 cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{isDeleting ? "Deleting…" : "Delete Item"}</span>
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
