@@ -148,16 +148,53 @@ export default function DashboardCommunityPage() {
       </header>
 
       {!hasClasses ? (
-        <div className="mt-8">
-          <EmptyState
-            title="No community updates yet"
-            description="Start with a class to keep conversations focused and helpful."
-            action={{ to: routes.classes.join, label: "Join a class" }}
-          />
+        <div className="mt-8 overflow-hidden rounded-3xl border border-border bg-surface p-6 text-center shadow-sm sm:p-8">
+          <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-border/60 bg-white p-1.5 shadow-xs">
+            <img
+              src="/images/illustrations/community-welcome.jpg"
+              alt="Welcome to CampusMind community"
+              className="w-full rounded-xl object-cover"
+            />
+          </div>
+          <h2 className="mt-6 text-xl font-bold text-text-heading sm:text-2xl">
+            Welcome to the Campus Community
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted">
+            Connect with classmates, join study discussions, and share insights across your enrolled classes.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button to={routes.classes.join} size="lg">
+              Join a Class
+            </Button>
+            <Button to={routes.explore} variant="outline" size="lg">
+              Explore Courses
+            </Button>
+          </div>
         </div>
       ) : (
         <>
-          <div className="mt-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
+          <div className="mt-6 flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-xs">
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                Classroom Discussions
+              </span>
+              <h2 className="mt-1 text-base font-bold text-text-heading sm:text-lg">
+                Learn better together
+              </h2>
+              <p className="mt-0.5 text-xs text-text-muted">
+                Share updates, ask questions, or exchange ideas with your classmates and teachers.
+              </p>
+            </div>
+            <div className="hidden h-16 w-28 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-white p-0.5 sm:block">
+              <img
+                src="/images/illustrations/community-welcome.jpg"
+                alt="Community members"
+                className="h-full w-full rounded-lg object-cover"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm ring-1 border-border border">
             <div className="flex gap-3">
               <ClassroomAvatar to={routes.profile.root} avatar={user?.avatar} name={user?.name} />
               <div className="flex-1">

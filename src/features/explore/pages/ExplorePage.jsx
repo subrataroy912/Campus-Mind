@@ -142,6 +142,55 @@ export default function ExplorePage() {
           className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-primary"
         />
       </div>
+
+      {tab === "classes" ? (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+          <div className="grid items-center gap-6 p-5 sm:grid-cols-[1.4fr_1fr] sm:p-6">
+            <div>
+              <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                Discover & Learn
+              </span>
+              <h2 className="mt-2 text-xl font-bold text-text-heading sm:text-2xl">
+                Explore Courses & Communities
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-text-muted">
+                Browse open classrooms created by educators and fellow students. Enroll with one click or explore course materials freely.
+              </p>
+            </div>
+            <div className="overflow-hidden rounded-xl border border-border/60 bg-white p-1">
+              <img
+                src="/images/illustrations/learning-ecosystem.jpg"
+                alt="Interactive course discovery"
+                className="h-28 w-full rounded-lg object-cover sm:h-32"
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+          <div className="grid items-center gap-6 p-5 sm:grid-cols-[1.4fr_1fr] sm:p-6">
+            <div>
+              <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                Campus Network
+              </span>
+              <h2 className="mt-2 text-xl font-bold text-text-heading sm:text-2xl">
+                Connect with Learners & Instructors
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-text-muted">
+                Find peers in your courses, discover collaborators in your department, and expand your academic network.
+              </p>
+            </div>
+            <div className="overflow-hidden rounded-xl border border-border/60 bg-white p-1">
+              <img
+                src="/images/illustrations/diverse-campus.jpg"
+                alt="Diverse campus community"
+                className="h-28 w-full rounded-lg object-cover sm:h-32"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-5 flex gap-2 border-b border-border" role="tablist">
         <Button
           role="tab"
