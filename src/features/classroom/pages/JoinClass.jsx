@@ -122,28 +122,28 @@ export default function JoinClass() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md">
         {/* Back Link */}
-        <div className="mb-6">
+        <div className="mb-3">
           <Link
-            to={routes.classes.list}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
+            to={routes.spaces.list}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to classes</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to spaces</span>
           </Link>
         </div>
         {/* Header */}
-        <div className="mb-6 text-center sm:mb-8">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-canvas sm:h-14 sm:w-14">
+        <div className="mb-4 text-center sm:mb-5">
+          <div className="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-11 sm:w-11">
             {isOpenCourse ? (
-              <Globe className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
+              <Globe className="h-5 w-5 text-primary" />
             ) : isInviteCourse ? (
-              <Lock className="h-6 w-6 text-text-muted sm:h-7 sm:w-7" />
+              <Lock className="h-5 w-5 text-text-muted" />
             ) : (
               <svg
-                className="h-6 w-6 text-primary sm:h-7 sm:w-7"
+                className="h-5 w-5 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.8}
@@ -157,25 +157,25 @@ export default function JoinClass() {
               </svg>
             )}
           </div>
-          <h1 className="text-2xl font-semibold text-text-heading sm:text-3xl">
+          <h1 className="text-xl font-bold text-text-heading sm:text-2xl">
             {isOpenCourse
-              ? publicCourse?.title || "Join open class"
+              ? publicCourse?.title || "Join open space"
               : isInviteCourse
-              ? "Invite-only class"
-              : "Join a class"}
+              ? "Invite-only space"
+              : "Join a space"}
           </h1>
-          <p className="mt-1 text-sm text-text-muted sm:text-base">
+          <p className="mt-1 text-xs text-text-muted sm:text-sm">
             {isOpenCourse
-              ? "This class has open enrollment. Anyone can join — no class code required."
+              ? "This space has open enrollment. Anyone can join — no code required."
               : isInviteCourse
-              ? "This class requires an invitation from the instructor to join."
+              ? "This space requires an invitation from the host or teacher to join."
               : optionalCourseId
-              ? "Enter your class code to join this classroom."
-              : "Ask your teacher for the class code, then enter it below."}
+              ? "Enter your code to join this space."
+              : "Ask your instructor or team lead for the code, then enter it below."}
           </p>
         </div>
 
-        <div className="rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-border sm:p-6 lg:p-8">
+        <div className="rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border sm:p-6">
           {status !== "joined" && (
             isOpenCourse ? (
               <form onSubmit={handleFindClass}>
@@ -226,11 +226,11 @@ export default function JoinClass() {
               </div>
             ) : (
               <form onSubmit={handleFindClass}>
-                <label className="mb-3 block text-center text-sm font-medium text-text-main">
-                  Class code
+                <label className="mb-2.5 block text-center text-xs font-medium text-text-main">
+                  Space code
                 </label>
 
-                <div className="flex items-center justify-center gap-1 sm:gap-2">
+                <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                   {code.map((char, i) => (
                     <div key={i} className="flex items-center">
                       <input
@@ -242,28 +242,28 @@ export default function JoinClass() {
                         onChange={(e) => handleChange(i, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(i, e)}
                         onPaste={handlePaste}
-                        className="h-10 w-7 rounded-md border border-border text-center text-base font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-2 focus:ring-focus sm:h-12 sm:w-11 sm:rounded-lg sm:text-xl"
+                        className="h-10 w-8 rounded-lg border border-border text-center text-base font-semibold uppercase text-text-heading outline-none transition focus:border-primary focus:ring-1 focus:ring-focus sm:h-11 sm:w-10 sm:text-lg"
                       />
                       {i === 3 && (
-                        <span className="mx-0.5 text-border sm:mx-1.5">–</span>
+                        <span className="mx-0.5 text-border sm:mx-1 font-bold">–</span>
                       )}
                     </div>
                   ))}
                 </div>
 
                 {status === "incomplete" && (
-                  <p className="mt-3 text-center text-xs text-secondary">
-                    Enter all 8 characters of the class code.
+                  <p className="mt-2 text-center text-xs text-secondary">
+                    Enter all 8 characters of the space code.
                   </p>
                 )}
                 {status === "not-found" && (
-                  <p className="mt-3 text-center text-xs text-secondary">
-                    No class found with that code. Check it and try again.
+                  <p className="mt-2 text-center text-xs text-secondary">
+                    No space found with that code. Check it and try again.
                   </p>
                 )}
                 {error && (
                   <p
-                    className="mt-3 text-center text-xs text-secondary"
+                    className="mt-2 text-center text-xs text-secondary"
                     role="alert"
                   >
                     {error}
@@ -273,9 +273,9 @@ export default function JoinClass() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-4 h-9 w-full rounded-lg bg-primary px-4 text-xs font-semibold text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer shadow-xs"
                 >
-                  {status === "loading" ? "Joining class…" : "Join class"}
+                  {status === "loading" ? "Joining space…" : "Join space"}
                 </button>
               </form>
             )
@@ -283,10 +283,10 @@ export default function JoinClass() {
 
           {/* Joined confirmation */}
           {status === "joined" && foundClass && (
-            <div className="flex flex-col items-center py-4 text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-canvas">
+            <div className="flex flex-col items-center py-2 text-center">
+              <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
                 <svg
-                  className="h-6 w-6 text-success"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={2}
@@ -299,28 +299,28 @@ export default function JoinClass() {
                   />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-text-heading">
+              <h2 className="text-base font-bold text-text-heading">
                 You've joined {foundClass.title}
               </h2>
-              <p className="mt-1 text-sm text-text-muted">
+              <p className="mt-0.5 text-xs text-text-muted">
                 {foundClass.subtitle} with{" "}
                 {foundClass.instructor?.name ||
                   foundClass.teacher?.name ||
-                  "CampusMind teacher"}
+                  "CampusMind host"}
               </p>
-              <div className="mt-6 flex w-full flex-col gap-2.5 sm:flex-row sm:justify-center">
+              <div className="mt-4 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
                 <Link
-                  to={routes.classes.detail(foundClass.id)}
-                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover"
+                  to={routes.spaces.detail(foundClass.id)}
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-xs font-medium text-white transition hover:bg-primary-hover shadow-xs"
                 >
-                  Open class
+                  Open space
                 </Link>
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
+                  className="inline-flex h-9 items-center justify-center rounded-lg border border-border px-4 text-xs font-medium text-text-main transition hover:bg-canvas"
                 >
-                  Join another class
+                  Join another
                 </button>
               </div>
             </div>

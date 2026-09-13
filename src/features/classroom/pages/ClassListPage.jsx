@@ -24,14 +24,14 @@ export default function ClassListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-primary">Your Campus Spaces</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Your Campus Spaces</p>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
             Spaces
           </h1>
-          <p className="mt-1 text-sm text-text-muted">
+          <p className="text-xs text-text-muted sm:text-sm">
             All the spaces you are currently a member of, facilitating, or leading.
           </p>
         </div>
@@ -40,25 +40,25 @@ export default function ClassListPage() {
             to={routes.classes.join}
             variant="outline"
             size="sm"
-            className="gap-1.5"
+            className="h-8 gap-1.5 text-xs rounded-lg"
           >
-            <Ticket size={16} aria-hidden="true" />
+            <Ticket size={14} aria-hidden="true" />
             <span>Join with code</span>
           </Button>
           {user?.canCreateCourses && (
             <Button
               to={routes.spaces.new}
               size="sm"
-              className="gap-1.5"
+              className="h-8 gap-1.5 text-xs rounded-lg"
             >
-              <Plus size={16} aria-hidden="true" />
+              <Plus size={14} aria-hidden="true" />
               <span>Create space</span>
             </Button>
           )}
         </div>
       </header>
 
-      <section className="mt-8">
+      <section className="mt-5 sm:mt-6">
         {status === "error" ? (
           <EmptyState
             title="We could not load your spaces"
