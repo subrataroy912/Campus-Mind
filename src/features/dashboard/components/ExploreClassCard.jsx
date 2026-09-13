@@ -29,7 +29,7 @@ function ExploreClassCard({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { classrooms = [] } = useDashboardData();
+  const { classrooms = [] } = useDashboardData({ includeExplore: false });
 
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   useGetExploreFeedQuery,
   useGetExploreRecommendationsQuery,
@@ -7,11 +8,13 @@ import {
 /**
  * Selects the API endpoint without ever turning an empty search into a feed.
  * The API requires a nonblank q, while subject filtering belongs to the feed.
+ * Retains previous data when keepPreviousData is true to prevent UI flickering.
  */
 export function useExploreData({
   searchQuery = "",
   classFilter = "all",
   page = 0,
+  keepPreviousData = true,
 } = {}) {
   const q = searchQuery.trim();
   const subject =
@@ -38,14 +41,27 @@ export function useExploreData({
     ? recommendations
     : feed;
 
+  const [previousData, setPreviousData] = useState(active.data);
+
+  if (active.data && active.data !== previousData) {
+    setPreviousData(active.data);
+  }
+
+  const isPlaceholderData =
+    Boolean(keepPreviousData) && !active.data && Boolean(previousData);
+  const resolvedData =
+    active.data ?? (keepPreviousData ? previousData : undefined);
+
   return {
-    classes: active.data?.content ?? [],
-    page: active.data,
+    classes: resolvedData?.content ?? [],
+    page: resolvedData,
     query: active,
+    isPlaceholderData,
+    isFetching: active.isFetching,
     status:
-      active.isLoading || active.isFetching
+      active.isLoading && !resolvedData
         ? "loading"
-        : active.isError
+        : active.isError && !resolvedData
         ? "error"
         : "ready",
   };

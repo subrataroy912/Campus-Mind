@@ -27,10 +27,13 @@ export default function ExplorePage() {
     page: pageData,
     query,
     status,
+    isPlaceholderData,
+    isFetching,
   } = useExploreData({
     searchQuery: debouncedSearchQuery,
     classFilter,
     page,
+    keepPreviousData: true,
   });
   const { data: users = [] } = useGetExplorePeopleQuery();
 
@@ -108,12 +111,6 @@ export default function ExplorePage() {
       );
   }, [generalPeople, personFilter, searchQuery, user]);
 
-  if (query.isLoading && !pageData)
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
   if (status === "error")
     return (
       <div className="mx-auto max-w-7xl p-4">
@@ -206,14 +203,34 @@ export default function ExplorePage() {
               </FilterButton>
             ))}
           </div>
-          {filteredClasses.length ? (
+          {query.isLoading && !pageData ? (
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ExploreCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : filteredClasses.length ? (
             <section className="mt-6">
-              {classFilter === "recommended" && (
-                <h2 className="mb-3 text-lg font-semibold text-text-heading">
-                  Recommended courses
-                </h2>
-              )}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mb-3 flex items-center justify-between">
+                {classFilter === "recommended" ? (
+                  <h2 className="text-lg font-semibold text-text-heading">
+                    Recommended courses
+                  </h2>
+                ) : (
+                  <span />
+                )}
+                {(isPlaceholderData || isFetching) && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Updating...</span>
+                  </div>
+                )}
+              </div>
+              <div
+                className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 transition-opacity duration-150 ${
+                  isPlaceholderData ? "opacity-60 pointer-events-none" : "opacity-100"
+                }`}
+              >
                 {filteredClasses.map((classroom) => (
                   <ExploreClassCard
                     key={classroom.courseId || classroom.id || classroom._id}
@@ -365,5 +382,21 @@ function FilterButton({ active, children, onClick }) {
     >
       {children}
     </Button>
+  );
+}
+
+function ExploreCardSkeleton() {
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs animate-pulse">
+      <div className="h-14 w-full bg-border/40" />
+      <div className="p-3 space-y-2">
+        <div className="h-4 w-3/4 rounded bg-border/40" />
+        <div className="h-3 w-1/2 rounded bg-border/30" />
+        <div className="mt-3 flex items-center justify-between pt-2 border-t border-border/40">
+          <div className="h-3 w-16 rounded bg-border/30" />
+          <div className="h-5 w-12 rounded bg-border/40" />
+        </div>
+      </div>
+    </div>
   );
 }
