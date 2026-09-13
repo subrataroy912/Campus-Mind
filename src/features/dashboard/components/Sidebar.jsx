@@ -42,7 +42,7 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* Classroom Actions Section */}
+      {/* Spaces Actions Section */}
       <div
         className={`w-full space-y-2 border-t border-border ${
           compact ? "p-2 text-center" : "p-3"
@@ -53,7 +53,7 @@ export default function Sidebar({
             compact ? "sr-only" : "px-2"
           }`}
         >
-          Classroom
+          Spaces
         </p>
         <Button
           to={routes.classes.join}
@@ -68,14 +68,14 @@ export default function Sidebar({
         </Button>
         {user?.canCreateCourses && (
           <Button
-            to={routes.classes.new}
+            to={routes.spaces.new}
             className={`w-full ${
               compact ? "justify-center p-0" : "justify-start"
             }`}
-            title={compact ? "Create a class" : undefined}
+            title={compact ? "Create a space" : undefined}
           >
             <Plus size={17} aria-hidden="true" />
-            <span className={compact ? "hidden" : ""}>Create a class</span>
+            <span className={compact ? "hidden" : ""}>Create a space</span>
           </Button>
         )}
       </div>

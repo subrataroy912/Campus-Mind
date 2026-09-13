@@ -27,12 +27,12 @@ export default function ClassListPage() {
     <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-primary">Your Learning Spaces</p>
+          <p className="text-sm font-semibold text-primary">Your Campus Spaces</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
-            Classes
+            Spaces
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            All the classrooms you are currently enrolled in or instructing.
+            All the spaces you are currently a member of, facilitating, or leading.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -47,12 +47,12 @@ export default function ClassListPage() {
           </Button>
           {user?.canCreateCourses && (
             <Button
-              to={routes.classes.new}
+              to={routes.spaces.new}
               size="sm"
               className="gap-1.5"
             >
               <Plus size={16} aria-hidden="true" />
-              <span>Create class</span>
+              <span>Create space</span>
             </Button>
           )}
         </div>
@@ -61,14 +61,14 @@ export default function ClassListPage() {
       <section className="mt-8">
         {status === "error" ? (
           <EmptyState
-            title="We could not load your classes"
+            title="We could not load your spaces"
             description="Please refresh the page and try again."
           />
         ) : classrooms.length === 0 ? (
           <EmptyState
-            title="You haven't joined any classes yet"
-            description="Join an existing class with an invite code or browse public courses."
-            action={{ to: routes.classes.join, label: "Join a class" }}
+            title="You haven't joined any spaces yet"
+            description="Join an existing space with an invite code or create a space."
+            action={{ to: routes.classes.join, label: "Join a space" }}
           />
         ) : (
           <ContentList

@@ -3,6 +3,7 @@ import { ArrowLeft, Loader2, PlusCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
+  SpaceTypeSelector,
   ClassMediaSection,
   ClassBasicInfoSection,
   ClassAcademicSection,
@@ -34,11 +35,11 @@ export default function CreateClass() {
         {/* Navigation Back Link */}
         <div className="mb-6">
           <Link
-            to={routes.classes.list}
+            to={routes.spaces.list}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to classes</span>
+            <span>Back to spaces</span>
           </Link>
         </div>
 
@@ -50,10 +51,10 @@ export default function CreateClass() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
-                Create a class
+                Create a space
               </h1>
               <p className="text-xs text-text-muted sm:text-sm">
-                Set up a new learning space, customize its branding, and invite your students.
+                Set up a new space for your class, study group, club, or project team.
               </p>
             </div>
           </div>
@@ -65,7 +66,7 @@ export default function CreateClass() {
             className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300 shadow-xs"
             role="alert"
           >
-            <p className="font-semibold">Unable to create class</p>
+            <p className="font-semibold">Unable to create space</p>
             <p className="mt-0.5 text-xs">{submissionError}</p>
           </div>
         )}
@@ -75,6 +76,11 @@ export default function CreateClass() {
           onSubmit={submit}
           className="space-y-8 rounded-3xl bg-surface p-5 shadow-xs ring-1 ring-border sm:p-8"
         >
+          {/* Section 0: Space Type Selector */}
+          <SpaceTypeSelector form={form} update={update} />
+
+          <hr className="border-border/60" />
+
           {/* Section 1: Media & Branding */}
           <ClassMediaSection
             form={form}
@@ -96,7 +102,7 @@ export default function CreateClass() {
 
           <hr className="border-border/60" />
 
-          {/* Section 3: Academic Details (Subject & Target Grade with 'Other' custom inputs) */}
+          {/* Section 3: Academic/Focus Details */}
           <ClassAcademicSection
             form={form}
             errors={errors}
@@ -105,7 +111,7 @@ export default function CreateClass() {
 
           <hr className="border-border/60" />
 
-          {/* Section 4: Schedule & Timing */}
+          {/* Section 4: Schedule & Meeting Details */}
           <ClassScheduleSection
             form={form}
             update={update}
@@ -114,7 +120,7 @@ export default function CreateClass() {
 
           <hr className="border-border/60" />
 
-          {/* Section 5: Access & Enrollment Type */}
+          {/* Section 5: Access & Membership Type */}
           <ClassAccessTypeSection
             form={form}
             update={update}
@@ -141,10 +147,10 @@ export default function CreateClass() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Creating class…</span>
+                  <span>Creating space…</span>
                 </>
               ) : (
-                <span>Create class</span>
+                <span>Create space</span>
               )}
             </Button>
           </div>
@@ -152,7 +158,7 @@ export default function CreateClass() {
           {/* Inline Success Notice */}
           {submitted && (
             <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-300 font-medium">
-              Class created successfully. Redirecting to your new classroom…
+              Space created successfully. Redirecting to your new space…
             </div>
           )}
         </form>

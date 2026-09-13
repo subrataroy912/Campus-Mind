@@ -74,7 +74,7 @@ export default function DashboardHomePage() {
           Welcome back, {profile?.displayName?.split(" ")[0] || "there"}.
         </h1>
         <p className="mt-2 max-w-2xl text-text-muted">
-          Keep up with your classes, then discover a new space to learn with the
+          Keep up with your spaces, then discover a new space to connect with the
           CampusMind community.
         </p>
       </header>
@@ -87,20 +87,20 @@ export default function DashboardHomePage() {
                 id="my-classes-heading"
                 className="text-xl font-semibold text-text-heading"
               >
-                My classes
+                My spaces
               </h2>
               <p className="mt-1 text-sm text-text-muted">
-                Your enrolled learning spaces.
+                Your joined learning and campus spaces.
               </p>
             </div>
             <span className="text-sm text-text-muted">
-              <Link to={routes.profile.tab("classes")}>See all</Link>
+              <Link to={routes.spaces.list}>See all</Link>
             </span>
           </div>
 
           {status === "error" ? (
             <EmptyState
-              title="We could not load your classes"
+              title="We could not load your spaces"
               description="Please refresh the page and try again."
             />
           ) : (
@@ -132,12 +132,12 @@ export default function DashboardHomePage() {
                 Discover something new
               </h2>
               <p className="mt-0.5 text-sm text-text-muted">
-                Explore popular topics to grow your skills.
+                Explore popular topics and groups to grow your skills.
               </p>
             </div>
           </div>
           <Link
-            to={routes.profile.tab("classes")}
+            to={routes.spaces.list}
             className="inline-flex items-center gap-1 text-sm font-semibold text-text-heading hover:text-primary transition-colors"
           >
             <span>See all</span>
@@ -148,7 +148,7 @@ export default function DashboardHomePage() {
         {status === "error" ? (
           <div className="mt-6">
             <EmptyState
-              title="We could not load the class feed"
+              title="We could not load the spaces feed"
               description="Please check your connection or try again later."
             />
           </div>
@@ -163,8 +163,8 @@ export default function DashboardHomePage() {
         ) : (
           <div className="mt-6">
             <EmptyState
-              title="No public classes available"
-              description="There are currently no public classes to explore. Create a class to get started!"
+              title="No public spaces available"
+              description="There are currently no public spaces to explore. Create a space to get started!"
             />
           </div>
         )}

@@ -41,7 +41,7 @@ describe("application route auth restoration", () => {
     expect(getProtectedRouteState("failed", false)).toBe("unauthenticated");
   });
 
-  it("protects routes.classes.new behind CreatorRoute", () => {
+  it("protects routes.spaces.new behind CreatorRoute", () => {
     const rootRoute = appRouteConfig[0];
     const protectedRoute = rootRoute.children.find(
       (route) => route.element?.type?.name === "ProtectedRoute"
@@ -52,9 +52,9 @@ describe("application route auth restoration", () => {
     );
 
     expect(creatorRoute).toBeDefined();
-    const createClassRoute = creatorRoute?.children?.find(
-      (route) => route.path === "/classes/new"
+    const createSpaceRoute = creatorRoute?.children?.find(
+      (route) => route.path === "/spaces/new"
     );
-    expect(createClassRoute).toBeDefined();
+    expect(createSpaceRoute).toBeDefined();
   });
 });

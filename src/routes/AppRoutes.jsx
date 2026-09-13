@@ -115,15 +115,37 @@ export const appRouteConfig = [
               { path: routes.saved, element: <DashboardSavedPage /> },
               { path: routes.explore, element: <ExplorePage /> },
 
-              // Classes
-              { path: routes.classes.list, element: <ClassListPage /> },
-              { path: routes.classes.join, element: <JoinClassPage /> },
-              { path: routes.classes.detail(), element: <ClassPage /> },
+              // Spaces (formerly Classes)
+              { path: routes.spaces.list, element: <ClassListPage /> },
+              { path: routes.spaces.join, element: <JoinClassPage /> },
+              { path: routes.spaces.detail(), element: <ClassPage /> },
               {
                 element: <CreatorRoute />,
                 children: [
-                  { path: routes.classes.new, element: <CreateClassPage /> },
+                  { path: routes.spaces.new, element: <CreateClassPage /> },
                 ],
+              },
+
+              /* Backward-Compatible Redirects for legacy /classes/* paths */
+              {
+                path: "/classes",
+                element: <Navigate to={routes.spaces.list} replace />,
+              },
+              {
+                path: "/classes/join",
+                element: <Navigate to={routes.spaces.join} replace />,
+              },
+              {
+                path: "/classes/new",
+                element: <Navigate to={routes.spaces.new} replace />,
+              },
+              {
+                path: "/classes/:classId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.spaces.detail(params.classId)}
+                  />
+                ),
               },
 
               // Users & Profile

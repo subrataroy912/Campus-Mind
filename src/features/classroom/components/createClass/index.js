@@ -1,3 +1,4 @@
+export { default as SpaceTypeSelector } from "./SpaceTypeSelector.jsx";
 export { ClassMediaSection } from "./ClassMediaSection.jsx";
 export { ClassBasicInfoSection } from "./ClassBasicInfoSection.jsx";
 export { ClassAcademicSection } from "./ClassAcademicSection.jsx";

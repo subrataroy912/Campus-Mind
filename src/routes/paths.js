@@ -17,11 +17,18 @@ export const routes = {
   saved: "/saved",
   explore: "/explore",
 
+  spaces: {
+    list: "/spaces",
+    new: "/spaces/new",
+    join: "/spaces/join",
+    detail: (spaceId = ":classId") => `/spaces/${spaceId}`,
+  },
+
   classes: {
-    list: "/classes",
-    new: "/classes/new",
-    join: "/classes/join",
-    detail: (classId = ":classId") => `/classes/${classId}`,
+    list: "/spaces",
+    new: "/spaces/new",
+    join: "/spaces/join",
+    detail: (classId = ":classId") => `/spaces/${classId}`,
   },
 
   profile: {

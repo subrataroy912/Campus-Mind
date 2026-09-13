@@ -1,25 +1,30 @@
-import { GRADE_LEVELS, SUBJECTS } from "../../model/createClassForm.js";
+import { GRADE_LEVELS, SUBJECTS, SPACE_TYPES } from "../../model/createClassForm.js";
 
 export function ClassAcademicSection({ form, errors, update }) {
   const isCustomSubject = form.subject === "Other";
   const isCustomGrade = form.gradeLevel === "Other";
+  const spaceTypeMeta =
+    SPACE_TYPES.find((t) => t.id === form.spaceType) || SPACE_TYPES[0];
+  const isAcademicClass = form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
 
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-base font-semibold text-text-heading">
-          Academic Details
+          {isAcademicClass ? "Academic Details" : "Category & Focus Details"}
         </h2>
         <p className="mt-0.5 text-xs text-text-muted">
-          Categorize your class by subject and target grade level. Selecting &ldquo;Other&rdquo; allows entering custom values.
+          {isAcademicClass
+            ? "Categorize your class by subject and target grade level. Selecting “Other” allows entering custom values."
+            : `Set the primary subject and target audience for your ${spaceTypeMeta.label.toLowerCase()}.`}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* Subject */}
+        {/* Subject / Category */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-text-main">
-            Subject <span className="text-secondary">*</span>
+            {spaceTypeMeta.categoryLabel || "Subject"} <span className="text-secondary">*</span>
           </label>
           <select
             value={form.subject}
@@ -30,7 +35,7 @@ export function ClassAcademicSection({ form, errors, update }) {
                 : "border-border hover:border-text-muted/50"
             }`}
           >
-            <option value="">Select subject</option>
+            <option value="">Select {spaceTypeMeta.categoryLabel?.toLowerCase() || "subject"}</option>
             {SUBJECTS.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -45,13 +50,13 @@ export function ClassAcademicSection({ form, errors, update }) {
           {isCustomSubject && (
             <div className="pt-1 transition-all animate-in fade-in slide-in-from-top-1 duration-200">
               <label className="mb-1 block text-xs font-medium text-text-muted">
-                Specify custom subject <span className="text-secondary">*</span>
+                Specify custom {spaceTypeMeta.categoryLabel?.toLowerCase() || "subject"} <span className="text-secondary">*</span>
               </label>
               <input
                 type="text"
                 value={form.customSubject}
                 onChange={(e) => update("customSubject", e.target.value)}
-                placeholder="e.g. Robotics, Astronomy, Creative Writing"
+                placeholder="e.g. Robotics, Machine Learning, Film Club"
                 className={`w-full rounded-xl border px-3.5 py-2 text-sm text-text-heading bg-surface outline-none transition focus:ring-2 focus:ring-focus ${
                   errors.customSubject
                     ? "border-secondary focus:ring-secondary/20"
@@ -68,10 +73,10 @@ export function ClassAcademicSection({ form, errors, update }) {
           )}
         </div>
 
-        {/* Target Grade / Grade Level */}
+        {/* Target Grade / Level */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-text-main">
-            Target Grade <span className="text-secondary">*</span>
+            {spaceTypeMeta.levelLabel || "Target Grade"} {isAcademicClass && <span className="text-secondary">*</span>}
           </label>
           <select
             value={form.gradeLevel}
@@ -82,7 +87,7 @@ export function ClassAcademicSection({ form, errors, update }) {
                 : "border-border hover:border-text-muted/50"
             }`}
           >
-            <option value="">Select target grade</option>
+            <option value="">Select {spaceTypeMeta.levelLabel?.toLowerCase() || "level"}</option>
             {GRADE_LEVELS.map((g) => (
               <option key={g} value={g}>
                 {g}

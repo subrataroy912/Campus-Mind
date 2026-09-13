@@ -5,7 +5,7 @@ import {
   MessageCircle,
   Save,
   Users,
-  GraduationCap,
+  LayoutGrid,
 } from "lucide-react";
 
 export const SIDEBAR_NAV_ITEMS = [
@@ -14,5 +14,5 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "Messages", to: routes.messages, Icon: MessageCircle },
   { label: "Saved", to: routes.saved, Icon: Save },
   { label: "Explore", to: routes.explore, Icon: Compass },
-  { label: "Classes", to: routes.classes.list, Icon: GraduationCap },
+  { label: "Spaces", to: routes.spaces.list, Icon: LayoutGrid },
 ];

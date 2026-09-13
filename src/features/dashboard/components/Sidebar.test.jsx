@@ -27,19 +27,19 @@ vi.mock("react-router", () => ({
 }));
 
 describe("Sidebar navigation and creator gating", () => {
-  it("hides 'Create a class' button when user does not have course creator privileges", () => {
+  it("hides 'Create a space' button when user does not have course creator privileges", () => {
     mockUser = { id: "u1", canCreateCourses: false };
     const html = renderToString(<Sidebar />);
-    expect(html).not.toContain("Create a class");
-    expect(html).not.toContain(routes.classes.new);
+    expect(html).not.toContain("Create a space");
+    expect(html).not.toContain(routes.spaces.new);
     expect(html).toContain("Join with code");
   });
 
-  it("renders 'Create a class' button when user has course creator privileges", () => {
+  it("renders 'Create a space' button when user has course creator privileges", () => {
     mockUser = { id: "u1", canCreateCourses: true };
     const html = renderToString(<Sidebar />);
-    expect(html).toContain("Create a class");
-    expect(html).toContain(routes.classes.new);
+    expect(html).toContain("Create a space");
+    expect(html).toContain(routes.spaces.new);
     expect(html).toContain("Join with code");
   });
 });
