@@ -19,7 +19,6 @@ import {
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
-import { formatDisplayText } from "@/utils/textFormat.js";
 
 export default function ProfileHeader({
   profile,
@@ -206,19 +205,20 @@ export default function ProfileHeader({
             <h1 className="text-2xl font-bold tracking-tight text-text-heading">
               {profile.name}
             </h1>
-            <span
-              className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
-              title={profile.canCreateCourses ? "Course Creator" : undefined}
-            >
-              {formatDisplayText(profile.accountType) || "Student"}
-              {profile.canCreateCourses && (
+            {profile.canCreateCourses && (
+              <span
+                data-slot="creator-badge"
+                className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400"
+                title="Course Creator"
+              >
                 <Sparkles
                   size={12}
                   className="fill-amber-500 text-amber-500 shrink-0"
-                  aria-label="Course Creator"
+                  aria-hidden="true"
                 />
-              )}
-            </span>
+                Course Creator
+              </span>
+            )}
           </div>
           <p className="text-sm font-medium text-text-muted">
             @{profile.handle || "unknown"}

@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import { initials } from "@/utils/initials.js";
-import { formatDisplayText } from "@/utils/textFormat.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
 import { store } from "@/app/store.js";
 
@@ -52,7 +51,7 @@ function ExplorePersonCard({ person, currentUser }) {
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         <Badge variant="secondary" className="bg-canvas text-text-main border-border inline-flex items-center gap-1">
-          <span>{person.accountType ? formatDisplayText(person.accountType) : (person.department || "CampusMind learner")}</span>
+          <span>{person.department || "CampusMind learner"}</span>
           {person.canCreateCourses && (
             <Sparkles size={12} className="fill-amber-500 text-amber-500 shrink-0" aria-label="Course Creator" />
           )}

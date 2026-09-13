@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Lock, Mail, UserRound, Users } from "lucide-react";
+import { Lock, Mail, UserRound } from "lucide-react";
 import AuthInput from "../components/AuthInput.jsx";
 import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -12,14 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select.jsx";
-import { Label } from "@/components/ui/label.jsx";
+
 export default function RegisterPage() {
   const { register, authError, authStatus, clearAuthError } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +21,6 @@ export default function RegisterPage() {
     lastName: "",
     email: "",
     password: "",
-    accountType: "",
   });
   const loading = authStatus === "loading";
   const error =
@@ -135,33 +127,6 @@ export default function RegisterPage() {
           disabled={loading}
           autoComplete="new-password"
         />
-        <div className="space-y-2">
-          <Label htmlFor="accountType" className="text-sm font-medium">
-            Account Type
-          </Label>
-
-          <Select
-            value={formData.accountType}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, accountType: value }))
-            }
-            disabled={loading}
-            required
-          >
-            <SelectTrigger
-              id="accountType"
-              className="w-full bg-background flex items-center gap-2"
-            >
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Select your role" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="STUDENT">Student</SelectItem>
-              <SelectItem value="TEACHER">Teacher</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
         <Button className="w-full" type="submit" disabled={loading}>
           {loading ? "Creating account…" : "Create account"}
         </Button>

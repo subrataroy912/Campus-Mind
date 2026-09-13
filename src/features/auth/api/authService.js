@@ -24,7 +24,7 @@ export function normalizeAuthResponse(response) {
     headline: payload.headline ?? nestedUser.headline,
     profileVisibility:
       payload.profileVisibility ?? nestedUser.profileVisibility,
-    accountType: payload.accountType ?? nestedUser.accountType,
+    isAdmin: payload.isAdmin ?? nestedUser.isAdmin,
     canCreateCourses:
       payload.canCreateCourses ?? nestedUser.canCreateCourses,
     firstName: payload.firstName ?? nestedUser.firstName,

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import ProfileDetails from "./components/ProfileDetails.jsx";
 import ProfileHeader from "./components/ProfileHeader.jsx";
 import { formatDisplayText } from "@/utils/textFormat.js";
 
@@ -40,63 +39,41 @@ vi.mock("@/components/ui/dialog.jsx", () => ({
   DialogDescription: ({ children }) => <p>{children}</p>,
 }));
 
-describe("Student creator status and display rules", () => {
-  it("never outputs 'STUDENT_CREATOR' string when formatting account types", () => {
+describe("Format display text rules", () => {
+  it("formats course membership roles correctly", () => {
     expect(formatDisplayText("STUDENT")).toBe("Student");
-    expect(formatDisplayText("STUDENT_CREATOR")).toBe("Student");
-    expect(formatDisplayText("STUDENT_CREATOR")).not.toContain("CREATOR");
+    expect(formatDisplayText("TEACHER")).toBe("Teacher");
   });
+});
 
-  it("renders 'Student' with a subtle creator indicator mark when student is upgraded", () => {
-    const details = [
-      {
-        label: "Account type",
-        value: "STUDENT",
-        icon: "member",
-        isCreator: true,
-      },
-    ];
+describe("ProfileHeader creator badge and role display", () => {
+  it("renders standalone Course Creator badge when user has creator privileges", () => {
+    const profile = {
+      id: "u1",
+      name: "Jane Doe",
+      canCreateCourses: true,
+    };
 
-    const html = renderToString(<ProfileDetails details={details} />);
+    const html = renderToString(<ProfileHeader profile={profile} isOwner={false} />);
 
-    expect(html).toContain("Student");
+    expect(html).toContain('data-slot="creator-badge"');
     expect(html).toContain("Course Creator");
-    expect(html).not.toContain("STUDENT_CREATOR");
-    expect(html).not.toContain("Student Creator");
+    expect(html).not.toContain("Student");
+    expect(html).not.toContain("Teacher");
   });
 
-  it("renders 'Student' without creator indicator mark when student has standard privileges", () => {
-    const details = [
-      {
-        label: "Account type",
-        value: "STUDENT",
-        icon: "member",
-        isCreator: false,
-      },
-    ];
+  it("does not render role pill or creator badge when user has standard privileges", () => {
+    const profile = {
+      id: "u1",
+      name: "Jane Doe",
+      canCreateCourses: false,
+    };
 
-    const html = renderToString(<ProfileDetails details={details} />);
+    const html = renderToString(<ProfileHeader profile={profile} isOwner={false} />);
 
-    expect(html).toContain("Student");
-    expect(html).not.toContain("Course Creator");
-    expect(html).not.toContain("STUDENT_CREATOR");
-  });
-
-  it("renders 'Teacher' without creator indicator mark because teachers already have full privileges", () => {
-    const details = [
-      {
-        label: "Account type",
-        value: "TEACHER",
-        icon: "member",
-        isCreator: false,
-      },
-    ];
-
-    const html = renderToString(<ProfileDetails details={details} />);
-
-    expect(html).toContain("Teacher");
-    expect(html).not.toContain("Course Creator");
-    expect(html).not.toContain("STUDENT_CREATOR");
+    expect(html).not.toContain('data-slot="creator-badge"');
+    expect(html).not.toContain("Student");
+    expect(html).not.toContain("Teacher");
   });
 });
 
@@ -105,7 +82,6 @@ describe("ProfileHeader creator action and confirmation", () => {
     const profile = {
       id: "u1",
       name: "Jane Doe",
-      accountType: "STUDENT",
       canCreateCourses: false,
     };
 
@@ -119,7 +95,6 @@ describe("ProfileHeader creator action and confirmation", () => {
     const profile = {
       id: "u1",
       name: "Jane Doe",
-      accountType: "STUDENT",
       canCreateCourses: false,
     };
 
@@ -132,7 +107,6 @@ describe("ProfileHeader creator action and confirmation", () => {
     const profile = {
       id: "u1",
       name: "Jane Doe",
-      accountType: "STUDENT",
       canCreateCourses: true,
     };
 
@@ -145,7 +119,6 @@ describe("ProfileHeader creator action and confirmation", () => {
     const profile = {
       id: "u1",
       name: "Jane Doe",
-      accountType: "STUDENT",
       canCreateCourses: false,
     };
 

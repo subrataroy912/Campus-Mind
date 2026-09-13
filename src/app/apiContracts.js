@@ -1,7 +1,6 @@
 /**
  * API transport contracts. These typedefs intentionally mirror Majorproject's
  * JSON, rather than UI/domain objects. ISO timestamps are strings.
- * @typedef {'TEACHER'|'STUDENT'|'ADMIN'} AccountType
  * @typedef {'PUBLIC'|'PRIVATE'} Visibility
  * @typedef {'ASSIGNMENT'|'ANNOUNCEMENT'|'MATERIAL'} CourseworkType
  * @typedef {'DRAFT'|'PUBLISHED'|'ARCHIVED'} CourseworkStatus

@@ -41,7 +41,6 @@ const profileFor = (user) => ({
   headline: user?.headline,
   links: Array.isArray(user?.links) ? user.links : [],
   canCreateCourses: Boolean(user?.canCreateCourses),
-  accountType: user?.accountType || "STUDENT",
   profileVisibility: user?.profileVisibility || "PUBLIC",
   privacy: {
     discoverable: user?.profileVisibility !== "PRIVATE",
@@ -135,12 +134,6 @@ export default function ProfilePage() {
       label: "Headline",
       value: profile.headline || "CampusMind learner",
       icon: "program",
-    },
-    {
-      label: "Account type",
-      value: formatDisplayText(profile.accountType) || "—",
-      icon: "member",
-      isCreator: Boolean(profile.canCreateCourses),
     },
     {
       label: "Location",

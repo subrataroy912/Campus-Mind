@@ -22,9 +22,9 @@ export const selectIsAuthenticated = createSelector(
   (token, user) => Boolean(token && user)
 );
 
-export const selectUserAccountType = createSelector(
+export const selectIsAdmin = createSelector(
   [selectCurrentUser],
-  (user) => user?.accountType ?? "STUDENT"
+  (user) => Boolean(user?.isAdmin)
 );
 
 export const selectCanCreateCourses = createSelector(

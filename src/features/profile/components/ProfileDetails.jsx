@@ -27,7 +27,6 @@ const icons = {
 
 const personalLabels = new Set([
   "Headline",
-  "Account type",
   "Gender",
   "Date of Birth",
   "Profile visibility",

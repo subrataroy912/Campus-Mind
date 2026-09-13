@@ -5,7 +5,6 @@ export function formatDisplayText(value) {
 
   const dictionary = {
     STUDENT: "Student",
-    STUDENT_CREATOR: "Student",
     TEACHER: "Teacher",
     ADMIN: "Admin",
     PRIVATE: "Private",
