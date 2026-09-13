@@ -1,20 +1,25 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation } from "react-router";
 
-function BrandLogo({ compact = false, className = '', fetchPriority = 'auto' }) {
-  const location = useLocation()
-  const isHome = location.pathname === '/'
+function BrandLogo({
+  compact = false,
+  className = "",
+  fetchPriority = "auto",
+  to = "/",
+}) {
+  const location = useLocation();
 
   const handleClick = (e) => {
-    if (isHome) {
-      e.preventDefault()
+    if (location.pathname === to) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-  }
+  };
 
   return (
     <Link
-      to="/"
+      to={to}
       onClick={handleClick}
-      className={`relative inline-flex max-w-full px-2 py-1 transition-opacity hover:opacity-80 sm:px-3 ${className}`}
+      className={`relative inline-flex max-w-full px-2 py-1 transition-opacity hover:opacity-80 ${className}`}
     >
       <div className="flex items-center justify-center gap-1 md:gap-2 flex-nowrap">
         <img
@@ -39,7 +44,7 @@ function BrandLogo({ compact = false, className = '', fetchPriority = 'auto' }) 
         beta
       </span>
     </Link>
-  )
+  );
 }
 
-export default BrandLogo
+export default BrandLogo;

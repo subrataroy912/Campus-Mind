@@ -2,10 +2,13 @@ import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useSearchParams } from "react-router";
 import { ArrowLeft, Globe, Lock } from "lucide-react";
-import { joinClassroom } from "../api/classroomService";
+import {
+  joinClassroom,
+} from "../api/classroomService.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import { useGetPublicCourseQuery } from "@/features/explore/api/exploreApi.js";
+import { routes } from "@/routes/paths";
 import {
   CLASS_CODE_LENGTH,
   formatClassCode,
@@ -124,7 +127,7 @@ export default function JoinClass() {
         {/* Back Link */}
         <div className="mb-6">
           <Link
-            to="/dashboard"
+            to={routes.classes.list}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -215,7 +218,7 @@ export default function JoinClass() {
                   </p>
                 </div>
                 <Link
-                  to="/dashboard"
+                  to={routes.dashboard}
                   className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-main transition hover:bg-canvas"
                 >
                   Back to dashboard
@@ -307,7 +310,7 @@ export default function JoinClass() {
               </p>
               <div className="mt-6 flex w-full flex-col gap-2.5 sm:flex-row sm:justify-center">
                 <Link
-                  to={`/dashboard/classes/${foundClass.id}`}
+                  to={routes.classes.detail(foundClass.id)}
                   className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover"
                 >
                   Open class

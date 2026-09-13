@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { routes } from "@/routes/paths.js";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 import {
@@ -72,7 +73,7 @@ export default function ClassFeedPost({ post, pinned = false }) {
           <div className="flex flex-wrap items-baseline gap-x-2">
             {authorId ? (
               <Link
-                to={`/dashboard/profile/${authorId}`}
+                to={routes.user(authorId)}
                 className="text-sm font-semibold text-text-heading hover:text-primary hover:underline transition-colors"
               >
                 {authorName}
@@ -137,7 +138,7 @@ export default function ClassFeedPost({ post, pinned = false }) {
                         <div className="rounded-xl bg-canvas px-3 py-2 text-text-main">
                           {commenterId ? (
                             <Link
-                              to={`/dashboard/profile/${commenterId}`}
+                              to={routes.user(commenterId)}
                               className="font-semibold text-text-heading text-xs hover:text-primary hover:underline transition-colors"
                             >
                               {commentAuthor}

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { routes } from "@/routes/paths";
 
 export function ClassroomAvatar({
   avatar,
@@ -14,7 +15,7 @@ export function ClassroomAvatar({
     to !== "#"
       ? to
       : userId
-      ? `/dashboard/profile/${userId}`
+      ? routes.user(userId)
       : "#";
 
   const content = (

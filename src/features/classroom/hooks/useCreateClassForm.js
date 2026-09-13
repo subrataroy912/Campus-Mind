@@ -11,6 +11,7 @@ import {
 } from "../api/classroomService.js";
 import { INITIAL_CLASS_FORM } from "../model/createClassForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
+import { routes } from "@/routes/paths.js";
 
 export function useCreateClassForm() {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ export function useCreateClassForm() {
 
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
-      navigate(`/dashboard/classes/${savedClassroom.id}`, {
+      navigate(routes.classes.detail(savedClassroom.id), {
         state: { enrollmentCode: classroom.code },
       });
     } catch (error) {

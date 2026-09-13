@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { getProtectedRouteState } from "../context/authSession.js";
 
 import SessionBootstrapSkeleton from "../features/auth/components/SessionBootstrapSkeleton.jsx";
+import { routes } from "./paths.js";
 
 export default function ProtectedRoute() {
   const { isAuthenticated, authStatus } = useAuth();
@@ -17,6 +18,6 @@ export default function ProtectedRoute() {
   return routeState === "authenticated" ? (
     <Outlet />
   ) : (
-    <Navigate to="/auth/login" replace state={{ from: location }} />
+    <Navigate to={routes.auth.login} replace state={{ from: location }} />
   );
 }

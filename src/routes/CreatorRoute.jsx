@@ -1,9 +1,10 @@
-﻿import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { getProtectedRouteState } from "../context/authSession.js";
 import SessionBootstrapSkeleton from "../features/auth/components/SessionBootstrapSkeleton.jsx";
+import { routes } from "./paths.js";
 
-export default function CreatorRoute({ children, redirectTo = "/dashboard" }) {
+export default function CreatorRoute({ children, redirectTo = routes.dashboard }) {
   const { user, isAuthenticated, authStatus } = useAuth();
 
   const routeState = getProtectedRouteState(authStatus, isAuthenticated);
@@ -13,7 +14,7 @@ export default function CreatorRoute({ children, redirectTo = "/dashboard" }) {
   }
 
   if (routeState !== "authenticated") {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to={routes.auth.login} replace />;
   }
 
   if (!user?.canCreateCourses) {

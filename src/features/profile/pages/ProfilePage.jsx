@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, Lock, UserX } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -20,6 +20,7 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import { routes } from "@/routes/paths.js";
 
 const profileFor = (user) => ({
   ...user,
@@ -52,11 +53,7 @@ export default function ProfilePage() {
   const { userId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const {
-    user: currentUser,
-    updateProfile,
-    authStatus,
-  } = useAuth();
+  const { user: currentUser, updateProfile, authStatus } = useAuth();
   const activeTab = searchParams.get("tab") || "classes";
   const setActiveTab = (tab) => {
     setSearchParams(
@@ -91,6 +88,8 @@ export default function ProfilePage() {
     isError: isPublicProfileError,
   } = useGetPublicProfileQuery(userId, {
     skip: authStatus === "hydrating" || !userId || isProfileOwner,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
   });
   const viewedUser = isProfileOwner
     ? currentProfile || currentUser
@@ -105,19 +104,39 @@ export default function ProfilePage() {
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
-  if (isCurrentProfileLoading || isPublicProfileLoading)
+  if (authStatus === "hydrating" || isCurrentProfileLoading || isPublicProfileLoading)
     return <ProfilePageSkeleton />;
-  if (
-    !profile ||
-    (isPublicProfileError && !isProfileOwner) ||
-    (isCurrentProfileError && isProfileOwner)
-  )
+
+  if (isCurrentProfileError && isProfileOwner)
     return (
       <ProfileMessage
-        title="Profile unavailable"
-        description="This profile is unavailable or you do not have permission to view it."
+        icon={UserX}
+        badge="Error"
+        title="Unable to load profile"
+        description="We could not load your profile details right now. Please try again later."
       />
     );
+
+  if (isPublicProfileError && !isProfileOwner)
+    return (
+      <ProfileMessage
+        icon={Lock}
+        badge="Private / Unavailable"
+        title="This profile is private or unavailable"
+        description="This profile is private, unavailable, or you do not have permission to view it."
+      />
+    );
+
+  if (!profile)
+    return (
+      <ProfileMessage
+        icon={UserX}
+        badge="Not Found"
+        title="Profile unavailable"
+        description="This profile could not be found or you do not have permission to view it."
+      />
+    );
+
   if (
     !isProfileOwner &&
     !profile.privacy.discoverable &&
@@ -125,6 +144,8 @@ export default function ProfilePage() {
   )
     return (
       <ProfileMessage
+        icon={Lock}
+        badge="Private Profile"
         title="This profile is private"
         description="This member is only visible to people in a shared class."
       />
@@ -264,7 +285,7 @@ export default function ProfilePage() {
               <EmptyState
                 title="No saved items yet"
                 description="Save posts and resources to find them quickly later."
-                action={{ to: "/dashboard/saved", label: "Browse saved items" }}
+                action={{ to: routes.saved, label: "Browse saved items" }}
               />
             ) : classes.length ? (
               <ContentList
@@ -286,7 +307,7 @@ export default function ProfilePage() {
                 }
                 action={
                   isOwner
-                    ? { to: "/dashboard/class/join", label: "Join a class" }
+                    ? { to: routes.explore, label: "Join a class" }
                     : undefined
                 }
               />
@@ -308,23 +329,72 @@ export default function ProfilePage() {
 }
 
 function ProfileMessage({
-  title = "Loading profile...",
-  description = "Please wait while we fetch your information.",
+  icon: Icon = Lock,
+  badge = "Private Profile",
+  title = "This profile is private",
+  description = "This member is only visible to people in a shared class.",
+  isLoading = false,
 }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="grid min-h-dvh place-items-center bg-canvas p-6">
-      <div className="flex flex-col items-center text-center">
-        {/* Modern Spinner */}
-        <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+    <div className="flex min-h-dvh flex-col bg-canvas">
+      {/* Top back navigation */}
+      <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+        >
+          <ArrowLeft size={16} /> Back
+        </Button>
+      </div>
 
-        {/* Text */}
-        <h2 className="mt-4 text-base font-medium text-text-heading">
-          {title}
-        </h2>
+      <div className="grid flex-1 place-items-center p-6">
+        <div className="flex max-w-md flex-col items-center text-center">
+          {isLoading ? (
+            <div className="size-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+          ) : (
+            <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-surface ring-1 ring-border shadow-sm">
+              <Icon className="size-8 text-primary" />
+            </div>
+          )}
 
-        {description && (
-          <p className="mt-1 text-sm text-text-muted">{description}</p>
-        )}
+          {badge && !isLoading && (
+            <span className="mb-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {badge}
+            </span>
+          )}
+
+          <h2 className="text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
+            {title}
+          </h2>
+
+          {description && (
+            <p className="mt-2 text-sm leading-relaxed text-text-muted">
+              {description}
+            </p>
+          )}
+
+          {!isLoading && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="gap-2"
+              >
+                <ArrowLeft size={16} /> Go Back
+              </Button>
+              <Button
+                onClick={() => navigate(routes.dashboard)}
+                className="gap-2"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

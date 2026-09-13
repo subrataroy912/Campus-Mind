@@ -6,6 +6,7 @@ import { getSharedClassCount } from "@/utils/sharedClasses.js";
 import { initials } from "@/utils/initials.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
 import { store } from "@/app/store.js";
+import { routes } from "@/routes/paths.js";
 
 function ExplorePersonCard({ person, currentUser }) {
   const sharedClassCount = getSharedClassCount(currentUser, person);
@@ -59,8 +60,8 @@ function ExplorePersonCard({ person, currentUser }) {
         {sharedClassCount > 0 && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Shares {sharedClassCount} {sharedClassCount === 1 ? "class" : "classes"} with you</span>}
       </div>
       <div className="mt-6 flex gap-2 border-t border-border pt-4">
-        <Button to={`/dashboard/profile/${person.id}`} variant="outline" size="sm">View profile</Button>
-        {sharedClassCount > 0 && <Button to="/dashboard/messages" size="sm"><MessageCircle aria-hidden="true" />Message</Button>}
+        <Button to={routes.user(person.id)} variant="outline" size="sm">View profile</Button>
+        {sharedClassCount > 0 && <Button to={routes.messages} size="sm"><MessageCircle aria-hidden="true" />Message</Button>}
       </div>
     </article>
   );

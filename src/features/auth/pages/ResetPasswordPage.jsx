@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import { Lock, Eye, EyeOff, ShieldCheck, Check, X } from "lucide-react";
 import AuthInput from "../components/AuthInput.jsx";
 import { Button } from "@/components/ui/button.jsx";
+import { routes } from "@/routes/paths.js";
 
 const RULES = [
   {
@@ -63,7 +64,7 @@ export default function ResetPasswordPage() {
           It may have expired, or already been used. Request a fresh link to
           continue.
         </p>
-        <Link to="/auth/forgot-password">
+        <Link to={routes.auth.forgotPassword}>
           <Button className="mt-7 w-full">Request a new link</Button>
         </Link>
       </div>
@@ -152,7 +153,7 @@ export default function ResetPasswordPage() {
       <p className="mt-7 text-center text-text-main">
         <Link
           className="font-bold text-primary hover:underline"
-          to="/auth/login"
+          to={routes.auth.login}
         >
           Back to sign in
         </Link>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, LogOut, Moon, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Switch } from "@/components/ui/switch.jsx";
@@ -80,7 +81,7 @@ export default function SettingsPage() {
     setIsLoggingOut(true);
     try {
       await logout();
-      navigate("/auth/login", { replace: true });
+      navigate(routes.auth.login, { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
       setIsLoggingOut(false);
@@ -130,7 +131,7 @@ export default function SettingsPage() {
               title="Profile"
               description="This is how you appear across CampusMind."
               action={
-                <Button variant="outline" to="/dashboard/profile">
+                <Button variant="outline" to={routes.profile.root}>
                   Edit profile
                 </Button>
               }

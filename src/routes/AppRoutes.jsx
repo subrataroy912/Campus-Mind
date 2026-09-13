@@ -8,6 +8,8 @@ import PublicRoute from "./PublicRoute.jsx";
 import CreatorRoute from "./CreatorRoute.jsx";
 import ServerDown from "@/pages/ServerDown.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
+import { routes } from "./paths.js";
+import ParamRedirect from "./ParamRedirect.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(() =>
   import("../features/dashboard/pages/DashboardHomePage.jsx")
@@ -37,6 +39,10 @@ const ResetPasswordPage = lazy(() =>
 const OAuthCallbackPage = lazy(() =>
   import("../features/auth/pages/OAuthCallbackPage.jsx")
 );
+
+const ClassListPage = lazy(() =>
+  import("../features/classroom/pages/ClassListPage.jsx")
+);
 const ClassPage = lazy(() =>
   import("../features/classroom/pages/ClassPage.jsx")
 );
@@ -62,134 +68,140 @@ export const appRouteConfig = [
       </AuthProvider>
     ),
     children: [
+      /* =====================================================================
+          PUBLIC ROUTES
+          ===================================================================== */
       {
         element: <PublicRoute />,
-        // Public pages still need restored auth state to redirect signed-in users.
         handle: { requiresSessionRestore: true },
         children: [
           {
-            path: "/",
+            path: routes.home,
             element: <RootLayout />,
-            children: [
-              {
-                index: true,
-                element: <GetStartedPage />,
-              },
-            ],
+            children: [{ index: true, element: <GetStartedPage /> }],
           },
           {
-            path: "/auth",
+            path: routes.auth.root,
             element: <AuthLayout />,
             children: [
               {
                 index: true,
-                element: <Navigate to="login" replace />,
+                element: <Navigate to={routes.auth.login} replace />,
               },
-              {
-                path: "login",
-                element: <LoginPage />,
-              },
-              {
-                path: "register",
-                element: <RegisterPage />,
-              },
-              {
-                path: "forgot-password",
-                element: <ForgotPasswordPage />,
-              },
-
-              {
-                path: "reset-password",
-                element: <ResetPasswordPage />,
-              },
-              {
-                path: "callback",
-                element: <OAuthCallbackPage />,
-              },
+              { path: "login", element: <LoginPage /> },
+              { path: "register", element: <RegisterPage /> },
+              { path: "forgot-password", element: <ForgotPasswordPage /> },
+              { path: "reset-password", element: <ResetPasswordPage /> },
+              { path: "callback", element: <OAuthCallbackPage /> },
             ],
-          },
-          {
-            path: "/login",
-            element: <Navigate to="/auth/login" replace />,
           },
         ],
       },
 
-      // end public routes
-
+      /* =====================================================================
+          AUTHENTICATED APPLICATION ROUTES (DashboardLayout as Pathless Layout)
+          ===================================================================== */
       {
         element: <ProtectedRoute />,
-        // Protected pages must wait for session restoration before rendering.
         handle: { requiresSessionRestore: true, isProtected: true },
         children: [
           {
-            path: "/dashboard",
             element: <DashboardLayout />,
             children: [
+              // Application Core
+              { path: routes.dashboard, element: <DashboardHome /> },
+              { path: routes.community, element: <DashboardCommunityPage /> },
+              { path: routes.messages, element: <DashboardMessagesPage /> },
+              { path: routes.saved, element: <DashboardSavedPage /> },
+              { path: routes.explore, element: <ExplorePage /> },
+
+              // Classes
+              { path: routes.classes.list, element: <ClassListPage /> },
+              { path: routes.classes.join, element: <JoinClassPage /> },
+              { path: routes.classes.detail(), element: <ClassPage /> },
               {
-                index: true,
-                element: <DashboardHome />,
+                element: <CreatorRoute />,
+                children: [
+                  { path: routes.classes.new, element: <CreateClassPage /> },
+                ],
+              },
+
+              // Users & Profile
+              { path: routes.profile.root, element: <ProfilePage /> },
+              { path: routes.user(), element: <ProfilePage /> },
+
+              // Settings
+              { path: routes.settings, element: <SettingsPage /> },
+
+              /* Backward-Compatible Redirects for legacy /dashboard/* paths */
+              {
+                path: "/dashboard/classes",
+                element: <Navigate to={routes.classes.list} replace />,
               },
               {
-                path: "community",
-                element: <DashboardCommunityPage />,
+                path: "/dashboard/classes/:classId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.classes.detail(params.classId)}
+                  />
+                ),
               },
               {
-                path: "messages",
-                element: <DashboardMessagesPage />,
+                path: "/dashboard/class/join",
+                element: <ParamRedirect to={routes.classes.join} />,
               },
-              {
-                path: "saved",
-                element: <DashboardSavedPage />,
-              },
-              {
-                path: "explore",
-                element: <ExplorePage />,
-              },
-            ],
-          },
-          {
-            path: "/dashboard/classes/:classId",
-            element: <ClassPage />,
-          },
-          {
-            element: <CreatorRoute />,
-            children: [
               {
                 path: "/dashboard/class/create",
-                element: <CreateClassPage />,
+                element: <Navigate to={routes.classes.new} replace />,
+              },
+              {
+                path: "/dashboard/community",
+                element: <ParamRedirect to={routes.community} />,
+              },
+              {
+                path: "/dashboard/messages",
+                element: <ParamRedirect to={routes.messages} />,
+              },
+              {
+                path: "/dashboard/saved",
+                element: <ParamRedirect to={routes.saved} />,
+              },
+              {
+                path: "/dashboard/explore",
+                element: <ParamRedirect to={routes.explore} />,
+              },
+              {
+                path: "/dashboard/profile",
+                element: <ParamRedirect to={routes.profile.root} />,
+              },
+              {
+                path: "/dashboard/profile/:userId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.user(params.userId)}
+                  />
+                ),
+              },
+              {
+                path: "/dashboard/settings",
+                element: <Navigate to={routes.settings} replace />,
               },
             ],
-          },
-          {
-            path: "/dashboard/class/join",
-            element: <JoinClassPage />,
-          },
-          {
-            path: "/dashboard/classes",
-            element: <Navigate to="/dashboard/profile?tab=classes" replace />,
-          },
-          {
-            path: "/dashboard/profile",
-            element: <ProfilePage />,
-          },
-          {
-            path: "/dashboard/profile/:userId",
-            element: <ProfilePage />,
-          },
-          {
-            path: "/dashboard/settings",
-            element: <SettingsPage />,
           },
         ],
       },
-      // Server-down does not depend on authentication and may render immediately.
+
+      /* =====================================================================
+          SYSTEM ROUTES
+          ===================================================================== */
       {
-        path: "/server-down",
+        path: routes.serverDown,
         element: <ServerDown />,
       },
-      // The catch-all is also auth-independent and may render immediately.
-      { path: "*", element: <NotFound /> },
+      {
+        path: routes.notFound, // covers "*" from your routes.js
+        element: <NotFound />,
+      },
     ],
   },
 ];

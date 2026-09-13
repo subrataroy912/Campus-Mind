@@ -1,7 +1,9 @@
-﻿import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import Sidebar from "./Sidebar.jsx";
+
+import { routes } from "@/routes/paths.js";
 
 let mockUser = { id: "u1", canCreateCourses: false };
 
@@ -29,7 +31,7 @@ describe("Sidebar navigation and creator gating", () => {
     mockUser = { id: "u1", canCreateCourses: false };
     const html = renderToString(<Sidebar />);
     expect(html).not.toContain("Create a class");
-    expect(html).not.toContain("/dashboard/class/create");
+    expect(html).not.toContain(routes.classes.new);
     expect(html).toContain("Join with code");
   });
 
@@ -37,7 +39,7 @@ describe("Sidebar navigation and creator gating", () => {
     mockUser = { id: "u1", canCreateCourses: true };
     const html = renderToString(<Sidebar />);
     expect(html).toContain("Create a class");
-    expect(html).toContain("/dashboard/class/create");
+    expect(html).toContain(routes.classes.new);
     expect(html).toContain("Join with code");
   });
 });

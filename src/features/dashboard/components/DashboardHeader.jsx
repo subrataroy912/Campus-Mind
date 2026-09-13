@@ -9,6 +9,7 @@ import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { logoutFromHeader } from "./headerLogout.js";
 import NotificationsMenu from "@/features/notifications/components/NotificationsMenu.jsx";
+import { routes } from "@/routes/paths";
 
 export default function DashboardHeader() {
   const navigate = useNavigate();
@@ -44,14 +45,14 @@ export default function DashboardHeader() {
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <BrandLogo fetchPriority="high" />
+        <BrandLogo fetchPriority="high" to={routes.dashboard} />
       </div>
 
       {/* User Profile and Logout */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <NotificationsMenu />
         <Link
-          to="/dashboard/profile"
+          to={routes.profile.root}
           className="flex items-center gap-2 rounded-lg p-2 text-sm font-semibold text-text-main transition-colors hover:bg-canvas"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent/20 text-primary">

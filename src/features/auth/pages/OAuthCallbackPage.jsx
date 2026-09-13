@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import { normalizeAuthResponse } from "../api/authService.js";
 import { handleOAuthFailure, parseOAuthCallback } from "../oauth.js";
 import { safeLocalStorageSet } from "@/utils/storage.js";
+import { routes } from "@/routes/paths.js";
 
 export default function OAuthCallbackPage() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function OAuthCallbackPage() {
 
         const response = normalizeAuthResponse(callback);
         await completeOAuth(response);
-        navigate("/dashboard", { replace: true });
+        navigate(routes.dashboard, { replace: true });
       } catch {
         // AuthContext owns the failure state shown below.
       }
@@ -61,7 +62,7 @@ export default function OAuthCallbackPage() {
         <button
           type="button"
           className="text-sm font-semibold text-primary hover:underline"
-          onClick={() => navigate("/auth/login", { replace: true })}
+          onClick={() => navigate(routes.auth.login, { replace: true })}
         >
           Return to sign in
         </button>

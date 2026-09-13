@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 import { getClassTheme } from "../utils/classTheme.js";
+import { routes } from "@/routes/paths";
 
 export default function ClassHeader({
   classroom,
@@ -62,7 +63,7 @@ export default function ClassHeader({
         {/* Back Link */}
         <div className="absolute left-3 top-3 z-10">
           <Link
-            to="/dashboard"
+            to={routes.classes.list}
             className="flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-black/45 backdrop-blur-md shadow-xs border border-white/15"
             aria-label="Back to dashboard classes"
           >
@@ -173,7 +174,7 @@ export default function ClassHeader({
             </div>
           ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
             <Link
-              to={`/dashboard/class/join?courseId=${encodeURIComponent(
+              to={`${routes.classes.join}?courseId=${encodeURIComponent(
                 classroom?.id || ""
               )}&accessType=code`}
               className="flex w-full items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:mb-2 sm:w-auto sm:self-auto cursor-pointer"

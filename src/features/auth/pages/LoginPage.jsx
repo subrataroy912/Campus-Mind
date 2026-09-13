@@ -14,6 +14,7 @@ import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 import {
   Tooltip,
   TooltipContent,
@@ -62,7 +63,7 @@ function LoginPage() {
         description: "You are signed in and ready to continue.",
         type: "success",
       });
-      navigate("/dashboard", { replace: true });
+      navigate(routes.dashboard, { replace: true });
     } catch (err) {
       toast.add({
         title: "Sign-in failed",
@@ -184,7 +185,7 @@ function LoginPage() {
           </label>
           <Link
             className="text-primary-hover hover:underline"
-            to="/auth/forgot-password"
+            to={routes.auth.forgotPassword}
           >
             Forgot Password?
           </Link>
@@ -203,7 +204,7 @@ function LoginPage() {
         New here?{" "}
         <Link
           className="font-bold text-primary hover:underline"
-          to="/auth/register"
+          to={routes.auth.register}
         >
           Create an account
         </Link>

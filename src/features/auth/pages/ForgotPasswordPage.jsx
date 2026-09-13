@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { Mail, ArrowLeft, MailCheck } from "lucide-react";
 import AuthInput from "../components/AuthInput.jsx";
 import { Button } from "@/components/ui/button.jsx";
+import { routes } from "@/routes/paths.js";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -47,7 +48,7 @@ export default function ForgotPasswordPage() {
           .
         </p>
         <Link
-          to="/auth/login"
+          to={routes.auth.login}
           className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
         >
           <ArrowLeft size={16} aria-hidden="true" />
@@ -60,7 +61,7 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <Link
-        to="/auth/login"
+        to={routes.auth.login}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-muted hover:text-text-main"
       >
         <ArrowLeft size={16} aria-hidden="true" />
@@ -105,7 +106,7 @@ export default function ForgotPasswordPage() {
         Remembered it after all?{" "}
         <Link
           className="font-bold text-primary hover:underline"
-          to="/auth/login"
+          to={routes.auth.login}
         >
           Sign in
         </Link>

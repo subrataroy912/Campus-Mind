@@ -5,7 +5,7 @@ import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar
 import { useMessages } from "../hooks/useMessages.js";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-// import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 
 const EMPTY_CONVERSATIONS = [];
 
@@ -190,7 +190,7 @@ export default function DashboardMessagesPage() {
           <EmptyState
             title="No messages to catch up on"
             description="Open a class to join its conversation."
-            action={{ to: "/dashboard", label: "View my classes" }}
+            action={{ to: routes.classes.list, label: "View my classes" }}
           />
         </div>
       </div>

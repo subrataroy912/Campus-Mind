@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { ArrowRight, KeyRound, Loader2, X } from "lucide-react";
+import { routes } from "@/routes/paths";
 
 export function CodePromptModal({
   isOpen,
@@ -75,7 +76,7 @@ export function CodePromptModal({
 
           <div className="flex items-center justify-between pt-2">
             <Link
-              to={`/dashboard/class/join?courseId=${encodeURIComponent(courseId)}&accessType=code`}
+              to={`${routes.classes.join}?courseId=${encodeURIComponent(courseId)}&accessType=code`}
               onClick={onClose}
               className="text-[11px] text-text-muted hover:text-primary hover:underline"
             >

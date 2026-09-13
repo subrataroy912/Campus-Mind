@@ -22,6 +22,7 @@ import {
   useGetCourseworkListQuery,
   useCreateCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { routes } from "@/routes/paths";
 
 export function ClassHomeTab({
   isEnrolled = true,
@@ -124,7 +125,7 @@ export function ClassHomeTab({
               </span>
             ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
               <Link
-                to={`/dashboard/class/join?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
+                to={`${routes.classes.join}?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
                 className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-primary-hover"
               >
                 <UserPlus className="h-4 w-4" />
@@ -251,7 +252,7 @@ export function ClassHomeTab({
               <p className="text-xs font-medium text-text-muted">Instructor</p>
               {classroom?.teacherId || classroom?.ownerId ? (
                 <Link
-                  to={`/dashboard/profile/${classroom.teacherId || classroom.ownerId}`}
+                  to={routes.user(classroom.teacherId || classroom.ownerId)}
                   className="text-sm font-bold text-text-heading hover:text-primary hover:underline transition-colors"
                 >
                   {teacherName}

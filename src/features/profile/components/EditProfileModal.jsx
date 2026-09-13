@@ -83,7 +83,10 @@ export function EditProfileModal({
                 onBlur={() => handleBlur("firstName")}
                 placeholder="First name"
               />
-              <FieldError id="profile-first-name-error" message={errors.firstName} />
+              <FieldError
+                id="profile-first-name-error"
+                message={errors.firstName}
+              />
             </div>
             <div>
               <label
@@ -101,7 +104,10 @@ export function EditProfileModal({
                 onBlur={() => handleBlur("lastName")}
                 placeholder="Last name"
               />
-              <FieldError id="profile-last-name-error" message={errors.lastName} />
+              <FieldError
+                id="profile-last-name-error"
+                message={errors.lastName}
+              />
             </div>
           </div>
 
@@ -119,11 +125,13 @@ export function EditProfileModal({
               </span>
               <Input
                 id="profile-handle"
-                className={`pl-8 ${errors.handle ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                className={`pl-8 ${
+                  errors.handle
+                    ? "border-destructive focus-visible:ring-destructive"
+                    : ""
+                }`}
                 value={formData.handle}
-                onChange={(event) =>
-                  handleChange("handle", event.target.value)
-                }
+                onChange={(event) => handleChange("handle", event.target.value)}
                 onBlur={() => handleBlur("handle")}
                 aria-invalid={Boolean(errors.handle)}
                 aria-describedby={
@@ -133,7 +141,8 @@ export function EditProfileModal({
               />
             </div>
             <p className="mt-1.5 text-xs text-text-muted">
-              Your handle is unique and helps people find you. You can change it at most twice within a 14-day period.
+              Your handle is unique and helps people find you. You can change it
+              at most twice within a 14-day period.
             </p>
             <FieldError id="profile-handle-error" message={errors.handle} />
           </div>
@@ -149,9 +158,7 @@ export function EditProfileModal({
             <Input
               id="profile-headline"
               value={formData.headline}
-              onChange={(event) =>
-                handleChange("headline", event.target.value)
-              }
+              onChange={(event) => handleChange("headline", event.target.value)}
               onBlur={() => handleBlur("headline")}
               placeholder="e.g. Computer Science Student | Open Source Enthusiast"
             />
@@ -178,9 +185,7 @@ export function EditProfileModal({
               onBlur={() => handleBlur("bio")}
               maxLength={MAX_BIO_LENGTH}
               aria-invalid={Boolean(errors.bio)}
-              aria-describedby={
-                errors.bio ? "profile-bio-error" : undefined
-              }
+              aria-describedby={errors.bio ? "profile-bio-error" : undefined}
               placeholder="Tell the community about yourself"
               className="flex min-h-20 w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
@@ -229,7 +234,7 @@ export function EditProfileModal({
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
-                  <option value="Non-binary">Non-binary</option>
+                  <option value="Other">Other</option>
                   <option value="Prefer not to say">Prefer not to say</option>
                 </select>
               </div>
@@ -269,7 +274,10 @@ export function EditProfileModal({
                   onBlur={() => handleBlur("address")}
                   placeholder="Street address"
                 />
-                <FieldError id="profile-address-error" message={errors.address} />
+                <FieldError
+                  id="profile-address-error"
+                  message={errors.address}
+                />
               </div>
             </div>
           </div>
@@ -290,9 +298,7 @@ export function EditProfileModal({
                 <Input
                   id="profile-city"
                   value={formData.city}
-                  onChange={(event) =>
-                    handleChange("city", event.target.value)
-                  }
+                  onChange={(event) => handleChange("city", event.target.value)}
                   onBlur={() => handleBlur("city")}
                   placeholder="e.g. Siliguri"
                 />
@@ -331,8 +337,12 @@ export function EditProfileModal({
                 }
                 className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <option value="PUBLIC">Public — Anyone can find and view your profile</option>
-                <option value="PRIVATE">Private — Only members in shared classes can see you</option>
+                <option value="PUBLIC">
+                  Public — Anyone can find and view your profile
+                </option>
+                <option value="PRIVATE">
+                  Private — Only members in shared classes can see you
+                </option>
               </select>
             </div>
           </div>
@@ -345,7 +355,8 @@ export function EditProfileModal({
                   Social & Web Links
                 </p>
                 <p className="text-xs text-text-muted">
-                  Add links to your portfolio, GitHub, LinkedIn, or personal website with custom names.
+                  Add links to your portfolio, GitHub, LinkedIn, or personal
+                  website with custom names.
                 </p>
               </div>
               <Button
@@ -353,7 +364,9 @@ export function EditProfileModal({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const current = Array.isArray(formData.links) ? formData.links : [];
+                  const current = Array.isArray(formData.links)
+                    ? formData.links
+                    : [];
                   if (current.length < 5) {
                     handleChange("links", [...current, { name: "", url: "" }]);
                   }
@@ -365,20 +378,27 @@ export function EditProfileModal({
               </Button>
             </div>
 
-            {(!formData.links || formData.links.length === 0) ? (
+            {!formData.links || formData.links.length === 0 ? (
               <p className="py-2 text-xs italic text-text-muted">
-                No links added yet. Click &quot;Add link&quot; to share your profiles.
+                No links added yet. Click &quot;Add link&quot; to share your
+                profiles.
               </p>
             ) : (
               <div className="space-y-3 mt-3">
                 {formData.links.map((link, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  <div
+                    key={index}
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-2"
+                  >
                     <Input
                       placeholder="Label (e.g. GitHub)"
                       value={link?.name || ""}
                       onChange={(e) => {
                         const updated = [...formData.links];
-                        updated[index] = { ...updated[index], name: e.target.value };
+                        updated[index] = {
+                          ...updated[index],
+                          name: e.target.value,
+                        };
                         handleChange("links", updated);
                       }}
                       className="w-full sm:w-1/3 text-sm"
@@ -388,7 +408,10 @@ export function EditProfileModal({
                       value={link?.url || ""}
                       onChange={(e) => {
                         const updated = [...formData.links];
-                        updated[index] = { ...updated[index], url: e.target.value };
+                        updated[index] = {
+                          ...updated[index],
+                          url: e.target.value,
+                        };
                         handleChange("links", updated);
                       }}
                       className="w-full sm:flex-1 text-sm"
@@ -399,7 +422,9 @@ export function EditProfileModal({
                       size="icon"
                       className="shrink-0 text-text-muted hover:text-destructive self-end sm:self-center"
                       onClick={() => {
-                        const updated = formData.links.filter((_, i) => i !== index);
+                        const updated = formData.links.filter(
+                          (_, i) => i !== index
+                        );
                         handleChange("links", updated);
                       }}
                       aria-label={`Remove link ${index + 1}`}

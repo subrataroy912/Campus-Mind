@@ -8,10 +8,13 @@ import { getClassTheme } from "@/features/classroom/utils/classTheme.js";
 import { classroomApi } from "@/features/classroom/api/classroomApi.js";
 import { store } from "@/app/store.js";
 import { initials } from "@/utils/initials.js";
-import { AccessBadge, ACCESS_TYPES } from "@/features/classroom/components/AccessBadge.jsx";
+import {
+  AccessBadge,
+  ACCESS_TYPES,
+} from "@/features/classroom/components/AccessBadge.jsx";
 import { CodePromptModal } from "@/features/classroom/components/CodePromptModal.jsx";
 import { InviteOnlyModal } from "@/features/classroom/components/InviteOnlyModal.jsx";
-
+import { routes } from "@/routes/paths";
 function formatLearners(count) {
   const value = Number(count);
   if (!Number.isFinite(value) || value <= 0) return "0 learners";
@@ -22,11 +25,7 @@ function formatLearners(count) {
   return `${value} learners`;
 }
 
-function ExploreClassCard({
-  classroom,
-  className = "",
-  priority = false,
-}) {
+function ExploreClassCard({ classroom, className = "", priority = false }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { classrooms = [] } = useDashboardData({ includeExplore: false });
@@ -67,7 +66,9 @@ function ExploreClassCard({
     if (!courseId) return;
 
     if (isAlreadyEnrolled || accessType === ACCESS_TYPES.OPEN) {
-      navigate(`/dashboard/classes/${courseId}`);
+      navigate({
+        pathname: routes.classes.detail(courseId),
+      });
       return;
     }
 
@@ -81,7 +82,9 @@ function ExploreClassCard({
       return;
     }
 
-    navigate(`/dashboard/classes/${courseId}`);
+    navigate({
+      pathname: routes.classes.detail(courseId),
+    });
   };
 
   const handleJoinClassByCode = async (e) => {
@@ -97,7 +100,9 @@ function ExploreClassCard({
     try {
       await joinClassroom(user?.id, courseId, cleanCode);
       setIsCodeModalOpen(false);
-      navigate(`/dashboard/classes/${courseId}`);
+      navigate({
+        pathname: routes.classes.detail(courseId),
+      });
     } catch (err) {
       const message =
         err?.data?.error ||
@@ -132,7 +137,11 @@ function ExploreClassCard({
         ].join(" ")}
       >
         {/* Cover Header & Floating/Overlay Logo */}
-        <div className={`relative h-14 w-full ${coverUrl ? "bg-canvas" : classTheme.gradientClass}`}>
+        <div
+          className={`relative h-14 w-full ${
+            coverUrl ? "bg-canvas" : classTheme.gradientClass
+          }`}
+        >
           {coverUrl && (
             <img
               src={coverUrl}
@@ -144,7 +153,7 @@ function ExploreClassCard({
               className="absolute inset-0 h-full w-full object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/15 to-transparent" />
 
           {/* Access Type Badge */}
           <div className="absolute top-2 right-2 z-10">
