@@ -9,6 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.jsx";
+import { toast } from "@/components/ui/toast.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
 import { formatDisplayText } from "@/utils/textFormat.js";
 
@@ -21,6 +30,35 @@ export default function ProfileHeader({
   onAvatarUpload,
   onBannerUpload,
 }) {
+  const { unlockCreator } = useAuth();
+  const [showCreatorConfirm, setShowCreatorConfirm] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+
+  const handleConfirmUnlock = async () => {
+    setIsUnlocking(true);
+    try {
+      await unlockCreator();
+      toast.add({
+        title: "Course Creator Unlocked",
+        description:
+          "You now have privileges to build classes and host learning groups.",
+        type: "success",
+      });
+      setShowCreatorConfirm(false);
+    } catch (err) {
+      toast.add({
+        title: "Unlock failed",
+        description:
+          err?.data?.error ||
+          err?.message ||
+          "Failed to unlock course creation privileges. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
   const copyLink = () =>
     navigator.clipboard?.writeText(
       `${window.location.origin}/dashboard/profile/${profile.id}`,
@@ -120,7 +158,7 @@ export default function ProfileHeader({
                   </Button>
                 }
               />
-              <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuContent align="end" className="w-60 sm:w-64">
                 {isOwner ? (
                   <>
                     <DropdownMenuItem onClick={copyLink}>
@@ -135,6 +173,26 @@ export default function ProfileHeader({
                     >
                       Go to Settings
                     </DropdownMenuItem>
+                    {!profile.canCreateCourses && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setShowCreatorConfirm(true)}
+                          className="flex flex-col items-start gap-0.5 py-2 cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5 font-medium text-text-heading">
+                            <Sparkles
+                              size={14}
+                              className="fill-amber-500 text-amber-500 shrink-0"
+                            />
+                            Become a Creator
+                          </span>
+                          <span className="text-[11px] leading-tight text-text-muted">
+                            Unlocks course and group creation. Permanent change.
+                          </span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </>
                 ) : (
                   <ViewerMenu copyLink={copyLink} />
@@ -219,6 +277,38 @@ export default function ProfileHeader({
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog for Becoming a Creator */}
+      <Dialog open={showCreatorConfirm} onOpenChange={setShowCreatorConfirm}>
+        <DialogContent className="max-w-md bg-surface p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-text-heading">
+              Become a Course Creator
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-sm text-text-muted">
+              Unlock course-creation privileges to build classes and host learning groups. This is a permanent change and cannot be undone. Are you sure you want to proceed?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isUnlocking}
+              onClick={() => setShowCreatorConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={isUnlocking}
+              onClick={handleConfirmUnlock}
+              className="bg-primary hover:bg-primary-hover text-surface font-medium"
+            >
+              {isUnlocking ? "Unlocking…" : "Yes, Become Creator"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

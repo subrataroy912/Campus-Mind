@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { useAuth } from "@/context/AuthContext.jsx";
 import { Link } from "react-router";
 import { ArrowLeft, Loader2, PlusCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import { useCreateClassForm } from "../hooks/useCreateClassForm.js";
 import {
-  CreatorUnlockBanner,
   ClassMediaSection,
   ClassBasicInfoSection,
   ClassAcademicSection,
@@ -14,9 +11,6 @@ import {
 } from "../components/createClass/index.js";
 
 export default function CreateClass() {
-  const { user, unlockCreator } = useAuth();
-  const [isUnlocking, setIsUnlocking] = useState(false);
-  const [unlockError, setUnlockError] = useState("");
   const {
     form,
     preview,
@@ -32,25 +26,6 @@ export default function CreateClass() {
     reset,
     submit,
   } = useCreateClassForm();
-
-  const isStudentWithoutCreator =
-    user?.accountType === "STUDENT" && !user?.canCreateCourses;
-
-  const handleUnlock = async () => {
-    setIsUnlocking(true);
-    setUnlockError("");
-    try {
-      await unlockCreator();
-    } catch (err) {
-      setUnlockError(
-        err?.data?.error ||
-          err?.message ||
-          "Failed to unlock course creation privileges."
-      );
-    } finally {
-      setIsUnlocking(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-canvas py-6 px-4 sm:py-10 sm:px-6 lg:px-8">
@@ -82,14 +57,6 @@ export default function CreateClass() {
             </div>
           </div>
         </div>
-
-        {/* Creator Privileges Alert */}
-        <CreatorUnlockBanner
-          isStudentWithoutCreator={isStudentWithoutCreator}
-          handleUnlock={handleUnlock}
-          isUnlocking={isUnlocking}
-          unlockError={unlockError}
-        />
 
         {/* Global Submission Error */}
         {submissionError && (
@@ -167,12 +134,7 @@ export default function CreateClass() {
 
             <Button
               type="submit"
-              disabled={isSubmitting || isStudentWithoutCreator}
-              title={
-                isStudentWithoutCreator
-                  ? "Unlock course creation privileges above first"
-                  : undefined
-              }
+              disabled={isSubmitting}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary-hover font-medium text-surface shadow-xs disabled:opacity-50"
             >
               {isSubmitting ? (

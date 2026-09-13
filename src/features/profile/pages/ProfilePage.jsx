@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { ArrowLeft, Eye, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -56,7 +56,6 @@ export default function ProfilePage() {
   const {
     user: currentUser,
     updateProfile,
-    unlockCreator,
     authStatus,
   } = useAuth();
   const activeTab = searchParams.get("tab") || "classes";
@@ -77,7 +76,6 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUnlocking, setIsUnlocking] = useState(false);
   const { classrooms = [] } = useDashboardData();
   const isProfileOwner = !userId || userId === currentUser?.id;
   const isOwner = isProfileOwner && !preview;
@@ -196,17 +194,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleUnlockCreator = async () => {
-    setIsUnlocking(true);
-    try {
-      await unlockCreator();
-    } catch (err) {
-      console.error("Failed to unlock creator status", err);
-    } finally {
-      setIsUnlocking(false);
-    }
-  };
-
   const save = async (formData) => {
     setIsSaving(true);
     try {
@@ -260,39 +247,6 @@ export default function ProfilePage() {
         <section>
           <ProfileDetails details={details} />
         </section>
-        {isOwner &&
-          profile.accountType === "STUDENT" &&
-          !profile.canCreateCourses && (
-            <section className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold text-text-heading">
-                      Course Creator Status
-                    </h2>
-                    <span className="inline-flex items-center rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
-                      Standard Student
-                    </span>
-                  </div>
-                  <p className="text-sm text-text-muted">
-                    Unlock course-creation privileges to create and manage
-                    courses and study groups. Once enabled, this privilege
-                    cannot be changed or revoked.
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <Button
-                    size="sm"
-                    onClick={handleUnlockCreator}
-                    disabled={isUnlocking}
-                  >
-                    <Sparkles size={14} className="mr-1.5" />
-                    {isUnlocking ? "Unlocking…" : "Unlock Course Creator"}
-                  </Button>
-                </div>
-              </div>
-            </section>
-          )}
         <section className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
           <div className="flex gap-1 border-b border-border p-2" role="tablist">
             <Button

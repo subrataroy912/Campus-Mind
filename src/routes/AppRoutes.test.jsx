@@ -40,4 +40,20 @@ describe("application route auth restoration", () => {
   it("keeps the public page visible when session restoration fails", () => {
     expect(getProtectedRouteState("failed", false)).toBe("unauthenticated");
   });
+
+  it("protects /dashboard/class/create behind CreatorRoute", () => {
+    const rootRoute = appRouteConfig[0];
+    const protectedRoute = rootRoute.children.find(
+      (route) => route.element?.type?.name === "ProtectedRoute"
+    );
+    const creatorRoute = protectedRoute?.children?.find(
+      (route) => route.element?.type?.name === "CreatorRoute"
+    );
+
+    expect(creatorRoute).toBeDefined();
+    const createClassRoute = creatorRoute?.children?.find(
+      (route) => route.path === "/dashboard/class/create"
+    );
+    expect(createClassRoute).toBeDefined();
+  });
 });

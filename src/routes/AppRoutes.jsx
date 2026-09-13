@@ -5,6 +5,7 @@ import DashboardLayout from "../app/layouts/DashboardLayout.jsx";
 import RootLayout from "../app/layouts/RootLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import PublicRoute from "./PublicRoute.jsx";
+import CreatorRoute from "./CreatorRoute.jsx";
 import ServerDown from "@/pages/ServerDown.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
@@ -152,8 +153,13 @@ export const appRouteConfig = [
             element: <ClassPage />,
           },
           {
-            path: "/dashboard/class/create",
-            element: <CreateClassPage />,
+            element: <CreatorRoute />,
+            children: [
+              {
+                path: "/dashboard/class/create",
+                element: <CreateClassPage />,
+              },
+            ],
           },
           {
             path: "/dashboard/class/join",

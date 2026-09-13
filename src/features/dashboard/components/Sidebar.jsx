@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
+import { useAuth } from "@/context/AuthContext.jsx";
 import { SIDEBAR_NAV_ITEMS } from "@/config/navigation.js";
 import { getNavLinkStyles } from "@/utils/routeHelpers.js";
 import { Plus, Settings, Ticket } from "lucide-react";
@@ -9,6 +10,8 @@ export default function Sidebar({
   onNavigate,
   isAbsolute = "",
 }) {
+  const { user } = useAuth();
+
   return (
     <aside
       className={`${
@@ -67,14 +70,16 @@ export default function Sidebar({
           <Ticket size={17} aria-hidden="true" />
           <span className={compact ? "hidden" : ""}>Join with code</span>
         </Button>
-        <Button
-          to="/dashboard/class/create"
-          className={`w-full ${compact ? "justify-center p-0" : "justify-start"}`}
-          title={compact ? "Create a class" : undefined}
-        >
-          <Plus size={17} aria-hidden="true" />
-          <span className={compact ? "hidden" : ""}>Create a class</span>
-        </Button>
+        {user?.canCreateCourses && (
+          <Button
+            to="/dashboard/class/create"
+            className={`w-full ${compact ? "justify-center p-0" : "justify-start"}`}
+            title={compact ? "Create a class" : undefined}
+          >
+            <Plus size={17} aria-hidden="true" />
+            <span className={compact ? "hidden" : ""}>Create a class</span>
+          </Button>
+        )}
       </div>
 
       {/* Settings Footer Section */}
