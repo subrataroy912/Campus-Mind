@@ -4,11 +4,14 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import ClassHeader from "../components/ClassHeader.jsx";
 import ClassTabs from "../components/ClassTabs.jsx";
 import ClassQuickLinks from "../components/ClassQuickLinks.jsx";
-import ClassPageSkeleton from "../components/ClassPageSkeleton.jsx";
-import { useClassroom } from "../hooks/useClassroom.js";
-import { joinClassroom } from "../api/classroomService.js";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
-import { isTeacherRole } from "../roles.js";
+import { ClassPageSkeleton } from "../components/ClassPageSkeleton.jsx";
+import { CodePromptModal } from "../components/CodePromptModal.jsx";
+import {
+  useFindClassroomByIdQuery,
+  useJoinClassroomMutation,
+} from "../api/classroomApi.js";
+import { isTeacherRole, isUserEnrolled } from "../roles.js";
+import { routes } from "@/routes/paths";
 import {
   ClassHomeTab,
   ClassworkTab,
@@ -17,51 +20,88 @@ import {
 } from "../components/classPage/index.js";
 
 export default function ClassPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") || "home";
   const { classId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const { user } = useAuth();
+  const activeTab = searchParams.get("tab") || "home";
+  const { user, authStatus } = useAuth();
+  const isHydrating = authStatus === "hydrating";
 
-  const { classroom, error, notFound, isEnrolled, isLoading } =
-    useClassroom(classId);
+  const {
+    data: classroom,
+    isLoading,
+    error,
+  } = useFindClassroomByIdQuery(classId, {
+    skip: isHydrating || !classId,
+  });
 
-  const [isJoining, setIsJoining] = useState(false);
-  const [joinError, setJoinError] = useState("");
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+  const [classCodeInput, setClassCodeInput] = useState("");
+  const [localJoinError, setLocalJoinError] = useState("");
 
-  const handleJoin = async () => {
-    if (!classId || isJoining) return;
-    setIsJoining(true);
-    setJoinError("");
+  const [joinClassroom, { isLoading: isJoining, error: joinErrorObj }] =
+    useJoinClassroomMutation();
+
+  const isEnrolled = isUserEnrolled(classroom, user?.id);
+
+  const rawAccessType = (classroom?.accessType || (classroom?.visibility === "PUBLIC" ? "OPEN" : "CODE")).toUpperCase();
+  const isCodeProtected = rawAccessType === "CODE" && classroom?.visibility !== "PUBLIC";
+
+  const handleJoin = async (overrideCode) => {
+    if (!classId) return;
+
+    // If this classroom requires a code and no code was provided yet, open the modal
+    const effectiveCode = typeof overrideCode === "string" ? overrideCode.trim() : classCodeInput.trim();
+    if (isCodeProtected && !effectiveCode) {
+      setLocalJoinError("");
+      setIsCodeModalOpen(true);
+      return;
+    }
+
+    setLocalJoinError("");
     try {
-      await joinClassroom(user?.id, { courseId: classId });
-      triggerLifecycleRefresh("course:joined", { courseId: classId });
+      await joinClassroom({
+        courseId: classId,
+        code: effectiveCode || undefined,
+      }).unwrap();
+      setIsCodeModalOpen(false);
+      setClassCodeInput("");
     } catch (err) {
-      const status = err?.status ?? err?.originalStatus;
-      if (
-        status === 409 ||
-        err?.data?.error?.toLowerCase()?.includes("already")
-      ) {
-        triggerLifecycleRefresh("course:joined", { courseId: classId });
-        return;
-      }
-      setJoinError(
+      const message =
         err?.data?.error ||
-          err?.message ||
-          "Failed to join class. Please try again."
-      );
-    } finally {
-      setIsJoining(false);
+        err?.data?.message ||
+        err?.message ||
+        "Failed to join class. Please verify the code and try again.";
+      setLocalJoinError(message);
     }
   };
 
-  if (isLoading && !classroom) {
+  const handleCodeSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!classCodeInput.trim()) {
+      setLocalJoinError("Please enter a class code.");
+      return;
+    }
+    handleJoin(classCodeInput);
+  };
+
+  const joinError =
+    localJoinError ||
+    joinErrorObj?.data?.message ||
+    joinErrorObj?.data?.error ||
+    joinErrorObj?.message ||
+    null;
+
+  if (isLoading) {
     return <ClassPageSkeleton />;
   }
 
-  if (notFound) {
+  const isNotFound =
+    !classroom || error?.status === 404 || error?.data?.status === 404;
+
+  if (isNotFound) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4 text-center">
+      <div className="grid min-h-screen place-items-center bg-canvas px-4 py-8">
         <div className="max-w-md rounded-2xl bg-surface p-6 shadow-xs ring-1 ring-border">
           <h2 className="text-lg font-semibold text-text-heading">
             Classroom Not Found
@@ -72,7 +112,7 @@ export default function ClassPage() {
           </p>
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
             <Link
-              to={`/dashboard/class/join?courseId=${encodeURIComponent(
+              to={`${routes.classes.join}?courseId=${encodeURIComponent(
                 classId || ""
               )}`}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover shadow-xs"
@@ -80,7 +120,7 @@ export default function ClassPage() {
               Join this class
             </Link>
             <Link
-              to="/dashboard"
+              to={routes.classes.list}
               className="inline-flex items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
             >
               Back to classes
@@ -187,6 +227,21 @@ export default function ClassPage() {
             isJoining={isJoining}
           />
         )}
+
+        <CodePromptModal
+          isOpen={isCodeModalOpen}
+          onClose={() => {
+            setIsCodeModalOpen(false);
+            setLocalJoinError("");
+          }}
+          onSubmit={handleCodeSubmit}
+          cardTitle={classroom?.title || "Class"}
+          courseId={classId}
+          classCode={classCodeInput}
+          onChangeCode={setClassCodeInput}
+          joinError={localJoinError}
+          isJoining={isJoining}
+        />
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 
 const TYPE_META = {
   announcement: {
@@ -151,14 +152,14 @@ export default function DashboardCommunityPage() {
           <EmptyState
             title="No community updates yet"
             description="Start with a class to keep conversations focused and helpful."
-            action={{ to: "/dashboard/class/join", label: "Join a class" }}
+            action={{ to: routes.classes.join, label: "Join a class" }}
           />
         </div>
       ) : (
         <>
           <div className="mt-6 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border">
             <div className="flex gap-3">
-              <ClassroomAvatar to="/dashboard/profile" avatar={user?.avatar} name={user?.name} />
+              <ClassroomAvatar to={routes.profile.root} avatar={user?.avatar} name={user?.name} />
               <div className="flex-1">
                 <textarea
                   value={draft}

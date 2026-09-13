@@ -9,6 +9,7 @@ import CreatorRoute from "./CreatorRoute.jsx";
 import ServerDown from "@/pages/ServerDown.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 import { routes } from "./paths.js";
+import ParamRedirect from "./ParamRedirect.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(() =>
   import("../features/dashboard/pages/DashboardHomePage.jsx")
@@ -131,6 +132,60 @@ export const appRouteConfig = [
 
               // Settings
               { path: routes.settings, element: <SettingsPage /> },
+
+              /* Backward-Compatible Redirects for legacy /dashboard/* paths */
+              {
+                path: "/dashboard/classes",
+                element: <Navigate to={routes.classes.list} replace />,
+              },
+              {
+                path: "/dashboard/classes/:classId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.classes.detail(params.classId)}
+                  />
+                ),
+              },
+              {
+                path: "/dashboard/class/join",
+                element: <ParamRedirect to={routes.classes.join} />,
+              },
+              {
+                path: "/dashboard/class/create",
+                element: <Navigate to={routes.classes.new} replace />,
+              },
+              {
+                path: "/dashboard/community",
+                element: <ParamRedirect to={routes.community} />,
+              },
+              {
+                path: "/dashboard/messages",
+                element: <ParamRedirect to={routes.messages} />,
+              },
+              {
+                path: "/dashboard/saved",
+                element: <ParamRedirect to={routes.saved} />,
+              },
+              {
+                path: "/dashboard/explore",
+                element: <ParamRedirect to={routes.explore} />,
+              },
+              {
+                path: "/dashboard/profile",
+                element: <ParamRedirect to={routes.profile.root} />,
+              },
+              {
+                path: "/dashboard/profile/:userId",
+                element: (
+                  <ParamRedirect
+                    to={(params) => routes.user(params.userId)}
+                  />
+                ),
+              },
+              {
+                path: "/dashboard/settings",
+                element: <Navigate to={routes.settings} replace />,
+              },
             ],
           },
         ],

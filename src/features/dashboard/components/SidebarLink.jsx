@@ -1,4 +1,5 @@
 import { NavLink } from "react-router";
+import { routes } from "@/routes/paths.js";
 
 export function SidebarLink({
   to,
@@ -11,7 +12,7 @@ export function SidebarLink({
   return (
     <NavLink
       to={to}
-      end={end ?? to === "/dashboard"}
+      end={end ?? to === routes.dashboard}
       className={(navState) =>
         `${getNavLinkStyles(navState)} ${
           compact ? "justify-center px-0" : ""

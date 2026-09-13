@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Camera, Globe, Menu, MessageCircle, Pencil, Sparkles } from "lucide-react";
+import { routes } from "@/routes/paths.js";
 import { Button } from "@/components/ui/button.jsx";
 import {
   DropdownMenu,
@@ -60,7 +61,7 @@ export default function ProfileHeader({
 
   const copyLink = () =>
     navigator.clipboard?.writeText(
-      `${window.location.origin}/dashboard/profile/${profile.id}`,
+      `${window.location.origin}${routes.user(profile.id)}`,
     );
   return (
     <header className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
@@ -140,7 +141,7 @@ export default function ProfileHeader({
                 <span className="hidden min-[380px]:inline">Edit profile</span>
               </Button>
             ) : (
-              <Button to={`/dashboard/messages?member=${profile.id}`}>
+              <Button to={`${routes.messages}?member=${profile.id}`}>
                 <MessageCircle aria-hidden="true" />
                 Message
               </Button>
@@ -168,7 +169,7 @@ export default function ProfileHeader({
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      render={<Link to="/dashboard/settings" />}
+                      render={<Link to={routes.settings} />}
                     >
                       Go to Settings
                     </DropdownMenuItem>

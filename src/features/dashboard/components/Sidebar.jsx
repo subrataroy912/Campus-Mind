@@ -1,9 +1,10 @@
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { SIDEBAR_NAV_ITEMS } from "@/config/navigation.js";
 import { Plus, Settings, Ticket } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
+import { routes } from "@/routes/paths";
 
 export default function Sidebar({
   compact = false,
@@ -55,7 +56,7 @@ export default function Sidebar({
           Classroom
         </p>
         <Button
-          to="/dashboard/class/join"
+          to={routes.classes.join}
           variant="outline"
           className={`w-full ${
             compact ? "justify-center p-0" : "justify-start"
@@ -67,7 +68,7 @@ export default function Sidebar({
         </Button>
         {user?.canCreateCourses && (
           <Button
-            to="/dashboard/class/create"
+            to={routes.classes.new}
             className={`w-full ${
               compact ? "justify-center p-0" : "justify-start"
             }`}
@@ -84,7 +85,7 @@ export default function Sidebar({
         className={`w-full border-t border-border ${compact ? "p-2" : "p-3"}`}
       >
         <Link
-          to="/dashboard/settings"
+          to={routes.settings}
           className={`flex items-center rounded-md text-sm font-medium text-text-main transition-colors hover:bg-canvas ${
             compact ? "justify-center py-2 px-0" : "gap-3 px-3 py-2"
           }`}

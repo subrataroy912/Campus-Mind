@@ -9,6 +9,7 @@ import {
   ClassScheduleSection,
   ClassAccessTypeSection,
 } from "../components/createClass/index.js";
+import { routes } from "@/routes/paths.js";
 
 export default function CreateClass() {
   const {
@@ -33,7 +34,7 @@ export default function CreateClass() {
         {/* Navigation Back Link */}
         <div className="mb-6">
           <Link
-            to="/dashboard"
+            to={routes.classes.list}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-heading transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />

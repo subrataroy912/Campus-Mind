@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 import {
   useGetClassroomRosterQuery,
   useUpdateClassroomMutation,
@@ -45,7 +46,7 @@ const MemberRow = React.memo(function MemberRow({
       </div>
       {memberId ? (
         <Link
-          to={`/dashboard/profile/${memberId}`}
+          to={routes.user(memberId)}
           className="min-w-0 flex-1 truncate text-sm font-medium text-text-main hover:text-primary hover:underline transition-colors"
         >
           {memberName}
@@ -61,7 +62,7 @@ const MemberRow = React.memo(function MemberRow({
         </span>
       )}
       <Button
-        to={`/dashboard/messages?member=${memberId}`}
+        to={`${routes.messages}?member=${memberId}`}
         variant="ghost"
         size="icon-sm"
         aria-label={`Message ${memberName}`}

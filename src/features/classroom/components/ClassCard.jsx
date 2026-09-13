@@ -5,6 +5,7 @@ import { formatDisplayText } from "@/utils/textFormat.js";
 import { getClassTheme } from "../utils/classTheme.js";
 import { classroomApi } from "../api/classroomApi.js";
 import { store } from "@/app/store.js";
+import { routes } from "@/routes/paths";
 
 function ClassCard({ classroom, priority = false }) {
   const classTheme = getClassTheme(classroom);
@@ -105,7 +106,7 @@ function ClassCard({ classroom, priority = false }) {
           {teacher?.name ? (
             teacherId ? (
               <Link
-                to={`/dashboard/profile/${teacherId}`}
+                to={routes.user(teacherId)}
                 className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-[130px] sm:max-w-[150px] text-xs sm:text-sm"
                 title={`with ${teacher.name}`}
               >
@@ -159,7 +160,7 @@ function ClassCard({ classroom, priority = false }) {
         </span>
         <Link
           className="text-sm font-bold text-primary transition-colors hover:text-primary-hover hover:underline"
-          to={`/dashboard/classes/${classroom.id}`}
+          to={routes.classes.detail(classroom.id)}
         >
           Open class
         </Link>

@@ -6,6 +6,7 @@ import { getOAuthRedirectUrl } from "../api/authService.js";
 import { Button } from "@/components/ui/button.jsx";
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { routes } from "@/routes/paths.js";
 import {
   Tooltip,
   TooltipContent,
@@ -51,7 +52,7 @@ export default function RegisterPage() {
         description: "Your account is ready. Sign in to continue.",
         type: "success",
       });
-      navigate("/auth/login", { replace: true, state: { registered: true } });
+      navigate(routes.auth.login, { replace: true, state: { registered: true } });
     } catch (err) {
       toast.add({
         title: "Registration failed",
@@ -134,7 +135,7 @@ export default function RegisterPage() {
       <p className="mt-7 text-center text-text-main">
         Already have an account?{" "}
         <Link
-          to="/auth/login"
+          to={routes.auth.login}
           className="font-bold text-primary hover:underline"
         >
           Sign in

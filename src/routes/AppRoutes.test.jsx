@@ -41,18 +41,19 @@ describe("application route auth restoration", () => {
     expect(getProtectedRouteState("failed", false)).toBe("unauthenticated");
   });
 
-  it("protects /dashboard/class/create behind CreatorRoute", () => {
+  it("protects routes.classes.new behind CreatorRoute", () => {
     const rootRoute = appRouteConfig[0];
     const protectedRoute = rootRoute.children.find(
       (route) => route.element?.type?.name === "ProtectedRoute"
     );
-    const creatorRoute = protectedRoute?.children?.find(
+    const dashboardLayoutRoute = protectedRoute?.children?.[0];
+    const creatorRoute = dashboardLayoutRoute?.children?.find(
       (route) => route.element?.type?.name === "CreatorRoute"
     );
 
     expect(creatorRoute).toBeDefined();
     const createClassRoute = creatorRoute?.children?.find(
-      (route) => route.path === "/dashboard/class/create"
+      (route) => route.path === "/classes/new"
     );
     expect(createClassRoute).toBeDefined();
   });

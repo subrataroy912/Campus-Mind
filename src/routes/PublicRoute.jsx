@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { getProtectedRouteState } from "@/context/authSession";
+import { routes } from "@/routes/paths.js";
 
 export default function PublicRoute() {
   const { isAuthenticated, authStatus } = useAuth();
@@ -22,7 +23,7 @@ export default function PublicRoute() {
   }
 
   if (routeState === "authenticated") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={routes.dashboard} replace />;
   }
 
   return <Outlet />;
