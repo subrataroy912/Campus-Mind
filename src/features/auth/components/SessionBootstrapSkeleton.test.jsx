@@ -11,7 +11,7 @@ describe("SessionBootstrapSkeleton", () => {
       </MemoryRouter>
     );
 
-    expect(html).toContain('src="/logo-square.png"');
+    expect(html).toContain('src="/logo-square.webp"');
     expect(html).toContain('fetchPriority="high"');
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-label="Restoring session"');

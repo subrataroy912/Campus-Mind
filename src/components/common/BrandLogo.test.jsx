@@ -4,14 +4,14 @@ import { MemoryRouter } from "react-router";
 import BrandLogo from "./BrandLogo.jsx";
 
 describe("BrandLogo", () => {
-  it("renders with default fetchPriority='auto' and logo-square.png", () => {
+  it("renders with default fetchPriority='auto' and logo-square.webp", () => {
     const html = renderToString(
       <MemoryRouter>
         <BrandLogo />
       </MemoryRouter>
     );
 
-    expect(html).toContain('src="/logo-square.png"');
+    expect(html).toContain('src="/logo-square.webp"');
     expect(html).toContain('fetchPriority="auto"');
     expect(html).toContain('decoding="async"');
     expect(html).toContain('width="40"');
@@ -37,7 +37,7 @@ describe("BrandLogo", () => {
       </MemoryRouter>
     );
 
-    expect(html).toContain('src="/logo-square.png"');
+    expect(html).toContain('src="/logo-square.webp"');
     expect(html).not.toContain(">Campus<");
     expect(html).not.toContain(">Mind<");
   });

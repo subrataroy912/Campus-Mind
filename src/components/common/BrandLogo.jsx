@@ -18,7 +18,7 @@ function BrandLogo({ compact = false, className = '', fetchPriority = 'auto' }) 
     >
       <div className="flex items-center justify-center gap-1 md:gap-2 flex-nowrap">
         <img
-          src="/logo-square.png"
+          src="/logo-square.webp"
           alt="CampusMind"
           width="40"
           height="40"
