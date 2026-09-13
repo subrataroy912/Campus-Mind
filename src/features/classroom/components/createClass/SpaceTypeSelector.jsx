@@ -22,17 +22,19 @@ export default function SpaceTypeSelector({ form, update }) {
   const currentType = form.spaceType || "ACADEMIC_CLASS";
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-base font-semibold text-text-heading">
-          Choose Space Type
-        </h2>
-        <p className="text-xs text-text-muted mt-0.5">
-          Select the type of group you want to create. This shapes its features, defaults, and discovery.
-        </p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+            Space Type <span className="text-secondary">*</span>
+          </label>
+          <p className="text-[12px] text-text-muted">
+            Configures identity, meeting style, and audience.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {SPACE_TYPES.map((type) => {
           const isSelected = currentType === type.id;
           const Icon = ICON_MAP[type.icon] || Globe;
@@ -42,41 +44,36 @@ export default function SpaceTypeSelector({ form, update }) {
               key={type.id}
               type="button"
               onClick={() => update("spaceType", type.id)}
-              className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 focus:outline-none ${
+              className={`group relative flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all duration-150 focus:outline-none min-h-[72px] sm:min-h-[76px] cursor-pointer ${
                 isSelected
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-xs"
-                  : "border-border bg-surface hover:border-border/80 hover:bg-canvas/40"
+                  ? "border-primary bg-primary/8 text-primary shadow-xs ring-1 ring-primary"
+                  : "border-border bg-surface text-text-main hover:border-border/80 hover:bg-canvas/50"
               }`}
+              title={`${type.label}: ${type.description}`}
             >
-              <div className="flex w-full items-center justify-between">
-                <div
-                  className={`flex size-9 items-center justify-center rounded-xl transition-colors ${
-                    isSelected
-                      ? "bg-primary text-surface"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                >
-                  <Icon className="size-5" />
-                </div>
-                {isSelected ? (
-                  <span className="flex size-5 items-center justify-center rounded-full bg-primary text-surface shadow-xs">
-                    <Check className="size-3 stroke-[3]" />
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-text-muted">
-                    {type.badge}
-                  </span>
-                )}
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                  isSelected
+                    ? "bg-primary text-surface"
+                    : "bg-primary/10 text-primary group-hover:bg-primary/15"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
               </div>
 
-              <div className="mt-3">
-                <h3 className="text-sm font-semibold text-text-heading">
-                  {type.label}
-                </h3>
-                <p className="mt-1 text-xs leading-relaxed text-text-muted line-clamp-2">
-                  {type.description}
-                </p>
-              </div>
+              <span className="mt-1.5 line-clamp-1 text-xs font-medium">
+                {type.label}
+              </span>
+
+              <span className="text-[10px] text-text-muted">
+                {type.badge}
+              </span>
+
+              {isSelected && (
+                <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-surface">
+                  <Check className="h-2.5 w-2.5 stroke-[3]" />
+                </span>
+              )}
             </button>
           );
         })}
