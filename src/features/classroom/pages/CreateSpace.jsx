@@ -54,7 +54,8 @@ export default function CreateSpace() {
                 Create a space
               </h1>
               <p className="text-[12px] text-text-muted">
-                Set up a new space for your class, study group, club, or project team.
+                Set up a new space for your class, study group, club, or project
+                team.
               </p>
             </div>
           </div>
@@ -94,20 +95,12 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 2: Basic Info */}
-          <SpaceBasicInfoSection
-            form={form}
-            errors={errors}
-            update={update}
-          />
+          <SpaceBasicInfoSection form={form} errors={errors} update={update} />
 
           <hr className="border-border/50" />
 
           {/* Section 3: Academic/Focus Details */}
-          <SpaceAcademicSection
-            form={form}
-            errors={errors}
-            update={update}
-          />
+          <SpaceAcademicSection form={form} errors={errors} update={update} />
 
           <hr className="border-border/50" />
 
@@ -121,10 +114,7 @@ export default function CreateSpace() {
           <hr className="border-border/50" />
 
           {/* Section 5: Access & Membership Type */}
-          <SpaceAccessTypeSection
-            form={form}
-            update={update}
-          />
+          <SpaceAccessTypeSection form={form} update={update} />
 
           {/* Form Actions */}
           <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
