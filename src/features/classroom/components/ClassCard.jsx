@@ -60,7 +60,9 @@ function ClassCard({ classroom, priority = false }) {
       className="w-full h-full flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-surface shadow-xs transition hover:-translate-y-0.5 hover:shadow-sm"
     >
       {/* Compact Banner & Floating Logo */}
-      <div className={`relative h-20 w-full shrink-0 ${classTheme.gradientClass}`}>
+      <div
+        className={`relative h-20 w-full shrink-0 ${classTheme.gradientClass}`}
+      >
         <div className="absolute inset-0 overflow-hidden">
           {(classroom.coverUrl || classroom.cover) && (
             <img
@@ -96,7 +98,7 @@ function ClassCard({ classroom, priority = false }) {
       {/* Main Content - High density layout */}
       <div className="flex-1 flex flex-col justify-between p-3.5 pt-3 min-w-0">
         <div className="pr-14 min-w-0">
-          <div className="flex items-center gap-1.5 min-h-[1rem]">
+          <div className="flex items-center gap-1.5 min-h-4">
             <span className="inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.2 text-[10px] font-semibold text-primary">
               {spaceLabel}
             </span>
@@ -112,7 +114,7 @@ function ClassCard({ classroom, priority = false }) {
           >
             {classroom.title}
           </h2>
-          <p className="mt-0.5 text-xs text-text-muted line-clamp-1 min-h-[1rem]">
+          <p className="mt-0.5 text-xs text-text-muted line-clamp-1 min-h-4">
             {classroom.subtitle || classroom.section || "\u00A0"}
           </p>
         </div>
@@ -123,21 +125,23 @@ function ClassCard({ classroom, priority = false }) {
             teacherId ? (
               <Link
                 to={routes.user(teacherId)}
-                className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-[120px] text-xs"
+                className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-30 text-xs"
                 title={`with ${teacher.name}`}
               >
                 with {teacher.name}
               </Link>
             ) : (
               <span
-                className="font-medium text-text-main truncate max-w-[120px] text-xs"
+                className="font-medium text-text-main truncate max-w-30 text-xs"
                 title={`with ${teacher.name}`}
               >
                 with {teacher.name}
               </span>
             )
           ) : (
-            <span className="text-[11px] text-text-muted italic">Self-paced</span>
+            <span className="text-[11px] text-text-muted italic">
+              Self-paced
+            </span>
           )}
           <div className="flex items-center gap-1.5 shrink-0 text-xs">
             {accessType === "invite" ? (
@@ -169,7 +173,9 @@ function ClassCard({ classroom, priority = false }) {
         <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">
           <MessageCircle size={13} />
           {unread ? (
-            <span className="font-semibold text-text-heading">{unread} new</span>
+            <span className="font-semibold text-text-heading">
+              {unread} new
+            </span>
           ) : (
             "Up to date"
           )}

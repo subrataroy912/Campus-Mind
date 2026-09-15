@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { ArrowLeft, Eye, Lock, UserX } from "lucide-react";
+import { ArrowLeft, Eye, Lock, Shield, Users, UserX } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -21,6 +21,7 @@ import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 import { routes } from "@/routes/paths.js";
+import { DashboardSection } from "@/features/dashboard/components/DashboardSection.jsx";
 
 const profileFor = (user) => ({
   ...user,
@@ -103,8 +104,17 @@ export default function ProfilePage() {
   const classes = isOwner
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
-
-  if (authStatus === "hydrating" || isCurrentProfileLoading || isPublicProfileLoading)
+  const createdClasses = classes.filter(
+    (item) => item.ownerId === viewedUser.id
+  );
+  const joinedClasses = classes.filter(
+    (item) => item.ownerId !== viewedUser.id
+  );
+  if (
+    authStatus === "hydrating" ||
+    isCurrentProfileLoading ||
+    isPublicProfileLoading
+  )
     return <ProfilePageSkeleton />;
 
   if (isCurrentProfileError && isProfileOwner)
@@ -217,6 +227,85 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
+
+  const renderTabContent = () => {
+    if (activeTab === "saved") {
+      return (
+        <EmptyState
+          title="No saved items yet"
+          description="Save posts and resources to find them quickly later."
+          action={{ to: routes.saved, label: "Browse saved items" }}
+        />
+      );
+    }
+
+    if (!classes.length) {
+      return (
+        <EmptyState
+          title={
+            isOwner
+              ? "You haven't joined or created a class yet"
+              : "No shared classes yet"
+          }
+          description={
+            isOwner
+              ? "Join or create a class to see it on your profile."
+              : "You don't have any classes in common right now."
+          }
+          action={
+            isOwner
+              ? { to: routes.explore, label: "Explore classes" }
+              : undefined
+          }
+        />
+      );
+    }
+
+    return (
+      <div className="flex flex-col">
+        {createdClasses.length > 0 && (
+          <DashboardSection
+            id="managed-spaces-heading"
+            title={isOwner ? "Spaces you manage" : "Spaces they manage"}
+            description={
+              isOwner
+                ? "Spaces where you are an admin or teacher."
+                : "Spaces managed by this user."
+            }
+            icon={Shield}
+            iconWrapperClass="bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+            items={createdClasses}
+            layout="grid"
+            renderItem={(classroom) => <ClassCard classroom={classroom} />}
+            className="mt-0 pt-0 sm:mt-0 sm:pt-0 border-none"
+          />
+        )}
+
+        {joinedClasses.length > 0 && (
+          <DashboardSection
+            id="joined-spaces-heading"
+            title={isOwner ? "Spaces you've joined" : "Shared spaces"}
+            description={
+              isOwner
+                ? "Communities you are actively participating in."
+                : "Communities you both belong to."
+            }
+            icon={Users}
+            iconWrapperClass="bg-green-100 text-green-600 dark:bg-green-950/50 dark:text-green-400"
+            items={joinedClasses}
+            layout="grid"
+            renderItem={(classroom) => <ClassCard classroom={classroom} />}
+            className={
+              createdClasses.length > 0
+                ? "mt-8 border-t border-border pt-6 sm:mt-8 sm:pt-6"
+                : "mt-0 pt-0 sm:mt-0 sm:pt-0 border-none"
+            }
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="mx-auto min-h-dvh max-w-6xl px-3 py-3 sm:px-6 lg:py-6">
       {/* Back button */}
@@ -225,14 +314,14 @@ export default function ProfilePage() {
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+          className="-ml-2 gap-2 text-text-muted hover:text-text-heading"
         >
           <ArrowLeft size={16} /> Back
         </Button>
       </div>
 
       {preview && (
-        <div className="sticky top-2 z-30 mb-4 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary backdrop-blur-md shadow-sm">
+        <div className="sticky top-2 z-30 mb-4 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary shadow-sm backdrop-blur-md">
           <div className="flex items-center gap-2">
             <Eye size={18} />
             <span>You are viewing your profile as others see it.</span>
@@ -241,7 +330,7 @@ export default function ProfilePage() {
             variant="outline"
             size="sm"
             onClick={() => setPreview(false)}
-            className="h-8 bg-surface text-text-heading border-border shadow-xs hover:bg-canvas"
+            className="h-8 border-border bg-surface text-text-heading shadow-xs hover:bg-canvas"
           >
             Exit preview
           </Button>
@@ -258,9 +347,11 @@ export default function ProfilePage() {
           onAvatarUpload={handleAvatarUpload}
           onBannerUpload={handleBannerUpload}
         />
+
         <section>
           <ProfileDetails details={details} />
         </section>
+
         <section className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
           <div className="flex gap-1 border-b border-border p-2" role="tablist">
             <Button
@@ -280,41 +371,11 @@ export default function ProfilePage() {
               </Button>
             )}
           </div>
-          <div className="p-4 sm:p-5">
-            {activeTab === "saved" ? (
-              <EmptyState
-                title="No saved items yet"
-                description="Save posts and resources to find them quickly later."
-                action={{ to: routes.saved, label: "Browse saved items" }}
-              />
-            ) : classes.length ? (
-              <ContentList
-                layout="grid"
-                items={classes}
-                renderItem={(classroom) => <ClassCard classroom={classroom} />}
-              />
-            ) : (
-              <EmptyState
-                title={
-                  isOwner
-                    ? "You haven't joined a class yet"
-                    : "No shared classes yet"
-                }
-                description={
-                  isOwner
-                    ? "Join a class to see it on your profile."
-                    : "You don't have any classes in common right now."
-                }
-                action={
-                  isOwner
-                    ? { to: routes.explore, label: "Join a class" }
-                    : undefined
-                }
-              />
-            )}
-          </div>
+
+          <div className="p-4 sm:p-5">{renderTabContent()}</div>
         </section>
       </div>
+
       {isOwner && (
         <EditProfileModal
           isOpen={isEditing}

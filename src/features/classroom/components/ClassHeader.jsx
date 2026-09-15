@@ -16,6 +16,8 @@ import {
   Trash2,
   UserPlus,
   Video,
+  LogOutIcon,
+  PencilIcon,
 } from "lucide-react";
 import { ClassroomIcon } from "./ClassroomIcon.jsx";
 import { getClassTheme } from "../utils/classTheme.js";
@@ -34,14 +36,43 @@ import {
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,
 } from "../api/classroomApi.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu.jsx";
 
 const SPACE_TYPE_CONFIG = {
-  ACADEMIC_CLASS: { label: "Class", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
-  STUDY_GROUP: { label: "Study Group", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
-  CLUB_SOCIETY: { label: "Club & Society", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
-  PROJECT_TEAM: { label: "Project Team", color: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20" },
-  DEPARTMENT_COHORT: { label: "Cohort", color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" },
-  COMMUNITY_HUB: { label: "Community", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
+  ACADEMIC_CLASS: {
+    label: "Class",
+    color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+  },
+  STUDY_GROUP: {
+    label: "Study Group",
+    color:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+  },
+  CLUB_SOCIETY: {
+    label: "Club & Society",
+    color:
+      "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  },
+  PROJECT_TEAM: {
+    label: "Project Team",
+    color:
+      "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20",
+  },
+  DEPARTMENT_COHORT: {
+    label: "Cohort",
+    color:
+      "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+  },
+  COMMUNITY_HUB: {
+    label: "Community",
+    color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
+  },
 };
 
 export default function ClassHeader({
@@ -53,15 +84,17 @@ export default function ClassHeader({
 }) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
-  const [archiveClassroom, { isLoading: isArchiving }] = useArchiveClassroomMutation();
-  const [deleteClassroom, { isLoading: isDeleting }] = useDeleteClassroomMutation();
-  const [leaveClassroom, { isLoading: isLeaving }] = useLeaveClassroomMutation();
+  const [archiveClassroom, { isLoading: isArchiving }] =
+    useArchiveClassroomMutation();
+  const [deleteClassroom, { isLoading: isDeleting }] =
+    useDeleteClassroomMutation();
+  const [leaveClassroom, { isLoading: isLeaving }] =
+    useLeaveClassroomMutation();
 
   const classTheme = getClassTheme(classroom);
   const teacherName =
@@ -75,10 +108,11 @@ export default function ClassHeader({
 
   const accessType = (
     classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "open" : "code")
+    (classroom?.visibility === "PUBLIC" ? "Public" : "code")
   ).toLowerCase();
 
-  const spaceTypeInfo = SPACE_TYPE_CONFIG[classroom?.spaceType] || SPACE_TYPE_CONFIG.ACADEMIC_CLASS;
+  const spaceTypeInfo =
+    SPACE_TYPE_CONFIG[classroom?.spaceType] || SPACE_TYPE_CONFIG.ACADEMIC_CLASS;
   const isOnline = classroom?.meetingType === "ONLINE";
   const location = classroom?.location || classroom?.room;
   const isMeetingLink =
@@ -93,7 +127,8 @@ export default function ClassHeader({
   const handleCopy = () => {
     let textToCopy = classroom?.code || classroom?.enrollmentCode || "";
     if (accessType === "open") {
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
       textToCopy = `${origin}/join?courseId=${classroom?.id || ""}`;
     }
     if (!textToCopy) return;
@@ -135,7 +170,9 @@ export default function ClassHeader({
   return (
     <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border">
       {/* Compact Banner Section */}
-      <div className={`relative h-20 sm:h-28 overflow-hidden ${classTheme.gradientClass}`}>
+      <div
+        className={`relative h-20 sm:h-28 overflow-hidden ${classTheme.gradientClass}`}
+      >
         {(classroom?.coverUrl || classroom?.cover) && (
           <img
             src={classroom.coverUrl || classroom.cover}
@@ -146,7 +183,7 @@ export default function ClassHeader({
           />
         )}
         <div className="absolute inset-0 bg-black/15" />
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-black/50 via-black/20 to-transparent" />
 
         {/* Back Link */}
         <div className="absolute left-2.5 top-2.5 z-10">
@@ -161,63 +198,79 @@ export default function ClassHeader({
         </div>
 
         {/* Settings Dropdown for Teachers / Leaders */}
-        <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-1.5">
+        <div className="absolute right-2.5 top-2.5 z-20 flex items-center gap-1.5">
           {isEnrolled && !teacher && (
-            <button
-              onClick={() => setIsLeaveDialogOpen(true)}
+            <Button
+              variant="outline"
+              size="sm"
               title="Leave space"
-              className="flex h-7 items-center gap-1 rounded-full bg-black/35 px-2.5 text-[11px] font-medium text-white transition hover:bg-black/50 backdrop-blur-md border border-white/15 cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsLeaveDialogOpen(true);
+              }}
+              className="h-7 border-white/20 bg-black/40 px-2.5 text-[11px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white"
             >
-              <LogOut className="h-3 w-3" />
+              <LogOutIcon className="mr-1.5 h-3 w-3" />
               <span className="hidden sm:inline">Leave</span>
-            </button>
+            </Button>
           )}
 
           {teacher && (
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen((open) => !open)}
-                aria-label="Class settings"
-                title="Space settings"
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/45 backdrop-blur-md border border-white/15 shadow-xs cursor-pointer"
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label="Class settings"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    className="h-7 w-7 rounded-full border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white focus-visible:ring-1 focus-visible:ring-white"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    <span className="sr-only">Class settings</span>
+                  </Button>
+                }
+              />
+
+              <DropdownMenuContent
+                align="end"
+                className="w-48 text-xs font-medium"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
-                <Settings className="h-3.5 w-3.5" />
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-8 z-20 w-48 overflow-hidden rounded-xl bg-surface py-1 shadow-lg ring-1 ring-border text-xs">
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setIsEditModalOpen(true);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-medium text-text-main hover:bg-canvas transition-colors cursor-pointer"
-                  >
-                    <Pencil className="h-3.5 w-3.5 text-primary" />
-                    <span>Edit space details</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setIsArchiveDialogOpen(true);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-medium text-amber-600 dark:text-amber-400 hover:bg-canvas transition-colors cursor-pointer"
-                  >
-                    <Archive className="h-3.5 w-3.5" />
-                    <span>Archive space</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span>Delete space</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                <DropdownMenuItem
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="cursor-pointer gap-2"
+                >
+                  <PencilIcon className="h-3.5 w-3.5 text-primary" />
+                  <span>Edit space details</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onClick={() => setIsArchiveDialogOpen(true)}
+                  className="cursor-pointer gap-2 text-amber-600 focus:bg-amber-50 focus:text-amber-700 dark:text-amber-500 dark:focus:bg-amber-950/50 dark:focus:text-amber-400"
+                >
+                  <Archive className="h-3.5 w-3.5" />
+                  <span>Archive space</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete space</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
@@ -256,7 +309,9 @@ export default function ClassHeader({
             </div>
 
             <p className="text-xs font-medium text-text-muted truncate">
-              {classroom?.section || classroom?.subtitle ? `${classroom.section || classroom.subtitle} • ` : ""}
+              {classroom?.section || classroom?.subtitle
+                ? `${classroom.section || classroom.subtitle} • `
+                : ""}
               <span>with {teacherName}</span>
               {classroom?.subject ? ` • ${classroom.subject}` : ""}
             </p>
@@ -265,7 +320,11 @@ export default function ClassHeader({
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
               {/* Meeting format */}
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-1.5 py-0.5 text-text-muted border border-border font-medium">
-                {isOnline ? <Video className="h-3 w-3 text-primary" /> : <MapPin className="h-3 w-3 text-primary" />}
+                {isOnline ? (
+                  <Video className="h-3 w-3 text-primary" />
+                ) : (
+                  <MapPin className="h-3 w-3 text-primary" />
+                )}
                 {isMeetingLink ? (
                   <a
                     href={location}
@@ -277,14 +336,25 @@ export default function ClassHeader({
                     <ExternalLink className="h-2.5 w-2.5" />
                   </a>
                 ) : (
-                  <span>{location || (classroom?.meetingType === "ONLINE" ? "Online" : "In-Person")}</span>
+                  <span>
+                    {location ||
+                      (classroom?.meetingType === "ONLINE"
+                        ? "Online"
+                        : "In-Person")}
+                  </span>
                 )}
               </span>
 
               {/* Access type */}
               <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-1.5 py-0.5 text-text-muted border border-border capitalize font-medium">
                 <ClassroomIcon
-                  name={accessType === "open" ? "globe" : accessType === "code" ? "key" : "lock"}
+                  name={
+                    accessType === "open"
+                      ? "globe"
+                      : accessType === "code"
+                      ? "key"
+                      : "lock"
+                  }
                   className="h-3 w-3 text-text-muted"
                 />
                 <span>{accessType}</span>
@@ -313,7 +383,9 @@ export default function ClassHeader({
               </div>
             ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
               <Link
-                to={`${routes.classes.join}?courseId=${encodeURIComponent(classroom?.id || "")}&accessType=code`}
+                to={`${routes.classes.join}?courseId=${encodeURIComponent(
+                  classroom?.id || ""
+                )}&accessType=code`}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover sm:w-auto"
               >
                 <UserPlus className="h-3.5 w-3.5" />
@@ -337,7 +409,11 @@ export default function ClassHeader({
               onClick={handleCopy}
               className="w-full sm:w-auto h-8 text-xs gap-1.5"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5 text-text-muted" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <Copy className="h-3.5 w-3.5 text-text-muted" />
+              )}
               <span>{copied ? "Link copied!" : "Copy join link"}</span>
             </Button>
           ) : teacher ? (
@@ -347,10 +423,18 @@ export default function ClassHeader({
               onClick={handleCopy}
               className="w-full sm:w-auto h-8 text-xs gap-1.5 font-mono"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <KeyRound className="h-3.5 w-3.5 text-primary" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <KeyRound className="h-3.5 w-3.5 text-primary" />
+              )}
               <span>
                 {copied ? "Copied!" : "Class code: "}
-                {!copied && <span className="font-mono text-primary">{classroom?.code}</span>}
+                {!copied && (
+                  <span className="font-mono text-primary">
+                    {classroom?.code}
+                  </span>
+                )}
               </span>
             </Button>
           ) : (
@@ -375,13 +459,21 @@ export default function ClassHeader({
       <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-text-heading">Archive Space?</DialogTitle>
+            <DialogTitle className="text-base font-bold text-text-heading">
+              Archive Space?
+            </DialogTitle>
             <DialogDescription className="text-xs text-text-muted">
-              Archiving hides this space from active lists and disables new enrollments, while preserving past discussions and submissions.
+              Archiving hides this space from active lists and disables new
+              enrollments, while preserving past discussions and submissions.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsArchiveDialogOpen(false)} disabled={isArchiving}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsArchiveDialogOpen(false)}
+              disabled={isArchiving}
+            >
               Cancel
             </Button>
             <Button
@@ -400,13 +492,21 @@ export default function ClassHeader({
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-text-heading">Delete Space Permanently?</DialogTitle>
+            <DialogTitle className="text-base font-bold text-text-heading">
+              Delete Space Permanently?
+            </DialogTitle>
             <DialogDescription className="text-xs text-text-muted">
-              This action cannot be undone. All materials, coursework, member records, and announcements will be permanently deleted.
+              This action cannot be undone. All materials, coursework, member
+              records, and announcements will be permanently deleted.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
               Cancel
             </Button>
             <Button
@@ -425,13 +525,21 @@ export default function ClassHeader({
       <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-text-heading">Leave this Space?</DialogTitle>
+            <DialogTitle className="text-base font-bold text-text-heading">
+              Leave this Space?
+            </DialogTitle>
             <DialogDescription className="text-xs text-text-muted">
-              You will lose access to member updates, resources, and discussions until you re-enroll with an invite code.
+              You will lose access to member updates, resources, and discussions
+              until you re-enroll with an invite code.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsLeaveDialogOpen(false)} disabled={isLeaving}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsLeaveDialogOpen(false)}
+              disabled={isLeaving}
+            >
               Cancel
             </Button>
             <Button

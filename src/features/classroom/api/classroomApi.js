@@ -37,8 +37,7 @@ const normalizeCourse = (response = {}) => {
     tags: Array.isArray(course.tags) ? course.tags : [],
     links: Array.isArray(course.links) ? course.links : [],
     accessType: (
-      course.accessType ||
-      (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
+      course.accessType || (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
     ).toLowerCase(),
     teacherId: course.teacherId ?? course.ownerId,
     teacher,
@@ -148,17 +147,28 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: result?.id ?? "unknown" },
         ...(discoveryFieldsChanged(changes) ? exploreTags : []),
       ],
-      async onQueryStarted({ courseId, changes }, { dispatch, queryFulfilled }) {
+      async onQueryStarted(
+        { courseId, changes },
+        { dispatch, queryFulfilled }
+      ) {
         const patchResult = dispatch(
-          classroomApi.util.updateQueryData("findClassroomById", courseId, (draft) => {
-            Object.assign(draft, changes);
-          })
+          classroomApi.util.updateQueryData(
+            "findClassroomById",
+            courseId,
+            (draft) => {
+              Object.assign(draft, changes);
+            }
+          )
         );
         const listPatchResult = dispatch(
-          classroomApi.util.updateQueryData("fetchClassrooms", undefined, (draft) => {
-            const course = draft.find((c) => c.id === courseId);
-            if (course) Object.assign(course, changes);
-          })
+          classroomApi.util.updateQueryData(
+            "fetchClassrooms",
+            undefined,
+            (draft) => {
+              const course = draft.find((c) => c.id === courseId);
+              if (course) Object.assign(course, changes);
+            }
+          )
         );
         try {
           await queryFulfilled;
@@ -177,7 +187,10 @@ export const classroomApi = baseApi.injectEndpoints({
       ],
     }),
     archiveClassroom: builder.mutation({
-      query: (courseId) => ({ url: `/courses/${courseId}/archive`, method: "POST" }),
+      query: (courseId) => ({
+        url: `/courses/${courseId}/archive`,
+        method: "POST",
+      }),
       invalidatesTags: [
         { type: "Classrooms", id: "LIST" },
         { type: "Profile", id: "CURRENT" },
@@ -264,4 +277,3 @@ export const {
   useCreateClassroomMutation,
   useJoinClassroomMutation,
 } = classroomApi;
-

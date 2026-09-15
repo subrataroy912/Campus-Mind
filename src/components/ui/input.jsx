@@ -1,12 +1,8 @@
-import * as React from "react"
-import { Input as InputPrimitive } from "@base-ui/react/input"
-import { cn } from "cn"
+import * as React from "react";
+import { Input as InputPrimitive } from "@base-ui/react/input";
+import { cn } from "cn";
 
-function Input({
-  className,
-  type,
-  ...props
-}) {
+function Input({ className, type, ...props }) {
   return (
     <InputPrimitive
       type={type}
@@ -17,7 +13,7 @@ function Input({
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Input }
+export { Input };

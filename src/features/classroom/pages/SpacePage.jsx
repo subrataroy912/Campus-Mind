@@ -106,6 +106,7 @@ export default function SpacePage() {
   const isNotFound =
     !classroom || error?.status === 404 || error?.data?.status === 404;
 
+  // TODO:: Have to make a reusable component
   if (isNotFound) {
     return (
       <div className="grid min-h-screen place-items-center bg-canvas px-4 py-8">
@@ -138,6 +139,7 @@ export default function SpacePage() {
     );
   }
 
+        // TODO:: Have to make a reusable component
   if (error) {
     return (
       <div className="grid min-h-screen place-items-center bg-canvas text-text-muted text-sm">

@@ -60,7 +60,8 @@ export function useCreateSpaceForm() {
     if (!form.className.trim()) {
       nextErrors.className = "Space name is required.";
     }
-    const isAcademicClass = form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
+    const isAcademicClass =
+      form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
 
     if (!form.subject) {
       nextErrors.subject = "Select a subject or category.";
@@ -71,7 +72,10 @@ export function useCreateSpaceForm() {
     if (isAcademicClass) {
       if (!form.gradeLevel) {
         nextErrors.gradeLevel = "Select a target grade.";
-      } else if (form.gradeLevel === "Other" && !form.customGradeLevel?.trim()) {
+      } else if (
+        form.gradeLevel === "Other" &&
+        !form.customGradeLevel?.trim()
+      ) {
         nextErrors.customGradeLevel = "Please enter your custom target grade.";
       }
     }
@@ -197,4 +201,3 @@ export function useCreateSpaceForm() {
 }
 
 export const useCreateClassForm = useCreateSpaceForm;
-

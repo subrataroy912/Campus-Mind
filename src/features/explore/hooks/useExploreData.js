@@ -15,29 +15,33 @@ export function useExploreData({
   classFilter = "all",
   page = 0,
   keepPreviousData = true,
+  enabled = true,
 } = {}) {
   const q = searchQuery.trim();
   const subject =
     !q && !["all", "popular", "recommended"].includes(classFilter)
       ? classFilter
       : undefined;
+
+  const isSearch = Boolean(q);
+  const isRecommended = !isSearch && classFilter === "recommended";
+
   const feed = useGetExploreFeedQuery(
     { subject, page, size: 20 },
-    { skip: Boolean(q) || classFilter === "recommended" }
+    { skip: !enabled || isSearch || isRecommended }
   );
   const search = useSearchExploreCoursesQuery(
     { q, page, size: 20 },
-    { skip: !q }
+    { skip: !enabled || !isSearch }
   );
   const recommendations = useGetExploreRecommendationsQuery(
     { page, size: 20 },
-    {
-      skip: Boolean(q) || classFilter !== "recommended",
-    }
+    { skip: !enabled || isSearch || !isRecommended }
   );
-  const active = q
+
+  const active = isSearch
     ? search
-    : classFilter === "recommended"
+    : isRecommended
     ? recommendations
     : feed;
 

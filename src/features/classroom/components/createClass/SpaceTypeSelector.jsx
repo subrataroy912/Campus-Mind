@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   GraduationCap,
   BookOpen,
@@ -6,6 +7,7 @@ import {
   Building2,
   Globe,
   Check,
+  ChevronDown,
 } from "lucide-react";
 import { SPACE_TYPES } from "../../model/createSpaceForm.js";
 
@@ -20,63 +22,116 @@ const ICON_MAP = {
 
 export default function SpaceTypeSelector({ form, update }) {
   const currentType = form.spaceType || "ACADEMIC_CLASS";
+  const selected =
+    SPACE_TYPES.find((t) => t.id === currentType) || SPACE_TYPES[0];
+  const SelectedIcon = ICON_MAP[selected.icon] || Globe;
+
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (rootRef.current && !rootRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    function onEscape(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, []);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Space Type <span className="text-secondary">*</span>
-          </label>
-          <p className="text-[12px] text-text-muted">
-            Configures identity, meeting style, and audience.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-1" ref={rootRef}>
+      <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+        Space Type <span className="text-secondary">*</span>
+      </label>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {SPACE_TYPES.map((type) => {
-          const isSelected = currentType === type.id;
-          const Icon = ICON_MAP[type.icon] || Globe;
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-2 text-left transition-colors hover:border-border/80 focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <SelectedIcon className="h-3.5 w-3.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-medium text-text-main">
+              {selected.label}
+            </div>
+            <div className="truncate text-[11px] text-text-muted">
+              {selected.description}
+            </div>
+          </div>
+          <ChevronDown
+            className={`h-3.5 w-3.5 shrink-0 text-text-muted transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </button>
 
-          return (
-            <button
-              key={type.id}
-              type="button"
-              onClick={() => update("spaceType", type.id)}
-              className={`group relative flex flex-col items-center justify-center rounded-xl border p-2.5 text-center transition-all duration-150 focus:outline-none min-h-[72px] sm:min-h-[76px] cursor-pointer ${
-                isSelected
-                  ? "border-primary bg-primary/8 text-primary shadow-xs ring-1 ring-primary"
-                  : "border-border bg-surface text-text-main hover:border-border/80 hover:bg-canvas/50"
-              }`}
-              title={`${type.label}: ${type.description}`}
-            >
-              <div
-                className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                  isSelected
-                    ? "bg-primary text-surface"
-                    : "bg-primary/10 text-primary group-hover:bg-primary/15"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-              </div>
+        {open && (
+          <ul
+            role="listbox"
+            className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-border bg-surface p-1 shadow-md"
+          >
+            {SPACE_TYPES.map((type) => {
+              const isSelected = currentType === type.id;
+              const Icon = ICON_MAP[type.icon] || Globe;
 
-              <span className="mt-1.5 line-clamp-1 text-xs font-medium">
-                {type.label}
-              </span>
-
-              <span className="text-[10px] text-text-muted">
-                {type.badge}
-              </span>
-
-              {isSelected && (
-                <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-surface">
-                  <Check className="h-2.5 w-2.5 stroke-[3]" />
-                </span>
-              )}
-            </button>
-          );
-        })}
+              return (
+                <li key={type.id} role="option" aria-selected={isSelected}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update("spaceType", type.id);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors ${
+                      isSelected
+                        ? "bg-primary/8 text-primary"
+                        : "text-text-main hover:bg-canvas/60"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${
+                        isSelected
+                          ? "bg-primary text-surface"
+                          : "bg-primary/10 text-primary"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate text-xs font-medium">
+                          {type.label}
+                        </span>
+                        <span className="shrink-0 text-[10px] text-text-muted">
+                          {type.badge}
+                        </span>
+                      </div>
+                      <div className="truncate text-[11px] text-text-muted">
+                        {type.description}
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <Check className="h-3.5 w-3.5 shrink-0 stroke-[3] text-primary" />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

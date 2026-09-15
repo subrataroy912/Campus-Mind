@@ -1,4 +1,5 @@
-import { Globe, KeyRound, Lock } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Globe, KeyRound, Lock } from "lucide-react";
 
 const ACCESS_OPTIONS = [
   {
@@ -22,73 +23,109 @@ const ACCESS_OPTIONS = [
 ];
 
 export function SpaceAccessTypeSection({ form, update }) {
+  const selected =
+    ACCESS_OPTIONS.find((o) => o.value === form.accessType) ||
+    ACCESS_OPTIONS[0];
+  const SelectedIcon = selected.icon;
+
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (rootRef.current && !rootRef.current.contains(e.target))
+        setOpen(false);
+    }
+    function onEscape(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, []);
+
   return (
-    <div className="space-y-3">
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Access & Privacy
-        </label>
-        <p className="text-[12px] text-text-muted">
-          Choose who can discover and join this space.
-        </p>
-      </div>
+    <div className="space-y-1 " ref={rootRef}>
+      <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+        Access & Privacy
+      </label>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {ACCESS_OPTIONS.map((opt) => {
-          const Icon = opt.icon;
-          const isSelected = form.accessType === opt.value;
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-2 text-left transition-colors hover:border-border/80 focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <SelectedIcon className="h-3.5 w-3.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-medium text-text-main">
+              {selected.label}
+            </div>
+            <div className="truncate text-[11px] text-text-muted">
+              {selected.desc}
+            </div>
+          </div>
+          <ChevronDown
+            className={`h-3.5 w-3.5 shrink-0 text-text-muted transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </button>
 
-          return (
-            <label
-              key={opt.value}
-              className={`relative flex cursor-pointer items-start gap-2.5 rounded-xl border p-2.5 transition-all ${
-                isSelected
-                  ? "border-primary bg-primary/8 ring-1 ring-primary/40 shadow-2xs"
-                  : "border-border bg-surface hover:border-text-muted/50 hover:bg-canvas/50"
-              }`}
-            >
-              <input
-                type="radio"
-                name="accessType"
-                value={opt.value}
-                checked={isSelected}
-                onChange={(e) => update("accessType", e.target.value)}
-                className="sr-only"
-              />
-              <div
-                className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors mt-0.5 ${
-                  isSelected
-                    ? "bg-primary text-surface"
-                    : "bg-canvas text-text-muted border border-border"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </div>
+        {open && (
+          <ul
+            role="listbox"
+            className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface p-1 shadow-md"
+          >
+            {ACCESS_OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = form.accessType === opt.value;
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-text-heading">
-                    {opt.label}
-                  </p>
-                  <div
-                    className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${
+              return (
+                <li key={opt.value} role="option" aria-selected={isSelected}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update("accessType", opt.value);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full cursor-pointer items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors ${
                       isSelected
-                        ? "border-primary bg-primary"
-                        : "border-border bg-surface"
+                        ? "bg-primary/8 text-primary"
+                        : "text-text-main hover:bg-canvas/60"
                     }`}
                   >
+                    <div
+                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${
+                        isSelected
+                          ? "bg-primary text-surface"
+                          : "bg-primary/10 text-primary"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium">{opt.label}</div>
+                      <div className="truncate text-[11px] text-text-muted">
+                        {opt.desc}
+                      </div>
+                    </div>
                     {isSelected && (
-                      <div className="h-1.5 w-1.5 rounded-full bg-surface" />
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-[3] text-primary" />
                     )}
-                  </div>
-                </div>
-                <p className="mt-0.5 text-[11px] text-text-muted leading-tight">
-                  {opt.desc}
-                </p>
-              </div>
-            </label>
-          );
-        })}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );
