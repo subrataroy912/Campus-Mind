@@ -93,29 +93,33 @@ export default function DashboardHomePage() {
 
   return (
     <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
-      <header className="flex items-center justify-between rounded-2xl bg-surface shadow-sm">
-        {/* Left Side: Your Text */}
-        <div className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Your learning space
-          </p>
-          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
-            Welcome back, <br className="block sm:hidden" /> {greetingName}.
-          </h1>
-          <p className="mt-1 text-xs text-text-muted sm:text-sm">
-            Keep up with your spaces, then discover a new space to connect with
-            the CampusMind community.
-          </p>
-        </div>
+      <header className="flex flex-col gap-4 rounded-2xl bg-surface p-5 shadow-sm sm:p-6 md:flex-row md:items-center md:justify-between md:gap-6">
+  {/* Left Side */}
+  <div className="min-w-0 max-w-xl">
+    <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+      Your learning space
+    </p>
 
-        <div className="hidden md:block md:w-38">
-          <img
-            src="/images/dashboard-welcome.svg"
-            alt="CampusMind Welcome"
-            className="h-full w-full object-contain"
-          />
-        </div>
-      </header>
+    <h1 className="mt-1 text-xl font-bold tracking-tight text-text-heading sm:text-2xl md:text-3xl">
+      Welcome back,
+      <br className="block sm:hidden" /> {greetingName}.
+    </h1>
+
+    <p className="mt-2 max-w-lg text-xs leading-relaxed text-text-muted sm:text-sm">
+      Keep up with your spaces, then discover a new space to connect with
+      the CampusMind community.
+    </p>
+  </div>
+
+  {/* Illustration */}
+  <div className="mx-auto w-32 shrink-0 sm:w-40 md:mx-0 md:w-44 lg:w-48">
+    <img
+      src="/images/dashboard-welcome.svg"
+      alt="CampusMind Welcome"
+      className="h-auto w-full object-contain"
+    />
+  </div>
+</header>
 
       {classrooms.length > 0 && (
         <DashboardSection
