@@ -63,20 +63,40 @@ export default function DashboardHomePage() {
       </div>
     );
   }
+  const firstName = profile?.displayName?.split(" ")[0];
+  const title =
+    profile?.gender?.toLowerCase() === "male"
+      ? "Mr. "
+      : profile?.gender?.toLowerCase() === "female"
+      ? "Mrs. "
+      : "";
+
+  const greetingName = firstName ? `${title}${firstName}` : "there";
 
   return (
     <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-          Your learning space
-        </p>
-        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
-          Welcome back, {profile?.displayName?.split(" ")[0] || "there"}.
-        </h1>
-        <p className="mt-1 max-w-2xl text-xs text-text-muted sm:text-sm">
-          Keep up with your spaces, then discover a new space to connect with the
-          CampusMind community.
-        </p>
+      <header className="flex items-center justify-between rounded-2xl bg-surface p-6 shadow-sm">
+        {/* Left Side: Your Text */}
+        <div className="max-w-xl">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+            Your learning space
+          </p>
+          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-text-heading sm:text-3xl">
+            Welcome back, <br className="block sm:hidden" /> {greetingName}.
+          </h1>
+          <p className="mt-1 text-xs text-text-muted sm:text-sm">
+            Keep up with your spaces, then discover a new space to connect with
+            the CampusMind community.
+          </p>
+        </div>
+
+        <div className=" md:block md:w-38">
+          <img
+            src="/images/dashboard-welcome.svg"
+            alt="CampusMind Welcome"
+            className="h-full w-full object-contain"
+          />
+        </div>
       </header>
 
       {classrooms.length > 0 && (
@@ -137,7 +157,7 @@ export default function DashboardHomePage() {
             </div>
           </div>
           <Link
-            to={routes.spaces.list}
+            to={routes.explore}
             className="inline-flex items-center gap-1 text-xs font-semibold text-text-heading hover:text-primary transition-colors"
           >
             <span>See all</span>

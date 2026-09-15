@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
-import { useNavigate } from "react-router";
-import { ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/classroom/api/classroomService.js";
@@ -15,14 +14,16 @@ import {
 import { CodePromptModal } from "@/features/classroom/components/CodePromptModal.jsx";
 import { InviteOnlyModal } from "@/features/classroom/components/InviteOnlyModal.jsx";
 import { routes } from "@/routes/paths";
+import { cn } from "@/lib/utils";
+import { Users } from "lucide-react";
 function formatLearners(count) {
   const value = Number(count);
-  if (!Number.isFinite(value) || value <= 0) return "0 learners";
-  if (value === 1) return "1 learner";
+  if (!Number.isFinite(value) || value <= 0) return "0";
+  if (value === 1) return "1";
   if (value >= 1000) {
-    return `${(value / 1000).toFixed(1).replace(".0", "")}k learners`;
+    return `${(value / 1000).toFixed(1).replace(".0", "")}k `;
   }
-  return `${value} learners`;
+  return `${value}`;
 }
 
 function ExploreClassCard({ classroom, className = "", priority = false }) {
@@ -127,96 +128,89 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
 
   return (
     <>
-      <article
-        onMouseEnter={handlePrefetchClass}
-        onFocus={handlePrefetchClass}
-        className={[
-          "group flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs",
-          "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40",
-          className,
-        ].join(" ")}
+      <Link
+        onClick={handleOpenClassAction}
+        to={routes.classes.detail(courseId)}
+        className="block group"
       >
-        {/* Cover Header & Floating/Overlay Logo */}
-        <div
-          className={`relative h-14 w-full ${
-            coverUrl ? "bg-canvas" : classTheme.gradientClass
-          }`}
-        >
-          {coverUrl && (
-            <img
-              src={coverUrl}
-              alt=""
-              aria-hidden="true"
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={priority ? "high" : "auto"}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+        <article
+          onMouseEnter={handlePrefetchClass}
+          onFocus={handlePrefetchClass}
+          className={cn(
+            "flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs",
+            "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40",
+            className
           )}
-          <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/15 to-transparent" />
-
-          {/* Access Type Badge */}
-          <div className="absolute top-2 right-2 z-10">
-            <AccessBadge accessType={accessType} />
-          </div>
-
-          {/* Logo - always above on cover */}
-          <div className="absolute bottom-2 left-2.5 z-10 flex h-7.5 w-7.5 sm:h-8 sm:w-8 items-center justify-center overflow-hidden rounded-md border border-white/70 dark:border-zinc-700 bg-surface shadow-xs">
-            {logoUrl ? (
+        >
+          <div
+            className={cn(
+              "relative h-14 w-full",
+              coverUrl ? "bg-canvas" : classTheme.gradientClass
+            )}
+          >
+            {coverUrl && (
               <img
-                src={logoUrl}
+                src={coverUrl}
                 alt=""
                 aria-hidden="true"
-                loading="lazy"
+                loading={priority ? "eager" : "lazy"}
                 decoding="async"
-                className="h-full w-full object-cover"
+                fetchPriority={priority ? "high" : "auto"}
+                className="absolute inset-0 h-full w-full object-cover"
               />
-            ) : (
-              <span className="text-[11px] font-bold text-primary">
-                {initials(cardTitle) || "CL"}
-              </span>
             )}
-          </div>
-        </div>
 
-        {/* Main Body */}
-        <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
-          <div className="min-w-0">
-            <button
-              type="button"
-              onClick={handleOpenClassAction}
-              className="block text-left w-full group-hover:text-primary transition-colors cursor-pointer"
-            >
+            <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/15 to-transparent" />
+
+            {/* Access Type Badge */}
+            <div className="absolute top-2 right-2 z-10">
+              <AccessBadge accessType={accessType} />
+            </div>
+
+            {/* Logo */}
+            <div className="absolute bottom-2 left-2.5 z-10 flex h-7.5 w-7.5 sm:h-8 sm:w-8 items-center justify-center overflow-hidden rounded-md border border-white/70 dark:border-zinc-700 bg-surface shadow-xs">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-[11px] font-bold text-primary">
+                  {initials(cardTitle) || "CL"}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Main Body */}
+          <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
+            <div className="w-full text-left transition-colors group-hover:text-primary">
               <h3
                 title={cardTitle}
-                className="text-xs sm:text-sm font-bold leading-tight text-text-heading truncate"
+                className="truncate text-xs font-bold leading-tight text-text-heading sm:text-sm"
               >
                 {cardTitle}
               </h3>
-            </button>
-            {cardSubject && (
-              <p className="mt-0.5 text-[11px] text-text-muted truncate">
-                {cardSubject}
-              </p>
-            )}
-          </div>
+            </div>
 
-          {/* Bottom Row */}
-          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-[11px] text-text-muted">
-            <span className="truncate">{learnersCount}</span>
-            <button
-              type="button"
-              onClick={handleOpenClassAction}
-              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs hover:bg-primary-hover active:scale-95 transition-all cursor-pointer"
-            >
-              <span>Open</span>
-              <ArrowRight size={11} aria-hidden="true" />
-            </button>
+            <div className="mt-1 flex items-center justify-between space-x-2">
+              {cardSubject && (
+                <p className="truncate text-[11px] text-text-muted">
+                  {cardSubject}
+                </p>
+              )}
+              <span className="flex items-center gap-1 truncate text-[11px] text-text-muted">
+                <Users size={12} /> {learnersCount}
+              </span>
+            </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </Link>
 
-      {/* Code Prompt Modal for AccessType === CODE */}
       <CodePromptModal
         isOpen={isCodeModalOpen}
         onClose={() => setIsCodeModalOpen(false)}

@@ -33,7 +33,10 @@ export function CodePromptModal({
               <KeyRound size={18} aria-hidden="true" />
             </div>
             <div className="min-w-0">
-              <h3 id="code-prompt-dialog-title" className="text-base font-bold text-text-heading truncate">
+              <h3
+                id="code-prompt-dialog-title"
+                className="text-base font-bold text-text-heading truncate"
+              >
                 Enter Class Code
               </h3>
               <p className="text-xs text-text-muted truncate">
@@ -76,7 +79,9 @@ export function CodePromptModal({
 
           <div className="flex items-center justify-between pt-2">
             <Link
-              to={`${routes.classes.join}?courseId=${encodeURIComponent(courseId)}&accessType=code`}
+              to={`${routes.classes.join}?courseId=${encodeURIComponent(
+                courseId
+              )}&accessType=code`}
               onClick={onClose}
               className="text-[11px] text-text-muted hover:text-primary hover:underline"
             >
@@ -98,7 +103,11 @@ export function CodePromptModal({
               >
                 {isJoining ? (
                   <>
-                    <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                    <Loader2
+                      size={13}
+                      className="animate-spin"
+                      aria-hidden="true"
+                    />
                     <span>Joining...</span>
                   </>
                 ) : (

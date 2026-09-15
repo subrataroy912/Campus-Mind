@@ -96,7 +96,7 @@ function ClassCard({ classroom, priority = false }) {
       {/* Main Content - High density layout */}
       <div className="flex-1 flex flex-col justify-between p-3.5 pt-3 min-w-0">
         <div className="pr-14 min-w-0">
-          <div className="flex items-center gap-1.5 min-h-[1rem]">
+          <div className="flex items-center gap-1.5 min-h-4">
             <span className="inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.2 text-[10px] font-semibold text-primary">
               {spaceLabel}
             </span>
@@ -123,7 +123,7 @@ function ClassCard({ classroom, priority = false }) {
             teacherId ? (
               <Link
                 to={routes.user(teacherId)}
-                className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-[120px] text-xs"
+                className="font-medium text-text-main hover:text-primary hover:underline transition-colors truncate max-w-30 text-xs"
                 title={`with ${teacher.name}`}
               >
                 with {teacher.name}

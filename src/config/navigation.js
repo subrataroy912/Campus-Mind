@@ -10,9 +10,9 @@ import {
 
 export const SIDEBAR_NAV_ITEMS = [
   { label: "Dashboard", to: routes.dashboard, Icon: Home },
+  { label: "My Spaces", to: routes.spaces.list, Icon: LayoutGrid },
+  { label: "Explore", to: routes.explore, Icon: Compass },
   { label: "Community", to: routes.community, Icon: Users },
   { label: "Messages", to: routes.messages, Icon: MessageCircle },
   { label: "Saved", to: routes.saved, Icon: Save },
-  { label: "Explore", to: routes.explore, Icon: Compass },
-  { label: "Spaces", to: routes.spaces.list, Icon: LayoutGrid },
 ];
