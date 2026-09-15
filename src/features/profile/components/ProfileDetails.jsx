@@ -44,6 +44,7 @@ export default function ProfileDetails({ details }) {
         title="Personal & Account Information"
         subtitle="Identity, role, and visibility settings"
         defaultExpanded={true}
+        storageKey="profile-personal-section-expanded" // <-- Added this key
       >
         <dl className="grid gap-4 sm:grid-cols-3">
           {personalDetails.map(({ label, value, icon, isCreator }) => {
@@ -71,7 +72,10 @@ export default function ProfileDetails({ details }) {
                         title="Course Creator"
                         aria-label="Course Creator"
                       >
-                        <Sparkles size={14} className="fill-amber-500 shrink-0" />
+                        <Sparkles
+                          size={14}
+                          className="shrink-0 fill-amber-500"
+                        />
                       </span>
                     )}
                   </dd>
@@ -87,6 +91,7 @@ export default function ProfileDetails({ details }) {
           title="Contact & Location"
           subtitle="Location and contact details"
           defaultExpanded={true}
+          storageKey="profile-contact-section-expanded" // <-- Added this key
         >
           <dl className="grid gap-4 sm:grid-cols-3">
             {contactDetails.map(({ label, value, icon, isCreator }) => {
@@ -116,7 +121,7 @@ export default function ProfileDetails({ details }) {
                         >
                           <Sparkles
                             size={14}
-                            className="fill-amber-500 shrink-0"
+                            className="shrink-0 fill-amber-500"
                           />
                         </span>
                       )}
@@ -131,4 +136,3 @@ export default function ProfileDetails({ details }) {
     </div>
   );
 }
-

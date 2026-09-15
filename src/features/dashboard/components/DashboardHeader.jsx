@@ -46,7 +46,7 @@ export default function DashboardHeader() {
         </button>
 
         <BrandLogo fetchPriority="high" to={routes.dashboard} />
-      </div>
+      </div>s
 
       {/* User Profile and Logout */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">

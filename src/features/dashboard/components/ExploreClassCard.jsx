@@ -16,14 +16,17 @@ import { InviteOnlyModal } from "@/features/classroom/components/InviteOnlyModal
 import { routes } from "@/routes/paths";
 import { cn } from "@/lib/utils";
 import { Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 function formatLearners(count) {
   const value = Number(count);
-  if (!Number.isFinite(value) || value <= 0) return "0";
-  if (value === 1) return "1";
+  if (!Number.isFinite(value) || value <= 0) return "0 learners";
+  if (value === 1) return "1 learner";
   if (value >= 1000) {
-    return `${(value / 1000).toFixed(1).replace(".0", "")}k `;
+    return `${(value / 1000).toFixed(1).replace(".0", "")}k learners`;
   }
-  return `${value}`;
+  return `${value} learners`;
 }
 
 function ExploreClassCard({ classroom, className = "", priority = false }) {
@@ -131,21 +134,24 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
       <Link
         onClick={handleOpenClassAction}
         to={routes.classes.detail(courseId)}
-        className="block group"
+        aria-label={`Open ${cardTitle}`}
+        className="group block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
-        <article
+        <Card
           onMouseEnter={handlePrefetchClass}
           onFocus={handlePrefetchClass}
           className={cn(
-            "flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs",
-            "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40",
+            "flex h-full flex-col overflow-hidden rounded-xl border-0 p-0 shadow-xs transition-all duration-200",
+            "group-hover:-translate-y-0.5 group-hover:shadow-md",
             className
           )}
         >
+          {/* Cover Header */}
           <div
             className={cn(
-              "relative h-14 w-full",
-              coverUrl ? "bg-canvas" : classTheme.gradientClass
+              "relative w-full",
+              "h-20 sm:h-24",
+              coverUrl ? "bg-muted" : classTheme.gradientClass
             )}
           >
             {coverUrl && (
@@ -156,42 +162,32 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
                 loading={priority ? "eager" : "lazy"}
                 decoding="async"
                 fetchPriority={priority ? "high" : "auto"}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover object-top"
               />
             )}
 
+            {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/15 to-transparent" />
 
             {/* Access Type Badge */}
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute right-2 top-2 z-10">
               <AccessBadge accessType={accessType} />
             </div>
 
-            {/* Logo */}
-            <div className="absolute bottom-2 left-2.5 z-10 flex h-7.5 w-7.5 sm:h-8 sm:w-8 items-center justify-center overflow-hidden rounded-md border border-white/70 dark:border-zinc-700 bg-surface shadow-xs">
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-[11px] font-bold text-primary">
-                  {initials(cardTitle) || "CL"}
-                </span>
-              )}
-            </div>
+            <Avatar className="absolute bottom-2 left-2.5 z-10 h-7.5 w-7.5 sm:h-10 sm:w-10 rounded-md border border-white/70 shadow-xs dark:border-zinc-700 bg-background">
+              <AvatarImage src={logoUrl} className="object-cover" />
+              <AvatarFallback className="rounded-md text-[11px] font-bold text-primary">
+                {initials(cardTitle) || "CL"}
+              </AvatarFallback>
+            </Avatar>
           </div>
 
-          {/* Main Body */}
-          <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
+          {/* Main Body via Shadcn CardContent */}
+          <CardContent className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
             <div className="w-full text-left transition-colors group-hover:text-primary">
               <h3
                 title={cardTitle}
-                className="truncate text-xs font-bold leading-tight text-text-heading sm:text-sm"
+                className="truncate text-xs font-bold leading-tight text-foreground sm:text-sm"
               >
                 {cardTitle}
               </h3>
@@ -199,16 +195,16 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
 
             <div className="mt-1 flex items-center justify-between space-x-2">
               {cardSubject && (
-                <p className="truncate text-[11px] text-text-muted">
+                <p className="truncate text-[11px] text-muted-foreground">
                   {cardSubject}
                 </p>
               )}
-              <span className="flex items-center gap-1 truncate text-[11px] text-text-muted">
+              <span className="flex items-center gap-1 truncate text-[11px] text-muted-foreground">
                 <Users size={12} /> {learnersCount}
               </span>
             </div>
-          </div>
-        </article>
+          </CardContent>
+        </Card>
       </Link>
 
       <CodePromptModal
@@ -226,7 +222,6 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
         isJoining={isJoinSubmitting}
       />
 
-      {/* Invite Only Modal for AccessType === INVITE */}
       <InviteOnlyModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
