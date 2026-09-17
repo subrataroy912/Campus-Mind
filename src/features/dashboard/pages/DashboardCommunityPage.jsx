@@ -13,6 +13,8 @@ import { useSearchParams } from "react-router";
 
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
 import { FeedTabsNav } from "../components/FeedTabsNav.jsx";
+import { CampusStoriesBar } from "../components/CampusStoriesBar.jsx";
+import { TrendingTopicsWidget } from "../components/TrendingTopicsWidget.jsx";
 import { SpacePostBox } from "@/features/classroom/components/SpacePostBox.jsx";
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
 import { ReactionPicker } from "@/features/classroom/components/ReactionPicker.jsx";
@@ -326,6 +328,7 @@ export default function DashboardCommunityPage() {
 
   // Local state for user-created posts in this session
   const [customPosts, setCustomPosts] = useState([]);
+  const [activeTopic, setActiveTopic] = useState(null);
 
   // Merge backend data with rich campus pulse posts
   const allPosts = useMemo(() => {
@@ -362,8 +365,20 @@ export default function DashboardCommunityPage() {
       list = list.filter((post) => post.type === activeFilter);
     }
 
+    // Apply trending hashtag topic filter
+    if (activeTopic) {
+      const query = activeTopic.replace("#", "").toLowerCase();
+      list = list.filter(
+        (post) =>
+          (post.content && post.content.toLowerCase().includes(query)) ||
+          (post.title && post.title.toLowerCase().includes(query)) ||
+          (post.poll?.question &&
+            post.poll.question.toLowerCase().includes(query))
+      );
+    }
+
     return list;
-  }, [allPosts, activeTab, activeFilter]);
+  }, [allPosts, activeTab, activeFilter, activeTopic]);
 
   const handleTabChange = (newTab) => {
     setSearchParams((prev) => {
@@ -446,6 +461,15 @@ export default function DashboardCommunityPage() {
           Real-time polls, peer discussions, class announcements, and trending campus buzz.
         </p>
       </header>
+
+      {/* 24-Hour Campus Stories Bar */}
+      <CampusStoriesBar />
+
+      {/* Trending Topics & Hashtags */}
+      <TrendingTopicsWidget
+        activeTopic={activeTopic}
+        onSelectTopic={setActiveTopic}
+      />
 
       {/* Discovery Multi-Tabs Navigation */}
       <FeedTabsNav
