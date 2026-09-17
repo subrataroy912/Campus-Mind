@@ -41,7 +41,16 @@ export const courseworkApi = baseApi.injectEndpoints({
     getCourseworkList: builder.query({
       query: ({ courseId, page = 0, size = 20 }) => ({ url: `/courses/${courseId}/coursework`, params: { page, size } }),
       transformResponse: (response) => {
-        return { ...response, content: response.content.map(normalizeCoursework) };
+        const payload = response?.data ?? response;
+        const content = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.content)
+          ? payload.content
+          : [];
+        return {
+          ...(typeof response === "object" ? response : {}),
+          content: content.map(normalizeCoursework),
+        };
       },
       providesTags: (result, _error, { courseId }) => [
         { type: "Coursework", id: `LIST-${courseId}` },
@@ -63,17 +72,36 @@ export const courseworkApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeCoursework(response?.data ?? response),
-      invalidatesTags: (result, _error, { courseId }) => [
+      invalidatesTags: (_result, _error, { courseId }) => [
         { type: "Coursework", id: `LIST-${courseId}` },
-        "Classrooms", 
+        { type: "Classrooms", id: courseId },
         "Profile"
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ courseId }, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled;
+          const { data: createdItem } = await queryFulfilled;
           triggerLifecycleRefresh(dispatch, "coursework-published");
+          if (createdItem?.id) {
+            dispatch(
+              courseworkApi.util.updateQueryData(
+                "getCourseworkList",
+                { courseId, page: 0, size: 50 },
+                (draft) => {
+                  if (Array.isArray(draft?.content)) {
+                    if (
+                      !draft.content.some(
+                        (item) => String(item.id) === String(createdItem.id)
+                      )
+                    ) {
+                      draft.content.unshift(createdItem);
+                    }
+                  }
+                }
+              )
+            );
+          }
         } catch {
-          // The mutation error is already surfaced to the caller.
+          // The mutation error is handled by the caller.
         }
       },
     }),
@@ -105,6 +133,27 @@ export const courseworkApi = baseApi.injectEndpoints({
         { type: "Coursework", id: `LIST-${courseId}` },
         "Classrooms"
       ],
+      async onQueryStarted({ courseId, courseworkId }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          courseworkApi.util.updateQueryData(
+            "getCourseworkList",
+            { courseId, page: 0, size: 50 },
+            (draft) => {
+              if (Array.isArray(draft?.content)) {
+                draft.content = draft.content.filter(
+                  (item) => String(item.id) !== String(courseworkId)
+                );
+              }
+            }
+          )
+        );
+        try {
+          await queryFulfilled;
+          triggerLifecycleRefresh(dispatch, "coursework-deleted");
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     getSubmissionList: builder.query({
       query: ({ courseworkId, page = 0, size = 20 }) => ({ url: `/coursework/${courseworkId}/submissions`, params: { page, size } }),

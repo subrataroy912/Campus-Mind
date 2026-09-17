@@ -19,9 +19,14 @@ describe("mapCreateClassPayload", () => {
       })
     ).toEqual({
       title: "Algebra II",
+      spaceType: "ACADEMIC_CLASS",
       section: "Period 3",
       subject: "Mathematics",
       description: "Advanced algebra",
+      meetingType: "IN_PERSON",
+      location: "Room 204",
+      tags: [],
+      links: [],
       coverUrl: null,
       logoUrl: null,
       theme: "indigo",
@@ -36,9 +41,14 @@ describe("mapCreateClassPayload", () => {
       })
     ).toEqual({
       title: "Biology Honors",
+      spaceType: "ACADEMIC_CLASS",
       section: "",
       subject: "",
       description: "",
+      meetingType: "IN_PERSON",
+      location: "",
+      tags: [],
+      links: [],
       coverUrl: null,
       logoUrl: null,
       theme: null,
@@ -53,9 +63,14 @@ describe("mapCreateClassPayload", () => {
       })
     ).toEqual({
       title: "Chemistry 101",
+      spaceType: "ACADEMIC_CLASS",
       section: "",
       subject: "",
       description: "",
+      meetingType: "IN_PERSON",
+      location: "",
+      tags: [],
+      links: [],
       coverUrl: null,
       logoUrl: null,
       theme: null,

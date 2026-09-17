@@ -232,6 +232,8 @@ export const baseApi = createApi({
     "Profile",
     "Notifications",
     "Coursework",
+    "CourseworkComments",
+    "SubmissionComments",
     "Attachments",
   ],
   baseQuery: baseQueryWithRefresh,

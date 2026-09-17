@@ -20,6 +20,7 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import { ProfileAchievementsCard } from "../components/ProfileAchievementsCard.jsx";
 import { routes } from "@/routes/paths.js";
 import { DashboardSection } from "@/features/dashboard/components/DashboardSection.jsx";
 
@@ -67,7 +68,7 @@ export default function ProfilePage() {
         }
         return next;
       },
-      { replace: true }
+      { replace: true },
     );
   };
   const [isEditing, setIsEditing] = useState(false);
@@ -97,7 +98,7 @@ export default function ProfilePage() {
     : publicProfile;
   const profile = useMemo(
     () => viewedUser && profileFor(viewedUser),
-    [viewedUser]
+    [viewedUser],
   );
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
@@ -105,10 +106,10 @@ export default function ProfilePage() {
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
   const createdClasses = classes.filter(
-    (item) => item.ownerId === viewedUser.id
+    (item) => item.ownerId === viewedUser.id,
   );
   const joinedClasses = classes.filter(
-    (item) => item.ownerId !== viewedUser.id
+    (item) => item.ownerId !== viewedUser.id,
   );
   if (
     authStatus === "hydrating" ||
@@ -347,6 +348,10 @@ export default function ProfilePage() {
           onAvatarUpload={handleAvatarUpload}
           onBannerUpload={handleBannerUpload}
         />
+
+        <section>
+          <ProfileAchievementsCard />
+        </section>
 
         <section>
           <ProfileDetails details={details} />

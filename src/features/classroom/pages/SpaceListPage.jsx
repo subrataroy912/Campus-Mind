@@ -4,7 +4,7 @@ import { Plus, Ticket, Loader2, Filter } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
-import ClassCard from "../components/ClassCard.jsx";
+import SpaceCard from "../components/SpaceCard.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
@@ -59,7 +59,7 @@ export default function SpaceListPage() {
 
         <div className="flex items-center gap-2">
           <Button
-            to={routes.classes.join}
+            to={routes.spaces.join}
             variant="outline"
             size="sm"
             className="h-8 gap-1.5 text-xs rounded-lg"
@@ -120,7 +120,7 @@ export default function SpaceListPage() {
           <EmptyState
             title="You haven't joined any spaces yet"
             description="Join an existing space with an invite code or create a space."
-            action={{ to: routes.classes.join, label: "Join a space" }}
+            action={{ to: routes.spaces.join, label: "Join a space" }}
           />
         ) : filteredSpaces.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-xs text-text-muted">
@@ -130,7 +130,7 @@ export default function SpaceListPage() {
           <ContentList
             layout="grid"
             items={filteredSpaces}
-            renderItem={(classroom) => <ClassCard classroom={classroom} />}
+            renderItem={(classroom) => <SpaceCard classroom={classroom} />}
           />
         )}
       </section>

@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Layers,
   MapPin,
+  RefreshCw,
   Shield,
   Tag,
   UserPlus,
@@ -19,12 +20,15 @@ import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { CollapsibleSection } from "@/components/common/CollapsibleSection.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
-import ClassPostBox from "../ClassPostBox.jsx";
-import ClassFeedPost from "../ClassFeedPost.jsx";
+import { SpacePostBox, ClassPostBox } from "../SpacePostBox.jsx";
+import { SpaceFeedPost, ClassFeedPost } from "../ClassFeedPost.jsx";
 import {
   useGetCourseworkListQuery,
   useCreateCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { isTeacherRole } from "../../roles.js";
+import { toast } from "@/components/ui/toast.jsx";
 import { routes } from "@/routes/paths";
 
 const SPACE_LABELS = {
@@ -41,47 +45,93 @@ export function ClassHomeTab({
   onJoin,
   isJoining = false,
   classroom,
+  teacher = false,
   _teacher = false,
 }) {
+  const { user } = useAuth();
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const courseId = classroom?.id;
+
+  const isTeacher = Boolean(
+    teacher ||
+    _teacher ||
+    isTeacherRole(classroom?.role) ||
+    (user?.id &&
+      (String(classroom?.teacherId) === String(user.id) ||
+        String(classroom?.ownerId) === String(user.id) ||
+        String(classroom?.creatorId) === String(user.id))),
+  );
 
   const accessType = (
     classroom?.accessType ||
     (classroom?.visibility === "PUBLIC" ? "open" : "code")
   ).toLowerCase();
 
-  const { data: courseworkPage, isLoading: isLoadingCoursework } =
-    useGetCourseworkListQuery(
-      { courseId, page: 0, size: 50 },
-      { skip: !courseId }
-    );
+  const {
+    data: courseworkPage,
+    isLoading: isLoadingCoursework,
+    isError: isCourseworkError,
+    refetch: refetchCoursework,
+  } = useGetCourseworkListQuery(
+    { courseId, page: 0, size: 50 },
+    { skip: !courseId },
+  );
 
-  const [createCoursework] = useCreateCourseworkMutation();
+  const [createCoursework, { isLoading: isCreatingPost }] =
+    useCreateCourseworkMutation();
 
-  // Show both ANNOUNCEMENT posts and any stream updates
+  // Show stream updates sorted chronologically descending (latest posts first)
   const announcements = useMemo(() => {
-    const list = courseworkPage?.content ?? [];
-    return list.filter(
-      (item) =>
-        item.type === "ANNOUNCEMENT" ||
-        item.type === "MATERIAL" ||
-        item.type === "ASSIGNMENT" ||
-        !item.type
-    );
+    const list = [...(courseworkPage?.content ?? [])];
+    return list
+      .filter(
+        (item) =>
+          item.type === "ANNOUNCEMENT" ||
+          item.type === "DISCUSSION" ||
+          item.type === "MATERIAL" ||
+          item.type === "ASSIGNMENT" ||
+          !item.type,
+      )
+      .sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        const timeA = new Date(
+          a.createdAt || a.created_at || a.dueDate || 0,
+        ).getTime();
+        const timeB = new Date(
+          b.createdAt || b.created_at || b.dueDate || 0,
+        ).getTime();
+        return timeB - timeA;
+      });
   }, [courseworkPage]);
 
-  const handlePostAnnouncement = async (text) => {
+  const handlePostAnnouncement = async (data) => {
+    const text =
+      typeof data === "string"
+        ? data
+        : data?.content || data?.description || data?.text || "";
+    const postTitle =
+      typeof data === "object" && data?.title ? data.title : "Announcement";
+    const postType =
+      typeof data === "object" && data?.type ? data.type : "ANNOUNCEMENT";
+
     if (!text?.trim() || !courseId) return;
+
     await createCoursework({
       courseId,
       payload: {
-        type: "ANNOUNCEMENT",
-        title: "Announcement",
+        type: postType,
+        title: postTitle,
         description: text.trim(),
         status: "PUBLISHED",
       },
     }).unwrap();
+
+    toast.add({
+      title: "Post published",
+      description: "Your update is now live in the space stream.",
+      type: "success",
+    });
   };
 
   const teacherName =
@@ -113,7 +163,9 @@ export function ClassHomeTab({
 
   const scheduleText = (() => {
     if (classroom?.schedule) return classroom.schedule;
-    const days = Array.isArray(classroom?.days) ? classroom.days.join(", ") : null;
+    const days = Array.isArray(classroom?.days)
+      ? classroom.days.join(", ")
+      : null;
     const time =
       classroom?.startTime && classroom?.endTime
         ? `${classroom.startTime} - ${classroom.endTime}`
@@ -139,7 +191,8 @@ export function ClassHomeTab({
                 You are previewing this space
               </h3>
               <p className="text-xs text-text-muted max-w-xl leading-relaxed">
-                Join now to participate in group discussions, access shared resources, submit coursework, and connect with peers.
+                Join now to participate in group discussions, access shared
+                resources, submit coursework, and connect with peers.
               </p>
             </div>
             {accessType === "invite" ? (
@@ -205,7 +258,9 @@ export function ClassHomeTab({
               <Layers className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Type</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                Type
+              </p>
               <p className="text-xs font-semibold text-text-heading truncate">
                 {spaceTypeLabel}
               </p>
@@ -218,7 +273,9 @@ export function ClassHomeTab({
               <BookOpen className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Domain</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                Domain
+              </p>
               <p className="text-xs font-semibold text-text-heading truncate">
                 {classroom?.subject || "General"}
               </p>
@@ -228,10 +285,16 @@ export function ClassHomeTab({
           {/* Location / Meeting format */}
           <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
             <div className="grid h-7 w-7 place-items-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-              {isOnline ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
+              {isOnline ? (
+                <Video className="h-3.5 w-3.5" />
+              ) : (
+                <MapPin className="h-3.5 w-3.5" />
+              )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Format</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                Format
+              </p>
               {isMeetingLink ? (
                 <a
                   href={location}
@@ -244,7 +307,10 @@ export function ClassHomeTab({
                 </a>
               ) : (
                 <p className="text-xs font-semibold text-text-heading truncate">
-                  {location || (classroom?.meetingType === "ONLINE" ? "Online" : "In-Person")}
+                  {location ||
+                    (classroom?.meetingType === "ONLINE"
+                      ? "Online"
+                      : "In-Person")}
                 </p>
               )}
             </div>
@@ -256,7 +322,9 @@ export function ClassHomeTab({
               <Clock className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Schedule</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                Schedule
+              </p>
               <p className="text-xs font-semibold text-text-heading truncate">
                 {scheduleText || "Flexible / Async"}
               </p>
@@ -289,7 +357,9 @@ export function ClassHomeTab({
               size="h-8 w-8 sm:h-9 sm:w-9"
             />
             <div>
-              <p className="text-[10px] font-medium text-text-muted">Lead / Facilitator</p>
+              <p className="text-[10px] font-medium text-text-muted">
+                Lead / Facilitator
+              </p>
               {classroom?.teacherId || classroom?.ownerId ? (
                 <Link
                   to={routes.user(classroom.teacherId || classroom.ownerId)}
@@ -298,7 +368,9 @@ export function ClassHomeTab({
                   {teacherName}
                 </Link>
               ) : (
-                <p className="text-xs font-bold text-text-heading">{teacherName}</p>
+                <p className="text-xs font-bold text-text-heading">
+                  {teacherName}
+                </p>
               )}
             </div>
           </div>
@@ -306,7 +378,7 @@ export function ClassHomeTab({
           <div className="flex items-center gap-3 text-xs text-text-muted">
             <div className="flex items-center gap-1 font-medium">
               <Users className="h-3.5 w-3.5 text-primary" />
-              <span>{classroom?.memberCount ?? 0} members</span>
+              <span>{`${classroom?.memberCount ?? 0} members`}</span>
             </div>
             <div className="flex items-center gap-1 font-medium">
               <Shield className="h-3.5 w-3.5 text-primary" />
@@ -330,12 +402,48 @@ export function ClassHomeTab({
         </div>
 
         {isEnrolled && (
-          <ClassPostBox onSubmit={handlePostAnnouncement} />
+          <SpacePostBox
+            onSubmit={handlePostAnnouncement}
+            isPosting={isCreatingPost}
+          />
         )}
 
         {isLoadingCoursework && announcements.length === 0 ? (
-          <div className="rounded-xl bg-surface p-5 text-center text-xs text-text-muted ring-1 ring-border shadow-xs">
-            Loading space updates•
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse rounded-2xl border border-border bg-surface p-4 sm:p-5 space-y-3 shadow-2xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-border/60" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3.5 w-28 rounded bg-border/60" />
+                    <div className="h-2.5 w-16 rounded bg-border/40" />
+                  </div>
+                </div>
+                <div className="space-y-2 pt-1">
+                  <div className="h-3 w-full rounded bg-border/50" />
+                  <div className="h-3 w-4/5 rounded bg-border/40" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isCourseworkError && announcements.length === 0 ? (
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-center space-y-2">
+            <p className="text-xs sm:text-sm font-medium text-destructive">
+              Failed to load space stream updates.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => refetchCoursework()}
+              className="text-xs h-7 gap-1.5 cursor-pointer"
+            >
+              <RefreshCw className="h-3 w-3" />
+              <span>Retry</span>
+            </Button>
           </div>
         ) : announcements.length === 0 ? (
           <EmptyState
@@ -343,14 +451,17 @@ export function ClassHomeTab({
             description="Announcements, project updates, and discussions will appear here when posted."
           />
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {announcements.map((post) => (
-              <ClassFeedPost
+              <SpaceFeedPost
                 key={post.id}
                 post={{
                   ...post,
                   teacherName,
+                  teacherAvatar,
                 }}
+                courseId={courseId}
+                canManage={isTeacher}
               />
             ))}
           </div>
@@ -359,3 +470,6 @@ export function ClassHomeTab({
     </div>
   );
 }
+
+export const SpaceHomeTab = ClassHomeTab;
+export default ClassHomeTab;

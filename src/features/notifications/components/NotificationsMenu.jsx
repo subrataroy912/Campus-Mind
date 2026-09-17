@@ -307,6 +307,45 @@ function formatRelativeTime(dateString) {
 
 const DUMMY_NOTIFICATIONS = [
   {
+    id: "notif-reaction-1",
+    type: "REACTION_RECEIVED",
+    title: "New Reaction on Your Poll",
+    message:
+      "Maya Lin and 3 others reacted with 🔥 Fire to your Capstone tech stack poll.",
+    resourceType: "POLL",
+    resourceId: "poll-capstone-1",
+    read: false,
+    readAt: null,
+    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    link: "/community?tab=trending",
+  },
+  {
+    id: "notif-streak-1",
+    type: "STREAK_REMINDER",
+    title: "🔥 5-Day Streak Active!",
+    message:
+      "You're on a roll! Check today's campus buzz or react to a discussion to keep your streak going.",
+    resourceType: "STREAK",
+    resourceId: "streak-daily",
+    read: false,
+    readAt: null,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    link: "/community?tab=for-you",
+  },
+  {
+    id: "notif-poll-1",
+    type: "CAMPUS_PULSE",
+    title: "Trending Campus Poll",
+    message:
+      "Over 120 students have voted in 'Best stack for Capstone'. See what's winning!",
+    resourceType: "CAMPUS_PULSE",
+    resourceId: "pulse-capstone",
+    read: true,
+    readAt: "2026-09-17T06:00:00Z",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    link: "/community?filter=poll",
+  },
+  {
     id: "notif-98f2b1a4-6c3e-4d5f-9e7a-1234567890ab",
     type: "ASSIGNMENT_GRADED",
     title: "Assignment Graded: Distributed Systems Lab 3",
@@ -329,17 +368,5 @@ const DUMMY_NOTIFICATIONS = [
     read: true,
     readAt: null,
     createdAt: "2026-09-13T12:30:00Z",
-  },
-  {
-    id: "notif-11c3d5e7-9a8f-4123-bcde-456789abcdef",
-    type: "NEW_ANNOUNCEMENT",
-    title: "New Stream Announcement",
-    message:
-      "Dr. Martinez posted an update: 'Tomorrow's Advanced Algorithms seminar has been moved to Lecture Hall B.'",
-    resourceType: "ANNOUNCEMENT",
-    resourceId: "ann-40912",
-    read: true,
-    readAt: null,
-    createdAt: "2026-09-13T13:05:12Z",
   },
 ];
