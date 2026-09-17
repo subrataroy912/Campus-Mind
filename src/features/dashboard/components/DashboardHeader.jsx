@@ -8,6 +8,7 @@ import { initials } from "@/utils/initials";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi";
 import { useAuth } from "@/context/AuthContext.jsx";
 import NotificationsMenu from "@/features/notifications/components/NotificationsMenu.jsx";
+import { DailyStreakBadge } from "./DailyStreakBadge.jsx";
 import { routes } from "@/routes/paths";
 
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ export default function DashboardHeader() {
         >
           <Search size={20} />
         </Button>
+        <DailyStreakBadge />
         <NotificationsMenu />
         <Link
           to={routes.profile.root}

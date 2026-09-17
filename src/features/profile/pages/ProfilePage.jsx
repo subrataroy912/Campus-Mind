@@ -20,6 +20,7 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import { ProfileAchievementsCard } from "../components/ProfileAchievementsCard.jsx";
 import { routes } from "@/routes/paths.js";
 import { DashboardSection } from "@/features/dashboard/components/DashboardSection.jsx";
 
@@ -347,6 +348,10 @@ export default function ProfilePage() {
           onAvatarUpload={handleAvatarUpload}
           onBannerUpload={handleBannerUpload}
         />
+
+        <section>
+          <ProfileAchievementsCard />
+        </section>
 
         <section>
           <ProfileDetails details={details} />
