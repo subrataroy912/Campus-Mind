@@ -1,127 +1,148 @@
-import { DAYS, MEETING_TYPES } from "../../model/createSpaceForm.js";
+import { useState } from "react";
+import { MEETING_TYPES } from "../../model/createSpaceForm.js";
+import { Input } from "@/components/ui/input.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
+import { Plus, X } from "lucide-react";
+import { SpaceSelect } from "./SpaceSelect.jsx";
 
-export function SpaceScheduleSection({ form, update, toggleDay }) {
+export function SpaceScheduleSection({ form, update, addTag, removeTag }) {
   const currentMeetingType = form.meetingType || "IN_PERSON";
+  const [tagInput, setTagInput] = useState("");
+
+  const handleAddTag = () => {
+    if (!tagInput.trim()) return;
+    if (addTag) {
+      addTag(tagInput.trim());
+    } else {
+      const clean = tagInput.trim().replace(/^#/, "").toLowerCase();
+      const existing = form.tags || [];
+      if (!existing.includes(clean)) {
+        update("tags", [...existing, clean]);
+      }
+    }
+    setTagInput("");
+  };
+
+  const handleRemoveTag = (t) => {
+    if (removeTag) {
+      removeTag(t);
+    } else {
+      update(
+        "tags",
+        (form.tags || []).filter((item) => item !== t),
+      );
+    }
+  };
 
   return (
     <div className="space-y-3">
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Meeting & Schedule
-        </label>
-        <p className="text-[12px] text-text-muted">
-          Format, location, and meeting times.
-        </p>
-      </div>
-
-      {/* Meeting Format - Segmented Horizontal Bar */}
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-text-main">
-          Format
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {MEETING_TYPES.map((type) => {
-            const isSelected = currentMeetingType === type.id;
-            return (
-              <button
-                key={type.id}
-                type="button"
-                onClick={() => update("meetingType", type.id)}
-                className={`flex h-9 items-center justify-center rounded-lg border px-2.5 text-xs font-medium transition-all cursor-pointer ${
-                  isSelected
-                    ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/40 shadow-xs"
-                    : "border-border bg-surface text-text-main hover:border-border/80 hover:bg-canvas/50"
-                }`}
-                title={type.description}
-              >
-                {type.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Location / Meeting Link */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-text-main">
-          {currentMeetingType === "ONLINE"
-            ? "Virtual Meeting Link or Platform"
-            : currentMeetingType === "HYBRID"
-            ? "Physical Room & Virtual Link"
-            : "Room / Building / Location"}
-        </label>
-        <input
-          type="text"
-          value={form.location || form.room || ""}
-          onChange={(e) => {
-            update("location", e.target.value);
-            update("room", e.target.value);
-          }}
-          placeholder={
-            currentMeetingType === "ONLINE"
-              ? "e.g. Google Meet link, Zoom, or Discord"
-              : "e.g. Room 402, Hall B, or Lab 3"
-          }
-          className="h-9 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text-heading outline-none transition hover:border-text-muted/50 focus:ring-1 focus:ring-focus"
-        />
-      </div>
-
-      {/* Days of Week + Time in a responsive row */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {/* Days of Week */}
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-main">
-            Meeting days
+      {/* Meeting Format & Location side-by-side */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label
+            htmlFor="create-space-meeting-type"
+            className="block text-xs font-semibold text-text-heading"
+          >
+            Meeting Format
           </label>
-          <div className="flex flex-wrap gap-1">
-            {DAYS.map((day) => {
-              const isSelected = form.days.includes(day);
-              return (
+          <SpaceSelect
+            id="create-space-meeting-type"
+            value={currentMeetingType}
+            onChange={(val) => update("meetingType", val)}
+            options={MEETING_TYPES}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="location"
+            className="block text-xs font-semibold text-text-heading"
+          >
+            {currentMeetingType === "ONLINE"
+              ? "Virtual Meeting Link"
+              : currentMeetingType === "HYBRID"
+                ? "Location & Virtual Link"
+                : "Location / Room"}
+          </label>
+          <Input
+            id="location"
+            type="text"
+            value={form.location || form.room || ""}
+            onChange={(e) => {
+              update("location", e.target.value);
+              update("room", e.target.value);
+            }}
+            placeholder={
+              currentMeetingType === "ONLINE"
+                ? "e.g. meet.google.com/xyz or Zoom link"
+                : "e.g. Room 301, Science Hall B"
+            }
+            className="h-9 text-xs"
+            maxLength={500}
+          />
+        </div>
+      </div>
+
+      {/* Discovery Tags */}
+      <div className="space-y-1">
+        <label
+          htmlFor="tagInput"
+          className="block text-xs font-semibold text-text-heading"
+        >
+          Tags
+        </label>
+        <div className="flex gap-2">
+          <Input
+            id="tagInput"
+            type="text"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                handleAddTag();
+              }
+            }}
+            placeholder="Type a tag and press Enter (e.g. algorithms, python, robotics)"
+            className="h-9 text-xs"
+          />
+          <button
+            type="button"
+            onClick={handleAddTag}
+            disabled={!tagInput.trim()}
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface px-3 text-xs font-medium text-text-main hover:bg-canvas disabled:opacity-50 cursor-pointer shrink-0"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add</span>
+          </button>
+        </div>
+
+        {/* Tag Pills */}
+        {form.tags && form.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {form.tags.map((t) => (
+              <Badge
+                key={t}
+                variant="secondary"
+                className="gap-1 py-0.5 px-2 text-xs font-medium"
+              >
+                <span>#{t}</span>
                 <button
-                  key={day}
                   type="button"
-                  onClick={() => toggleDay(day)}
-                  className={`h-7 rounded-md px-2 text-[11px] font-medium transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-primary text-surface shadow-2xs font-semibold"
-                      : "bg-canvas text-text-main hover:bg-border/60 border border-border/80"
-                  }`}
-                  aria-pressed={isSelected}
+                  onClick={() => handleRemoveTag(t)}
+                  className="rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 cursor-pointer"
+                  aria-label={`Remove tag ${t}`}
                 >
-                  {day}
+                  <X className="h-2.5 w-2.5" />
                 </button>
-              );
-            })}
+              </Badge>
+            ))}
           </div>
-        </div>
-
-        {/* Start and End Times */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-main">
-              Start time
-            </label>
-            <input
-              type="time"
-              value={form.startTime}
-              onChange={(e) => update("startTime", e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface px-2 text-xs text-text-heading outline-none transition hover:border-text-muted/50 focus:ring-1 focus:ring-focus"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-main">
-              End time
-            </label>
-            <input
-              type="time"
-              value={form.endTime}
-              onChange={(e) => update("endTime", e.target.value)}
-              className="h-8 w-full rounded-lg border border-border bg-surface px-2 text-xs text-text-heading outline-none transition hover:border-text-muted/50 focus:ring-1 focus:ring-focus"
-            />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+export const ClassScheduleSection = SpaceScheduleSection;
+export default SpaceScheduleSection;

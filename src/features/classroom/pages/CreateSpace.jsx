@@ -6,7 +6,6 @@ import {
   SpaceTypeSelector,
   SpaceMediaSection,
   SpaceBasicInfoSection,
-  SpaceAcademicSection,
   SpaceScheduleSection,
   SpaceAccessTypeSection,
 } from "../components/createClass/index.js";
@@ -21,10 +20,15 @@ export default function CreateSpace() {
     submitted,
     submissionError,
     isSubmitting,
+    isUploadingCover,
+    isUploadingLogo,
     update,
-    toggleDay,
+    addTag,
+    removeTag,
     handleImageUpload,
     handleLogoUpload,
+    removeCover,
+    removeLogo,
     reset,
     submit,
   } = useCreateSpaceForm();
@@ -33,7 +37,7 @@ export default function CreateSpace() {
     <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
         {/* Navigation Back Link */}
-        <div className="mb-3">
+        <div className="mb-2.5">
           <Link
             to={routes.spaces.list}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
@@ -44,18 +48,17 @@ export default function CreateSpace() {
         </div>
 
         {/* Page Header */}
-        <div className="mb-4 sm:mb-5">
+        <div className="mb-3.5 sm:mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+            <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-primary">
               <PlusCircle className="h-4 w-4" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
+              <h1 className="text-lg font-bold tracking-tight text-text-heading sm:text-xl">
                 Create a space
               </h1>
-              <p className="text-[12px] text-text-muted">
-                Set up a new space for your class, study group, club, or project
-                team.
+              <p className="text-xs text-text-muted">
+                Set up a space for your class, study group, club, or project.
               </p>
             </div>
           </div>
@@ -64,7 +67,7 @@ export default function CreateSpace() {
         {/* Global Submission Error */}
         {submissionError && (
           <div
-            className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300 shadow-2xs"
+            className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300 shadow-2xs"
             role="alert"
           >
             <p className="font-semibold">Unable to create space</p>
@@ -75,14 +78,12 @@ export default function CreateSpace() {
         {/* Main Creation Form */}
         <form
           onSubmit={submit}
-          className="space-y-5 rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border sm:p-6"
+          className="space-y-4 rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border sm:p-5"
         >
-          {/* Section 0: Space Type Selector */}
+          {/* Section 0: Space Type Dropdown */}
           <SpaceTypeSelector form={form} update={update} />
 
-          <hr className="border-border/50" />
-
-          {/* Section 1: Media & Branding */}
+          {/* Section 1: Media & Branding Preview */}
           <SpaceMediaSection
             form={form}
             preview={preview}
@@ -90,40 +91,34 @@ export default function CreateSpace() {
             update={update}
             handleImageUpload={handleImageUpload}
             handleLogoUpload={handleLogoUpload}
+            onRemoveCover={removeCover}
+            onRemoveLogo={removeLogo}
+            isUploadingCover={isUploadingCover}
+            isUploadingLogo={isUploadingLogo}
           />
-
-          <hr className="border-border/50" />
 
           {/* Section 2: Basic Info */}
           <SpaceBasicInfoSection form={form} errors={errors} update={update} />
 
-          <hr className="border-border/50" />
-
-          {/* Section 3: Academic/Focus Details */}
-          <SpaceAcademicSection form={form} errors={errors} update={update} />
-
-          <hr className="border-border/50" />
-
-          {/* Section 4: Schedule & Meeting Details */}
+          {/* Section 3: Meeting, Location & Tags */}
           <SpaceScheduleSection
             form={form}
             update={update}
-            toggleDay={toggleDay}
+            addTag={addTag}
+            removeTag={removeTag}
           />
 
-          <hr className="border-border/50" />
-
-          {/* Section 5: Access & Membership Type */}
+          {/* Section 4: Access & Membership Type Dropdown */}
           <SpaceAccessTypeSection form={form} update={update} />
 
           {/* Form Actions */}
-          <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-3.5 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={reset}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingCover || isUploadingLogo}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg border-border hover:bg-canvas text-text-main text-xs"
             >
               <RotateCcw className="h-3.5 w-3.5 text-text-muted" />
@@ -133,7 +128,7 @@ export default function CreateSpace() {
             <Button
               type="submit"
               size="sm"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingCover || isUploadingLogo}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary hover:bg-primary-hover font-medium text-surface shadow-xs disabled:opacity-50 text-xs"
             >
               {isSubmitting ? (

@@ -28,7 +28,7 @@ export function ContentList({
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-4 sm:-ml-6">
+          <CarouselContent className="-ml-4 sm:-ml-6 items-stretch">
             {displayItems.map((item, index) => (
               <CarouselItem
                 key={keyExtractor(item, index)}

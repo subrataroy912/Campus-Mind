@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
+import { Input } from "@/components/ui/input.jsx";
 import {
   useAddCourseworkCommentMutation,
   useGetCourseworkCommentsQuery,
@@ -37,7 +39,7 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-3.5 space-y-3">
       <p className="text-xs font-bold text-text-muted uppercase tracking-wider">
-        Class Discussion
+        Discussion & Comments
       </p>
       {courseworkComments.length === 0 ? (
         <p className="text-xs text-text-muted">No comments yet.</p>
@@ -58,7 +60,7 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
       )}
 
       <div className="flex gap-2 pt-1">
-        <input
+        <Input
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           onKeyDown={(e) => {
@@ -67,16 +69,32 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
               handleAddComment();
             }
           }}
-          className="flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-xs text-text-heading outline-none focus:ring-2 focus:ring-focus"
-          placeholder="Add a class comment…"
+          disabled={isPosting}
+          className="h-8 flex-1 text-xs"
+          placeholder="Add a comment…"
         />
-        <Button size="sm" loading={isPosting} onClick={handleAddComment}>
-          Post
+        <Button
+          size="sm"
+          type="button"
+          disabled={isPosting || !commentText.trim()}
+          onClick={handleAddComment}
+          className="h-8 text-xs font-semibold"
+        >
+          {isPosting ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Send className="h-3 w-3" />
+          )}
+          <span className="hidden sm:inline ml-1">Post</span>
         </Button>
       </div>
       {commentError && (
-        <p className="text-xs text-secondary font-medium">{commentError}</p>
+        <p className="text-xs text-destructive font-medium" role="alert">
+          {commentError}
+        </p>
       )}
     </div>
   );
 }
+
+export default CourseworkCommentSection;

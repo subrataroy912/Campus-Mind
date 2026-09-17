@@ -1,125 +1,26 @@
-import { useState, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { Link, useSearchParams } from "react-router";
-import { ArrowLeft, Globe, Lock } from "lucide-react";
-import {
-  joinClassroom,
-} from "../api/classroomService.js";
-import { useAuth } from "@/context/AuthContext.jsx";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
-import { useGetPublicCourseQuery } from "@/features/explore/api/exploreApi.js";
+import { Link } from "react-router";
+import { ArrowLeft, Check, Globe, Lock, Loader2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths";
-import {
-  CLASS_CODE_LENGTH,
-  formatClassCode,
-  normalizeClassCode,
-} from "@/utils/classCode.js";
+import { useJoinSpaceForm } from "../hooks/useJoinSpaceForm.js";
 
 export default function JoinSpace() {
-  const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
-  const { user } = useAuth();
-  const initialCode = normalizeClassCode(searchParams.get("code") || "");
-  const optionalCourseId = searchParams.get("courseId") || "";
-  const queryAccessType = (searchParams.get("accessType") || "").toUpperCase();
-
-  const { data: publicCourse } = useGetPublicCourseQuery(
+  const {
+    code,
+    status,
+    foundSpace,
+    error,
+    inputsRef,
+    publicCourse,
+    isOpenCourse,
+    isInviteCourse,
     optionalCourseId,
-    { skip: !optionalCourseId }
-  );
-
-  const effectiveAccessType =
-    queryAccessType ||
-    publicCourse?.accessType ||
-    (publicCourse?.visibility === "PUBLIC" ? "OPEN" : "CODE");
-
-  const isOpenCourse = Boolean(
-    optionalCourseId &&
-      (effectiveAccessType === "OPEN" || publicCourse?.visibility === "PUBLIC")
-  );
-  const isInviteCourse = Boolean(
-    optionalCourseId && effectiveAccessType === "INVITE"
-  );
-
-  const [code, setCode] = useState(() =>
-    Array.from(
-      { length: CLASS_CODE_LENGTH },
-      (_, index) => initialCode[index] || ""
-    )
-  );
-  const [status, setStatus] = useState("idle"); // idle | loading | found | not-found | joined
-  const [foundClass, setFoundClass] = useState(null);
-  const [error, setError] = useState("");
-  const inputsRef = useRef([]);
-
-  const handleChange = (index, value) => {
-    const clean = normalizeClassCode(value).slice(0, 1);
-    const next = [...code];
-    next[index] = clean;
-    setCode(next);
-    setStatus("idle");
-    setFoundClass(null);
-    if (clean && index < 7) {
-      inputsRef.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, "")
-      .slice(0, 8)
-      .split("");
-    const next = [...code];
-    pasted.forEach((ch, i) => (next[i] = ch));
-    setCode(next);
-    setError("");
-    const lastIndex = Math.min(pasted.length, 8) - 1;
-    if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
-  };
-
-  const handleFindClass = async (e) => {
-    e.preventDefault();
-    const classCode = formatClassCode(code);
-    const hasCode = code.every(Boolean);
-
-    if (!isOpenCourse && !hasCode && !optionalCourseId) {
-      setStatus("incomplete");
-      return;
-    }
-
-    setStatus("loading");
-    setError("");
-    try {
-      const joined = await joinClassroom(
-        user?.id,
-        optionalCourseId || undefined,
-        isOpenCourse ? "" : classCode || ""
-      );
-      triggerLifecycleRefresh(dispatch, "course-created");
-      setFoundClass(joined);
-      setStatus("joined");
-    } catch (requestError) {
-      setError(joinErrorMessage(requestError));
-      setStatus("idle");
-    }
-  };
-
-  const handleReset = () => {
-    setCode(Array.from({ length: CLASS_CODE_LENGTH }, () => ""));
-    setStatus("idle");
-    setFoundClass(null);
-    setError("");
-    inputsRef.current[0]?.focus();
-  };
+    handleChange,
+    handleKeyDown,
+    handlePaste,
+    handleSubmit,
+    handleReset,
+  } = useJoinSpaceForm();
 
   return (
     <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">
@@ -134,6 +35,7 @@ export default function JoinSpace() {
             <span>Back to spaces</span>
           </Link>
         </div>
+
         {/* Header */}
         <div className="mb-4 text-center sm:mb-5">
           <div className="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-11 sm:w-11">
@@ -142,19 +44,7 @@ export default function JoinSpace() {
             ) : isInviteCourse ? (
               <Lock className="h-5 w-5 text-text-muted" />
             ) : (
-              <svg
-                className="h-5 w-5 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.8}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
+              <Sparkles className="h-5 w-5 text-primary" />
             )}
           </div>
           <h1 className="text-xl font-bold text-text-heading sm:text-2xl">
@@ -168,64 +58,75 @@ export default function JoinSpace() {
             {isOpenCourse
               ? "This space has open enrollment. Anyone can join — no code required."
               : isInviteCourse
-              ? "This space requires an invitation from the host or teacher to join."
+              ? "This space requires an invitation from the host or facilitator to join."
               : optionalCourseId
               ? "Enter your code to join this space."
-              : "Ask your instructor or team lead for the code, then enter it below."}
+              : "Ask your instructor or space lead for the code, then enter it below."}
           </p>
         </div>
 
-        <div className="rounded-2xl bg-surface p-4 shadow-xs ring-1 ring-border sm:p-6">
+        <div className="rounded-2xl bg-surface p-4 shadow-xs ring-1 border border-border sm:p-6">
           {status !== "joined" && (
             isOpenCourse ? (
-              <form onSubmit={handleFindClass}>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="rounded-xl border border-border/70 bg-canvas p-4 text-center">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">
-                    {publicCourse?.subject || "Open Course"}
+                    {publicCourse?.subject || "Open Space"}
                   </div>
-                  <div className="mt-1 text-base font-medium text-text-heading">
-                    {publicCourse?.title || "Classroom"}
+                  <div className="mt-1 text-base font-semibold text-text-heading">
+                    {publicCourse?.title || "Space"}
                   </div>
                   {publicCourse?.instructorName && (
                     <div className="mt-0.5 text-xs text-text-muted">
-                      Instructor: {publicCourse.instructorName}
+                      Facilitator: {publicCourse.instructorName}
                     </div>
                   )}
                 </div>
 
                 {error && (
-                  <p className="mt-3 text-center text-xs text-secondary" role="alert">
+                  <p className="text-center text-xs text-destructive font-medium" role="alert">
                     {error}
                   </p>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={status === "loading"}
-                  className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs h-9"
                 >
-                  {status === "loading" ? "Joining class…" : "Join and Open Class"}
-                </button>
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      <span>Joining space…</span>
+                    </>
+                  ) : (
+                    "Join and Open Space"
+                  )}
+                </Button>
               </form>
             ) : isInviteCourse ? (
-              <div className="text-center py-2">
+              <div className="text-center py-2 space-y-4">
                 <div className="rounded-xl border border-border/70 bg-canvas p-4">
-                  <div className="text-sm font-medium text-text-heading">
-                    {publicCourse?.title || "Classroom"}
+                  <div className="text-sm font-semibold text-text-heading">
+                    {publicCourse?.title || "Space"}
                   </div>
-                  <p className="mt-2 text-xs text-text-muted">
-                    This classroom is invite-only. Please contact the teacher to be added to the student roster.
+                  <p className="mt-2 text-xs text-text-muted leading-relaxed">
+                    This space is invite-only. Please contact the facilitator or lead to be added to the roster.
                   </p>
                 </div>
-                <Link
-                  to={routes.dashboard}
-                  className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-main transition hover:bg-canvas"
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
                 >
-                  Back to dashboard
-                </Link>
+                  <Link to={routes.spaces.list}>
+                    Back to spaces
+                  </Link>
+                </Button>
               </div>
             ) : (
-              <form onSubmit={handleFindClass}>
+              <form onSubmit={handleSubmit}>
                 <label className="mb-2.5 block text-center text-xs font-medium text-text-main">
                   Space code
                 </label>
@@ -252,76 +153,71 @@ export default function JoinSpace() {
                 </div>
 
                 {status === "incomplete" && (
-                  <p className="mt-2 text-center text-xs text-secondary">
+                  <p className="mt-2 text-center text-xs text-destructive">
                     Enter all 8 characters of the space code.
-                  </p>
-                )}
-                {status === "not-found" && (
-                  <p className="mt-2 text-center text-xs text-secondary">
-                    No space found with that code. Check it and try again.
                   </p>
                 )}
                 {error && (
                   <p
-                    className="mt-2 text-center text-xs text-secondary"
+                    className="mt-2 text-center text-xs text-destructive font-medium"
                     role="alert"
                   >
                     {error}
                   </p>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={status === "loading"}
-                  className="mt-4 h-9 w-full rounded-lg bg-primary px-4 text-xs font-semibold text-surface transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer shadow-xs"
+                  className="mt-4 h-9 w-full text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs"
                 >
-                  {status === "loading" ? "Joining space…" : "Join space"}
-                </button>
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      <span>Joining space…</span>
+                    </>
+                  ) : (
+                    "Join space"
+                  )}
+                </Button>
               </form>
             )
           )}
 
           {/* Joined confirmation */}
-          {status === "joined" && foundClass && (
+          {status === "joined" && foundSpace && (
             <div className="flex flex-col items-center py-2 text-center">
               <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.5 12.75l6 6 9-13.5"
-                  />
-                </svg>
+                <Check className="h-5 w-5" strokeWidth={2.5} />
               </div>
               <h2 className="text-base font-bold text-text-heading">
-                You've joined {foundClass.title}
+                You've joined {foundSpace.title}
               </h2>
               <p className="mt-0.5 text-xs text-text-muted">
-                {foundClass.subtitle} with{" "}
-                {foundClass.instructor?.name ||
-                  foundClass.teacher?.name ||
-                  "CampusMind host"}
+                {foundSpace.subtitle} with{" "}
+                {foundSpace.instructor?.name ||
+                  foundSpace.teacher?.name ||
+                  "CampusMind facilitator"}
               </p>
               <div className="mt-4 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-                <Link
-                  to={routes.spaces.detail(foundClass.id)}
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-xs font-medium text-white transition hover:bg-primary-hover shadow-xs"
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-9 text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs"
                 >
-                  Open space
-                </Link>
-                <button
+                  <Link to={routes.spaces.detail(foundSpace.id)}>
+                    Open space
+                  </Link>
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={handleReset}
-                  className="inline-flex h-9 items-center justify-center rounded-lg border border-border px-4 text-xs font-medium text-text-main transition hover:bg-canvas"
+                  className="h-9 text-xs"
                 >
                   Join another
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -329,12 +225,4 @@ export default function JoinSpace() {
       </div>
     </div>
   );
-}
-
-function joinErrorMessage(error) {
-  const message = error?.data?.error || error?.message;
-  if (error?.status === 403)
-    return "This code is invalid or expired, enrollment is disabled, or your account cannot join courses.";
-  if (error?.status === 409) return message || "You have already joined this class.";
-  return message || "Unable to join this class. Please try again.";
 }

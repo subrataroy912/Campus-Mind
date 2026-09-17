@@ -67,7 +67,7 @@ export default function ProfilePage() {
         }
         return next;
       },
-      { replace: true }
+      { replace: true },
     );
   };
   const [isEditing, setIsEditing] = useState(false);
@@ -97,7 +97,7 @@ export default function ProfilePage() {
     : publicProfile;
   const profile = useMemo(
     () => viewedUser && profileFor(viewedUser),
-    [viewedUser]
+    [viewedUser],
   );
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
@@ -105,10 +105,10 @@ export default function ProfilePage() {
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
   const createdClasses = classes.filter(
-    (item) => item.ownerId === viewedUser.id
+    (item) => item.ownerId === viewedUser.id,
   );
   const joinedClasses = classes.filter(
-    (item) => item.ownerId !== viewedUser.id
+    (item) => item.ownerId !== viewedUser.id,
   );
   if (
     authStatus === "hydrating" ||
