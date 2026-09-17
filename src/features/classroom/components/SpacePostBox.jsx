@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Send,
   Loader2,
@@ -8,11 +8,14 @@ import {
   Bookmark,
   Type,
   X,
+  Image as ImageIcon,
+  BarChart2,
 } from "lucide-react";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Textarea } from "@/components/ui/textarea.jsx";
 import { Input } from "@/components/ui/input.jsx";
+import { CreatePollModal } from "./CreatePollModal.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { cn } from "@/lib/utils.js";
 
@@ -39,9 +42,33 @@ export function SpacePostBox({
   const [postType, setPostType] = useState("ANNOUNCEMENT");
   const [localError, setLocalError] = useState("");
 
+  // Rich attachments: Images & Polls
+  const [attachedImages, setAttachedImages] = useState([]);
+  const [attachedPoll, setAttachedPoll] = useState(null);
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const newImages = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+      name: file.name,
+    }));
+
+    setAttachedImages((prev) => [...prev, ...newImages].slice(0, 4));
+    e.target.value = "";
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setAttachedImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const submit = async (e) => {
     if (e) e.preventDefault();
-    if (!text.trim() || isPosting) return;
+    if ((!text.trim() && !attachedPoll && attachedImages.length === 0) || isPosting) return;
 
     setLocalError("");
     const trimmedText = text.trim();
@@ -59,6 +86,8 @@ export function SpacePostBox({
       description: trimmedText,
       type: postType,
       text: trimmedText,
+      poll: attachedPoll || undefined,
+      media: attachedImages.length > 0 ? attachedImages.map((img) => ({ url: img.url, alt: img.name })) : undefined,
       toString() {
         return this.content;
       },
@@ -71,6 +100,8 @@ export function SpacePostBox({
       setText("");
       setTitle("");
       setShowTitle(false);
+      setAttachedImages([]);
+      setAttachedPoll(null);
       setLocalError("");
     } catch (err) {
       const errMsg =
@@ -181,6 +212,57 @@ export function SpacePostBox({
             className="w-full resize-none text-xs sm:text-sm bg-canvas/40 min-h-[70px] focus-visible:ring-primary"
           />
 
+          {/* Attached Poll Preview */}
+          {attachedPoll && (
+            <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 p-2.5 text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <BarChart2 className="h-4 w-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <span className="font-semibold text-text-heading block truncate">
+                    Poll: {attachedPoll.question}
+                  </span>
+                  <span className="text-[11px] text-text-muted">
+                    {attachedPoll.options.length} options · {attachedPoll.duration}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAttachedPoll(null)}
+                className="rounded-md p-1 text-text-muted hover:bg-canvas hover:text-text-main transition cursor-pointer"
+                title="Remove poll"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Attached Images Thumbnails */}
+          {attachedImages.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {attachedImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  className="group relative h-16 w-16 overflow-hidden rounded-xl border border-border shadow-xs"
+                >
+                  <img
+                    src={img.url}
+                    alt={img.name}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white opacity-80 hover:opacity-100 transition cursor-pointer"
+                    title="Remove image"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Error Banner */}
           {displayedError && (
             <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-2 text-xs text-destructive">
@@ -191,34 +273,77 @@ export function SpacePostBox({
 
           {/* Footer Controls */}
           <div className="flex items-center justify-between border-t border-border/50 pt-2">
-            <span className="text-[11px] text-text-muted hidden sm:inline">
-              Press{" "}
-              <kbd className="rounded border border-border bg-canvas px-1 py-0.5 text-[10px] font-mono">
-                Ctrl+Enter
-              </kbd>{" "}
-              to publish
-            </span>
+            <div className="flex items-center gap-1">
+              {/* Photo Upload Trigger */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageSelect}
+                accept="image/*"
+                multiple
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isPosting || attachedImages.length >= 4}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-canvas hover:text-text-main transition cursor-pointer disabled:opacity-50"
+                title="Attach photos (max 4)"
+              >
+                <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                <span className="hidden sm:inline">Photo</span>
+              </button>
 
-            <Button
-              type="button"
-              onClick={submit}
-              disabled={!text.trim() || isPosting}
-              size="sm"
-              className="ml-auto h-8 gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
-            >
-              {isPosting ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  <span>Publishing…</span>
-                </>
-              ) : (
-                <>
-                  <Send className="h-3.5 w-3.5" />
-                  <span>Publish</span>
-                </>
-              )}
-            </Button>
+              {/* Poll Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsPollModalOpen(true)}
+                disabled={isPosting || Boolean(attachedPoll)}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-canvas hover:text-text-main transition cursor-pointer disabled:opacity-50"
+                title="Create a poll"
+              >
+                <BarChart2 className="h-3.5 w-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Poll</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-text-muted hidden sm:inline">
+                Press{" "}
+                <kbd className="rounded border border-border bg-canvas px-1 py-0.5 text-[10px] font-mono">
+                  Ctrl+Enter
+                </kbd>
+              </span>
+
+              <Button
+                type="button"
+                onClick={submit}
+                disabled={(!text.trim() && !attachedPoll && attachedImages.length === 0) || isPosting}
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-xs hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
+              >
+                {isPosting ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Publishing…</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Publish</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
+
+          {/* Poll Creation Modal */}
+          <CreatePollModal
+            isOpen={isPollModalOpen}
+            onClose={() => setIsPollModalOpen(false)}
+            onSavePoll={setAttachedPoll}
+            initialPoll={attachedPoll}
+          />
         </div>
       </div>
     </div>

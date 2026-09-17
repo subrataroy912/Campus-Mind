@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import { routes } from "@/routes/paths.js";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
+import { ReactionPicker } from "./ReactionPicker.jsx";
+import { ReactionSummary } from "./ReactionSummary.jsx";
+import { PollPostWidget } from "./PollPostWidget.jsx";
+import { PostMediaCarousel } from "./PostMediaCarousel.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Input } from "@/components/ui/input.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
@@ -50,6 +54,43 @@ export function SpaceFeedPost({
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [commentError, setCommentError] = useState("");
+
+  // Interactive Reactions & Polls
+  const [userReaction, setUserReaction] = useState(post.userReaction || null);
+  const [reactions, setReactions] = useState(
+    post.reactions || (post.likes ? { LOVE: post.likes } : {})
+  );
+  const [poll, setPoll] = useState(post.poll || null);
+
+  const handleSelectReaction = (reactionId) => {
+    const prevReaction = userReaction;
+    setUserReaction(reactionId);
+    setReactions((prev) => {
+      const next = { ...prev };
+      if (prevReaction && next[prevReaction] > 0) {
+        next[prevReaction] = next[prevReaction] - 1;
+      }
+      if (reactionId) {
+        next[reactionId] = (next[reactionId] || 0) + 1;
+      }
+      return next;
+    });
+  };
+
+  const handleVotePoll = (optionId) => {
+    if (!poll) return;
+    setPoll((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        userVotedOptionId: optionId,
+        totalVotes: (prev.totalVotes || 0) + 1,
+        options: prev.options.map((opt) =>
+          opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+        ),
+      };
+    });
+  };
 
   const [deleteCoursework, { isLoading: isDeletingPost }] =
     useDeleteCourseworkMutation();
@@ -256,13 +297,34 @@ export function SpaceFeedPost({
             {content}
           </p>
 
-          {/* Footer Controls: Comments Toggle */}
-          <div className="mt-3 flex items-center gap-4 text-xs text-text-muted border-t border-border/40 pt-2.5">
+          {/* Interactive Poll */}
+          {poll && (
+            <PollPostWidget
+              poll={poll}
+              onVote={handleVotePoll}
+            />
+          )}
+
+          {/* Media Carousel / Gallery */}
+          {post.media && post.media.length > 0 && (
+            <PostMediaCarousel media={post.media} />
+          )}
+
+          {/* Footer Controls: Reactions & Comments */}
+          <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2.5">
+            <div className="flex items-center gap-2">
+              <ReactionPicker
+                userReaction={userReaction}
+                onSelectReaction={handleSelectReaction}
+              />
+              <ReactionSummary reactions={reactions} />
+            </div>
+
             <button
               type="button"
               onClick={() => setCommentsOpen((open) => !open)}
               className={cn(
-                "inline-flex items-center gap-1.5 font-medium transition cursor-pointer hover:text-primary",
+                "inline-flex items-center gap-1.5 font-medium transition cursor-pointer hover:text-primary text-xs text-text-muted",
                 commentsOpen && "text-primary font-semibold"
               )}
             >
