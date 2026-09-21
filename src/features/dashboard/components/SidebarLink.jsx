@@ -12,7 +12,7 @@ export function SidebarLink({
   return (
     <NavLink
       to={to}
-      end={end ?? (to === routes.dashboard || to === routes.spaces.list)}
+      end={end ?? to === routes.dashboard}
       className={(navState) =>
         `${getNavLinkStyles(navState)} ${
           compact ? "justify-center px-0" : ""

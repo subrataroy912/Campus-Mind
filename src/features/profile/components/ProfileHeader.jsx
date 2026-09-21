@@ -20,7 +20,6 @@ import {
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
-import { ReputationBadge } from "./ReputationBadge.jsx";
 
 export default function ProfileHeader({
   profile,
@@ -203,7 +202,7 @@ export default function ProfileHeader({
           </div>
         </div>
         <div className="mt-3">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-2xl font-bold tracking-tight text-text-heading">
               {profile.name}
             </h1>
@@ -221,8 +220,6 @@ export default function ProfileHeader({
                 Course Creator
               </span>
             )}
-            <ReputationBadge badgeId="SCHOLAR" size="sm" />
-            <ReputationBadge badgeId="STREAK_MASTER" size="sm" />
           </div>
           <p className="text-sm font-medium text-text-muted">
             @{profile.handle || "unknown"}

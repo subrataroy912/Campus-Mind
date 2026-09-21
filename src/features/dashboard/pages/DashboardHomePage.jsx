@@ -1,18 +1,27 @@
 import { useMemo } from "react";
 import {
+  Compass,
   Loader2,
+  ArrowRight,
   CompassIcon,
   Sparkles,
   Flame,
 } from "lucide-react";
+import { Link } from "react-router";
+
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 import { useDashboardData } from "../useDashboardData.js";
 import EmptyState from "@/components/common/EmptyState.jsx";
+import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
-import { CampusLiveLounge } from "../components/CampusLiveLounge.jsx";
-import { CampusLeaderboardWidget } from "../components/CampusLeaderboardWidget.jsx";
-import { StudyBuddiesWidget } from "../components/StudyBuddiesWidget.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
@@ -111,17 +120,6 @@ export default function DashboardHomePage() {
     />
   </div>
 </header>
-
-      {/* Live Campus Study Lounge */}
-      <div className="mt-5 sm:mt-6">
-        <CampusLiveLounge />
-      </div>
-
-      {/* Peer Connections & Weekly Leaderboard */}
-      <div className="mt-5 sm:mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CampusLeaderboardWidget />
-        <StudyBuddiesWidget />
-      </div>
 
       {classrooms.length > 0 && (
         <DashboardSection

@@ -1,4 +1,4 @@
-import { Link } from "react-router"; // or "react-router-dom"
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { SIDEBAR_NAV_ITEMS } from "@/config/navigation.js";
@@ -17,7 +17,7 @@ export default function Sidebar({
     <aside
       className={`${
         isAbsolute ? `${isAbsolute} flex` : "hidden md:flex"
-      } z-20 shrink-0 flex-col border-border bg-surface transition-all md:border-r duration-200 ${
+      } z-20 shrink-0 flex-col border-r border-border bg-surface transition-all duration-200 ${
         compact ? "w-16 items-center" : "w-64"
       }`}
     >
@@ -27,7 +27,7 @@ export default function Sidebar({
           aria-label="Main navigation"
         >
           <ul className="space-y-1">
-            {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon, end }) => (
+            {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
               <li key={to}>
                 <SidebarLink
                   to={to}
@@ -35,7 +35,6 @@ export default function Sidebar({
                   Icon={Icon}
                   compact={compact}
                   onNavigate={onNavigate}
-                  end={end}
                 />
               </li>
             ))}
@@ -43,6 +42,7 @@ export default function Sidebar({
         </nav>
       </div>
 
+      {/* Spaces Actions Section */}
       <div
         className={`w-full space-y-2 border-t border-border ${
           compact ? "p-2 text-center" : "p-3"
@@ -55,62 +55,45 @@ export default function Sidebar({
         >
           Spaces
         </p>
-
         <Button
+          to={routes.classes.join}
           variant="outline"
           className={`w-full ${
-            compact ? "justify-center p-0" : "justify-start gap-3 px-3"
+            compact ? "justify-center p-0" : "justify-start"
           }`}
           title={compact ? "Join with code" : undefined}
         >
-          <Link
-            to={routes.classes.join}
-            onClick={onNavigate}
-            className="flex items-center justify-center gap-2"
-          >
-            <Ticket size={17} aria-hidden="true" />
-            <span className={compact ? "hidden" : ""}>Join with code</span>
-          </Link>
+          <Ticket size={17} aria-hidden="true" />
+          <span className={compact ? "hidden" : ""}>Join with code</span>
         </Button>
-
         {(user?.canCreateCourses || user?.isAdmin) && (
           <Button
+            to={routes.spaces.new}
             className={`w-full ${
-              compact ? "justify-center p-0" : "justify-start gap-3 px-3"
+              compact ? "justify-center p-0" : "justify-start"
             }`}
             title={compact ? "Create a space" : undefined}
           >
-            <Link
-              to={routes.spaces.new}
-              onClick={onNavigate}
-              className="flex items-center justify-center gap-2"
-            >
-              <Plus size={17} aria-hidden="true" />
-              <span className={compact ? "hidden" : ""}>Create a space</span>
-            </Link>
+            <Plus size={17} aria-hidden="true" />
+            <span className={compact ? "hidden" : ""}>Create a space</span>
           </Button>
         )}
       </div>
 
+      {/* Settings Footer Section */}
       <div
         className={`w-full border-t border-border ${compact ? "p-2" : "p-3"}`}
       >
-        <Button
-          variant="ghost"
-          className={`w-full text-text-main hover:bg-canvas ${
-            compact ? "justify-center p-0" : "justify-start gap-3 px-3"
+        <Link
+          to={routes.settings}
+          className={`flex items-center rounded-md text-sm font-medium text-text-main transition-colors hover:bg-canvas ${
+            compact ? "justify-center py-2 px-0" : "gap-3 px-3 py-2"
           }`}
           title={compact ? "Settings" : undefined}
         >
-          <Link
-            to={routes.settings}
-            onClick={onNavigate}
-            className="flex items-center justify-center gap-2"
-          >
-            <Settings size={19} aria-hidden="true" />
-            <span className={compact ? "hidden" : ""}>Settings</span>
-          </Link>
-        </Button>
+          <Settings size={19} />
+          <span className={compact ? "hidden" : ""}>Settings</span>
+        </Link>
       </div>
     </aside>
   );

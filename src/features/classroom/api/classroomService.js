@@ -10,62 +10,18 @@ export function mapCreateClassPayload(details = {}) {
     ? "OPEN"
     : "CODE";
 
-  const rawVisibility = (details.visibility || "").toUpperCase();
-  const visibility = ["PUBLIC", "PRIVATE"].includes(rawVisibility)
-    ? rawVisibility
-    : accessType === "OPEN"
-    ? "PUBLIC"
-    : "PRIVATE";
-
-  const rawMeetingType = (details.meetingType || "").toUpperCase();
-  const meetingType = ["ONLINE", "IN_PERSON", "HYBRID"].includes(rawMeetingType)
-    ? rawMeetingType
-    : "IN_PERSON";
-
-  const rawSpaceType = (details.spaceType || "").toUpperCase();
-  const spaceType = [
-    "ACADEMIC_CLASS",
-    "STUDY_GROUP",
-    "CLUB_SOCIETY",
-    "PROJECT_TEAM",
-    "DEPARTMENT_COHORT",
-    "COMMUNITY_HUB",
-  ].includes(rawSpaceType)
-    ? rawSpaceType
-    : "ACADEMIC_CLASS";
-
-  const title = (details.title ?? details.name ?? details.className ?? "").trim();
-  const section = (details.section ?? "").trim();
-  const subject = (details.subject ?? "").trim();
-  const description = (details.description ?? "").trim();
-  const location = (details.location ?? details.room ?? "").trim();
-
-  const tags = Array.isArray(details.tags)
-    ? details.tags.map((t) => String(t).trim()).filter(Boolean)
-    : typeof details.tags === "string"
-    ? details.tags
-        .split(",")
-        .map((t) => t.trim().replace(/^#/, ""))
-        .filter(Boolean)
-    : [];
-
-  const links = Array.isArray(details.links) ? details.links : [];
-
   return {
-    title,
-    spaceType,
-    section,
-    subject,
-    description,
-    visibility,
-    accessType,
-    meetingType,
-    location,
-    tags,
-    links,
+    title: details.title ?? details.name ?? details.className ?? "",
+    section: details.section ?? "",
+    subject: details.subject ?? "",
+    description: details.description ?? "",
     coverUrl: details.coverUrl ?? null,
     logoUrl: details.logoUrl ?? null,
     theme: details.theme ?? null,
+    accessType,
+    visibility:
+      details.visibility ??
+      (accessType === "OPEN" ? "PUBLIC" : "PRIVATE"),
   };
 }
 
@@ -129,33 +85,6 @@ export async function requestCourseLogoUpload() {
   );
 }
 
-export async function uploadSpaceMedia(file, type = "cover") {
-  if (!file) return null;
-  const upload =
-    type === "logo"
-      ? await requestCourseLogoUpload()
-      : await requestCourseCoverUpload();
-
-  const body = new FormData();
-  body.append("file", file);
-  body.append("api_key", upload.uploadApiKey);
-  body.append("timestamp", String(upload.uploadTimestamp));
-  body.append("signature", upload.uploadSignature);
-  body.append("public_id", upload.publicId);
-
-  const response = await fetch(upload.uploadUrl, {
-    method: "POST",
-    body,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Unable to upload the space ${type}.`);
-  }
-
-  const result = await response.json();
-  return result.secure_url;
-}
-
 export async function updateClassroom(courseId, changes) {
   return unwrapResponse(
     await store
@@ -194,12 +123,3 @@ export async function joinClassroom(_userId, courseIdOrCode, maybeCode) {
       .unwrap()
   );
 }
-
-export const createSpace = createClassroom;
-export const updateSpace = updateClassroom;
-export const joinSpace = joinClassroom;
-export const fetchSpaces = fetchClassrooms;
-export const findSpaceById = findClassroomById;
-export const mapCreateSpacePayload = mapCreateClassPayload;
-export const mapJoinSpacePayload = mapJoinClassPayload;
-

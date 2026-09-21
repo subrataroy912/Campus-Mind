@@ -4,4 +4,4 @@ export { SpaceBasicInfoSection, SpaceBasicInfoSection as ClassBasicInfoSection }
 export { SpaceAcademicSection, SpaceAcademicSection as ClassAcademicSection } from "./SpaceAcademicSection.jsx";
 export { SpaceScheduleSection, SpaceScheduleSection as ClassScheduleSection } from "./SpaceScheduleSection.jsx";
 export { SpaceAccessTypeSection, SpaceAccessTypeSection as ClassAccessTypeSection } from "./SpaceAccessTypeSection.jsx";
-export { SpaceSelect } from "./SpaceSelect.jsx";
+

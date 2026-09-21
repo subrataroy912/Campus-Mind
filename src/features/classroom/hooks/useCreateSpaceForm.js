@@ -5,7 +5,9 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
 import {
   createClassroom,
-  uploadSpaceMedia,
+  requestCourseCoverUpload,
+  requestCourseLogoUpload,
+  updateClassroom,
 } from "../api/classroomService.js";
 import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
@@ -15,7 +17,6 @@ export function useCreateSpaceForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useAuth();
-
   const [form, setForm] = useState(INITIAL_SPACE_FORM);
   const [preview, setPreview] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -23,122 +24,60 @@ export function useCreateSpaceForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploadingCover, setIsUploadingCover] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const update = (field, value) => {
-    setForm((prev) => {
-      const next = { ...prev, [field]: value };
-      // Sync className and title for seamless compatibility
-      if (field === "className") next.title = value;
-      if (field === "title") next.className = value;
-      // Auto-sync visibility when accessType changes
-      if (field === "accessType") {
-        next.visibility = value === "OPEN" ? "PUBLIC" : "PRIVATE";
-      }
-      return next;
-    });
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-  };
-
-  const addTag = (tag) => {
-    if (!tag) return;
-    const clean = tag.trim().replace(/^#/, "").toLowerCase();
-    if (!clean) return;
-    setForm((prev) => {
-      const existing = prev.tags || [];
-      if (existing.includes(clean)) return prev;
-      return { ...prev, tags: [...existing, clean] };
-    });
-  };
-
-  const removeTag = (tagToRemove) => {
-    setForm((prev) => ({
-      ...prev,
-      tags: (prev.tags || []).filter((t) => t !== tagToRemove),
-    }));
+    setForm((previous) => ({ ...previous, [field]: value }));
+    setErrors((previous) => ({ ...previous, [field]: undefined }));
   };
 
   const toggleDay = (day) => {
-    setForm((prev) => ({
-      ...prev,
-      days: (prev.days || []).includes(day)
-        ? prev.days.filter((d) => d !== day)
-        : [...(prev.days || []), day],
+    setForm((previous) => ({
+      ...previous,
+      days: previous.days.includes(day)
+        ? previous.days.filter((item) => item !== day)
+        : [...previous.days, day],
     }));
   };
 
-  const handleImageUpload = async (eventOrFile) => {
-    const file = eventOrFile?.target
-      ? eventOrFile.target.files?.[0]
-      : eventOrFile;
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
     if (!file) return;
-    setIsUploadingCover(true);
-    try {
-      const optimizedFile = await optimizeImage(file, 1600);
-      update("coverImage", optimizedFile);
-      setPreview(URL.createObjectURL(optimizedFile));
-    } catch {
-      update("coverImage", file);
-      setPreview(URL.createObjectURL(file));
-    } finally {
-      setIsUploadingCover(false);
-    }
+    const optimizedFile = await optimizeImage(file, 1600);
+    update("coverImage", optimizedFile);
+    setPreview(URL.createObjectURL(optimizedFile));
   };
 
-  const handleLogoUpload = async (eventOrFile) => {
-    const file = eventOrFile?.target
-      ? eventOrFile.target.files?.[0]
-      : eventOrFile;
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
     if (!file) return;
-    setIsUploadingLogo(true);
-    try {
-      const optimizedFile = await optimizeImage(file, 600);
-      update("logoImage", optimizedFile);
-      setLogoPreview(URL.createObjectURL(optimizedFile));
-    } catch {
-      update("logoImage", file);
-      setLogoPreview(URL.createObjectURL(file));
-    } finally {
-      setIsUploadingLogo(false);
-    }
-  };
-
-  const removeCover = () => {
-    update("coverImage", null);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(null);
-  };
-
-  const removeLogo = () => {
-    update("logoImage", null);
-    if (logoPreview) URL.revokeObjectURL(logoPreview);
-    setLogoPreview(null);
+    const optimizedFile = await optimizeImage(file, 600);
+    update("logoImage", optimizedFile);
+    setLogoPreview(URL.createObjectURL(optimizedFile));
   };
 
   const validate = () => {
     const nextErrors = {};
-    const titleVal = (form.title || form.className || "").trim();
-
-    if (!titleVal) {
+    if (!form.className.trim()) {
       nextErrors.className = "Space name is required.";
-      nextErrors.title = "Space name is required.";
-    } else if (titleVal.length > 120) {
-      nextErrors.className = "Space name cannot exceed 120 characters.";
     }
+    const isAcademicClass =
+      form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
 
-    if (!form.subject?.trim()) {
-      nextErrors.subject = "Subject or domain category is required.";
+    if (!form.subject) {
+      nextErrors.subject = "Select a subject or category.";
     } else if (form.subject === "Other" && !form.customSubject?.trim()) {
-      nextErrors.customSubject = "Please specify your custom subject.";
+      nextErrors.customSubject = "Please enter your custom subject.";
     }
 
-    if (form.section && form.section.length > 80) {
-      nextErrors.section = "Section cannot exceed 80 characters.";
-    }
-
-    if (form.description && form.description.length > 2000) {
-      nextErrors.description = "Description cannot exceed 2000 characters.";
+    if (isAcademicClass) {
+      if (!form.gradeLevel) {
+        nextErrors.gradeLevel = "Select a target grade.";
+      } else if (
+        form.gradeLevel === "Other" &&
+        !form.customGradeLevel?.trim()
+      ) {
+        nextErrors.customGradeLevel = "Please enter your custom target grade.";
+      }
     }
 
     setErrors(nextErrors);
@@ -155,7 +94,7 @@ export function useCreateSpaceForm() {
   };
 
   const submit = async (event) => {
-    if (event) event.preventDefault();
+    event.preventDefault();
     if (!validate()) {
       setSubmitted(false);
       return;
@@ -163,57 +102,82 @@ export function useCreateSpaceForm() {
 
     setIsSubmitting(true);
     setSubmissionError("");
-
     try {
       let coverUrl = null;
       let logoUrl = null;
 
-      // Upload banner & logo if user selected images
+      // Upload cover image if provided (optional)
       if (form.coverImage) {
-        coverUrl = await uploadSpaceMedia(form.coverImage, "cover");
+        const upload = await requestCourseCoverUpload();
+        const body = new FormData();
+        body.append("file", form.coverImage);
+        body.append("api_key", upload.uploadApiKey);
+        body.append("timestamp", String(upload.uploadTimestamp));
+        body.append("signature", upload.uploadSignature);
+        body.append("public_id", upload.publicId);
+        const response = await fetch(upload.uploadUrl, {
+          method: "POST",
+          body,
+        });
+        if (!response.ok) throw new Error("Unable to upload the space cover.");
+        coverUrl = (await response.json()).secure_url;
       }
+
+      // Upload logo image if provided (optional)
       if (form.logoImage) {
-        logoUrl = await uploadSpaceMedia(form.logoImage, "logo");
+        const upload = await requestCourseLogoUpload();
+        const body = new FormData();
+        body.append("file", form.logoImage);
+        body.append("api_key", upload.uploadApiKey);
+        body.append("timestamp", String(upload.uploadTimestamp));
+        body.append("signature", upload.uploadSignature);
+        body.append("public_id", upload.publicId);
+        const response = await fetch(upload.uploadUrl, {
+          method: "POST",
+          body,
+        });
+        if (!response.ok) throw new Error("Unable to upload the space logo.");
+        logoUrl = (await response.json()).secure_url;
       }
 
       const effectiveSubject =
-        form.subject === "Other"
-          ? form.customSubject?.trim()
-          : form.subject?.trim();
+        form.subject === "Other" ? form.customSubject?.trim() : form.subject;
+      const effectiveGradeLevel =
+        form.gradeLevel === "Other"
+          ? form.customGradeLevel?.trim()
+          : form.gradeLevel;
 
-      const finalTitle = (form.title || form.className || "").trim();
-
-      // Single atomic course creation with all backend DTO fields
       const classroom = await createClassroom(user?.id, {
-        title: finalTitle,
-        className: finalTitle,
+        ...form,
+        title: form.className,
         spaceType: form.spaceType || "ACADEMIC_CLASS",
-        section: form.section?.trim() || "",
-        subject: effectiveSubject || "",
-        description: form.description?.trim() || "",
         meetingType: form.meetingType || "IN_PERSON",
-        location: (form.location || form.room || "").trim(),
-        tags: form.tags || [],
-        links: form.links || [],
-        accessType: form.accessType || "CODE",
-        visibility: form.visibility || (form.accessType === "OPEN" ? "PUBLIC" : "PRIVATE"),
-        theme: form.theme || "indigo",
+        location: form.location || form.room,
+        subject: effectiveSubject,
+        gradeLevel: effectiveGradeLevel,
+        targetGrade: effectiveGradeLevel,
         coverUrl,
         logoUrl,
       });
 
+      const updates = {};
+      if (coverUrl && !classroom.coverUrl) updates.coverUrl = coverUrl;
+      if (logoUrl && !classroom.logoUrl) updates.logoUrl = logoUrl;
+
+      const savedClassroom =
+        Object.keys(updates).length > 0
+          ? await updateClassroom(classroom.id, updates)
+          : classroom;
+
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
-      navigate(routes.spaces.detail(classroom.id), {
+      navigate(routes.spaces.detail(savedClassroom.id), {
         state: { enrollmentCode: classroom.code },
       });
     } catch (error) {
-      const errMsg =
-        error?.data?.message ||
-        error?.data?.error ||
-        error?.message ||
-        "Unable to create this space. Please check your connection and try again.";
-      setSubmissionError(errMsg);
+      setSubmissionError(
+        error?.data?.error || error?.message || "Unable to create this space."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -227,20 +191,13 @@ export function useCreateSpaceForm() {
     submitted,
     submissionError,
     isSubmitting,
-    isUploadingCover,
-    isUploadingLogo,
     update,
-    addTag,
-    removeTag,
     toggleDay,
     handleImageUpload,
     handleLogoUpload,
-    removeCover,
-    removeLogo,
     reset,
     submit,
   };
 }
 
 export const useCreateClassForm = useCreateSpaceForm;
-
