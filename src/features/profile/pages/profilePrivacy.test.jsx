@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import ProfilePage from "./pages/ProfilePage.jsx";
+import ProfilePage from "./ProfilePage.jsx";
 
 // Mock react-router
 vi.mock("react-router", () => ({
@@ -26,7 +26,7 @@ vi.mock("@/context/AuthContext.jsx", () => ({
 }));
 
 // Mock dashboard data
-vi.mock("@/features/dashboard/useDashboardData.js", () => ({
+vi.mock("@/features/dashboard/hooks/useDashboardData.js", () => ({
   useDashboardData: () => ({
     classrooms: [],
     exploreClassrooms: [],
@@ -50,7 +50,7 @@ let mockPublicProfileState = {
 };
 
 // Mock profile API queries
-vi.mock("./api/profileApi.js", () => ({
+vi.mock("../api/profileApi.js", () => ({
   useGetCurrentProfileQuery: () => ({
     data: null,
     isLoading: false,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Check, Loader2 } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { useNotificationsPolling } from "../hooks/useNotificationsPolling.js";
 import { useMarkNotificationReadMutation } from "../api/notificationsApi.js";
 import {
@@ -7,6 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
+import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { useNavigate } from "react-router";
 
 export default function NotificationsMenu() {
@@ -28,38 +30,40 @@ export default function NotificationsMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-canvas hover:text-text-main cursor-pointer"
+        className="relative flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-canvas hover:text-text-main cursor-pointer"
         aria-label={`Notifications (${unreadCount} unread)`}
       >
-        <Bell size={18} aria-hidden="true" />
+        <Bell size={16} aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shadow-xs">
+          <span className="absolute top-0.5 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-bold text-white shadow-xs">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-96 p-0 sm:w-112.5">
+      <DropdownMenuContent align="end" className="w-80 p-0 sm:w-96">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border p-3">
-          <span className="font-bold text-sm text-text-heading">
+        <div className="flex items-center justify-between border-b border-border px-3 py-2">
+          <span className="font-semibold text-xs text-text-heading">
             Notifications
           </span>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            <Badge variant="secondary" className="h-4 px-1.5 text-[10px] font-semibold text-primary">
               {unreadCount} new
-            </span>
+            </Badge>
           )}
         </div>
 
         {/* Body list */}
-        <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
+        <div className="max-h-72 overflow-y-auto divide-y divide-border/50">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8 text-text-muted">
-              <Loader2 className="h-5 w-5 animate-spin" />
+            <div className="flex flex-col gap-2 p-3">
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+              <Skeleton className="h-10 w-4/5 rounded-md" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="py-8 text-center text-xs text-text-muted">
+            <div className="py-5 text-center text-xs text-text-muted">
               No new notifications
             </div>
           ) : (
@@ -106,44 +110,44 @@ function NotificationItem({
 
   const sizeStyles = {
     sm: {
-      container: "px-3 py-2.5",
-      gap: "gap-2.5",
+      container: "px-3 py-2",
+      gap: "gap-2",
       title: "text-xs",
       message: "text-[11px] leading-4 mt-0.5",
-      meta: "text-[10px] mt-1.5",
+      meta: "text-[10px] mt-1",
       badge: "text-[9px] px-1.5 py-0.5",
-      icon: 13,
+      icon: 12,
       button: "h-6 w-6",
     },
     md: {
+      container: "px-3 py-2",
+      gap: "gap-2.5",
+      title: "text-xs",
+      message: "text-[11px] leading-4 mt-0.5",
+      meta: "text-[10px] mt-1",
+      badge: "text-[9px] px-1.5 py-0.5",
+      icon: 12,
+      button: "h-6 w-6",
+    },
+    lg: {
       container: "px-4 py-3",
       gap: "gap-3",
       title: "text-sm",
       message: "text-xs leading-5 mt-0.5",
       meta: "text-[11px] mt-1.5",
-      badge: "text-[9px] px-1.5 py-0.5",
+      badge: "text-[10px] px-2 py-0.5",
       icon: 14,
       button: "h-7 w-7",
     },
-    lg: {
-      container: "px-5 py-4",
-      gap: "gap-4",
-      title: "text-sm",
-      message: "text-sm leading-5 mt-1",
-      meta: "text-xs mt-2",
-      badge: "text-[10px] px-2 py-0.5",
-      icon: 16,
-      button: "h-8 w-8",
-    },
   }[size] || {
-    container: "px-4 py-3",
-    gap: "gap-3",
-    title: "text-sm",
-    message: "text-xs leading-5 mt-0.5",
-    meta: "text-[11px] mt-1.5",
+    container: "px-3 py-2",
+    gap: "gap-2.5",
+    title: "text-xs",
+    message: "text-[11px] leading-4 mt-0.5",
+    meta: "text-[10px] mt-1",
     badge: "text-[9px] px-1.5 py-0.5",
-    icon: 14,
-    button: "h-7 w-7",
+    icon: 12,
+    button: "h-6 w-6",
   };
 
   const handleCardClick = () => {

@@ -19,7 +19,7 @@ import {
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { baseApi } from "../app/baseApi.js";
 import { clearPersistedApiState } from "../app/apiCachePersistence.js";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 import {
   commitAuthSession,
   mergeProfileIntoCurrentSession,

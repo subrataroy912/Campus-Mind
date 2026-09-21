@@ -23,10 +23,10 @@ export default function Sidebar({
     >
       <div className="w-full flex-1 overflow-y-auto">
         <nav
-          className={`flex-1 ${compact ? "p-2" : "p-3"}`}
+          className={`flex-1 ${compact ? "p-1.5" : "p-2"}`}
           aria-label="Main navigation"
         >
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {SIDEBAR_NAV_ITEMS.map(({ label, to, Icon }) => (
               <li key={to}>
                 <SidebarLink
@@ -44,13 +44,13 @@ export default function Sidebar({
 
       {/* Spaces Actions Section */}
       <div
-        className={`w-full space-y-2 border-t border-border ${
-          compact ? "p-2 text-center" : "p-3"
+        className={`w-full space-y-1.5 border-t border-border ${
+          compact ? "p-1.5 text-center" : "p-2"
         }`}
       >
         <p
-          className={`text-xs font-semibold uppercase tracking-wide text-text-muted transition-all ${
-            compact ? "sr-only" : "px-2"
+          className={`text-[10px] font-semibold uppercase tracking-wider text-text-muted transition-all ${
+            compact ? "sr-only" : "px-1"
           }`}
         >
           Spaces
@@ -58,23 +58,25 @@ export default function Sidebar({
         <Button
           to={routes.classes.join}
           variant="outline"
-          className={`w-full ${
-            compact ? "justify-center p-0" : "justify-start"
+          size="sm"
+          className={`w-full text-xs ${
+            compact ? "justify-center px-0" : "justify-start"
           }`}
           title={compact ? "Join with code" : undefined}
         >
-          <Ticket size={17} aria-hidden="true" />
+          <Ticket size={15} aria-hidden="true" />
           <span className={compact ? "hidden" : ""}>Join with code</span>
         </Button>
         {(user?.canCreateCourses || user?.isAdmin) && (
           <Button
             to={routes.spaces.new}
-            className={`w-full ${
-              compact ? "justify-center p-0" : "justify-start"
+            size="sm"
+            className={`w-full text-xs ${
+              compact ? "justify-center px-0" : "justify-start"
             }`}
             title={compact ? "Create a space" : undefined}
           >
-            <Plus size={17} aria-hidden="true" />
+            <Plus size={15} aria-hidden="true" />
             <span className={compact ? "hidden" : ""}>Create a space</span>
           </Button>
         )}
@@ -82,16 +84,16 @@ export default function Sidebar({
 
       {/* Settings Footer Section */}
       <div
-        className={`w-full border-t border-border ${compact ? "p-2" : "p-3"}`}
+        className={`w-full border-t border-border ${compact ? "p-1.5" : "p-2"}`}
       >
         <Link
           to={routes.settings}
-          className={`flex items-center rounded-md text-sm font-medium text-text-main transition-colors hover:bg-canvas ${
-            compact ? "justify-center py-2 px-0" : "gap-3 px-3 py-2"
+          className={`flex items-center rounded-md text-xs font-medium text-text-main transition-colors hover:bg-canvas ${
+            compact ? "justify-center py-1.5 px-0" : "gap-2.5 px-2 py-1.5"
           }`}
           title={compact ? "Settings" : undefined}
         >
-          <Settings size={19} />
+          <Settings size={16} />
           <span className={compact ? "hidden" : ""}>Settings</span>
         </Link>
       </div>

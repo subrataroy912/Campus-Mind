@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import ProfileHeader from "./components/ProfileHeader.jsx";
+import ProfileHeader from "./ProfileHeader.jsx";
 import { formatDisplayText } from "@/utils/textFormat.js";
 
 // Mock react-router

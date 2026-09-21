@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Flame, Loader2, Sparkles } from "lucide-react";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import FilterButton from "./FilterButton.jsx";
@@ -20,9 +20,18 @@ export default function ExploreClassesTab({
   onPreviousPage,
   onNextPage,
 }) {
+  const isDefaultBrowse =
+    classFilter === "all" && !debouncedSearchQuery && page === 0;
+  const trendingItems = isDefaultBrowse ? classes.slice(0, 4) : [];
+  const mainGridItems = isDefaultBrowse ? classes.slice(4) : classes;
+
+  const showSkeletons = isLoading && !pageData;
+  const hasClasses = classes.length > 0;
+
   return (
-    <>
-      <div className="mt-4 flex flex-wrap gap-2">
+    <div className="flex flex-col gap-3.5">
+      {/* 1. Persistent Filter & Subject Pills (Never unmount during loading/empty) */}
+      <div className="flex flex-wrap items-center gap-1.5">
         {BUILT_IN_CLASS_FILTERS.map((f) => (
           <FilterButton
             key={f.id}
@@ -32,54 +41,97 @@ export default function ExploreClassesTab({
             {f.label}
           </FilterButton>
         ))}
-        {classSubjects.map((subject) => (
-          <FilterButton
-            key={subject}
-            active={classFilter === subject}
-            onClick={() => onFilterChange(subject)}
-          >
-            {subject}
-          </FilterButton>
-        ))}
+
+        {classSubjects.length > 0 && (
+          <>
+            <span className="mx-1 h-3.5 w-px bg-border/80" aria-hidden="true" />
+            {classSubjects.map((subject) => (
+              <FilterButton
+                key={subject}
+                active={classFilter === subject}
+                onClick={() => onFilterChange(subject)}
+              >
+                {subject}
+              </FilterButton>
+            ))}
+          </>
+        )}
       </div>
 
-      {isLoading && !pageData ? (
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
+      {/* 2. Content Area */}
+      {showSkeletons ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
             <ExploreCardSkeleton key={index} />
           ))}
         </div>
-      ) : classes.length ? (
-        <section className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            {classFilter === "recommended" ? (
-              <h2 className="text-lg font-semibold text-text-heading">
-                Recommended courses
-              </h2>
-            ) : (
-              <span />
-            )}
+      ) : hasClasses ? (
+        <section className="flex flex-col gap-4">
+          {/* Status Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              {classFilter === "recommended" ? (
+                <>
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Recommended courses
+                  </h2>
+                </>
+              ) : debouncedSearchQuery ? (
+                <p className="text-xs text-muted-foreground">
+                  Search results for{" "}
+                  <span className="font-medium text-foreground">
+                    "{debouncedSearchQuery}"
+                  </span>
+                </p>
+              ) : null}
+            </div>
+
             {(isPlaceholderData || isFetching) && (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 <span>Updating...</span>
               </div>
             )}
           </div>
+
+          {/* Curated Trending Shelf */}
+          {trendingItems.length > 0 && (
+            <div className="flex flex-col gap-2.5 rounded-xl border bg-muted/20 p-3 sm:p-3.5">
+              <div className="flex items-center gap-1.5">
+                <Flame className="h-4 w-4 text-rose-500" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                  Trending this week
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                {trendingItems.map((classroom) => (
+                  <ExploreClassCard
+                    key={classroom.courseId || classroom.id || classroom._id}
+                    classroom={classroom}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Main Grid */}
           <div
-            className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 transition-opacity duration-150 ${
+            className={`grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 transition-opacity duration-150 ${
               isPlaceholderData
-                ? "opacity-60 pointer-events-none"
+                ? "pointer-events-none opacity-60"
                 : "opacity-100"
             }`}
           >
-            {classes.map((classroom) => (
+            {(isDefaultBrowse ? mainGridItems : classes).map((classroom) => (
               <ExploreClassCard
                 key={classroom.courseId || classroom.id || classroom._id}
                 classroom={classroom}
               />
             ))}
           </div>
+
+          {/* Pagination */}
           <ExplorePagination
             page={pageData?.page ?? page}
             totalPages={pageData?.totalPages ?? 0}
@@ -91,23 +143,23 @@ export default function ExploreClassesTab({
           />
         </section>
       ) : (
-        <div className="mt-6">
+        <div className="pt-4">
           <EmptyState
             title={
               debouncedSearchQuery
                 ? "No courses matched your search."
                 : classFilter !== "all" &&
-                  classFilter !== "popular" &&
-                  classFilter !== "recommended"
-                ? "No public courses found for this subject."
-                : classFilter === "recommended"
-                ? "No recommendations available."
-                : "No public courses found."
+                    classFilter !== "popular" &&
+                    classFilter !== "recommended"
+                  ? "No public courses found for this subject."
+                  : classFilter === "recommended"
+                    ? "No recommendations available."
+                    : "No public courses found."
             }
             description={isFetching ? "Loading courses..." : undefined}
           />
         </div>
       )}
-    </>
+    </div>
   );
 }

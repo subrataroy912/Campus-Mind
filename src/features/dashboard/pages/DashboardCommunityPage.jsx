@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "react-router";
 
-import { useDashboardData } from "../useDashboardData.js";
+import { useDashboardData } from "../hooks/useDashboardData.js";
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
 import { Button } from "@/components/ui/button.jsx";

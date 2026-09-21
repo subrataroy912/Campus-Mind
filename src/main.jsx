@@ -9,7 +9,7 @@ import { maintenanceMode } from "./config/appConfig.js";
 import ServerDown from "./pages/ServerDown.jsx";
 import { Toaster } from "@/components/ui/toast.jsx";
 import { baseApi } from "./app/baseApi.js";
-import { getEventRefreshTargets } from "./features/events/refreshEvents.js";
+import { getEventRefreshTargets } from "./app/refreshEvents.js";
 import { reportWebVitals } from "./utils/reportWebVitals.js";
 
 try {

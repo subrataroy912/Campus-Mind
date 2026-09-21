@@ -10,7 +10,7 @@ import {
   useFindClassroomByIdQuery,
   useJoinClassroomMutation,
 } from "../api/classroomApi.js";
-import { isTeacherRole, isUserEnrolled } from "../roles.js";
+import { isTeacherRole, isUserEnrolled } from "../utils/roles.js";
 import { routes } from "@/routes/paths";
 import {
   ClassHomeTab,

@@ -276,10 +276,10 @@ export default function ClassHeader({
       </div>
 
       {/* Content Section - High-Density layout */}
-      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-end sm:justify-between sm:px-5 sm:pb-3.5 sm:pt-0">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 min-w-0 flex-1">
+      <div className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-end sm:justify-between sm:px-4 sm:pb-3 sm:pt-0">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 min-w-0 flex-1">
           {/* Compact Floating Avatar */}
-          <div className="-mt-8 h-16 w-16 z-10 shrink-0 overflow-hidden rounded-xl border-3 border-surface bg-canvas shadow-xs sm:-mt-10 sm:h-20 sm:w-20">
+          <div className="-mt-7 h-14 w-14 z-10 shrink-0 overflow-hidden rounded-xl border-3 border-surface bg-canvas shadow-xs sm:-mt-8 sm:h-16 sm:w-16">
             {classroom?.logo || classroom?.logoUrl ? (
               <img
                 src={classroom.logo || classroom.logoUrl}
@@ -289,20 +289,20 @@ export default function ClassHeader({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="grid h-full w-full place-items-center bg-primary/10 text-base sm:text-lg font-bold text-primary">
+              <div className="grid h-full w-full place-items-center bg-primary/10 text-sm sm:text-base font-bold text-primary">
                 {classroom?.title?.slice(0, 2)?.toUpperCase() || "SP"}
               </div>
             )}
           </div>
 
           {/* Title, Badges & Metadata */}
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 flex-1 space-y-0.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <h1 className="text-base sm:text-xl font-bold text-text-heading truncate">
+              <h1 className="text-sm sm:text-base font-bold text-text-heading truncate">
                 {classroom?.title || "Space"}
               </h1>
               <span
-                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[11px] font-semibold ${spaceTypeInfo.color}`}
+                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${spaceTypeInfo.color}`}
               >
                 {spaceTypeInfo.label}
               </span>

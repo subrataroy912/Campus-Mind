@@ -10,6 +10,7 @@ vi.mock("react-router", () => ({
       {children}
     </a>
   ),
+  useNavigate: () => vi.fn(),
 }));
 
 

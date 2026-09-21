@@ -5,6 +5,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 export function ContentList({
   items = [],
@@ -13,39 +14,49 @@ export function ContentList({
   layout = "carousel",
   keyExtractor = (item, index) => item?.id || index,
   customItemClass = "",
+  hasParentCarousel = false,
 }) {
-  const displayItems = limit ? items?.slice(0, limit) : items;
+  const displayItems = limit ? items.slice(0, limit) : items;
 
-  if (!displayItems?.length) return null;
+  if (!displayItems.length) return null;
 
   if (layout === "carousel") {
+    const carouselInner = (
+      <CarouselContent className="-ml-3 sm:-ml-3.5 items-stretch">
+        {displayItems.map((item, index) => (
+          <CarouselItem
+            key={keyExtractor(item, index)}
+            className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 max-w-[320px] pl-3 sm:pl-3.5"
+          >
+            <div
+              className={cn("flex h-full w-full flex-col", customItemClass)}
+            >
+              {renderItem(item, index)}
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    );
+
+    if (hasParentCarousel) {
+      return <div className="relative w-full min-w-0">{carouselInner}</div>;
+    }
+
     return (
-      <div className="relative w-full cursor-pointer">
+      <div className="relative w-full min-w-0">
         <Carousel
           opts={{
             align: "start",
             dragFree: true,
           }}
-          className="w-full"
+          className="w-full min-w-0"
         >
-          <CarouselContent className="-ml-4 sm:-ml-6">
-            {displayItems.map((item, index) => (
-              <CarouselItem
-                key={keyExtractor(item, index)}
-                className="pl-4 sm:pl-6 basis-[85vw] min-w-65 max-w-[320px] sm:basis-[320px] sm:max-w-none"
-              >
-                <div
-                  className={customItemClass || "flex h-full w-full flex-col"}
-                >
-                  {renderItem(item, index)}
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
+          {carouselInner}
 
-          <div className="hidden md:block">
-            <CarouselPrevious className="-left-4 lg:-left-12" />
-            <CarouselNext className="-right-4 lg:-right-12" />
+          {/* Compact navigation buttons when used standalone */}
+          <div className="hidden sm:block">
+            <CarouselPrevious className="-left-3 h-7 w-7 border-border/80 bg-background/90 shadow-xs hover:bg-background lg:-left-3.5" />
+            <CarouselNext className="-right-3 h-7 w-7 border-border/80 bg-background/90 shadow-xs hover:bg-background lg:-right-3.5" />
           </div>
         </Carousel>
       </div>
@@ -53,11 +64,11 @@ export function ContentList({
   }
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {displayItems.map((item, index) => (
         <div
           key={keyExtractor(item, index)}
-          className={customItemClass || "flex h-full w-full flex-col"}
+          className={cn("flex h-full w-full flex-col", customItemClass)}
         >
           {renderItem(item, index)}
         </div>

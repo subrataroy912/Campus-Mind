@@ -3,9 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
+import {
+  Carousel,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export function DashboardSection({
-  id, // Unique ID for ARIA labeling
+  id,
   title,
   description,
   layout = "carousel",
@@ -13,69 +18,103 @@ export function DashboardSection({
   iconWrapperClass = "bg-primary/10 text-primary",
   linkTo,
   linkText = "See all",
-  status, // "error", "loading", "success", etc.
+  status,
   items = [],
   renderItem,
   errorTitle = "We could not load the data",
   errorDescription = "Please check your connection or try again later.",
   emptyTitle = "No items available",
   emptyDescription = "There are currently no items to display.",
-  className, // Allow overriding outermost wrapper classes
+  className,
 }) {
-  return (
+  const isCarousel = layout === "carousel" && items.length > 0 && status !== "error";
+
+  const sectionContent = (
     <section
-      className={cn("mt-6 pt-5 sm:mt-8 sm:pt-6", className)}
+      className={cn("flex flex-col gap-2.5 min-w-0 w-full", className)}
       aria-labelledby={id}
     >
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div className="flex items-start gap-2.5">
+      {/* Header Row */}
+      <div className="flex flex-col justify-between gap-1.5 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2 min-w-0">
           {Icon && (
             <div
               className={cn(
-                "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-                iconWrapperClass
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
+                iconWrapperClass,
               )}
             >
-              <Icon size={15} aria-hidden="true" />
+              <Icon className="h-3.5 w-3.5" aria-hidden="true" />
             </div>
           )}
-          <div>
+          <div className="space-y-0.5 min-w-0">
             <h2
               id={id}
-              className="text-base font-bold tracking-tight text-foreground sm:text-lg"
+              className="text-sm font-semibold tracking-tight text-foreground truncate"
             >
               {title}
             </h2>
             {description && (
-              <p className="text-[12px] text-muted-foreground">{description}</p>
+              <p className="text-[11px] leading-none text-muted-foreground truncate">
+                {description}
+              </p>
             )}
           </div>
         </div>
 
-        {linkTo && (
-          <Link
-            to={linkTo}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-foreground transition-colors hover:text-primary"
-          >
-            <span>{linkText}</span>
-            <ArrowRight size={13} />
-          </Link>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {linkTo && (
+            <Link
+              to={linkTo}
+              className="group inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              <span>{linkText}</span>
+              <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5" />
+            </Link>
+          )}
+
+          {isCarousel && (
+            <div className="hidden sm:flex items-center gap-1">
+              <CarouselPrevious className="static h-6 w-6 translate-y-0 rounded-md border-border/80 bg-background/90 hover:bg-background" />
+              <CarouselNext className="static h-6 w-6 translate-y-0 rounded-md border-border/80 bg-background/90 hover:bg-background" />
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Content Body */}
       {status === "error" ? (
-        <div className="mt-6">
+        <div className="py-2">
           <EmptyState title={errorTitle} description={errorDescription} />
         </div>
       ) : items.length > 0 ? (
-        <div className="mt-4">
-          <ContentList layout={layout} items={items} renderItem={renderItem} />
-        </div>
+        <ContentList
+          layout={layout}
+          items={items}
+          renderItem={renderItem}
+          hasParentCarousel={isCarousel}
+        />
       ) : (
-        <div className="mt-6">
+        <div className="py-2">
           <EmptyState title={emptyTitle} description={emptyDescription} />
         </div>
       )}
     </section>
   );
+
+  if (isCarousel) {
+    return (
+      <Carousel
+        opts={{
+          align: "start",
+          dragFree: true,
+        }}
+        className="w-full min-w-0"
+      >
+        {sectionContent}
+      </Carousel>
+    );
+  }
+
+  return sectionContent;
 }

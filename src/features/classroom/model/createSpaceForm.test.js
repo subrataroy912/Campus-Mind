@@ -4,8 +4,8 @@ import {
   INITIAL_SPACE_FORM,
   INITIAL_CLASS_FORM,
   SUBJECTS,
-} from "./model/createSpaceForm.js";
-import { mapCreateClassPayload } from "./api/classroomService.js";
+} from "./createSpaceForm.js";
+import { mapCreateClassPayload } from "../api/classroomService.js";
 
 describe("createClassForm model", () => {
   it("initializes with empty customSubject and customGradeLevel", () => {

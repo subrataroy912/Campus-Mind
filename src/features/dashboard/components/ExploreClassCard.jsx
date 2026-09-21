@@ -1,6 +1,8 @@
 import { memo, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
+import { Users } from "lucide-react";
+
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/classroom/api/classroomService.js";
 import { getClassTheme } from "@/features/classroom/utils/classTheme.js";
@@ -15,7 +17,6 @@ import { CodePromptModal } from "@/features/classroom/components/CodePromptModal
 import { InviteOnlyModal } from "@/features/classroom/components/InviteOnlyModal.jsx";
 import { routes } from "@/routes/paths";
 import { cn } from "@/lib/utils";
-import { Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -58,11 +59,11 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
     (item) =>
       item.id === courseId ||
       item.courseId === courseId ||
-      item.classId === courseId
+      item.classId === courseId,
   );
 
   const learnersCount = formatLearners(
-    classroom?.enrollmentCount ?? classroom?.memberCount ?? 0
+    classroom?.enrollmentCount ?? classroom?.memberCount ?? 0,
   );
 
   const handleOpenClassAction = (e) => {
@@ -70,9 +71,7 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
     if (!courseId) return;
 
     if (isAlreadyEnrolled || accessType === ACCESS_TYPES.OPEN) {
-      navigate({
-        pathname: routes.classes.detail(courseId),
-      });
+      navigate({ pathname: routes.classes.detail(courseId) });
       return;
     }
 
@@ -86,9 +85,7 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
       return;
     }
 
-    navigate({
-      pathname: routes.classes.detail(courseId),
-    });
+    navigate({ pathname: routes.classes.detail(courseId) });
   };
 
   const handleJoinClassByCode = async (e) => {
@@ -104,16 +101,14 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
     try {
       await joinClassroom(user?.id, courseId, cleanCode);
       setIsCodeModalOpen(false);
-      navigate({
-        pathname: routes.classes.detail(courseId),
-      });
+      navigate({ pathname: routes.classes.detail(courseId) });
     } catch (err) {
-      const message =
+      setJoinErrorMessage(
         err?.data?.error ||
-        err?.data?.message ||
-        err?.message ||
-        "Invalid class code or failed to join class.";
-      setJoinErrorMessage(message);
+          err?.data?.message ||
+          err?.message ||
+          "Invalid class code or failed to join class.",
+      );
     } finally {
       setIsJoinSubmitting(false);
     }
@@ -124,7 +119,7 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
       store.dispatch(
         classroomApi.util.prefetch("findClassroomById", courseId, {
           force: false,
-        })
+        }),
       );
     }
   };
@@ -135,23 +130,21 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
         onClick={handleOpenClassAction}
         to={routes.classes.detail(courseId)}
         aria-label={`Open ${cardTitle}`}
-        className="group block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="group block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
       >
         <Card
           onMouseEnter={handlePrefetchClass}
           onFocus={handlePrefetchClass}
           className={cn(
-            "flex h-full flex-col overflow-hidden rounded-xl border-0 p-0 shadow-xs transition-all duration-200",
-            "group-hover:-translate-y-0.5 group-hover:shadow-md",
-            className
+            "flex h-full flex-col overflow-hidden rounded-lg border border-border/70 bg-card p-0 shadow-none transition-all duration-150 hover:border-foreground/20 hover:shadow-xs",
+            className,
           )}
         >
-          {/* Cover Header */}
+          {/* Header Banner */}
           <div
             className={cn(
-              "relative w-full",
-              "h-20 sm:h-24",
-              coverUrl ? "bg-muted" : classTheme.gradientClass
+              "relative h-16 sm:h-18 w-full overflow-hidden",
+              coverUrl ? "bg-muted" : classTheme.gradientClass,
             )}
           >
             {coverUrl && (
@@ -162,45 +155,51 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
                 loading={priority ? "eager" : "lazy"}
                 decoding="async"
                 fetchPriority={priority ? "high" : "auto"}
-                className="absolute inset-0 h-full w-full object-cover object-top"
+                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
               />
             )}
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/15 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
 
-            {/* Access Type Badge */}
+            {/* Top Bar inside Banner: Access Badge */}
             <div className="absolute right-2 top-2 z-10">
-              <AccessBadge accessType={accessType} />
+              <AccessBadge
+                accessType={accessType}
+                className="text-[10px] px-1.5 py-0.5"
+              />
             </div>
 
-            <Avatar className="absolute bottom-2 left-2.5 z-10 h-7.5 w-7.5 sm:h-10 sm:w-10 rounded-md border border-white/70 shadow-xs dark:border-zinc-700 bg-background">
-              <AvatarImage src={logoUrl} className="object-cover" />
-              <AvatarFallback className="rounded-md text-[11px] font-bold text-primary">
-                {initials(cardTitle) || "CL"}
-              </AvatarFallback>
-            </Avatar>
+            {/* Bottom Accent Avatar */}
+            <div className="absolute bottom-1.5 left-2 z-10">
+              <Avatar className="h-6 w-6 rounded border border-background/90 bg-background shadow-xs">
+                <AvatarImage src={logoUrl} className="object-cover" />
+                <AvatarFallback className="rounded text-[9px] font-semibold text-primary">
+                  {initials(cardTitle) || "CL"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </div>
 
-          {/* Main Body via Shadcn CardContent */}
-          <CardContent className="flex flex-1 flex-col justify-between p-2.5 sm:p-3">
-            <div className="w-full text-left transition-colors group-hover:text-primary">
+          {/* Compact Body Content */}
+          <CardContent className="flex flex-1 flex-col justify-between gap-2 p-2.5">
+            <div>
               <h3
                 title={cardTitle}
-                className="truncate text-xs font-bold leading-tight text-foreground sm:text-sm"
+                className="truncate text-xs font-semibold leading-tight text-foreground transition-colors group-hover:text-primary"
               >
                 {cardTitle}
               </h3>
             </div>
 
-            <div className="mt-1 flex items-center justify-between space-x-2">
-              {cardSubject && (
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {cardSubject}
-                </p>
-              )}
-              <span className="flex items-center gap-1 truncate text-[11px] text-muted-foreground">
-                <Users size={12} /> {learnersCount}
+            {/* Footer Metadata Row */}
+            <div className="flex items-center justify-between gap-1.5 border-t border-border/40 pt-1.5 text-[10px] text-muted-foreground">
+              <span className="truncate max-w-[110px] font-medium">
+                {cardSubject || "General"}
+              </span>
+
+              <span className="inline-flex shrink-0 items-center gap-1">
+                <Users className="h-3 w-3" />
+                <span>{learnersCount}</span>
               </span>
             </div>
           </CardContent>

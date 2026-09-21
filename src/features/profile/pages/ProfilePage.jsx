@@ -4,14 +4,13 @@ import { ArrowLeft, Eye, Lock, Shield, Users, UserX } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import {
   getSharedClassCount,
   getSharedClassIds,
 } from "@/utils/sharedClasses.js";
 import { formatDisplayText } from "@/utils/textFormat.js";
-import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import {
   useGetCurrentProfileQuery,
   useGetPublicProfileQuery,
@@ -55,6 +54,7 @@ export default function ProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user: currentUser, updateProfile, authStatus } = useAuth();
+
   const activeTab = searchParams.get("tab") || "classes";
   const setActiveTab = (tab) => {
     setSearchParams(
@@ -67,15 +67,18 @@ export default function ProfilePage() {
         }
         return next;
       },
-      { replace: true }
+      { replace: true },
     );
   };
+
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { classrooms = [] } = useDashboardData();
+
   const isProfileOwner = !userId || userId === currentUser?.id;
   const isOwner = isProfileOwner && !preview;
+
   const {
     data: currentProfile,
     isLoading: isCurrentProfileLoading,
@@ -83,6 +86,7 @@ export default function ProfilePage() {
   } = useGetCurrentProfileQuery(undefined, {
     skip: authStatus === "hydrating" || !isProfileOwner,
   });
+
   const {
     data: publicProfile,
     isLoading: isPublicProfileLoading,
@@ -92,32 +96,39 @@ export default function ProfilePage() {
     refetchOnFocus: false,
     refetchOnReconnect: false,
   });
+
   const viewedUser = isProfileOwner
     ? currentProfile || currentUser
     : publicProfile;
+
   const profile = useMemo(
     () => viewedUser && profileFor(viewedUser),
-    [viewedUser]
+    [viewedUser],
   );
+
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
+
   const classes = isOwner
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
+
   const createdClasses = classes.filter(
-    (item) => item.ownerId === viewedUser.id
+    (item) => item.ownerId === viewedUser?.id,
   );
   const joinedClasses = classes.filter(
-    (item) => item.ownerId !== viewedUser.id
+    (item) => item.ownerId !== viewedUser?.id,
   );
+
   if (
     authStatus === "hydrating" ||
     isCurrentProfileLoading ||
     isPublicProfileLoading
-  )
+  ) {
     return <ProfilePageSkeleton />;
+  }
 
-  if (isCurrentProfileError && isProfileOwner)
+  if (isCurrentProfileError && isProfileOwner) {
     return (
       <ProfileMessage
         icon={UserX}
@@ -126,8 +137,9 @@ export default function ProfilePage() {
         description="We could not load your profile details right now. Please try again later."
       />
     );
+  }
 
-  if (isPublicProfileError && !isProfileOwner)
+  if (isPublicProfileError && !isProfileOwner) {
     return (
       <ProfileMessage
         icon={Lock}
@@ -136,8 +148,9 @@ export default function ProfilePage() {
         description="This profile is private, unavailable, or you do not have permission to view it."
       />
     );
+  }
 
-  if (!profile)
+  if (!profile) {
     return (
       <ProfileMessage
         icon={UserX}
@@ -146,12 +159,13 @@ export default function ProfilePage() {
         description="This profile could not be found or you do not have permission to view it."
       />
     );
+  }
 
   if (
     !isProfileOwner &&
     !profile.privacy.discoverable &&
     sharedClassCount === 0
-  )
+  ) {
     return (
       <ProfileMessage
         icon={Lock}
@@ -160,6 +174,8 @@ export default function ProfilePage() {
         description="This member is only visible to people in a shared class."
       />
     );
+  }
+
   const details = [
     {
       label: "Headline",
@@ -262,7 +278,7 @@ export default function ProfilePage() {
     }
 
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
         {createdClasses.length > 0 && (
           <DashboardSection
             id="managed-spaces-heading"
@@ -273,11 +289,10 @@ export default function ProfilePage() {
                 : "Spaces managed by this user."
             }
             icon={Shield}
-            iconWrapperClass="bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+            iconWrapperClass="bg-blue-500/10 text-blue-600 dark:text-blue-400"
             items={createdClasses}
             layout="grid"
             renderItem={(classroom) => <ClassCard classroom={classroom} />}
-            className="mt-0 pt-0 sm:mt-0 sm:pt-0 border-none"
           />
         )}
 
@@ -291,14 +306,12 @@ export default function ProfilePage() {
                 : "Communities you both belong to."
             }
             icon={Users}
-            iconWrapperClass="bg-green-100 text-green-600 dark:bg-green-950/50 dark:text-green-400"
+            iconWrapperClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
             items={joinedClasses}
             layout="grid"
             renderItem={(classroom) => <ClassCard classroom={classroom} />}
             className={
-              createdClasses.length > 0
-                ? "mt-8 border-t border-border pt-6 sm:mt-8 sm:pt-6"
-                : "mt-0 pt-0 sm:mt-0 sm:pt-0 border-none"
+              createdClasses.length > 0 ? "border-t border-border/60 pt-4" : ""
             }
           />
         )}
@@ -307,74 +320,83 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="mx-auto min-h-dvh max-w-6xl px-3 py-3 sm:px-6 lg:py-6">
-      {/* Back button */}
-      <div className="mb-4">
+    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6">
+      {/* Back Button & Preview Bar */}
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="-ml-2 gap-2 text-text-muted hover:text-text-heading"
+          className="-ml-2 h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft className="h-3.5 w-3.5" /> Back
         </Button>
-      </div>
 
-      {preview && (
-        <div className="sticky top-2 z-30 mb-4 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary shadow-sm backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <Eye size={18} />
-            <span>You are viewing your profile as others see it.</span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPreview(false)}
-            className="h-8 border-border bg-surface text-text-heading shadow-xs hover:bg-canvas"
-          >
-            Exit preview
-          </Button>
-        </div>
-      )}
-
-      <div className="space-y-4">
-        <ProfileHeader
-          profile={profile}
-          isOwner={isOwner}
-          onEdit={() => setIsEditing(true)}
-          onPreview={() => setPreview((p) => !p)}
-          sharedClassCount={sharedClassCount}
-          onAvatarUpload={handleAvatarUpload}
-          onBannerUpload={handleBannerUpload}
-        />
-
-        <section>
-          <ProfileDetails details={details} />
-        </section>
-
-        <section className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
-          <div className="flex gap-1 border-b border-border p-2" role="tablist">
+        {preview && (
+          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary shadow-xs">
+            <Eye className="h-3.5 w-3.5" />
+            <span>Public preview mode</span>
             <Button
-              variant={activeTab === "classes" ? "default" : "ghost"}
+              variant="outline"
               size="sm"
-              onClick={() => setActiveTab("classes")}
+              onClick={() => setPreview(false)}
+              className="h-6 border-border bg-background px-2 text-[11px] text-foreground hover:bg-muted"
             >
-              Classes
+              Exit
             </Button>
-            {isOwner && (
-              <Button
-                variant={activeTab === "saved" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("saved")}
-              >
-                Saved
-              </Button>
-            )}
           </div>
-
-          <div className="p-4 sm:p-5">{renderTabContent()}</div>
-        </section>
+        )}
       </div>
+
+      {/* Main Stack */}
+      <ProfileHeader
+        profile={profile}
+        isOwner={isOwner}
+        onEdit={() => setIsEditing(true)}
+        onPreview={() => setPreview((p) => !p)}
+        sharedClassCount={sharedClassCount}
+        onAvatarUpload={handleAvatarUpload}
+        onBannerUpload={handleBannerUpload}
+      />
+
+      <ProfileDetails details={details} />
+
+      {/* Compact Tab Surface */}
+      <section className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-3 sm:p-4">
+        {/* Segmented Pill Switcher */}
+        <div className="inline-flex h-8 w-fit items-center rounded-lg bg-muted p-1 text-muted-foreground">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "classes"}
+            onClick={() => setActiveTab("classes")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all ${
+              activeTab === "classes"
+                ? "bg-background text-foreground shadow-xs"
+                : "hover:text-foreground"
+            }`}
+          >
+            Classes
+          </button>
+          {isOwner && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "saved"}
+              onClick={() => setActiveTab("saved")}
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                activeTab === "saved"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "hover:text-foreground"
+              }`}
+            >
+              Saved
+            </button>
+          )}
+        </div>
+
+        <div>{renderTabContent()}</div>
+      </section>
 
       {isOwner && (
         <EditProfileModal
@@ -399,57 +421,58 @@ function ProfileMessage({
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
-      {/* Top back navigation */}
-      <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+          className="-ml-2 h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft className="h-3.5 w-3.5" /> Back
         </Button>
       </div>
 
       <div className="grid flex-1 place-items-center p-6">
-        <div className="flex max-w-md flex-col items-center text-center">
+        <div className="flex max-w-sm flex-col items-center text-center">
           {isLoading ? (
-            <div className="size-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
           ) : (
-            <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-surface ring-1 ring-border shadow-sm">
-              <Icon className="size-8 text-primary" />
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-card shadow-xs">
+              <Icon className="h-6 w-6 text-primary" />
             </div>
           )}
 
           {badge && !isLoading && (
-            <span className="mb-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <span className="mb-2 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               {badge}
             </span>
           )}
 
-          <h2 className="text-xl font-bold tracking-tight text-text-heading sm:text-2xl">
+          <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
             {title}
           </h2>
 
           {description && (
-            <p className="mt-2 text-sm leading-relaxed text-text-muted">
+            <p className="mt-1 text-xs leading-normal text-muted-foreground">
               {description}
             </p>
           )}
 
           {!isLoading && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-4 flex items-center justify-center gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => navigate(-1)}
-                className="gap-2"
+                className="h-8 px-3 text-xs"
               >
-                <ArrowLeft size={16} /> Go Back
+                Go Back
               </Button>
               <Button
+                size="sm"
                 onClick={() => navigate(routes.dashboard)}
-                className="gap-2"
+                className="h-8 px-3 text-xs"
               >
                 Back to Dashboard
               </Button>

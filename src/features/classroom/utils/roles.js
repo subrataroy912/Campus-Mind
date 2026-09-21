@@ -29,4 +29,3 @@ export function isUserEnrolled(classroom, userId) {
   }
   return false;
 }
-

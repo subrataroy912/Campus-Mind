@@ -1,31 +1,42 @@
-import { Outlet } from "react-router";
 import { useState } from "react";
-import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
+import { Outlet } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import Sidebar from "../../features/dashboard/components/Sidebar";
+
 function DashboardLayout() {
   const [isCompact, setIsCompact] = useState(true);
+
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-canvas">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
       <DashboardHeader />
+
+      {/* Main App Workspace */}
       <div className="relative flex min-w-0 flex-1 overflow-hidden">
-        {/* Container for sidebar and its floating toggle button */}
-        <div className="relative flex shrink-0">
+        {/* Sidebar Container with Smooth Collapse/Expand */}
+        <aside className="relative flex shrink-0 transition-[width] duration-200 ease-in-out">
           <Sidebar compact={isCompact} />
 
-          {/* 2. Floating Toggle Button */}
+          {/* Floating Edge Toggle Button */}
           <button
-            onClick={() => setIsCompact(!isCompact)}
-            className="absolute -right-3 top-6 z-30 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-sm hover:bg-canvas md:flex"
+            type="button"
+            onClick={() => setIsCompact((prev) => !prev)}
+            className="absolute -right-3 top-5 z-30 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:flex"
             aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {isCompact ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            {isCompact ? (
+              <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronLeft className="h-3.5 w-3.5" />
+            )}
           </button>
-        </div>
+        </aside>
 
-        <div className="z-10 bg-surface"></div>
-
-        <main className="min-w-0 flex-1 overflow-y-auto overscroll-contain">
+        {/* Primary Scrollable Viewport */}
+        <main
+          id="main-content"
+          className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
+        >
           <Outlet />
         </main>
       </div>

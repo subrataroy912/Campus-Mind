@@ -1,34 +1,20 @@
 import { useMemo } from "react";
-import {
-  Compass,
-  Loader2,
-  ArrowRight,
-  CompassIcon,
-  Sparkles,
-  Flame,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-
-import { useDashboardData } from "../useDashboardData.js";
+import { useDashboardData } from "../hooks/useDashboardData.js";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
 import { DashboardSection } from "../components/DashboardSection.jsx";
+import WelcomeModal from "../components/WelcomeModal.jsx";
+import DashboardSkeleton from "../components/DashboardSkeleton.jsx";
 
 export default function DashboardHomePage() {
-  const { authStatus } = useAuth();
+  const { user, authStatus } = useAuth();
   const {
     data: profile,
     isLoading,
@@ -43,36 +29,33 @@ export default function DashboardHomePage() {
     status,
   } = useDashboardData();
 
-  const displayExploreCards = useMemo(() => {
+  // Curate 3 new spaces for the home teaser safely
+  const suggestedSpaces = useMemo(() => {
+    if (!Array.isArray(exploreClassrooms)) return [];
+
     const joinedCourseIds = new Set(
-      classrooms.map(
-        (classroom) => classroom.id || classroom.courseId || classroom.classId
+      (classrooms || []).map(
+        (c) => c?.id || c?.courseId || c?.classId || c?._id,
+      ),
+    );
+
+    return exploreClassrooms
+      .filter(
+        (c) =>
+          !joinedCourseIds.has(c?.courseId || c?.id || c?.classId || c?._id),
       )
-    );
-
-    const unjoined = exploreClassrooms.filter(
-      (c) => !joinedCourseIds.has(c.courseId || c.id || c.classId)
-    );
-    const joined = exploreClassrooms.filter((c) =>
-      joinedCourseIds.has(c.courseId || c.id || c.classId)
-    );
-
-    return [...unjoined, ...joined].slice(0, 4);
+      .slice(0, 3);
   }, [classrooms, exploreClassrooms]);
 
-  // Handle global loading states for both dashboard data and profile
+  // Loading skeleton screen
   if (status === "loading" || status === "idle" || isLoading) {
-    return (
-      <div className="flex h-64 w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
-  // Handle profile fetch errors
+  // Error boundary fallback
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl p-6">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">
         <EmptyState
           title="We could not load your profile"
           description="Please check your connection or refresh the page."
@@ -86,112 +69,69 @@ export default function DashboardHomePage() {
     profile?.gender?.toLowerCase() === "male"
       ? "Mr. "
       : profile?.gender?.toLowerCase() === "female"
-      ? "Mrs. "
-      : "";
-
+        ? "Mrs. "
+        : "";
   const greetingName = firstName ? `${title}${firstName}` : "there";
+  const activeUserId = profile?.id || profile?._id || user?.id;
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
-      <header className="flex flex-col gap-4 rounded-2xl bg-surface p-5 shadow-sm sm:p-6 md:flex-row md:items-center md:justify-between md:gap-6">
-  {/* Left Side */}
-  <div className="min-w-0 max-w-xl">
-    <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-      Your learning space
-    </p>
+    <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-4 px-3 py-3 sm:gap-5 sm:px-6">
+      {/* 1. One-Time Login Greeting Dialog */}
+      <WelcomeModal greetingName={greetingName} userId={activeUserId} />
 
-    <h1 className="mt-1 text-xl font-bold tracking-tight text-text-heading sm:text-2xl md:text-3xl">
-      Welcome back,
-      <br className="block sm:hidden" /> {greetingName}.
-    </h1>
+      {/* 2. Primary Section: My Spaces */}
+      <DashboardSection
+        id="my-classes-heading"
+        title="My spaces"
+        description="Your active learning and campus spaces."
+        linkTo={routes.spaces.list}
+        status={status}
+        items={classrooms}
+        renderItem={(classroom, index) => (
+          <ClassCard classroom={classroom} priority={index === 0} />
+        )}
+        errorTitle="We could not load your spaces"
+        errorDescription="Please refresh the page and try again."
+        emptyTitle="No enrolled spaces yet"
+        emptyDescription="Explore spaces below to join courses and groups."
+      />
 
-    <p className="mt-2 max-w-lg text-xs leading-relaxed text-text-muted sm:text-sm">
-      Keep up with your spaces, then discover a new space to connect with
-      the CampusMind community.
-    </p>
-  </div>
+      {/* 3. Compact Suggested Shelf */}
+      {suggestedSpaces.length > 0 && (
+        <section className="flex flex-col gap-2 rounded-lg border border-border/70 bg-card/60 p-3 shadow-none">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-primary"
+                aria-hidden="true"
+              />
+              <h2 className="text-xs font-semibold tracking-tight text-foreground">
+                Suggested for you
+              </h2>
+              <span className="hidden text-[11px] text-muted-foreground sm:inline">
+                · Explore new communities
+              </span>
+            </div>
 
-  {/* Illustration */}
-  <div className="mx-auto w-32 shrink-0 sm:w-40 md:mx-0 md:w-44 lg:w-48">
-    <img
-      src="/images/dashboard-welcome.svg"
-      alt="CampusMind Welcome"
-      className="h-auto w-full object-contain"
-    />
-  </div>
-</header>
+            <Link
+              to={routes.explore}
+              className="group inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              <span>Explore all</span>
+              <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5" />
+            </Link>
+          </div>
 
-      {classrooms.length > 0 && (
-        <DashboardSection
-          id="my-classes-heading"
-          title="My spaces"
-          description="Your joined learning and campus spaces."
-          linkTo={routes.spaces.list}
-          status={status}
-          items={classrooms}
-          renderItem={(classroom, index) => (
-            <ClassCard classroom={classroom} priority={index === 0} />
-          )}
-          errorTitle="We could not load your spaces"
-          errorDescription="Please refresh the page and try again."
-          className="mt-5 pt-0 sm:mt-6 sm:pt-0"
-        />
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {suggestedSpaces.map((space, idx) => (
+              <ExploreClassCard
+                key={space?.id || space?.courseId || space?._id || idx}
+                classroom={space}
+              />
+            ))}
+          </div>
+        </section>
       )}
-
-      <DashboardSection
-        id="explore-feed-heading"
-        title="Discover something new"
-        description="Explore popular topics and groups to grow your skills."
-        icon={CompassIcon}
-        iconWrapperClass="bg-orange-100 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400"
-        linkTo={routes.explore}
-        status={status}
-        items={displayExploreCards}
-        renderItem={(space, index) => (
-          <ExploreClassCard classroom={space} priority={index === 0} />
-        )}
-        errorTitle="We could not load the spaces feed"
-        errorDescription="Please check your connection or try again later."
-        emptyTitle="No public spaces available"
-        emptyDescription="There are currently no public spaces to explore. Create a space to get started!"
-        className="border-t border-border"
-      />
-      <DashboardSection
-        id="recommended-spaces-heading"
-        title="Recommended for you"
-        description="Hand-picked spaces based on your interests and activity."
-        icon={Sparkles}
-        iconWrapperClass="bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
-        linkTo={routes.explore}
-        status={status}
-        items={displayExploreCards}
-        renderItem={(space, index) => (
-          <ExploreClassCard classroom={space} priority={index === 0} />
-        )}
-        errorTitle="We could not load recommendations"
-        errorDescription="Please check your connection or try again later."
-        emptyTitle="No personalized recommendations yet"
-        emptyDescription="Join a few spaces and interact with the community to get tailored suggestions!"
-        className="border-t border-border"
-      />
-
-      <DashboardSection
-        id="trending-spaces-heading"
-        title="Trending right now"
-        description="Spaces with the most active discussions this week."
-        icon={Flame}
-        iconWrapperClass="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400"
-        linkTo={routes.explore}
-        status={status}
-        items={displayExploreCards}
-        renderItem={(space, index) => (
-          <ExploreClassCard classroom={space} priority={index === 0} />
-        )}
-        errorTitle="Could not load trending spaces"
-        emptyTitle="Nothing is trending right now"
-        emptyDescription="Be the first to start a conversation in your spaces!"
-        className="border-t border-border"
-      />
     </div>
   );
 }

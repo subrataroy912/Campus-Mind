@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useFetchClassroomsQuery } from "../classroom/api/classroomApi.js";
-import { useGetExploreFeedQuery } from "../explore/api/exploreApi.js";
+import { useFetchClassroomsQuery } from "../../classroom/api/classroomApi.js";
+import { useGetExploreFeedQuery } from "../../explore/api/exploreApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
 export function useDashboardData({ includeExplore = true } = {}) {
@@ -33,4 +33,3 @@ export function useDashboardData({ includeExplore = true } = {}) {
     status,
   };
 }
-

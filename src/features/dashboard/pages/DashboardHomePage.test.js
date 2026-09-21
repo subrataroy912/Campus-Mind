@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectDashboardFeed } from "../dashboardFeed.js";
+import { selectDashboardFeed } from "../model/dashboardFeed.js";
 
 describe("selectDashboardFeed", () => {
   it("keeps returned public discovery courses available for cards", () => {

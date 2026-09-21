@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router";
 import { Plus, Ticket, Loader2, Filter } from "lucide-react";
-import { useDashboardData } from "@/features/dashboard/useDashboardData.js";
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "../components/ClassCard.jsx";

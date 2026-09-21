@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
 import { useExplorePeople } from "../hooks/useExplorePeople.js";
@@ -10,30 +8,36 @@ import ExploreHeroBanner from "../components/ExploreHeroBanner.jsx";
 import ExploreClassesTab from "../components/ExploreClassesTab.jsx";
 import ExplorePeopleTab from "../components/ExplorePeopleTab.jsx";
 import { EXPLORE_TABS } from "../model/exploreConstants.js";
+import SearchInput from "@/components/common/SearchInput.jsx";
+
+const TABS = [
+  { id: EXPLORE_TABS.CLASSES, label: "Classes", paramVal: null },
+  { id: EXPLORE_TABS.PEOPLE, label: "People", paramVal: EXPLORE_TABS.PEOPLE },
+];
 
 export default function ExplorePage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+
   const tab = searchParams.get("tab") || EXPLORE_TABS.CLASSES;
   const classFilter = searchParams.get("classFilter") || "all";
   const personFilter = searchParams.get("personFilter") || "all";
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const isClassesTab = tab === EXPLORE_TABS.CLASSES;
   const isPeopleTab = tab === EXPLORE_TABS.PEOPLE;
 
   const {
-    classes,
+    classes = [],
     page: pageData,
     query,
     status,
     isPlaceholderData,
     isFetching,
   } = useExploreData({
-    searchQuery: debouncedSearchQuery,
+    searchQuery,
     classFilter,
     page,
     keepPreviousData: true,
@@ -41,8 +45,8 @@ export default function ExplorePage() {
   });
 
   const {
-    filteredPeople,
-    departments,
+    filteredPeople = [],
+    departments = [],
     isLoading: isLoadingUsers,
   } = useExplorePeople({
     searchQuery,
@@ -51,36 +55,20 @@ export default function ExplorePage() {
     enabled: isPeopleTab,
   });
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery.trim());
-      setPage(0);
-    }, 300);
-    return () => window.clearTimeout(timeout);
-  }, [searchQuery]);
-
-  const handleClassFilterChange = (filterVal) => {
+  // Reusable URL parameter updater
+  const updateParam = (key, value, resetPage = false) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (filterVal === "all") next.delete("classFilter");
-      else next.set("classFilter", filterVal);
+      if (!value || value === "all") next.delete(key);
+      else next.set(key, value);
       return next;
     });
-    setPage(0);
-  };
-
-  const handlePersonFilterChange = (filterVal) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (filterVal === "all") next.delete("personFilter");
-      else next.set("personFilter", filterVal);
-      return next;
-    });
+    if (resetPage) setPage(0);
   };
 
   const classSubjects = useMemo(
     () => [...new Set(classes.map((item) => item.subject).filter(Boolean))],
-    [classes]
+    [classes],
   );
 
   if (status === "error") {
@@ -95,53 +83,45 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5">
-      <div className="relative mt-4 w-full">
-        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-        <input
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Search public spaces, courses, topics..."
-          aria-label="Search public spaces"
-          className="h-9 w-full rounded-lg border border-border bg-surface pl-8 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary focus:border-primary transition"
+    <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 w-full min-w-0">
+      <ExploreHeroBanner tab={tab} />
+
+      {/* Action Row: Compact Tab Pills & Search Input */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex h-8 w-fit items-center rounded-lg bg-muted p-1 text-muted-foreground">
+          {TABS.map(({ id, label, paramVal }) => {
+            const isActive = tab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => updateParam("tab", paramVal, true)}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  isActive
+                    ? "bg-background text-foreground shadow-sm"
+                    : "hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        <SearchInput
+          defaultValue={searchQuery}
+          onChange={(debouncedVal) => {
+            setSearchQuery(debouncedVal);
+            setPage(0);
+          }}
+          placeholder="Search spaces, courses, topics..."
+          className="sm:w-72 lg:w-80"
         />
       </div>
 
-      <ExploreHeroBanner tab={tab} />
-
-      <div className="mt-4 flex gap-1.5 border-b border-border" role="tablist">
-        <Button
-          role="tab"
-          size="sm"
-          aria-selected={isClassesTab}
-          variant={isClassesTab ? "default" : "ghost"}
-          className="h-8 px-3 text-xs rounded-lg"
-          onClick={() => {
-            setSearchParams((prev) => {
-              const next = new URLSearchParams(prev);
-              next.delete("tab");
-              return next;
-            });
-          }}
-        >
-          Classes
-        </Button>
-        <Button
-          role="tab"
-          aria-selected={isPeopleTab}
-          variant={isPeopleTab ? "default" : "ghost"}
-          onClick={() => {
-            setSearchParams((prev) => {
-              const next = new URLSearchParams(prev);
-              next.set("tab", EXPLORE_TABS.PEOPLE);
-              return next;
-            });
-          }}
-        >
-          People
-        </Button>
-      </div>
-
+      {/* Tab Panels */}
       {isClassesTab ? (
         <ExploreClassesTab
           classes={classes}
@@ -149,13 +129,13 @@ export default function ExplorePage() {
           page={page}
           classFilter={classFilter}
           classSubjects={classSubjects}
-          debouncedSearchQuery={debouncedSearchQuery}
+          debouncedSearchQuery={searchQuery}
           isLoading={query.isLoading}
           isFetching={query.isFetching || isFetching}
           isPlaceholderData={isPlaceholderData}
-          onFilterChange={handleClassFilterChange}
-          onPreviousPage={() => setPage((current) => Math.max(0, current - 1))}
-          onNextPage={() => setPage((current) => current + 1)}
+          onFilterChange={(val) => updateParam("classFilter", val, true)}
+          onPreviousPage={() => setPage((c) => Math.max(0, c - 1))}
+          onNextPage={() => setPage((c) => c + 1)}
         />
       ) : (
         <ExplorePeopleTab
@@ -165,7 +145,7 @@ export default function ExplorePage() {
           searchQuery={searchQuery}
           currentUser={user}
           isLoading={isLoadingUsers}
-          onFilterChange={handlePersonFilterChange}
+          onFilterChange={(val) => updateParam("personFilter", val)}
         />
       )}
     </div>

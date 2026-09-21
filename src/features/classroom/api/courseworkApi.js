@@ -1,5 +1,5 @@
 import { baseApi } from "@/app/baseApi.js";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 
 const normalizeCoursework = (item = {}) => ({
   ...item,

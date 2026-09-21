@@ -7,7 +7,7 @@ vi.mock("@/context/AuthContext.jsx", () => ({
   useAuth: () => ({ user: { id: "user-1", name: "Test User" } }),
 }));
 
-vi.mock("@/features/dashboard/useDashboardData.js", () => ({
+vi.mock("@/features/dashboard/hooks/useDashboardData.js", () => ({
   useDashboardData: () => ({ classrooms: [{ id: "enrolled-1" }] }),
 }));
 

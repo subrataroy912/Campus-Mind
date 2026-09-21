@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 import {
   createClassroom,
   requestCourseCoverUpload,

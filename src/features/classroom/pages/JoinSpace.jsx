@@ -6,7 +6,7 @@ import {
   joinClassroom,
 } from "../api/classroomService.js";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { triggerLifecycleRefresh } from "@/features/events/refreshEvents.js";
+import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 import { useGetPublicCourseQuery } from "@/features/explore/api/exploreApi.js";
 import { routes } from "@/routes/paths";
 import {

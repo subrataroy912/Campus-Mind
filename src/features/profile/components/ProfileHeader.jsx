@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Camera, Globe, Menu, MessageCircle, Pencil, Sparkles } from "lucide-react";
+import {
+  Camera,
+  Globe,
+  MoreHorizontal,
+  MessageCircle,
+  Pencil,
+  Sparkles,
+} from "lucide-react";
 import { routes } from "@/routes/paths.js";
 import { Button } from "@/components/ui/button.jsx";
 import {
@@ -63,24 +70,26 @@ export default function ProfileHeader({
     navigator.clipboard?.writeText(
       `${window.location.origin}${routes.user(profile.id)}`,
     );
+
   return (
-    <header className="overflow-hidden rounded-2xl bg-surface shadow-sm ring-1 ring-border">
-      <div className="relative h-40 bg-accent/30 sm:h-56">
+    <header className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-none">
+      <div className="relative h-18 w-full bg-muted/40 sm:h-20">
         {profile.banner ? (
           <img
             src={profile.banner}
             alt="Profile banner"
             fetchPriority="high"
             decoding="async"
-            className="block h-full w-full object-cover"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="h-full bg-linear-to-r from-accent/20 to-accent/40" />
+          <div className="h-full w-full bg-gradient-to-r from-primary/15 via-primary/5 to-muted" />
         )}
+
         {isOwner && onBannerUpload && (
-          <label className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-1.5 rounded-lg bg-surface/90 px-3 py-1.5 text-xs font-medium text-text-heading shadow-md backdrop-blur-xs transition hover:bg-surface hover:text-primary">
-            <Camera size={14} />
-            <span>Change banner</span>
+          <label className="absolute bottom-1.5 right-2 flex cursor-pointer items-center gap-1 rounded bg-background/85 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background">
+            <Camera className="h-2.5 w-2.5" />
+            <span>Banner</span>
             <input
               type="file"
               accept="image/*"
@@ -96,80 +105,137 @@ export default function ProfileHeader({
           </label>
         )}
       </div>
-      <div className="px-4 pb-6 sm:px-7">
-        <div className="flex items-center justify-between gap-3">
-          <div className="relative -mt-10 flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-surface bg-primary text-xl font-bold text-primary-foreground shadow-sm">
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-              {profile.avatar ? (
-                <img
-                  className="h-full w-full object-cover"
-                  src={profile.avatar}
-                  alt={`${profile.name}'s avatar`}
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                initials(profile.name)
+
+      {/* 2. Integrated Identity Strip */}
+      <div className="px-3.5 pb-3 sm:px-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          {/* Avatar + Main Names Lockup */}
+          <div className="flex items-end gap-3">
+            {/* Anchored Compact Avatar */}
+            <div className="relative -mt-6 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border-2 border-card bg-primary text-xs font-bold text-primary-foreground shadow-2xs sm:-mt-7 sm:h-14 sm:w-14">
+              <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+                {profile.avatar ? (
+                  <img
+                    className="h-full w-full object-cover"
+                    src={profile.avatar}
+                    alt={`${profile.name}'s avatar`}
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  initials(profile.name)
+                )}
+              </div>
+
+              {isOwner && onAvatarUpload && (
+                <label
+                  title="Change avatar"
+                  className="absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground"
+                >
+                  <Camera className="h-2.5 w-2.5" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onAvatarUpload(file);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                </label>
               )}
             </div>
-            {isOwner && onAvatarUpload && (
-              <label
-                title="Change avatar"
-                className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 border-surface bg-surface text-text-muted shadow-sm transition hover:border-primary/40 hover:text-primary"
-              >
-                <Camera size={13} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      onAvatarUpload(file);
-                      e.target.value = "";
-                    }
-                  }}
-                />
-              </label>
-            )}
+
+            {/* Inlined Name & Meta Row */}
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <h1 className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-base">
+                  {profile.name}
+                </h1>
+
+                {profile.canCreateCourses && (
+                  <span
+                    data-slot="creator-badge"
+                    className="inline-flex items-center gap-0.5 rounded border border-amber-500/20 bg-amber-500/10 px-1 py-0.2 text-[9px] font-medium text-amber-600 dark:text-amber-400"
+                    title="Course Creator"
+                  >
+                    <Sparkles className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
+                    Creator
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
+                <span>@{profile.handle || "unknown"}</span>
+                {!isOwner && sharedClassCount > 0 && (
+                  <>
+                    <span>·</span>
+                    <span className="font-medium text-primary">
+                      {sharedClassCount} shared{" "}
+                      {sharedClassCount === 1 ? "class" : "classes"}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
+
+          {/* Action Buttons Row */}
+          <div className="flex shrink-0 items-center gap-1.5 self-start pt-1 sm:self-auto sm:pt-0">
             {isOwner ? (
-              <Button variant="outline" onClick={onEdit}>
-                <Pencil aria-hidden="true" />
-                <span className="hidden min-[380px]:inline">Edit profile</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="h-7 gap-1 px-2.5 text-xs"
+              >
+                <Pencil className="h-3 w-3" aria-hidden="true" />
+                <span>Edit</span>
               </Button>
             ) : (
-              <Button to={`${routes.messages}?member=${profile.id}`}>
-                <MessageCircle aria-hidden="true" />
-                Message
+              <Button
+                size="sm"
+                to={`${routes.messages}?member=${profile.id}`}
+                className="h-7 gap-1 px-2.5 text-xs font-medium"
+              >
+                <MessageCircle className="h-3 w-3" aria-hidden="true" />
+                <span>Message</span>
               </Button>
             )}
+
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-7 w-7"
                     aria-label="Profile options"
                   >
-                    <Menu aria-hidden="true" />
+                    <MoreHorizontal
+                      className="h-3.5 w-3.5"
+                      aria-hidden="true"
+                    />
                   </Button>
                 }
               />
-              <DropdownMenuContent align="end" className="w-60 sm:w-64">
+              <DropdownMenuContent align="end" className="w-48">
                 {isOwner ? (
                   <>
-                    <DropdownMenuItem onClick={copyLink}>
+                    <DropdownMenuItem onClick={copyLink} className="text-xs">
                       Share profile link
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onPreview}>
+                    <DropdownMenuItem onClick={onPreview} className="text-xs">
                       View as others see it
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       render={<Link to={routes.settings} />}
+                      className="text-xs"
                     >
                       Go to Settings
                     </DropdownMenuItem>
@@ -178,16 +244,13 @@ export default function ProfileHeader({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => setShowCreatorConfirm(true)}
-                          className="flex flex-col items-start gap-0.5 py-2 cursor-pointer"
+                          className="flex flex-col items-start gap-0.5 py-1.5 cursor-pointer text-xs"
                         >
-                          <span className="flex items-center gap-1.5 font-medium text-text-heading">
-                            <Sparkles
-                              size={14}
-                              className="fill-amber-500 text-amber-500 shrink-0"
-                            />
+                          <span className="flex items-center gap-1.5 font-medium text-foreground">
+                            <Sparkles className="h-3 w-3 fill-amber-500 text-amber-500 shrink-0" />
                             Become a Creator
                           </span>
-                          <span className="text-[11px] leading-tight text-text-muted">
+                          <span className="text-[10px] leading-tight text-muted-foreground">
                             Unlocks course and group creation. Permanent change.
                           </span>
                         </DropdownMenuItem>
@@ -201,101 +264,94 @@ export default function ProfileHeader({
             </DropdownMenu>
           </div>
         </div>
-        <div className="mt-3">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-text-heading">
-              {profile.name}
-            </h1>
-            {profile.canCreateCourses && (
-              <span
-                data-slot="creator-badge"
-                className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400"
-                title="Course Creator"
-              >
-                <Sparkles
-                  size={12}
-                  className="fill-amber-500 text-amber-500 shrink-0"
-                  aria-hidden="true"
-                />
-                Course Creator
-              </span>
+
+        {/* 3. Sub-Details: Headline, Bio & Inlined Links */}
+        {(profile.headline ||
+          profile.bio ||
+          (profile.links && profile.links.length > 0)) && (
+          <div className="mt-2.5 space-y-1.5 border-t border-border/40 pt-2 text-xs">
+            {profile.headline && (
+              <p className="font-medium text-foreground/90">
+                {profile.headline}
+              </p>
             )}
-          </div>
-          <p className="text-sm font-medium text-text-muted">
-            @{profile.handle || "unknown"}
-          </p>
-          {profile.headline && (
-            <p className="mt-4 text-sm font-medium text-text-main">
-              {profile.headline}
-            </p>
-          )}
-          {!isOwner && sharedClassCount > 0 && (
-            <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 text-[11px] font-medium text-secondary">
-              {sharedClassCount} classes together
-            </span>
-          )}
-          {profile.bio ? (
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
-              {profile.bio}
-            </p>
-          ) : (
-            isOwner && (
-              <p className="mt-2 text-sm text-text-muted">
-                Add a bio so classmates know a bit about you.{" "}
+
+            {profile.bio ? (
+              <p className="max-w-2xl leading-relaxed text-muted-foreground">
+                {profile.bio}
+              </p>
+            ) : isOwner ? (
+              <p className="text-muted-foreground">
+                Add a bio so classmates know about you.{" "}
                 <button
+                  type="button"
                   onClick={onEdit}
-                  className="text-primary hover:underline"
+                  className="text-primary underline underline-offset-2 hover:text-primary/80"
                 >
-                  Edit profile
+                  Edit
                 </button>
               </p>
-            )
-          )}
-          {Array.isArray(profile.links) && profile.links.length > 0 && (
-            <div className="mt-3.5 flex flex-wrap gap-2">
-              {profile.links.map((link, idx) => {
-                const rawUrl = typeof link === "object" && link !== null ? link.url : link;
-                if (!rawUrl) return null;
-                const linkName = typeof link === "object" && link !== null && link.name ? link.name : null;
-                const url = rawUrl.startsWith("http://") || rawUrl.startsWith("https://") ? rawUrl : `https://${rawUrl}`;
-                let displayUrl = rawUrl.replace(/^https?:\/\/(www\.)?/, "");
-                if (displayUrl.endsWith("/")) displayUrl = displayUrl.slice(0, -1);
-                const label = linkName || displayUrl;
-                return (
-                  <a
-                    key={idx}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-canvas/60 px-2.5 py-1 text-xs font-medium text-text-main transition hover:border-primary/40 hover:bg-canvas hover:text-primary"
-                  >
-                    <Globe size={13} className="shrink-0 text-text-muted" />
-                    <span className="max-w-[200px] truncate">{label}</span>
-                  </a>
-                );
-              })}
-            </div>
-          )}
-        </div>
+            ) : null}
+
+            {/* Compact Link Pills */}
+            {Array.isArray(profile.links) && profile.links.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                {profile.links.map((link, idx) => {
+                  const rawUrl =
+                    typeof link === "object" && link !== null ? link.url : link;
+                  if (!rawUrl) return null;
+                  const linkName =
+                    typeof link === "object" && link !== null && link.name
+                      ? link.name
+                      : null;
+                  const url =
+                    rawUrl.startsWith("http://") ||
+                    rawUrl.startsWith("https://")
+                      ? rawUrl
+                      : `https://${rawUrl}`;
+                  let displayUrl = rawUrl.replace(/^https?:\/\/(www\.)?/, "");
+                  if (displayUrl.endsWith("/"))
+                    displayUrl = displayUrl.slice(0, -1);
+                  const label = linkName || displayUrl;
+
+                  return (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded border border-border/80 bg-muted/20 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:bg-muted/50 hover:text-foreground"
+                    >
+                      <Globe className="h-2.5 w-2.5 shrink-0" />
+                      <span className="max-w-[130px] truncate">{label}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Confirmation Dialog for Becoming a Creator */}
       <Dialog open={showCreatorConfirm} onOpenChange={setShowCreatorConfirm}>
-        <DialogContent className="max-w-md bg-surface p-6">
+        <DialogContent className="max-w-sm p-4">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-text-heading">
+            <DialogTitle className="text-sm font-semibold text-foreground">
               Become a Course Creator
             </DialogTitle>
-            <DialogDescription className="mt-2 text-sm text-text-muted">
-              Unlock course-creation privileges to build classes and host learning groups. This is a permanent change and cannot be undone. Are you sure you want to proceed?
+            <DialogDescription className="mt-1 text-xs text-muted-foreground">
+              Unlock course-creation privileges to build classes and host
+              learning groups. This is a permanent change and cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="mt-3 flex justify-end gap-2">
             <Button
               variant="outline"
               size="sm"
               disabled={isUnlocking}
               onClick={() => setShowCreatorConfirm(false)}
+              className="h-7 px-2.5 text-xs"
             >
               Cancel
             </Button>
@@ -303,7 +359,7 @@ export default function ProfileHeader({
               size="sm"
               disabled={isUnlocking}
               onClick={handleConfirmUnlock}
-              className="bg-primary hover:bg-primary-hover text-surface font-medium"
+              className="h-7 px-3 text-xs"
             >
               {isUnlocking ? "Unlocking…" : "Yes, Become Creator"}
             </Button>
@@ -317,10 +373,15 @@ export default function ProfileHeader({
 function ViewerMenu({ copyLink, onBlock, onReport }) {
   const [confirming, setConfirming] = useState(false);
   return confirming ? (
-    <div className="p-2">
-      <p className="px-1 text-xs text-text-muted">Block this member?</p>
-      <div className="mt-2 flex gap-2">
-        <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
+    <div className="p-2 space-y-1.5">
+      <p className="text-[11px] text-muted-foreground">Block this member?</p>
+      <div className="flex gap-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setConfirming(false)}
+          className="h-6 px-2 text-[11px]"
+        >
           Cancel
         </Button>
         <Button
@@ -330,6 +391,7 @@ function ViewerMenu({ copyLink, onBlock, onReport }) {
             onBlock?.();
             setConfirming(false);
           }}
+          className="h-6 px-2 text-[11px]"
         >
           Block
         </Button>
@@ -337,14 +399,21 @@ function ViewerMenu({ copyLink, onBlock, onReport }) {
     </div>
   ) : (
     <>
-      <DropdownMenuItem onClick={copyLink}>Copy profile link</DropdownMenuItem>
+      <DropdownMenuItem onClick={copyLink} className="text-xs">
+        Copy profile link
+      </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive" onClick={onReport}>
+      <DropdownMenuItem
+        variant="destructive"
+        onClick={onReport}
+        className="text-xs"
+      >
         Report
       </DropdownMenuItem>
       <DropdownMenuItem
         variant="destructive"
         onClick={() => setConfirming(true)}
+        className="text-xs"
       >
         Block
       </DropdownMenuItem>
