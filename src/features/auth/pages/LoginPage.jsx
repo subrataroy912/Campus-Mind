@@ -78,39 +78,39 @@ function LoginPage() {
 
   return (
     <div className="relative">
-      <h1 className="text-3xl font-bold tracking-tight text-text-heading">
+      <h1 className="text-lg font-semibold tracking-tight text-text-heading">
         Welcome back
       </h1>
-      <p className="mt-2 text-text-main">
+      <p className="mt-1 text-xs text-text-muted">
         Sign in to see what is happening in your classes.
       </p>
 
       {/* 3rd-party cookie notice on page open */}
       {showCookieNotice && (
         <div
-          className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm text-amber-200"
+          className="mt-3.5 flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-300"
           role="alert"
         >
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
-          <div className="flex-1 text-xs leading-relaxed text-black">
-            <span className="font-semibold text-black">Notice: </span>
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
+          <div className="flex-1 text-[11px] leading-relaxed">
+            <span className="font-semibold">Notice: </span>
             Please enable 3rd-party cookies in your browser settings; otherwise,
             your login session will not stay active.
           </div>
           <button
             type="button"
             onClick={() => setShowCookieNotice(false)}
-            className="text-amber-300/70 hover:text-amber-100 p-0.5 transition-colors focus:outline-none"
+            className="text-amber-600/70 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 p-0.5 transition-colors focus:outline-none cursor-pointer"
             aria-label="Dismiss cookie notice"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         </div>
       )}
 
       {location.state?.registered && (
         <p
-          className="mt-5 rounded-xl border border-success/25 bg-success/10 px-4 py-3 text-sm font-medium text-text-main"
+          className="mt-3 rounded-lg border border-success/25 bg-success/10 px-3 py-2 text-xs font-medium text-text-main"
           role="status"
         >
           Account created. You can sign in now.
@@ -120,14 +120,14 @@ function LoginPage() {
       {/* Render precise backend or network errors */}
       {authStatus === "failed" && (
         <p
-          className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main"
+          className="mt-3 rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
           role="alert"
         >
           {errorMessage}
         </p>
       )}
 
-      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
         <AuthInput
           icon={Mail}
           label="Email"
@@ -153,14 +153,14 @@ function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-text-muted hover:text-text-main focus:outline-none"
+                    className="text-text-muted hover:text-text-main focus:outline-none cursor-pointer"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
                   />
                 }
               >
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </TooltipTrigger>
               <TooltipContent>
                 {showPassword ? "Hide password" : "Show password"}
@@ -171,10 +171,10 @@ function LoginPage() {
           value={formData.password}
           disabled={isLoading}
         />
-        <div className="flex flex-col gap-2 text-sm font-bold min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between min-[400px]:gap-4">
-          <label className="flex min-h-11 items-center gap-3 cursor-pointer select-none">
+        <div className="flex items-center justify-between text-xs">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-muted hover:text-text-main font-medium">
             <input
-              className="h-5 w-5 accent-primary rounded cursor-pointer"
+              className="h-3.5 w-3.5 accent-primary rounded cursor-pointer"
               name="rememberMe"
               onChange={updateField}
               type="checkbox"
@@ -184,7 +184,7 @@ function LoginPage() {
             Remember me
           </label>
           <Link
-            className="text-primary-hover hover:underline"
+            className="text-primary hover:underline font-medium text-[11px]"
             to={routes.auth.forgotPassword}
           >
             Forgot Password?
@@ -192,36 +192,38 @@ function LoginPage() {
         </div>
 
         <Button
-          className="w-full text-lg flex items-center justify-center gap-2"
+          className="w-full h-9 text-xs font-semibold flex items-center justify-center gap-1.5"
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? "Logging in..." : "Login"} <ArrowRight size={24} />
+          {isLoading ? "Logging in..." : "Login"} <ArrowRight size={14} />
         </Button>
       </form>
 
-      <p className="mt-7 text-center text-text-main">
+      <p className="mt-4 text-center text-xs text-text-muted">
         New here?{" "}
         <Link
-          className="font-bold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline"
           to={routes.auth.register}
         >
           Create an account
         </Link>
       </p>
-      <div className="flex items-center justify-center gap-2 p-2">
+      <div className="flex items-center justify-center gap-2 pt-3 border-t border-border/60 mt-3">
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 variant="outline"
+                size="icon"
+                className="h-8 w-8"
                 aria-label="Sign in with Google"
                 onClick={() => startOAuth("google")}
                 disabled={isLoading}
               />
             }
           >
-            <FaGoogle size={25} />
+            <FaGoogle size={14} />
           </TooltipTrigger>
           <TooltipContent>Continue with Google</TooltipContent>
         </Tooltip>
@@ -230,13 +232,15 @@ function LoginPage() {
             render={
               <Button
                 variant="outline"
+                size="icon"
+                className="h-8 w-8"
                 aria-label="Sign in with GitHub"
                 onClick={() => startOAuth("github")}
                 disabled={isLoading}
               />
             }
           >
-            <FaGithub size={25} />
+            <FaGithub size={14} />
           </TooltipTrigger>
           <TooltipContent>Continue with GitHub</TooltipContent>
         </Tooltip>

@@ -50,7 +50,7 @@ export default function ExplorePeopleTab({
             <ExplorePersonCard
               key={person.id}
               person={person}
-              currentUser={currentUser}
+              {...(currentUser ? { currentUser } : {})}
             />
           ))}
         </div>

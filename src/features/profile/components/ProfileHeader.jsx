@@ -73,23 +73,26 @@ export default function ProfileHeader({
 
   return (
     <header className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-none">
-      <div className="relative h-18 w-full bg-muted/40 sm:h-20">
+      <div className="relative h-24 sm:h-32 md:h-40 w-full overflow-hidden bg-muted/40 transition-all">
         {profile.banner ? (
           <img
             src={profile.banner}
             alt="Profile banner"
             fetchPriority="high"
             decoding="async"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-center"
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-r from-primary/15 via-primary/5 to-muted" />
         )}
 
         {isOwner && onBannerUpload && (
-          <label className="absolute bottom-1.5 right-2 flex cursor-pointer items-center gap-1 rounded bg-background/85 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background">
-            <Camera className="h-2.5 w-2.5" />
-            <span>Banner</span>
+          <label
+            title="Change profile banner (Recommended: 1200 × 300px, 4:1 ratio · Keep important text centered)"
+            className="absolute bottom-2 right-2 flex cursor-pointer items-center gap-1 rounded-md bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background"
+          >
+            <Camera className="h-3 w-3" />
+            <span>Banner (1200×300)</span>
             <input
               type="file"
               accept="image/*"
@@ -107,12 +110,12 @@ export default function ProfileHeader({
       </div>
 
       {/* 2. Integrated Identity Strip */}
-      <div className="px-3.5 pb-3 sm:px-4">
+      <div className="px-3.5 pb-3 sm:px-5 sm:pb-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           {/* Avatar + Main Names Lockup */}
-          <div className="flex items-end gap-3">
-            {/* Anchored Compact Avatar */}
-            <div className="relative -mt-6 flex h-13 w-13 shrink-0 items-center justify-center rounded-full border-2 border-card bg-primary text-xs font-bold text-primary-foreground shadow-2xs sm:-mt-7 sm:h-14 sm:w-14">
+          <div className="flex items-end gap-3 sm:gap-4">
+            {/* Anchored Responsive Avatar (h-14 mobile, h-18 tablet, h-21 desktop) */}
+            <div className="relative -mt-7 sm:-mt-9 md:-mt-11 flex h-14 w-14 sm:h-18 sm:w-18 md:h-21 md:w-21 shrink-0 items-center justify-center rounded-full border-2 sm:border-[3px] md:border-4 border-card bg-primary text-xs sm:text-base md:text-lg font-bold text-primary-foreground shadow-md">
               <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
                 {profile.avatar ? (
                   <img
@@ -130,10 +133,10 @@ export default function ProfileHeader({
 
               {isOwner && onAvatarUpload && (
                 <label
-                  title="Change avatar"
-                  className="absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground"
+                  title="Change avatar (Recommended: 400 × 400px, 1:1 square · Max 2MB)"
+                  className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground hover:bg-canvas"
                 >
-                  <Camera className="h-2.5 w-2.5" />
+                  <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   <input
                     type="file"
                     accept="image/*"

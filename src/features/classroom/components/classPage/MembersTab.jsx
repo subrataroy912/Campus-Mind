@@ -187,20 +187,20 @@ export function MembersTab({
 
   if (!isEnrolled) {
     return (
-      <section className="mt-4">
-        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center shadow-xs">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
-            <UserPlus className="h-6 w-6" />
+      <section className="mt-3">
+        <div className="rounded-xl border border-dashed border-border/80 bg-card/60 p-6 text-center shadow-2xs">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-2.5">
+            <UserPlus className="h-5 w-5" />
           </div>
-          <h3 className="text-base font-semibold text-text-heading">
+          <h3 className="text-sm font-semibold text-foreground">
             Class roster is only available to members
           </h3>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+          <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
             Join this class to view students and teachers and connect with classmates.
           </p>
           {onJoin && (
-            <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2 rounded-xl">
-              <UserPlus className="h-4 w-4" />
+            <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
+              <UserPlus className="h-3.5 w-3.5" />
               <span>Join Class</span>
             </Button>
           )}
@@ -212,18 +212,20 @@ export function MembersTab({
   const enrollmentCode = classroom?.code || classroom?.enrollmentCode;
 
   return (
-    <section className="mt-4">
-      <div className="rounded-2xl bg-surface p-5 shadow-xs ring-1 ring-border sm:p-6 space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="mt-3">
+      <div className="rounded-xl bg-card p-3.5 sm:p-4 border border-border/70 shadow-2xs space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">
-              Class Roster
-            </p>
-            <h2 className="text-2xl font-bold tracking-tight text-text-heading">
-              Members
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">
-              {classroom?.memberCount || roster.length} members enrolled in this class
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold tracking-tight text-foreground">
+                Members
+              </h2>
+              <span className="rounded-full bg-primary/10 px-2 py-0.2 text-[10px] font-semibold text-primary">
+                {classroom?.memberCount || roster.length}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Enrolled students, facilitators, and mentors in this space.
             </p>
           </div>
           {teacher && enrollmentCode && (
@@ -233,7 +235,7 @@ export function MembersTab({
                 size="sm"
                 loading={isUpdatingInvite}
                 onClick={handleToggleInvite}
-                className="rounded-xl gap-1.5"
+                className="h-7 rounded-md gap-1.5 text-xs border-border/70"
               >
                 <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
@@ -248,14 +250,14 @@ export function MembersTab({
 
         <div className="relative">
           <Search
-            className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
+            className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roster members by name…"
-            className="w-full rounded-xl border border-border bg-canvas py-2.5 pl-10 pr-4 text-sm text-text-main outline-none focus:ring-2 focus:ring-focus"
+            className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
           />
         </div>
 
@@ -265,13 +267,13 @@ export function MembersTab({
             description="Try searching with a different name or spelling."
           />
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {teachers.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-text-heading">
+              <div className="space-y-1.5">
+                <h3 className="text-xs font-semibold text-foreground">
                   Instructors & Teachers ({teachers.length})
                 </h3>
-                <div className="overflow-hidden rounded-2xl ring-1 ring-border divide-y divide-border bg-surface">
+                <div className="overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card">
                   {teachers.map((m) => (
                     <MemberRow
                       key={m.id}
@@ -288,11 +290,11 @@ export function MembersTab({
             )}
 
             {students.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-text-heading">
+              <div className="space-y-1.5">
+                <h3 className="text-xs font-semibold text-foreground">
                   Students ({students.length})
                 </h3>
-                <div className="grid overflow-hidden rounded-2xl ring-1 ring-border divide-y divide-border bg-surface sm:grid-cols-2 sm:divide-x">
+                <div className="grid overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card sm:grid-cols-2 sm:divide-x">
                   {(showAllStudents ? students : students.slice(0, 50)).map((m) => (
                     <MemberRow
                       key={m.id}
@@ -311,7 +313,7 @@ export function MembersTab({
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAllStudents((prev) => !prev)}
-                      className="rounded-xl text-xs"
+                      className="rounded-md text-xs h-7"
                     >
                       {showAllStudents
                         ? "Show fewer students"

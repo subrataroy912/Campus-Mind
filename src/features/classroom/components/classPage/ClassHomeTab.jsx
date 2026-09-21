@@ -41,7 +41,6 @@ export function ClassHomeTab({
   onJoin,
   isJoining = false,
   classroom,
-  _teacher = false,
 }) {
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const courseId = classroom?.id;

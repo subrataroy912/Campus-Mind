@@ -40,18 +40,29 @@ const buttonVariants = cva(
   }
 )
 
+import { Loader2 } from "lucide-react";
+
 function Button({
   className,
   variant = "default",
   size = "default",
   to,
   render,
+  loading,
+  disabled,
+  children,
   ...props
 }) {
   const classes = cn(buttonVariants({ variant, size, className }));
+  const isDisabled = disabled || Boolean(loading);
 
   if (to && !render) {
-    return <Link data-slot="button" className={classes} to={to} {...props} />;
+    return (
+      <Link data-slot="button" className={classes} to={to} {...props}>
+        {loading && <Loader2 className="mr-1.5 h-3 w-3 animate-spin shrink-0" />}
+        {children}
+      </Link>
+    );
   }
 
   return (
@@ -59,9 +70,13 @@ function Button({
       data-slot="button"
       className={classes}
       render={render}
+      disabled={isDisabled}
       {...props}
-    />
-  )
+    >
+      {loading && <Loader2 className="mr-1.5 h-3 w-3 animate-spin shrink-0" />}
+      {children}
+    </ButtonPrimitive>
+  );
 }
 
 export { Button, buttonVariants }

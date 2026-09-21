@@ -36,7 +36,8 @@ import {
   selectCurrentUser,
 } from "../features/auth/authSelectors.js";
 
-const AuthContext = createContext(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext(null);
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);

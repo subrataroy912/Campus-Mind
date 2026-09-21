@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Outlet } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import Sidebar from "../../features/dashboard/components/Sidebar";
+import { selectIsSidebarOpen } from "../../features/ui/uiSelectors.js";
+import { toggleSidebar } from "../../features/ui/uiSlice.js";
 
 function DashboardLayout() {
-  const [isCompact, setIsCompact] = useState(true);
+  const dispatch = useDispatch();
+  const isSidebarOpen = useSelector(selectIsSidebarOpen);
+  const isCompact = !isSidebarOpen;
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
@@ -20,7 +24,7 @@ function DashboardLayout() {
           {/* Floating Edge Toggle Button */}
           <button
             type="button"
-            onClick={() => setIsCompact((prev) => !prev)}
+            onClick={() => dispatch(toggleSidebar())}
             className="absolute -right-3 top-5 z-30 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:flex"
             aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
           >

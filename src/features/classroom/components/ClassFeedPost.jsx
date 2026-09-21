@@ -60,50 +60,50 @@ export default function ClassFeedPost({ post, pinned = false }) {
   };
 
   return (
-    <article className="rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-border sm:p-5">
+    <article className="rounded-xl bg-card p-3 sm:p-3.5 border border-border/70 shadow-2xs">
       {pinned && (
-        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-secondary">
-          <ClassroomIcon name="pin" className="h-3.5 w-3.5" />
+        <div className="mb-2 flex items-center gap-1 text-[11px] font-medium text-primary">
+          <ClassroomIcon name="pin" className="h-3 w-3" />
           <span>Pinned announcement</span>
         </div>
       )}
-      <div className="flex gap-3">
-        <ClassroomAvatar name={authorName} userId={authorId} />
+      <div className="flex gap-2.5">
+        <ClassroomAvatar name={authorName} userId={authorId} size="h-7 w-7" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
             {authorId ? (
               <Link
                 to={routes.user(authorId)}
-                className="text-sm font-semibold text-text-heading hover:text-primary hover:underline transition-colors"
+                className="text-xs font-semibold text-foreground hover:text-primary hover:underline transition-colors"
               >
                 {authorName}
               </Link>
             ) : (
-              <span className="text-sm font-semibold text-text-heading">
+              <span className="text-xs font-semibold text-foreground">
                 {authorName}
               </span>
             )}
             {displayTime && (
-              <span className="text-xs text-text-muted">{displayTime}</span>
+              <span className="text-[11px] text-muted-foreground">{displayTime}</span>
             )}
           </div>
           {post.title && post.title !== "Announcement" && (
-            <h4 className="mt-1 text-sm font-bold text-text-heading">
+            <h4 className="mt-0.5 text-xs font-semibold text-foreground">
               {post.title}
             </h4>
           )}
-          <p className="mt-1 text-sm text-text-main whitespace-pre-wrap">
+          <p className="mt-1 text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed">
             {content}
           </p>
 
           {!pinned && (
-            <div className="mt-3 flex items-center gap-4 text-xs text-text-muted">
+            <div className="mt-2.5 flex items-center gap-4 text-xs text-muted-foreground">
               <button
                 type="button"
                 onClick={() => setCommentsOpen((open) => !open)}
-                className="flex items-center gap-1.5 transition hover:text-primary cursor-pointer font-medium"
+                className="flex items-center gap-1.5 transition-colors hover:text-foreground cursor-pointer font-medium text-[11px]"
               >
-                <ClassroomIcon name="comment" className="h-4 w-4" />
+                <ClassroomIcon name="comment" className="h-3.5 w-3.5" />
                 <span>
                   {commentsOpen ? "Hide discussion" : "Discussion"}
                 </span>
@@ -113,10 +113,10 @@ export default function ClassFeedPost({ post, pinned = false }) {
           )}
 
           {!pinned && commentsOpen && (
-            <div className="mt-3 border-t border-border pt-3">
-              <div className="space-y-2">
+            <div className="mt-2.5 border-t border-border/50 pt-2.5">
+              <div className="space-y-1.5">
                 {isLoadingComments ? (
-                  <p className="text-xs text-text-muted">Loading discussion…</p>
+                  <p className="text-[11px] text-muted-foreground">Loading discussion…</p>
                 ) : comments.length ? (
                   comments.map((comment) => {
                     const commentAuthor =
@@ -129,47 +129,47 @@ export default function ClassFeedPost({ post, pinned = false }) {
                       comment.userId ||
                       null;
                     return (
-                      <div key={comment.id} className="flex gap-2 text-sm">
+                      <div key={comment.id} className="flex gap-2 text-xs">
                         <ClassroomAvatar
                           name={commentAuthor}
                           userId={commenterId}
-                          size="h-7 w-7"
+                          size="h-6 w-6"
                         />
-                        <div className="rounded-xl bg-canvas px-3 py-2 text-text-main">
+                        <div className="rounded-lg bg-muted/40 px-2.5 py-1.5 text-foreground flex-1">
                           {commenterId ? (
                             <Link
                               to={routes.user(commenterId)}
-                              className="font-semibold text-text-heading text-xs hover:text-primary hover:underline transition-colors"
+                              className="font-semibold text-foreground text-[11px] hover:text-primary hover:underline transition-colors"
                             >
                               {commentAuthor}
                             </Link>
                           ) : (
-                            <span className="font-semibold text-text-heading text-xs">
+                            <span className="font-semibold text-foreground text-[11px]">
                               {commentAuthor}{" "}
                             </span>
                           )}
-                          <p className="text-xs sm:text-sm">{comment.content}</p>
+                          <p className="text-xs text-foreground/90 mt-0.5">{comment.content}</p>
                         </div>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-xs text-text-muted">
+                  <p className="text-[11px] text-muted-foreground">
                     No comments yet. Start the discussion below.
                   </p>
                 )}
               </div>
 
-              <form onSubmit={submitReply} className="mt-3 flex gap-2">
+              <form onSubmit={submitReply} className="mt-2 flex gap-1.5">
                 <input
                   value={reply}
                   onChange={(event) => setReply(event.target.value)}
                   placeholder="Write a comment or question…"
-                  className="min-w-0 flex-1 rounded-xl border border-border bg-canvas px-3 py-2 text-xs sm:text-sm text-text-main outline-none focus:ring-2 focus:ring-focus"
+                  className="min-w-0 flex-1 rounded-md border border-border/60 bg-muted/30 px-2.5 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-primary px-3.5 py-1.5 text-xs sm:text-sm font-medium text-surface transition hover:bg-primary-hover disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  className="rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed shadow-2xs"
                   disabled={!reply.trim() || isSubmittingComment}
                 >
                   {isSubmittingComment ? "Posting…" : "Reply"}

@@ -24,19 +24,19 @@ import { initials } from "@/utils/initials.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
-    <label className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
-      <span>
-        <span className="block text-sm font-semibold text-text-heading">
+    <label className="flex items-center justify-between gap-4 py-2 first:pt-0 last:pb-0 cursor-pointer">
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs font-medium text-text-heading">
           {title}
         </span>
-        <span className="mt-0.5 block text-sm text-text-muted">
+        <span className="mt-0.5 block text-[11px] text-text-muted">
           {description}
         </span>
       </span>
       <Switch
         checked={checked}
         onCheckedChange={onChange}
-        className="mt-0.5 shrink-0"
+        className="shrink-0 scale-90"
       />
     </label>
   );
@@ -102,42 +102,41 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-3 sm:p-6">
-      <div className="mb-4">
+    <div className="mx-auto max-w-3xl p-3 sm:p-4 space-y-3.5">
+      <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="gap-2 text-text-muted hover:text-text-heading -ml-2"
+          className="h-7 gap-1.5 text-xs text-text-muted hover:text-text-heading -ml-1.5 px-2"
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={14} /> Back
         </Button>
       </div>
 
-      <header>
-        <p className="text-sm font-semibold text-primary">Account</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-text-heading">
+      <header className="space-y-0.5">
+        <h1 className="text-base font-semibold tracking-tight text-text-heading">
           Settings
         </h1>
-        <p className="mt-2 max-w-2xl text-text-muted">
-          Manage your profile, notifications, and privacy preferences.
+        <p className="text-xs text-text-muted">
+          Manage your profile, appearance, notifications, and account credentials.
         </p>
       </header>
 
-      <div className="mt-8 space-y-8">
-        <Card className="p-5 sm:p-6">
-          <div className="space-y-6">
+      <div className="space-y-3">
+        <Card className="rounded-lg border border-border/80 bg-surface p-3.5 sm:p-4 shadow-xs">
+          <div className="space-y-4">
             <ProfileSection
               title="Profile"
               description="This is how you appear across CampusMind."
               action={
-                <Button variant="outline" to={routes.profile.root}>
+                <Button variant="outline" size="sm" to={routes.profile.root} className="h-7 px-2.5 text-xs">
                   Edit profile
                 </Button>
               }
             >
-              <div className="flex items-center gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-lg font-bold text-primary-foreground">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {user?.avatar ? (
                     <img
                       src={user.avatar}
@@ -148,15 +147,15 @@ export default function SettingsPage() {
                     />
                   ) : (
                     initials(user?.name || "") || (
-                      <UserRound size={22} aria-hidden="true" />
+                      <UserRound size={18} aria-hidden="true" />
                     )
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-text-heading">
+                  <p className="truncate text-xs font-semibold text-text-heading">
                     {user?.name || "CampusMind member"}
                   </p>
-                  <p className="truncate text-sm text-text-muted">
+                  <p className="truncate text-[11px] text-text-muted">
                     {user?.email || "no email on file"}
                   </p>
                 </div>
@@ -167,7 +166,7 @@ export default function SettingsPage() {
               title="Notifications"
               description="Choose what CampusMind should notify you about."
             >
-              <div className="divide-y divide-border rounded-xl border border-border px-4">
+              <div className="divide-y divide-border/60 rounded-md border border-border/70 px-3 py-1 bg-canvas/30">
                 <SettingRow
                   title="Email notifications"
                   description="Receive account and learning updates by email."
@@ -192,60 +191,59 @@ export default function SettingsPage() {
         </Card>
 
         {/* Theme Settings Card */}
-        <Card className="p-5 sm:p-6">
-          <div className="space-y-6">
-            <ProfileSection
-              title="Appearance"
-              description="Customize your interface theme."
-            >
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  type="button"
-                  variant={theme === "light" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleThemeChange("light")}
-                  disabled={isThemeSaving || isThemeLoading}
-                  className="gap-2"
-                >
-                  <Sun size={16} aria-hidden="true" />
-                  Light
-                </Button>
-                <Button
-                  type="button"
-                  variant={theme === "dark" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleThemeChange("dark")}
-                  disabled={isThemeSaving || isThemeLoading}
-                  className="gap-2"
-                >
-                  <Moon size={16} aria-hidden="true" />
-                  Dark
-                </Button>
-              </div>
-              {themeError && (
-                <p className="mt-2 text-xs font-medium text-destructive">
-                  {themeError}
-                </p>
-              )}
-              <p className="mt-3 text-xs text-text-muted">
-                Theme preference is saved on this device.
+        <Card className="rounded-lg border border-border/80 bg-surface p-3.5 sm:p-4 shadow-xs">
+          <ProfileSection
+            title="Appearance"
+            description="Customize your interface theme."
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant={theme === "light" ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleThemeChange("light")}
+                disabled={isThemeSaving || isThemeLoading}
+                className="h-7 px-3 text-xs gap-1.5 font-medium"
+              >
+                <Sun size={13} aria-hidden="true" />
+                Light
+              </Button>
+              <Button
+                type="button"
+                variant={theme === "dark" ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleThemeChange("dark")}
+                disabled={isThemeSaving || isThemeLoading}
+                className="h-7 px-3 text-xs gap-1.5 font-medium"
+              >
+                <Moon size={13} aria-hidden="true" />
+                Dark
+              </Button>
+            </div>
+            {themeError && (
+              <p className="mt-1.5 text-xs font-medium text-destructive">
+                {themeError}
               </p>
-            </ProfileSection>
-          </div>
+            )}
+            <p className="mt-2 text-[11px] text-text-muted">
+              Theme preference is saved on this device.
+            </p>
+          </ProfileSection>
         </Card>
 
-        <Card className="border-primary/20 p-5 sm:p-6">
+        <Card className="rounded-lg border border-border/80 bg-surface p-3.5 sm:p-4 shadow-xs">
           <ProfileSection
             title="Account actions"
             description="Sign out here, or on every device you've used."
           >
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setShowLogoutConfirm(true)}
-                className="gap-2"
+                className="h-7 px-3 text-xs gap-1.5 font-medium text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
               >
-                <LogOut size={16} aria-hidden="true" />
+                <LogOut size={13} aria-hidden="true" />
                 Log out
               </Button>
             </div>

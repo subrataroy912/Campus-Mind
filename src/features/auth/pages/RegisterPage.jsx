@@ -66,43 +66,45 @@ export default function RegisterPage() {
   };
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight text-text-heading">
+      <h1 className="text-lg font-semibold tracking-tight text-text-heading">
         Create your account
       </h1>
-      <p className="mt-2 text-text-main">
+      <p className="mt-1 text-xs text-text-muted">
         Start with a simple local account. You can set up your profile later.
       </p>
       {authStatus === "failed" && (
         <p
-          className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium"
+          className="mt-3 rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
           role="alert"
         >
           {error}
         </p>
       )}
-      <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
-        <AuthInput
-          icon={UserRound}
-          label="First Name"
-          name="firstName"
-          value={formData.firstName}
-          onChange={updateField}
-          placeholder="Subrata"
-          required
-          disabled={loading}
-          autoComplete="name"
-        />
-        <AuthInput
-          icon={UserRound}
-          label="Last Name"
-          name="lastName"
-          value={formData.lastName}
-          onChange={updateField}
-          placeholder="Roy"
-          required
-          disabled={loading}
-          autoComplete="name"
-        />
+      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-2 gap-2">
+          <AuthInput
+            icon={UserRound}
+            label="First Name"
+            name="firstName"
+            value={formData.firstName}
+            onChange={updateField}
+            placeholder="Subrata"
+            required
+            disabled={loading}
+            autoComplete="name"
+          />
+          <AuthInput
+            icon={UserRound}
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={updateField}
+            placeholder="Roy"
+            required
+            disabled={loading}
+            autoComplete="name"
+          />
+        </div>
         <AuthInput
           icon={Mail}
           label="Email"
@@ -128,32 +130,34 @@ export default function RegisterPage() {
           disabled={loading}
           autoComplete="new-password"
         />
-        <Button className="w-full" type="submit" disabled={loading}>
+        <Button className="w-full h-9 text-xs font-semibold" type="submit" disabled={loading}>
           {loading ? "Creating account…" : "Create account"}
         </Button>
       </form>
-      <p className="mt-7 text-center text-text-main">
+      <p className="mt-4 text-center text-xs text-text-muted">
         Already have an account?{" "}
         <Link
           to={routes.auth.login}
-          className="font-bold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline"
         >
           Sign in
         </Link>
       </p>
-      <div className="flex items-center justify-center gap-2 p-2">
+      <div className="flex items-center justify-center gap-2 pt-3 border-t border-border/60 mt-3">
         <Tooltip>
           <TooltipTrigger
             render={
               <Button
                 variant="outline"
+                size="icon"
+                className="h-8 w-8"
                 aria-label="Sign up with Google"
                 onClick={() => startOAuth("google")}
                 disabled={loading}
               />
             }
           >
-            <FaGoogle size={25} />
+            <FaGoogle size={14} />
           </TooltipTrigger>
           <TooltipContent>Sign up with Google</TooltipContent>
         </Tooltip>
@@ -162,13 +166,15 @@ export default function RegisterPage() {
             render={
               <Button
                 variant="outline"
+                size="icon"
+                className="h-8 w-8"
                 aria-label="Sign up with GitHub"
                 onClick={() => startOAuth("github")}
                 disabled={loading}
               />
             }
           >
-            <FaGithub size={25} />
+            <FaGithub size={14} />
           </TooltipTrigger>
           <TooltipContent>Sign up with GitHub</TooltipContent>
         </Tooltip>

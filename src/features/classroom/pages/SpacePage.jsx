@@ -174,9 +174,6 @@ export default function SpacePage() {
 
         <ClassHeader
           classroom={classroomWithNewCode}
-          isEnrolled={isEnrolled}
-          onJoin={handleJoin}
-          isJoining={isJoining}
           teacher={teacher}
         />
 
@@ -202,7 +199,6 @@ export default function SpacePage() {
             onJoin={handleJoin}
             isJoining={isJoining}
             classroom={classroom}
-            teacher={teacher}
           />
         )}
 

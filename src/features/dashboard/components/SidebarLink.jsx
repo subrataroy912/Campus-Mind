@@ -9,27 +9,32 @@ export function SidebarLink({
   onNavigate,
   end,
 }) {
+  const isEnd = end ?? to === routes.dashboard;
+
   return (
     <NavLink
       to={to}
-      end={end ?? to === routes.dashboard}
-      className={(navState) =>
-        `${getNavLinkStyles(navState)} ${
+      end={isEnd}
+      className={(navState) => {
+        const isActive = typeof navState === "object" ? navState?.isActive : false;
+        return `group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
           compact ? "justify-center px-0" : ""
-        }`.trim()
-      }
+        } ${
+          isActive
+            ? "bg-primary/10 text-primary font-semibold"
+            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+        }`.trim();
+      }}
       onClick={onNavigate}
       title={compact ? label : undefined}
     >
-      {Icon && <Icon size={18} className="shrink-0" />}
-      <span className={compact ? "hidden" : ""}>{label}</span>
+      {Icon && (
+        <Icon
+          size={15}
+          className="shrink-0 transition-colors"
+        />
+      )}
+      <span className={compact ? "hidden" : "truncate"}>{label}</span>
     </NavLink>
   );
 }
-
-const getNavLinkStyles = ({ isActive }) =>
-  `flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
-    isActive
-      ? "bg-canvas text-primary"
-      : "text-text-main hover:bg-canvas hover:text-text-heading"
-  }`;

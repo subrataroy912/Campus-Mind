@@ -1,13 +1,18 @@
 import { useMemo } from "react";
 import { useGetExplorePeopleQuery } from "../api/exploreApi.js";
 import { filterAndSortPeople } from "../model/peopleFilter.js";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 export function useExplorePeople({
   searchQuery = "",
   personFilter = "all",
-  currentUser = null,
+  currentUser: propCurrentUser,
   enabled = true,
 } = {}) {
+  const { user } = useAuth();
+  const effectiveCurrentUser =
+    propCurrentUser !== undefined ? propCurrentUser : user;
+
   const {
     data: users = [],
     isLoading,
@@ -27,9 +32,9 @@ export function useExplorePeople({
       filterAndSortPeople(users, {
         searchQuery,
         personFilter,
-        currentUser,
+        currentUser: effectiveCurrentUser,
       }),
-    [users, searchQuery, personFilter, currentUser]
+    [users, searchQuery, personFilter, effectiveCurrentUser]
   );
 
   return {

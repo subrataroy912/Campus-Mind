@@ -7,20 +7,26 @@ export default function EmptyState({
   action,
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-surface px-6 py-12 text-center">
-      <Inbox className="mx-auto text-primary" aria-hidden="true" />
-      <h2 className="mt-3 text-lg font-bold text-text-heading">{title}</h2>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-card/60 px-4 py-6 text-center sm:py-8">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground ring-1 ring-border/50">
+        <Inbox className="h-4 w-4" aria-hidden="true" />
+      </div>
+      <h3 className="mt-2.5 text-xs font-semibold tracking-tight text-foreground sm:text-sm">{title}</h3>
       {description && (
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">
+        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
           {description}
         </p>
       )}
       {action && (
-        <Button to={action.to} onClick={action.onClick} className="mt-5">
+        <Button
+          to={action.to}
+          onClick={action.onClick}
+          size="sm"
+          className="mt-3.5 h-7 px-3 text-xs"
+        >
           {action.label}
         </Button>
       )}
-
     </div>
   );
 }

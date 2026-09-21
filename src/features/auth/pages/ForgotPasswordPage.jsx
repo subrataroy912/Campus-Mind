@@ -24,24 +24,24 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success/10 text-success">
-          <MailCheck size={28} aria-hidden="true" />
+      <div className="text-center py-2">
+        <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-emerald-500/10 text-emerald-600">
+          <MailCheck size={20} aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight text-text-heading">
+        <h1 className="mt-3 text-base font-semibold tracking-tight text-text-heading">
           Check your inbox
         </h1>
-        <p className="mt-2 text-text-main">
+        <p className="mt-1 text-xs text-text-muted">
           If an account exists for{" "}
           <span className="font-semibold text-text-heading">{email}</span>, a
           reset link is on its way.
         </p>
-        <p className="mt-6 text-sm text-text-muted">
+        <p className="mt-4 text-xs text-text-muted">
           Didn't get anything? Check your spam folder, or{" "}
           <button
             type="button"
             onClick={() => setSent(false)}
-            className="font-bold text-primary hover:underline"
+            className="font-medium text-primary hover:underline cursor-pointer"
           >
             try a different email
           </button>
@@ -49,9 +49,9 @@ export default function ForgotPasswordPage() {
         </p>
         <Link
           to={routes.auth.login}
-          className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+          className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
         >
-          <ArrowLeft size={16} aria-hidden="true" />
+          <ArrowLeft size={14} aria-hidden="true" />
           Back to sign in
         </Link>
       </div>
@@ -62,30 +62,30 @@ export default function ForgotPasswordPage() {
     <div>
       <Link
         to={routes.auth.login}
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-muted hover:text-text-main"
+        className="inline-flex items-center gap-1 text-xs font-medium text-text-muted hover:text-text-main transition-colors"
       >
-        <ArrowLeft size={16} aria-hidden="true" />
+        <ArrowLeft size={14} aria-hidden="true" />
         Back to sign in
       </Link>
 
-      <h1 className="mt-4 text-3xl font-bold tracking-tight text-text-heading">
+      <h1 className="mt-3 text-lg font-semibold tracking-tight text-text-heading">
         Forgot your password?
       </h1>
-      <p className="mt-2 text-text-main">
+      <p className="mt-1 text-xs text-text-muted">
         Enter the email tied to your account and we'll send you a link to reset
         it.
       </p>
 
       {error && (
         <p
-          className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main"
+          className="mt-3 rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
           role="alert"
         >
           {error}
         </p>
       )}
 
-      <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
         <AuthInput
           icon={Mail}
           label="Email"
@@ -97,15 +97,15 @@ export default function ForgotPasswordPage() {
           required
           autoComplete="email"
         />
-        <Button className="w-full" type="submit">
+        <Button className="w-full h-9 text-xs font-semibold" type="submit">
           Send reset link
         </Button>
       </form>
 
-      <p className="mt-7 text-center text-text-main">
+      <p className="mt-4 text-center text-xs text-text-muted">
         Remembered it after all?{" "}
         <Link
-          className="font-bold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline"
           to={routes.auth.login}
         >
           Sign in

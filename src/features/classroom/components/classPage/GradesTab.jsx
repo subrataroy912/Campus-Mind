@@ -30,7 +30,7 @@ const statusLabel = {
 function GradeChip({ status }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium tracking-tight ${
         statusClass[status] || statusClass.assigned
       }`}
     >
@@ -98,19 +98,19 @@ export function GradesTab({
   if (!isEnrolled) {
     return (
       <section className="mt-2">
-        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center shadow-xs">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
-            <Award className="h-6 w-6" />
+        <div className="rounded-lg border border-dashed border-border bg-surface p-6 sm:p-8 text-center shadow-xs">
+          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary mb-2.5">
+            <Award className="h-4.5 w-4.5" />
           </div>
-          <h3 className="text-base font-semibold text-text-heading">
+          <h3 className="text-sm font-semibold text-text-heading">
             Gradebook is reserved for enrolled students
           </h3>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+          <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
             Join this class to track your grades, missing assignments, and class standing.
           </p>
           {onJoin && (
-            <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2 rounded-xl">
-              <UserPlus className="h-4 w-4" />
+            <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3 gap-1.5 h-8 text-xs font-medium">
+              <UserPlus className="h-3.5 w-3.5" />
               <span>Join Class</span>
             </Button>
           )}
@@ -120,29 +120,28 @@ export function GradesTab({
   }
 
   return (
-    <section className="mt-4 space-y-3.5">
-      <header>
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">
-          Academic Progress
-        </p>
-        <h2 className="text-2xl font-bold tracking-tight text-text-heading">
-          Grades & Performance
-        </h2>
-        <p className="mt-1 text-sm text-text-muted">
-          {teacher
-            ? "Track class standing, review scores, and monitor submission trends."
-            : "Review your submitted work, scores, and instructor feedback."}
-        </p>
+    <section className="mt-3 space-y-3">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight text-text-heading">
+            Grades & Performance
+          </h2>
+          <p className="text-xs text-text-muted">
+            {teacher
+              ? "Track class standing, review scores, and monitor submission trends."
+              : "Review your submitted work, scores, and instructor feedback."}
+          </p>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {metrics.map(([label, value]) => (
           <div
             key={label}
-            className="rounded-2xl bg-surface p-5 shadow-xs ring-1 ring-border"
+            className="rounded-lg border border-border/80 bg-surface px-3.5 py-2.5 shadow-xs"
           >
-            <p className="text-xs font-medium text-text-muted">{label}</p>
-            <p className="mt-1.5 text-2xl font-bold tracking-tight text-text-heading">
+            <p className="text-[11px] font-medium text-text-muted">{label}</p>
+            <p className="mt-0.5 text-xl font-semibold tracking-tight text-text-heading">
               {value}
             </p>
           </div>
@@ -155,38 +154,38 @@ export function GradesTab({
           description="Grades will appear here as coursework is completed and reviewed."
         />
       ) : (
-        <div className="overflow-x-auto rounded-2xl bg-surface ring-1 ring-border shadow-xs">
-          <table className="w-full min-w-155 text-left text-sm">
-            <thead className="border-b border-border bg-canvas/60 text-xs font-semibold text-text-muted uppercase tracking-wider">
+        <div className="overflow-x-auto rounded-lg border border-border/80 bg-surface shadow-xs">
+          <table className="w-full min-w-140 text-left text-xs">
+            <thead className="border-b border-border/70 bg-canvas/60 text-[11px] font-medium text-text-muted uppercase tracking-wider">
               <tr>
                 {teacher ? (
                   <>
-                    <th className="px-5 py-3.5">Student</th>
-                    <th className="px-5 py-3.5">Average</th>
-                    <th className="px-5 py-3.5">Missing</th>
-                    <th className="px-5 py-3.5 text-right">Action</th>
+                    <th className="px-3.5 py-2">Student</th>
+                    <th className="px-3.5 py-2">Average</th>
+                    <th className="px-3.5 py-2">Missing</th>
+                    <th className="px-3.5 py-2 text-right">Action</th>
                   </>
                 ) : (
                   <>
-                    <th className="px-5 py-3.5">Assignment</th>
-                    <th className="px-5 py-3.5">Due date</th>
-                    <th className="px-5 py-3.5">Score</th>
-                    <th className="px-5 py-3.5 text-right">Status</th>
+                    <th className="px-3.5 py-2">Assignment</th>
+                    <th className="px-3.5 py-2">Due date</th>
+                    <th className="px-3.5 py-2">Score</th>
+                    <th className="px-3.5 py-2 text-right">Status</th>
                   </>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/60">
               {teacher
                 ? rows.map((row) => (
                     <Fragment key={row.id}>
                       <tr className="hover:bg-canvas/40 transition-colors">
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-3">
+                        <td className="px-3.5 py-2">
+                          <div className="flex items-center gap-2">
                             <ClassroomAvatar
                               name={row.studentName}
                               avatar={row.avatar}
-                              size="h-8 w-8"
+                              size="h-6 w-6"
                             />
                             <span className="font-medium text-text-heading">
                               {row.studentName}
@@ -194,7 +193,7 @@ export function GradesTab({
                           </div>
                         </td>
                         <td
-                          className={`px-5 py-3.5 font-semibold ${
+                          className={`px-3.5 py-2 font-medium ${
                             row.average === "—"
                               ? "text-text-muted"
                               : "text-text-main"
@@ -202,17 +201,17 @@ export function GradesTab({
                         >
                           {row.average}
                         </td>
-                        <td className="px-5 py-3.5 text-text-muted">
+                        <td className="px-3.5 py-2 text-text-muted">
                           {row.missingCount || "—"}
                         </td>
-                        <td className="px-5 py-3.5 text-right">
+                        <td className="px-3.5 py-2 text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() =>
                               setSelected(selected === row.id ? null : row.id)
                             }
-                            className="rounded-lg text-xs font-medium text-primary hover:text-primary"
+                            className="h-6 px-2 text-xs font-medium text-primary hover:text-primary hover:bg-primary/10"
                           >
                             {selected === row.id ? "Hide details" : "View breakdown"}
                           </Button>
@@ -222,7 +221,7 @@ export function GradesTab({
                         <tr key={`${row.id}-detail`}>
                           <td
                             colSpan="4"
-                            className="bg-canvas/50 px-5 py-3.5 text-xs text-text-muted leading-relaxed"
+                            className="bg-canvas/50 px-3.5 py-2 text-xs text-text-muted leading-relaxed"
                           >
                             Breakdown for <strong className="text-text-heading">{row.studentName}</strong>: {row.submittedCount ?? 0} assignments submitted · {row.missingCount ?? 0} missing.
                           </td>
@@ -232,14 +231,14 @@ export function GradesTab({
                   ))
                 : rows.map((row) => (
                     <tr key={row.id} className="hover:bg-canvas/40 transition-colors">
-                      <td className="px-5 py-3.5 font-medium text-text-heading">
+                      <td className="px-3.5 py-2 font-medium text-text-heading">
                         {row.assignmentTitle}
                       </td>
-                      <td className="px-5 py-3.5 text-xs text-text-muted">
+                      <td className="px-3.5 py-2 text-text-muted">
                         {row.dueDate}
                       </td>
                       <td
-                        className={`px-5 py-3.5 font-semibold ${
+                        className={`px-3.5 py-2 font-medium ${
                           row.score === null
                             ? "text-text-muted"
                             : "text-text-main"
@@ -247,7 +246,7 @@ export function GradesTab({
                       >
                         {row.score === null ? "—" : `${row.score}/${row.outOf}`}
                       </td>
-                      <td className="px-5 py-3.5 text-right">
+                      <td className="px-3.5 py-2 text-right">
                         <GradeChip status={row.status} />
                       </td>
                     </tr>

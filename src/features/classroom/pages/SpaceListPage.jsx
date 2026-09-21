@@ -40,19 +40,19 @@ export default function SpaceListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-2.5 sm:p-4 lg:p-5 space-y-3.5">
+    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5 space-y-3.5">
       {/* Header Bar */}
-      <header className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-heading">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
               Spaces
             </h1>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 px-2 py-0.2 text-[11px] font-semibold text-primary">
               {classrooms.length}
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Spaces you are enrolled in, facilitating, or leading across campus.
           </p>
         </div>
@@ -62,7 +62,7 @@ export default function SpaceListPage() {
             to={routes.classes.join}
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 text-xs rounded-lg"
+            className="h-7.5 gap-1.5 text-xs rounded-lg border-border/70"
           >
             <Ticket size={13} aria-hidden="true" />
             <span>Join with code</span>
@@ -71,7 +71,7 @@ export default function SpaceListPage() {
             <Button
               to={routes.spaces.new}
               size="sm"
-              className="h-8 gap-1.5 text-xs rounded-lg font-semibold"
+              className="h-7.5 gap-1.5 text-xs rounded-lg font-semibold"
             >
               <Plus size={13} aria-hidden="true" />
               <span>Create space</span>
@@ -82,7 +82,7 @@ export default function SpaceListPage() {
 
       {/* Filter Tabs - Compact High-Density Pills */}
       {classrooms.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
           {FILTER_OPTIONS.map((opt) => {
             const count =
               opt.value === "ALL"
@@ -95,11 +95,19 @@ export default function SpaceListPage() {
               <button
                 key={opt.value}
                 onClick={() => setSelectedType(opt.value)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${isSelected ? "bg-primary text-white shadow-xs" : "bg-canvas text-text-muted border border-border hover:bg-surface hover:text-text-heading"}`}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
+                    : "bg-muted/40 text-muted-foreground border border-border/60 hover:bg-muted/70 hover:text-foreground"
+                }`}
               >
                 <span>{opt.label}</span>
                 <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${isSelected ? "bg-white/20 text-white" : "bg-surface text-text-muted"}`}
+                  className={`rounded-full px-1.5 py-0.2 text-[10px] font-semibold ${
+                    isSelected
+                      ? "bg-primary-foreground/20 text-primary-foreground"
+                      : "bg-background text-muted-foreground"
+                  }`}
                 >
                   {count}
                 </span>

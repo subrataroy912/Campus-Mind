@@ -19,9 +19,9 @@ function BrandLogo({
     <Link
       to={to}
       onClick={handleClick}
-      className={`relative inline-flex max-w-full px-2 py-1 transition-opacity hover:opacity-80 ${className}`}
+      className={`relative inline-flex items-center gap-1.5 max-w-full px-1 py-0.5 transition-opacity hover:opacity-85 ${className}`}
     >
-      <div className="flex items-center justify-center gap-1 md:gap-2 flex-nowrap">
+      <div className="flex items-center justify-center gap-1.5 flex-nowrap">
         <img
           src="/logo-square.webp"
           alt="CampusMind"
@@ -29,18 +29,17 @@ function BrandLogo({
           height="40"
           decoding="async"
           fetchPriority={fetchPriority}
-          className="h-9 w-9 shrink-0 object-contain sm:h-10 sm:w-10"
+          className="h-6 w-6 shrink-0 object-contain sm:h-7 sm:w-7 rounded-md"
         />
 
         {!compact && (
-          <span className="hidden whitespace-nowrap text-lg font-bold tracking-tight text-text-heading sm:inline sm:text-xl">
-            Campus
-            <span className="text-primary">Mind</span>
+          <span className="hidden whitespace-nowrap text-xs sm:text-sm font-semibold tracking-tight text-foreground sm:inline">
+            Campus<span className="text-primary font-bold">Mind</span>
           </span>
         )}
       </div>
 
-      <span className="absolute -right-3 -top-1 rounded bg-primary px-1 py-0.5 text-[9px] font-extrabold uppercase leading-none text-primary-foreground shadow-sm">
+      <span className="ml-1 rounded-[4px] bg-primary/10 border border-primary/20 px-1 py-0.2 text-[8px] font-bold uppercase tracking-wider text-primary">
         beta
       </span>
     </Link>

@@ -3,10 +3,10 @@ import clsx from 'clsx'
 function AuthInput({ icon: Icon, label, rightIcon, className, ...props }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-text-heading">{label}</span>
-      <span className="mt-2 flex min-h-14 items-center gap-3 rounded-xl border border-border bg-surface px-4 text-text-muted shadow-sm focus-within:border-primary focus-within:ring-4 focus-within:ring-focus">
-        {Icon && <Icon aria-hidden="true" size={22} />}
-        <input className={clsx('w-full bg-transparent text-base text-text-heading outline-none placeholder:text-text-muted', className)} {...props} />
+      <span className="text-xs font-medium text-text-heading">{label}</span>
+      <span className="mt-1 flex h-9 items-center gap-2 rounded-md border border-border/80 bg-canvas/40 px-2.5 text-text-muted shadow-2xs transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-surface">
+        {Icon && <Icon aria-hidden="true" size={15} className="shrink-0 text-text-muted" />}
+        <input className={clsx('w-full bg-transparent text-xs text-text-heading outline-none placeholder:text-text-muted', className)} {...props} />
         {rightIcon}
       </span>
     </label>

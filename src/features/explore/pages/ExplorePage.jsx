@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { useAuth } from "@/context/AuthContext.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
 import { useExplorePeople } from "../hooks/useExplorePeople.js";
@@ -16,7 +15,6 @@ const TABS = [
 ];
 
 export default function ExplorePage() {
-  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = searchParams.get("tab") || EXPLORE_TABS.CLASSES;
@@ -51,7 +49,6 @@ export default function ExplorePage() {
   } = useExplorePeople({
     searchQuery,
     personFilter,
-    currentUser: user,
     enabled: isPeopleTab,
   });
 
@@ -81,7 +78,6 @@ export default function ExplorePage() {
       </div>
     );
   }
-
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 w-full min-w-0">
       <ExploreHeroBanner tab={tab} />
@@ -143,7 +139,6 @@ export default function ExplorePage() {
           departments={departments}
           personFilter={personFilter}
           searchQuery={searchQuery}
-          currentUser={user}
           isLoading={isLoadingUsers}
           onFilterChange={(val) => updateParam("personFilter", val)}
         />

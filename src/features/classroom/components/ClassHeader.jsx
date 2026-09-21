@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router";
 import {
   ArrowLeft,
   Archive,
+  Camera,
   Check,
   Copy,
   ExternalLink,
   Globe,
+  ImagePlus,
   KeyRound,
   Lock,
   LogOut,
@@ -168,10 +170,10 @@ export default function ClassHeader({
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border">
-      {/* Compact Banner Section */}
+    <div className="overflow-hidden rounded-xl bg-card border border-border/70 shadow-2xs">
+      {/* Responsive Facebook-style Banner Section */}
       <div
-        className={`relative h-20 sm:h-28 overflow-hidden ${classTheme.gradientClass}`}
+        className={`relative h-28 sm:h-36 md:h-44 lg:h-52 w-full overflow-hidden ${classTheme.gradientClass} transition-all`}
       >
         {(classroom?.coverUrl || classroom?.cover) && (
           <img
@@ -179,17 +181,18 @@ export default function ClassHeader({
             alt={`${classroom?.title || "Space"} banner`}
             fetchPriority="high"
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
         )}
         <div className="absolute inset-0 bg-black/15" />
-        <div className="absolute inset-x-0 top-0 h-16 bg-linear-to-b from-black/50 via-black/20 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 via-black/20 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
 
         {/* Back Link */}
-        <div className="absolute left-2.5 top-2.5 z-10">
+        <div className="absolute left-2.5 top-2.5 z-10 sm:left-3.5 sm:top-3.5">
           <Link
             to={routes.spaces.list}
-            className="flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-black/50 backdrop-blur-md shadow-xs border border-white/15"
+            className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/60 backdrop-blur-md shadow-2xs border border-white/15"
             aria-label="Back to spaces"
           >
             <ArrowLeft className="h-3 w-3" />
@@ -197,8 +200,8 @@ export default function ClassHeader({
           </Link>
         </div>
 
-        {/* Settings Dropdown for Teachers / Leaders */}
-        <div className="absolute right-2.5 top-2.5 z-20 flex items-center gap-1.5">
+        {/* Settings & Leader Controls */}
+        <div className="absolute right-2.5 top-2.5 z-20 flex items-center gap-1.5 sm:right-3.5 sm:top-3.5">
           {isEnrolled && !teacher && (
             <Button
               variant="outline"
@@ -211,104 +214,139 @@ export default function ClassHeader({
               }}
               className="h-7 border-white/20 bg-black/40 px-2.5 text-[11px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white"
             >
-              <LogOutIcon className="mr-1.5 h-3 w-3" />
+              <LogOutIcon className="mr-1 h-3 w-3" />
               <span className="hidden sm:inline">Leave</span>
             </Button>
           )}
 
           {teacher && (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    aria-label="Class settings"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    className="h-7 w-7 rounded-full border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white focus-visible:ring-1 focus-visible:ring-white"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    <span className="sr-only">Class settings</span>
-                  </Button>
-                }
-              />
-
-              <DropdownMenuContent
-                align="end"
-                className="w-48 text-xs font-medium"
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                title="Change banner & branding (Recommended: 1920 × 480px, 4:1 · Keep important text centered)"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  setIsEditModalOpen(true);
                 }}
+                className="h-7 border-white/20 bg-black/40 px-2.5 text-[11px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white"
               >
-                <DropdownMenuItem
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="cursor-pointer gap-2"
-                >
-                  <PencilIcon className="h-3.5 w-3.5 text-primary" />
-                  <span>Edit space details</span>
-                </DropdownMenuItem>
+                <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Change banner</span>
+              </Button>
 
-                <DropdownMenuSeparator />
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      aria-label="Class settings"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="h-7 w-7 rounded-full border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white focus-visible:ring-1 focus-visible:ring-white"
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                      <span className="sr-only">Class settings</span>
+                    </Button>
+                  }
+                />
 
-                <DropdownMenuItem
-                  onClick={() => setIsArchiveDialogOpen(true)}
-                  className="cursor-pointer gap-2 text-amber-600 focus:bg-amber-50 focus:text-amber-700 dark:text-amber-500 dark:focus:bg-amber-950/50 dark:focus:text-amber-400"
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 text-xs font-medium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                 >
-                  <Archive className="h-3.5 w-3.5" />
-                  <span>Archive space</span>
-                </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="cursor-pointer gap-2"
+                  >
+                    <PencilIcon className="h-3.5 w-3.5 text-primary" />
+                    <span>Edit space & branding</span>
+                  </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  <span>Delete space</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => setIsArchiveDialogOpen(true)}
+                    className="cursor-pointer gap-2 text-amber-600 focus:bg-amber-50 focus:text-amber-700 dark:text-amber-500 dark:focus:bg-amber-950/50 dark:focus:text-amber-400"
+                  >
+                    <Archive className="h-3.5 w-3.5" />
+                    <span>Archive space</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Delete space</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
         </div>
       </div>
 
-      {/* Content Section - High-Density layout */}
-      <div className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-end sm:justify-between sm:px-4 sm:pb-3 sm:pt-0">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 min-w-0 flex-1">
-          {/* Compact Floating Avatar */}
-          <div className="-mt-7 h-14 w-14 z-10 shrink-0 overflow-hidden rounded-xl border-3 border-surface bg-canvas shadow-xs sm:-mt-8 sm:h-16 sm:w-16">
-            {classroom?.logo || classroom?.logoUrl ? (
-              <img
-                src={classroom.logo || classroom.logoUrl}
-                alt={`${classroom?.title || "Space"} logo`}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="grid h-full w-full place-items-center bg-primary/10 text-sm sm:text-base font-bold text-primary">
-                {classroom?.title?.slice(0, 2)?.toUpperCase() || "SP"}
-              </div>
+      {/* Content Section - Facebook-style Left-Anchored Overlapping Identity */}
+      <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-end sm:justify-between sm:px-5 sm:pb-3 sm:pt-0">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 min-w-0 flex-1">
+          {/* Responsive Floating Logo (h-14 mobile, h-18 tablet, h-21 desktop) */}
+          <div className="relative -mt-7 sm:-mt-9 md:-mt-11 h-14 w-14 sm:h-18 sm:w-18 md:h-21 md:w-21 z-10 shrink-0">
+            <div className="h-full w-full overflow-hidden rounded-2xl border-2 sm:border-[3px] md:border-4 border-card bg-background shadow-md">
+              {classroom?.logo || classroom?.logoUrl ? (
+                <img
+                  src={classroom.logo || classroom.logoUrl}
+                  alt={`${classroom?.title || "Space"} logo`}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="grid h-full w-full place-items-center bg-primary/10 text-xs sm:text-base md:text-lg font-bold text-primary">
+                  {classroom?.title?.slice(0, 2)?.toUpperCase() || "SP"}
+                </div>
+              )}
+            </div>
+
+            {/* Quick Logo Edit Button for Leaders */}
+            {teacher && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsEditModalOpen(true);
+                }}
+                className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full border border-card bg-surface text-muted-foreground shadow-xs transition hover:text-primary hover:bg-canvas cursor-pointer"
+                title="Change logo (Recommended: 400 × 400px, 1:1 square · Max 2MB)"
+              >
+                <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+              </button>
             )}
           </div>
 
           {/* Title, Badges & Metadata */}
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <h1 className="text-sm sm:text-base font-bold text-text-heading truncate">
+              <h1 className="text-sm sm:text-base font-bold text-foreground truncate">
                 {classroom?.title || "Space"}
               </h1>
               <span
-                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${spaceTypeInfo.color}`}
+                className={`inline-flex items-center rounded border px-1.5 py-0.2 text-[10px] font-semibold ${spaceTypeInfo.color}`}
               >
                 {spaceTypeInfo.label}
               </span>
             </div>
 
-            <p className="text-xs font-medium text-text-muted truncate">
+            <p className="text-xs font-medium text-muted-foreground truncate">
               {classroom?.section || classroom?.subtitle
                 ? `${classroom.section || classroom.subtitle} • `
                 : ""}
@@ -319,7 +357,7 @@ export default function ClassHeader({
             {/* Badges & Location Line */}
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
               {/* Meeting format */}
-              <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-1.5 py-0.5 text-text-muted border border-border font-medium">
+              <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 font-medium">
                 {isOnline ? (
                   <Video className="h-3 w-3 text-primary" />
                 ) : (
@@ -346,7 +384,7 @@ export default function ClassHeader({
               </span>
 
               {/* Access type */}
-              <span className="inline-flex items-center gap-1 rounded-md bg-canvas px-1.5 py-0.5 text-text-muted border border-border capitalize font-medium">
+              <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 capitalize font-medium">
                 <ClassroomIcon
                   name={
                     accessType === "open"
@@ -355,7 +393,7 @@ export default function ClassHeader({
                       ? "key"
                       : "lock"
                   }
-                  className="h-3 w-3 text-text-muted"
+                  className="h-3 w-3 text-muted-foreground"
                 />
                 <span>{accessType}</span>
               </span>
@@ -364,7 +402,7 @@ export default function ClassHeader({
               {tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-md bg-accent/40 px-1.5 py-0.5 text-text-muted text-[10px] font-medium"
+                  className="inline-flex items-center rounded bg-accent/60 px-1.5 py-0.2 text-accent-foreground text-[10px] font-medium"
                 >
                   #{tag}
                 </span>

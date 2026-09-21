@@ -65,7 +65,6 @@ export const CourseworkCard = React.memo(function CourseworkCard({
   isHydrating,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [uploadedAttachments, setUploadedAttachments] = useState([]);
   const [updateCoursework, { isLoading: isPublishing }] = useUpdateCourseworkMutation();
   const [deleteCoursework, { isLoading: isDeleting }] = useDeleteCourseworkMutation();
 
@@ -105,10 +104,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
   const Icon = typeIcon[itemType] ?? ClipboardList;
   const isDraft = currentItem.status === "DRAFT";
 
-  const allAttachments = [
-    ...(currentItem.attachments || []),
-    ...uploadedAttachments,
-  ];
+  const allAttachments = currentItem.attachments || [];
 
   // Prefer the pre-formatted string from ClassworkTab; fall back for detail pane.
   const dueDateLabel =
@@ -140,24 +136,24 @@ export const CourseworkCard = React.memo(function CourseworkCard({
             setIsOpen((prev) => !prev);
           }
         }}
-        className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-canvas/60 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40 select-none"
+        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-muted/40 cursor-pointer focus:outline-hidden focus-visible:ring-1 focus-visible:ring-ring select-none"
         aria-expanded={isOpen}
       >
         <div
-          className={`grid h-8 w-8 place-items-center rounded-lg shrink-0 ${
+          className={`grid h-7 w-7 place-items-center rounded-md shrink-0 ${
             isDraft
-              ? "bg-muted text-text-muted"
+              ? "bg-muted text-muted-foreground"
               : "bg-primary/10 text-primary"
           }`}
         >
-          <Icon className="h-4 w-4" aria-hidden="true" />
+          <Icon className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-sm text-text-heading truncate">
+          <p className="font-semibold text-xs text-foreground truncate">
             {currentItem.title}
           </p>
           {dueDateLabel && (
-            <p className="mt-0.5 text-xs text-text-muted">
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
               Due {dueDateLabel}
             </p>
           )}
@@ -166,14 +162,14 @@ export const CourseworkCard = React.memo(function CourseworkCard({
           {/* Draft badge & action for teachers */}
           {teacher && isDraft && (
             <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+              <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Draft
               </span>
               <Button
                 size="sm"
                 onClick={handlePublishDraft}
                 disabled={isPublishing}
-                className="h-6 px-2 text-[11px] font-semibold gap-1 bg-primary text-white hover:bg-primary-hover rounded-md cursor-pointer"
+                className="h-5.5 px-2 text-[10px] font-semibold gap-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded cursor-pointer"
               >
                 <Send className="h-2.5 w-2.5" />
                 <span>{isPublishing ? "Publishing…" : "Publish Now"}</span>
@@ -185,8 +181,8 @@ export const CourseworkCard = React.memo(function CourseworkCard({
       </div>
 
       {isOpen && (
-        <div className="border-t border-border bg-canvas/40 px-4 py-4 space-y-4 transition-all">
-          <p className="text-sm leading-relaxed text-text-main whitespace-pre-line">
+        <div className="border-t border-border/50 bg-muted/20 px-3 py-3 space-y-3 transition-all">
+          <p className="text-xs leading-relaxed text-foreground/90 whitespace-pre-line">
             {currentItem.instructions ||
               currentItem.description ||
               "No detailed instructions available."}
@@ -219,16 +215,11 @@ export const CourseworkCard = React.memo(function CourseworkCard({
           {teacher ? (
             <CourseworkGradingSection
               item={currentItem}
-              classId={classId}
-              isHydrating={isHydrating}
               isOpen={isOpen}
             />
           ) : (
             <CourseworkSubmissionSection
-              classId={classId}
               item={currentItem}
-              uploadedAttachments={uploadedAttachments}
-              setUploadedAttachments={setUploadedAttachments}
             />
           )}
 

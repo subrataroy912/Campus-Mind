@@ -16,12 +16,8 @@ import {
   uploadAttachmentFile,
 } from "../../api/attachmentService.js";
 
-export function CourseworkSubmissionSection({
-  classId,
-  item,
-  _uploadedAttachments,
-  setUploadedAttachments,
-}) {
+export function CourseworkSubmissionSection({ item }) {
+  const [uploadedAttachments, setUploadedAttachments] = useState([]);
   const [draftSubmission, setDraftSubmission] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -94,7 +90,7 @@ export function CourseworkSubmissionSection({
   const isTurnedIn = mySubmission?.status === "TURNED_IN" || mySubmission?.status === "GRADED";
 
   const handleSubmit = async () => {
-    if (!classId || !item?.id) return;
+    if (!item?.id) return;
     setIsSubmitting(true);
     setSubmissionError("");
 
@@ -156,6 +152,21 @@ export function CourseworkSubmissionSection({
         <p className="text-xs text-secondary font-medium">
           {submissionError}
         </p>
+      )}
+
+      {uploadedAttachments.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {uploadedAttachments.map((file, idx) => (
+            <div
+              key={file.id ?? `upload-${idx}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-canvas/80 px-2.5 py-1 text-xs text-text-heading shadow-2xs"
+            >
+              <Upload className="h-3 w-3 text-primary" />
+              <span className="max-w-[160px] truncate">{file.name ?? "Attachment"}</span>
+              {file.detail && <span className="text-text-muted text-[10px]">({file.detail})</span>}
+            </div>
+          ))}
+        </div>
       )}
 
       <div className="flex items-center justify-between gap-2">

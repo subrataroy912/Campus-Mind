@@ -10,19 +10,27 @@ export function mapCreateClassPayload(details = {}) {
     ? "OPEN"
     : "CODE";
 
-  return {
+  const payload = {
     title: details.title ?? details.name ?? details.className ?? "",
     section: details.section ?? "",
     subject: details.subject ?? "",
     description: details.description ?? "",
-    coverUrl: details.coverUrl ?? null,
-    logoUrl: details.logoUrl ?? null,
+    coverUrl: details.coverUrl ?? details.cover ?? null,
+    logoUrl: details.logoUrl ?? details.logo ?? null,
     theme: details.theme ?? null,
     accessType,
     visibility:
       details.visibility ??
       (accessType === "OPEN" ? "PUBLIC" : "PRIVATE"),
   };
+
+  if (details.spaceType) payload.spaceType = details.spaceType;
+  if (details.meetingType) payload.meetingType = details.meetingType;
+  if (details.location) payload.location = details.location;
+  if (details.tags && details.tags.length > 0) payload.tags = details.tags;
+  if (details.links && details.links.length > 0) payload.links = details.links;
+
+  return payload;
 }
 
 export function mapJoinClassPayload({ courseId, code, classCode } = {}) {

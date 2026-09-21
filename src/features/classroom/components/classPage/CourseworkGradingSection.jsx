@@ -8,8 +8,6 @@ import { useAddSubmissionCommentMutation } from "../../api/commentApi.js";
 
 export function CourseworkGradingSection({
   item,
-  classId,
-  isHydrating,
   isOpen,
 }) {
   const [feedbackDrafts, setFeedbackDrafts] = useState({});
@@ -19,7 +17,7 @@ export function CourseworkGradingSection({
 
   const { data: submissionPage } = useGetSubmissionListQuery(
     { courseworkId: item.id, page: 0, size: 20 },
-    { skip: isHydrating || !classId || !item.id || !isOpen }
+    { skip: !item?.id || !isOpen }
   );
 
   const [gradeSubmission] = useGradeSubmissionMutation();

@@ -136,14 +136,14 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
           onMouseEnter={handlePrefetchClass}
           onFocus={handlePrefetchClass}
           className={cn(
-            "flex h-full flex-col overflow-hidden rounded-lg border border-border/70 bg-card p-0 shadow-none transition-all duration-150 hover:border-foreground/20 hover:shadow-xs",
+            "flex h-full w-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card p-0 shadow-2xs transition-all duration-200 hover:border-border hover:shadow-xs",
             className,
           )}
         >
-          {/* Header Banner */}
+          {/* 70% Header Banner */}
           <div
             className={cn(
-              "relative h-16 sm:h-18 w-full overflow-hidden",
+              "relative h-40 sm:h-44 w-full shrink-0 overflow-hidden",
               coverUrl ? "bg-muted" : classTheme.gradientClass,
             )}
           >
@@ -155,49 +155,54 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
                 loading={priority ? "eager" : "lazy"}
                 decoding="async"
                 fetchPriority={priority ? "high" : "auto"}
-                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
               />
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
             {/* Top Bar inside Banner: Access Badge */}
-            <div className="absolute right-2 top-2 z-10">
+            <div className="absolute right-2.5 top-2.5 z-10">
               <AccessBadge
                 accessType={accessType}
-                className="text-[10px] px-1.5 py-0.5"
+                className="text-[10px] px-2 py-0.5 backdrop-blur-xs bg-black/40 border-white/20 text-white font-medium"
               />
             </div>
 
             {/* Bottom Accent Avatar */}
-            <div className="absolute bottom-1.5 left-2 z-10">
-              <Avatar className="h-6 w-6 rounded border border-background/90 bg-background shadow-xs">
+            <div className="absolute bottom-2.5 left-2.5 z-10">
+              <Avatar className="h-9 w-9 rounded-xl border-2 border-background/90 bg-background shadow-xs">
                 <AvatarImage src={logoUrl} className="object-cover" />
-                <AvatarFallback className="rounded text-[9px] font-semibold text-primary">
+                <AvatarFallback className="rounded-lg text-[10px] font-bold text-primary">
                   {initials(cardTitle) || "CL"}
                 </AvatarFallback>
               </Avatar>
             </div>
           </div>
 
-          {/* Compact Body Content */}
-          <CardContent className="flex flex-1 flex-col justify-between gap-2 p-2.5">
+          {/* 30% Compact Body Content */}
+          <CardContent className="flex flex-1 flex-col justify-between p-2.5 sm:p-3 min-w-0 bg-card">
             <div>
+              {cardSubject && (
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-primary truncate">
+                  {cardSubject}
+                </div>
+              )}
               <h3
                 title={cardTitle}
-                className="truncate text-xs font-semibold leading-tight text-foreground transition-colors group-hover:text-primary"
+                className="mt-0.5 truncate text-xs sm:text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary"
               >
                 {cardTitle}
               </h3>
             </div>
 
             {/* Footer Metadata Row */}
-            <div className="flex items-center justify-between gap-1.5 border-t border-border/40 pt-1.5 text-[10px] text-muted-foreground">
-              <span className="truncate max-w-[110px] font-medium">
+            <div className="mt-2 flex items-center justify-between gap-1.5 border-t border-border/50 pt-2 text-[11px] text-muted-foreground">
+              <span className="truncate max-w-[130px] font-medium text-[11px]">
                 {cardSubject || "General"}
               </span>
 
-              <span className="inline-flex shrink-0 items-center gap-1">
+              <span className="inline-flex shrink-0 items-center gap-1 font-medium text-[11px]">
                 <Users className="h-3 w-3" />
                 <span>{learnersCount}</span>
               </span>

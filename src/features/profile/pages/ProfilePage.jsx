@@ -74,7 +74,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const { classrooms = [] } = useDashboardData();
+  const { classrooms = [] } = useDashboardData({ includeExplore: false });
 
   const isProfileOwner = !userId || userId === currentUser?.id;
   const isOwner = isProfileOwner && !preview;

@@ -186,19 +186,19 @@ export function ClassworkTab({
 
   if (!isEnrolled) {
     return (
-      <div className="mt-4 rounded-2xl border border-dashed border-border bg-surface p-10 text-center shadow-xs">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
-          <ClipboardList className="h-6 w-6" />
+      <div className="mt-3 rounded-xl border border-dashed border-border/80 bg-card/60 p-6 text-center shadow-2xs">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-2.5">
+          <ClipboardList className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-semibold text-text-heading">
+        <h3 className="text-sm font-semibold text-foreground">
           Classwork is reserved for enrolled students
         </h3>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted">
+        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
           Join this class to access assignments, view learning materials, and submit coursework.
         </p>
         {onJoin && (
-          <Button onClick={onJoin} loading={isJoining} className="mt-4 gap-2 rounded-xl">
-            <UserPlus className="h-4 w-4" />
+          <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
+            <UserPlus className="h-3.5 w-3.5" />
             <span>Join Class</span>
           </Button>
         )}
@@ -208,7 +208,7 @@ export function ClassworkTab({
 
   if (isLoading && !coursework.length) {
     return (
-      <div className="mt-4 rounded-2xl bg-surface p-8 text-center text-sm text-text-muted ring-1 ring-border shadow-xs">
+      <div className="mt-3 rounded-xl bg-card p-6 text-center text-xs text-muted-foreground border border-border/70 shadow-2xs">
         Loading classwork assignments…
       </div>
     );
@@ -216,24 +216,24 @@ export function ClassworkTab({
 
   if (error && !coursework.length) {
     return (
-      <div className="mt-4 rounded-2xl bg-surface p-8 text-center text-sm text-text-muted ring-1 ring-border shadow-xs">
+      <div className="mt-3 rounded-xl bg-card p-6 text-center text-xs text-muted-foreground border border-border/70 shadow-2xs">
         Unable to load classwork at the moment.
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
-      <main className="space-y-4">
+    <div className="mt-3 grid grid-cols-1 gap-3.5 lg:grid-cols-[1fr_260px]">
+      <main className="space-y-3.5">
         {teacher && (
           <div className="flex justify-end">
             <div className="relative">
-              <Button onClick={() => setCreateOpen(!createOpen)} className="gap-2 rounded-xl">
-                <Plus className="h-4 w-4" aria-hidden="true" />
+              <Button size="sm" onClick={() => setCreateOpen(!createOpen)} className="gap-1.5 h-7.5 text-xs rounded-lg">
+                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Create</span>
               </Button>
               {createOpen && (
-                <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl bg-surface p-1 shadow-lg ring-1 ring-border">
+                <div className="absolute right-0 z-10 mt-1.5 w-40 rounded-lg bg-card p-1 shadow-lg border border-border/80">
                   {[
                     { label: "Assignment", type: "ASSIGNMENT" },
                     { label: "Material", type: "MATERIAL" },
@@ -241,7 +241,8 @@ export function ClassworkTab({
                     <Button
                       key={type}
                       variant="ghost"
-                      className="w-full justify-start text-xs font-medium rounded-lg"
+                      size="sm"
+                      className="w-full justify-start text-xs font-medium rounded-md h-7"
                       onClick={() => {
                         setCreateType(type);
                         setCreateOpen(false);
@@ -276,14 +277,14 @@ export function ClassworkTab({
               const drafts = items.filter((i) => i.status === "DRAFT");
               if (!drafts.length) return null;
               return (
-                <section className="space-y-3">
-                  <h2 className="flex items-center gap-2 text-base font-bold text-text-heading">
+                <section className="space-y-2">
+                  <h2 className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                     Drafts
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+                    <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-semibold text-muted-foreground">
                       {drafts.length}
                     </span>
                   </h2>
-                  <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border divide-y divide-border">
+                  <div className="overflow-hidden rounded-xl bg-card border border-border/70 shadow-2xs divide-y divide-border/60">
                     {drafts.map((item) => (
                       <CourseworkCard
                         key={item.id}
@@ -303,11 +304,11 @@ export function ClassworkTab({
               const groupList = groupedItems[group] ?? [];
               if (!groupList.length) return null;
               return (
-                <section key={group} className="space-y-3">
-                  <h2 className="text-base font-bold text-text-heading">
+                <section key={group} className="space-y-2">
+                  <h2 className="text-xs font-semibold text-foreground">
                     {group}
                   </h2>
-                  <div className="overflow-hidden rounded-2xl bg-surface shadow-xs ring-1 ring-border divide-y divide-border">
+                  <div className="overflow-hidden rounded-xl bg-card border border-border/70 shadow-2xs divide-y divide-border/60">
                     {groupList.map((item) => (
                       <CourseworkCard
                         key={item.id}

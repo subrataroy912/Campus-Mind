@@ -9,7 +9,7 @@ export default function ClassTabs({ active, onChange, spaceType = "ACADEMIC_CLAS
   });
 
   return (
-    <div className="mt-2.5 sm:mt-3 flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 shadow-xs ring-1 ring-border">
+    <div className="mt-2 flex gap-1 overflow-x-auto rounded-lg bg-muted/40 p-1 border border-border/60 scrollbar-none">
       {visibleTabs.map((tab) => {
         const label = (!isAcademic && tab.altLabel) ? tab.altLabel : tab.label;
         const isActive = active === tab.id;
@@ -17,7 +17,11 @@ export default function ClassTabs({ active, onChange, spaceType = "ACADEMIC_CLAS
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${isActive ? "bg-surface text-text-heading shadow-xs" : "text-text-muted hover:text-text-heading hover:bg-surface/50"}`}
+            className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+              isActive
+                ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            }`}
           >
             {label}
           </button>

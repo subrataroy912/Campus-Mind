@@ -53,19 +53,19 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary">
-          <ShieldCheck size={28} aria-hidden="true" />
+      <div className="text-center py-2">
+        <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+          <ShieldCheck size={20} aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight text-text-heading">
+        <h1 className="mt-3 text-base font-semibold tracking-tight text-text-heading">
           This link isn't valid
         </h1>
-        <p className="mt-2 text-text-main">
+        <p className="mt-1 text-xs text-text-muted">
           It may have expired, or already been used. Request a fresh link to
           continue.
         </p>
-        <Link to={routes.auth.forgotPassword}>
-          <Button className="mt-7 w-full">Request a new link</Button>
+        <Link to={routes.auth.forgotPassword} className="mt-4 block">
+          <Button className="w-full h-9 text-xs font-semibold">Request a new link</Button>
         </Link>
       </div>
     );
@@ -73,23 +73,23 @@ export default function ResetPasswordPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight text-text-heading">
+      <h1 className="text-lg font-semibold tracking-tight text-text-heading">
         Set a new password
       </h1>
-      <p className="mt-2 text-text-main">
+      <p className="mt-1 text-xs text-text-muted">
         Choose something you haven't used before on CampusMind.
       </p>
 
       {error && (
         <p
-          className="mt-5 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-text-main"
+          className="mt-3 rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive"
           role="alert"
         >
           {error}
         </p>
       )}
 
-      <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
         <AuthInput
           icon={Lock}
           label="New password"
@@ -104,10 +104,10 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowPassword((previous) => !previous)}
-              className="text-text-muted hover:text-text-main focus:outline-none"
+              className="text-text-muted hover:text-text-main focus:outline-none cursor-pointer"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           }
         />
@@ -123,21 +123,21 @@ export default function ResetPasswordPage() {
           autoComplete="new-password"
         />
 
-        <ul className="space-y-1.5 rounded-xl border border-border bg-canvas px-4 py-3">
+        <ul className="space-y-1 rounded-md border border-border/70 bg-canvas/30 px-3 py-2">
           {RULES.map((rule) => {
             const met = rule.test(formData.password);
             return (
-              <li key={rule.id} className="flex items-center gap-2 text-sm">
+              <li key={rule.id} className="flex items-center gap-1.5 text-xs">
                 {met ? (
                   <Check
-                    size={16}
-                    className="text-success"
+                    size={14}
+                    className="text-emerald-600 dark:text-emerald-400"
                     aria-hidden="true"
                   />
                 ) : (
-                  <X size={16} className="text-text-muted" aria-hidden="true" />
+                  <X size={14} className="text-text-muted" aria-hidden="true" />
                 )}
-                <span className={met ? "text-text-main" : "text-text-muted"}>
+                <span className={met ? "text-text-heading font-medium" : "text-text-muted"}>
                   {rule.label}
                 </span>
               </li>
@@ -145,14 +145,14 @@ export default function ResetPasswordPage() {
           })}
         </ul>
 
-        <Button className="w-full" type="submit">
+        <Button className="w-full h-9 text-xs font-semibold" type="submit">
           Update password
         </Button>
       </form>
 
-      <p className="mt-7 text-center text-text-main">
+      <p className="mt-4 text-center text-xs text-text-muted">
         <Link
-          className="font-bold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline"
           to={routes.auth.login}
         >
           Back to sign in

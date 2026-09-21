@@ -30,21 +30,20 @@ export function useCreateSpaceForm() {
     setErrors((previous) => ({ ...previous, [field]: undefined }));
   };
 
-  const toggleDay = (day) => {
-    setForm((previous) => ({
-      ...previous,
-      days: previous.days.includes(day)
-        ? previous.days.filter((item) => item !== day)
-        : [...previous.days, day],
-    }));
-  };
-
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const optimizedFile = await optimizeImage(file, 1600);
     update("coverImage", optimizedFile);
     setPreview(URL.createObjectURL(optimizedFile));
+  };
+
+  const removeCoverImage = () => {
+    update("coverImage", null);
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+    setPreview(null);
   };
 
   const handleLogoUpload = async (event) => {
@@ -55,29 +54,24 @@ export function useCreateSpaceForm() {
     setLogoPreview(URL.createObjectURL(optimizedFile));
   };
 
+  const removeLogoImage = () => {
+    update("logoImage", null);
+    if (logoPreview) {
+      URL.revokeObjectURL(logoPreview);
+    }
+    setLogoPreview(null);
+  };
+
   const validate = () => {
     const nextErrors = {};
-    if (!form.className.trim()) {
+    if (!form.className?.trim()) {
       nextErrors.className = "Space name is required.";
     }
-    const isAcademicClass =
-      form.spaceType === "ACADEMIC_CLASS" || !form.spaceType;
 
     if (!form.subject) {
       nextErrors.subject = "Select a subject or category.";
     } else if (form.subject === "Other" && !form.customSubject?.trim()) {
       nextErrors.customSubject = "Please enter your custom subject.";
-    }
-
-    if (isAcademicClass) {
-      if (!form.gradeLevel) {
-        nextErrors.gradeLevel = "Select a target grade.";
-      } else if (
-        form.gradeLevel === "Other" &&
-        !form.customGradeLevel?.trim()
-      ) {
-        nextErrors.customGradeLevel = "Please enter your custom target grade.";
-      }
     }
 
     setErrors(nextErrors);
@@ -86,6 +80,8 @@ export function useCreateSpaceForm() {
 
   const reset = () => {
     setForm(INITIAL_SPACE_FORM);
+    if (preview) URL.revokeObjectURL(preview);
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
     setPreview(null);
     setLogoPreview(null);
     setErrors({});
@@ -94,7 +90,7 @@ export function useCreateSpaceForm() {
   };
 
   const submit = async (event) => {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     if (!validate()) {
       setSubmitted(false);
       return;
@@ -142,20 +138,17 @@ export function useCreateSpaceForm() {
 
       const effectiveSubject =
         form.subject === "Other" ? form.customSubject?.trim() : form.subject;
-      const effectiveGradeLevel =
-        form.gradeLevel === "Other"
-          ? form.customGradeLevel?.trim()
-          : form.gradeLevel;
 
       const classroom = await createClassroom(user?.id, {
         ...form,
-        title: form.className,
+        title: form.className.trim(),
         spaceType: form.spaceType || "ACADEMIC_CLASS",
         meetingType: form.meetingType || "IN_PERSON",
-        location: form.location || form.room,
+        section: form.section?.trim() || "",
         subject: effectiveSubject,
-        gradeLevel: effectiveGradeLevel,
-        targetGrade: effectiveGradeLevel,
+        description: form.description?.trim() || "",
+        accessType: form.accessType || "code",
+        theme: form.theme || "indigo",
         coverUrl,
         logoUrl,
       });
@@ -192,9 +185,10 @@ export function useCreateSpaceForm() {
     submissionError,
     isSubmitting,
     update,
-    toggleDay,
     handleImageUpload,
+    removeCoverImage,
     handleLogoUpload,
+    removeLogoImage,
     reset,
     submit,
   };
