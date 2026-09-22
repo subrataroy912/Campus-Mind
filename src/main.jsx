@@ -12,16 +12,7 @@ import { baseApi } from "./app/baseApi.js";
 import { getEventRefreshTargets } from "./app/refreshEvents.js";
 import { reportWebVitals } from "./utils/reportWebVitals.js";
 
-try {
-  const savedTheme = localStorage.getItem("campus-mind.theme");
-  if (savedTheme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else if (savedTheme === "light") {
-    document.documentElement.classList.remove("dark");
-  }
-} catch {
-  // ignore storage errors
-}
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 if (maintenanceMode && import.meta.env.DEV) {
   console.log("Application is in maintenance mode!");
@@ -40,10 +31,12 @@ createRoot(document.getElementById("root")).render(
       <ServerDown />
     ) : (
       <Provider store={store}>
-        <TooltipProvider>
-          <Toaster />
-          <RouterProvider router={AppRoutes} />
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <RouterProvider router={AppRoutes} />
+          </TooltipProvider>
+        </ThemeProvider>
       </Provider>
     )}
   </>

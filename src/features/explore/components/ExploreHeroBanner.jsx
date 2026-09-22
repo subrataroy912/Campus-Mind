@@ -17,7 +17,7 @@ export default function ExploreHeroBanner({ tab = EXPLORE_TABS.CLASSES }) {
             {banner.description}
           </p>
         </div>
-        <div className="hidden sm:block overflow-hidden rounded-lg border border-border/60 bg-white p-1">
+        <div className="hidden sm:block overflow-hidden rounded-lg border border-border/60 bg-card p-1">
           <img
             src={banner.imageSrc}
             alt={banner.imageAlt}

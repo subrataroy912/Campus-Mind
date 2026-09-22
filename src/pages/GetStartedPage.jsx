@@ -52,7 +52,7 @@ export default function GetStartedPage() {
           </div>
 
           <div className="relative overflow-hidden rounded-lg border border-border/80 bg-surface p-2 shadow-xs">
-            <div className="overflow-hidden rounded-md bg-white p-0.5">
+            <div className="overflow-hidden rounded-md bg-card p-0.5">
               <img
                 src="/images/illustrations/learning-ecosystem.jpg"
                 alt="CampusMind learning and collaboration ecosystem"
@@ -106,7 +106,7 @@ export default function GetStartedPage() {
                 </Button>
               </div>
             </div>
-            <div className="overflow-hidden rounded-md border border-border/60 bg-white p-1 shadow-2xs">
+            <div className="overflow-hidden rounded-md border border-border/60 bg-card p-1 shadow-2xs">
               <img
                 src="/images/illustrations/diverse-campus.jpg"
                 alt="Diverse CampusMind community of students and educators"

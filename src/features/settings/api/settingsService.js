@@ -1,8 +1,9 @@
 import { store } from "@/app/store.js";
 import { notificationsApi } from "@/features/notifications/api/notificationsApi.js";
 
-const THEME_KEY = "campus-mind.theme";
-const DEFAULT_THEME = "light";
+import { THEMES, THEME_STORAGE_KEY } from "@/context/ThemeContext.jsx";
+
+const DEFAULT_THEME = THEMES.SYSTEM;
 
 export async function fetchSettings() {
   const settings = await store
@@ -24,11 +25,8 @@ export async function updateSettings(nextSettings = {}) {
 
 export async function fetchTheme() {
   try {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === "dark" || saved === "light") {
-      if (typeof document !== "undefined") {
-        document.documentElement.classList.toggle("dark", saved === "dark");
-      }
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === THEMES.LIGHT || saved === THEMES.DARK || saved === THEMES.SYSTEM) {
       return saved;
     }
   } catch {
@@ -38,14 +36,19 @@ export async function fetchTheme() {
 }
 
 export async function updateTheme(theme) {
-  if (theme !== "light" && theme !== "dark") {
+  if (theme !== THEMES.LIGHT && theme !== THEMES.DARK && theme !== THEMES.SYSTEM) {
     throw new Error("Unsupported theme.");
   }
 
   try {
-    localStorage.setItem(THEME_KEY, theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
     if (typeof document !== "undefined") {
-      document.documentElement.classList.toggle("dark", theme === "dark");
+      const isDark =
+        theme === THEMES.DARK ||
+        (theme === THEMES.SYSTEM &&
+          typeof window !== "undefined" &&
+          window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", Boolean(isDark));
     }
   } catch {
     // ignore storage access errors
@@ -53,3 +56,4 @@ export async function updateTheme(theme) {
 
   return theme;
 }
+

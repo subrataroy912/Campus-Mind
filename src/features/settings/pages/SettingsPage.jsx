@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
@@ -99,10 +99,6 @@ export default function SettingsPage() {
       setIsLoggingOut(false);
     }
   };
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
 
   const handleThemeChange = async (nextTheme) => {
     try {
@@ -229,6 +225,17 @@ export default function SettingsPage() {
               >
                 <Moon size={13} aria-hidden="true" />
                 Dark
+              </Button>
+              <Button
+                type="button"
+                variant={theme === "system" ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleThemeChange("system")}
+                disabled={isThemeSaving || isThemeLoading}
+                className="h-7 px-3 text-xs gap-1.5 font-medium"
+              >
+                <Monitor size={13} aria-hidden="true" />
+                System
               </Button>
             </div>
             {themeError && (

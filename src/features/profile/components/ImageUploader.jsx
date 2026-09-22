@@ -59,10 +59,10 @@ export default function ImageUploader({
   return (
     <div className="relative">
       <div
-        className={`relative ${sizeClass} overflow-hidden rounded-lg border bg-gray-200 object-cover shadow-sm transition-all ${
+        className={`relative ${sizeClass} overflow-hidden rounded-lg border bg-muted object-cover shadow-xs transition-all ${
           isDragging
-            ? "border-blue-500 ring-2 ring-blue-500/50"
-            : "border-gray-200"
+            ? "border-primary ring-2 ring-primary/50"
+            : "border-border"
         }`}
         onDrop={handleDrop}
         onDragOver={(event) => {
@@ -85,7 +85,7 @@ export default function ImageUploader({
         )}
         {hasChanges && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            <span className="rounded-full bg-black/50 px-3 py-1 text-sm font-medium text-white">
+            <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
               Updated
             </span>
           </div>
@@ -109,7 +109,7 @@ export default function ImageUploader({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={hasChanges}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           Choose {label}
         </button>
@@ -117,7 +117,7 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={handleRemove}
-            className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            className="rounded-lg border border-destructive/40 bg-card px-3 py-1.5 text-xs font-medium text-destructive transition hover:bg-destructive/10 cursor-pointer"
           >
             Remove
           </button>
@@ -125,11 +125,11 @@ export default function ImageUploader({
       </div>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600" role="alert">
+        <p className="mt-2 text-xs text-destructive font-medium" role="alert">
           {error}
         </p>
       )}
-      <p className="mt-2 text-xs text-gray-500">{helperText}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{helperText}</p>
     </div>
   );
 }

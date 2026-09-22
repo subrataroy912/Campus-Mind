@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { selectIsMobileMenuOpen } from "@/features/ui/uiSelectors.js";
 import { setMobileMenuOpen } from "@/features/ui/uiSlice.js";
 import NavbarSearch from "./NavbarSearch";
+import ThemeToggle from "./ThemeToggle.jsx";
 
 export default function DashboardHeader() {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ export default function DashboardHeader() {
 
       {/* Right: User Profile and Actions */}
       <div className="flex shrink-0 items-center gap-1.5">
+        <ThemeToggle />
         <NotificationsMenu />
 
         <div className="h-4 w-px bg-border/60 mx-0.5" aria-hidden="true" />
