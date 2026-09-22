@@ -76,8 +76,12 @@ export default function DashboardHomePage() {
 
   return (
     <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
-      {/* 1. One-Time Login Greeting Dialog */}
-      <WelcomeModal greetingName={greetingName} userId={activeUserId} />
+      {/* 1. One-Time Login Greeting Dialog (only for fresh profile or 3-4 days away) */}
+      <WelcomeModal
+        greetingName={greetingName}
+        userId={activeUserId}
+        isLongTimeAway={user?.isLongTimeAway}
+      />
 
       {/* 2. Primary Section: My Spaces */}
       <DashboardSection

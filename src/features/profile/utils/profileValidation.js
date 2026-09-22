@@ -22,11 +22,13 @@ function ValidateField(name, value) {
   if (name === "department" && text.trim().length > 50) {
     return "Department must be less than 50 characters.";
   }
-  if (name === "firstName" && text.trim().length > 100) {
-    return "First name must be less than 100 characters.";
+  if (name === "firstName") {
+    if (!text.trim()) return "First name is required.";
+    if (text.trim().length > 100) return "First name must be less than 100 characters.";
   }
-  if (name === "lastName" && text.trim().length > 100) {
-    return "Last name must be less than 100 characters.";
+  if (name === "lastName") {
+    if (!text.trim()) return "Last name is required.";
+    if (text.trim().length > 100) return "Last name must be less than 100 characters.";
   }
   if (name === "phone" && text.trim().length > 20) {
     return "Phone number must be 20 characters or less.";

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchTheme, updateTheme as saveTheme } from "../api/settingsService.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function useSettings() {
   const [theme, setTheme] = useState(null);
@@ -19,7 +20,7 @@ export function useSettings() {
       })
       .catch((requestError) => {
         if (active) {
-          setError(requestError);
+          setError(parseApiError(requestError, "Unable to load theme preference.").message);
           setIsLoading(false);
         }
       });
@@ -37,8 +38,9 @@ export function useSettings() {
       setTheme(savedTheme);
       return savedTheme;
     } catch (requestError) {
-      setError(requestError);
-      throw requestError;
+      const message = parseApiError(requestError, "Unable to save theme preference.").message;
+      setError(message);
+      return null;
     } finally {
       setIsSaving(false);
     }

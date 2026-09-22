@@ -20,6 +20,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { selectIsMobileMenuOpen } from "@/features/ui/uiSelectors.js";
 import { setMobileMenuOpen } from "@/features/ui/uiSlice.js";
+import NavbarSearch from "./NavbarSearch";
 
 export default function DashboardHeader() {
   const navigate = useNavigate();
@@ -39,7 +40,6 @@ export default function DashboardHeader() {
       ? profile.avatarUrl.trim()
       : null;
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "unset";
     return () => {
@@ -49,7 +49,6 @@ export default function DashboardHeader() {
 
   return (
     <header className="relative z-40 flex h-14 items-center justify-between gap-2 border-b border-border/70 bg-card/95 px-3 backdrop-blur-md sm:px-4">
-      {/* Left: Grouped Menu Button and Logo + Quick Search */}
       <div className="flex items-center gap-2 min-w-0">
         <Button
           variant="ghost"
@@ -64,16 +63,7 @@ export default function DashboardHeader() {
 
         <BrandLogo fetchPriority="high" to={routes.dashboard} />
 
-        {/* Linear-style quick search command trigger */}
-        <Link
-          to={routes.explore}
-          className="hidden md:flex items-center gap-2 rounded-md border border-border/60 bg-muted/40 px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted/70 hover:text-foreground ml-2"
-        >
-          <span className="text-[11px]">Search spaces, topics...</span>
-          <kbd className="inline-flex h-4 items-center rounded border border-border/70 bg-background px-1 text-[9px] font-mono font-medium text-muted-foreground shadow-2xs">
-            ⌘K
-          </kbd>
-        </Link>
+        <NavbarSearch />
       </div>
 
       {/* Right: User Profile and Actions */}

@@ -5,6 +5,7 @@ import {
   useGradeSubmissionMutation,
 } from "../../api/courseworkApi.js";
 import { useAddSubmissionCommentMutation } from "../../api/commentApi.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function CourseworkGradingSection({
   item,
@@ -48,7 +49,7 @@ export function CourseworkGradingSection({
       setGradeDrafts((curr) => ({ ...curr, [submission.id]: "" }));
     } catch (requestError) {
       setGradingError(
-        requestError?.message || "Unable to grade this submission."
+        parseApiError(requestError, "Unable to grade this submission.").message
       );
     } finally {
       setIsGrading(false);
@@ -66,7 +67,9 @@ export function CourseworkGradingSection({
       }).unwrap();
       setFeedbackDrafts((curr) => ({ ...curr, [submission.id]: "" }));
     } catch (requestError) {
-      setGradingError(requestError?.message || "Unable to send feedback.");
+      setGradingError(
+        parseApiError(requestError, "Unable to send feedback.").message
+      );
     }
   };
 

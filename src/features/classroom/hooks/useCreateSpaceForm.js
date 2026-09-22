@@ -12,6 +12,7 @@ import {
 import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
 import { routes } from "@/routes/paths.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function useCreateSpaceForm() {
   const navigate = useNavigate();
@@ -169,7 +170,7 @@ export function useCreateSpaceForm() {
       });
     } catch (error) {
       setSubmissionError(
-        error?.data?.error || error?.message || "Unable to create this space."
+        parseApiError(error, "Unable to create this space.").message
       );
     } finally {
       setIsSubmitting(false);

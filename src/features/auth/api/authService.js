@@ -33,6 +33,9 @@ export function normalizeAuthResponse(response) {
     avatarUrl: payload.avatarUrl ?? nestedUser.avatarUrl ?? nestedUser.avatar,
     bannerUrl: payload.bannerUrl ?? nestedUser.bannerUrl ?? nestedUser.banner,
     role: payload.role ?? nestedUser.role,
+    isNewUser: payload.isNewUser ?? nestedUser.isNewUser ?? payload.newUser,
+    profileCompleted: payload.profileCompleted ?? nestedUser.profileCompleted,
+    isLongTimeAway: payload.isLongTimeAway ?? nestedUser.isLongTimeAway,
   };
 
   Object.keys(userFields).forEach((key) => {

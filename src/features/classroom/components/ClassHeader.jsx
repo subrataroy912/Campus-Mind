@@ -38,6 +38,8 @@ import {
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,
 } from "../api/classroomApi.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -143,9 +145,18 @@ export default function ClassHeader({
     try {
       await archiveClassroom(classroom.id).unwrap();
       setIsArchiveDialogOpen(false);
+      toast.add({
+        title: "Space archived",
+        description: "This space has been archived.",
+        type: "success",
+      });
       if (navigate) navigate(routes.spaces.list);
     } catch (err) {
-      console.error("Failed to archive space", err);
+      toast.add({
+        title: "Archive failed",
+        description: parseApiError(err, "Failed to archive this space.").message,
+        type: "error",
+      });
     }
   };
 
@@ -153,9 +164,18 @@ export default function ClassHeader({
     try {
       await deleteClassroom(classroom.id).unwrap();
       setIsDeleteDialogOpen(false);
+      toast.add({
+        title: "Space deleted",
+        description: "This space has been permanently deleted.",
+        type: "success",
+      });
       if (navigate) navigate(routes.spaces.list);
     } catch (err) {
-      console.error("Failed to delete space", err);
+      toast.add({
+        title: "Delete failed",
+        description: parseApiError(err, "Failed to delete this space.").message,
+        type: "error",
+      });
     }
   };
 
@@ -163,9 +183,18 @@ export default function ClassHeader({
     try {
       await leaveClassroom(classroom.id).unwrap();
       setIsLeaveDialogOpen(false);
+      toast.add({
+        title: "Left space",
+        description: "You have un-enrolled from this space.",
+        type: "success",
+      });
       if (navigate) navigate(routes.spaces.list);
     } catch (err) {
-      console.error("Failed to leave space", err);
+      toast.add({
+        title: "Leave failed",
+        description: parseApiError(err, "Failed to leave this space.").message,
+        type: "error",
+      });
     }
   };
 

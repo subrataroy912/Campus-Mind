@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Camera, ImagePlus, Loader2, X, KeyRound, Globe, Lock } from "lucide-react";
+import {
+  Camera,
+  ImagePlus,
+  Loader2,
+  X,
+  KeyRound,
+  Globe,
+  Lock,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +26,7 @@ import { getClassTheme } from "../utils/classTheme.js";
 import { optimizeImage } from "@/utils/optimizeImage.js";
 import { initials } from "@/utils/initials.js";
 import { cn } from "@/lib/utils.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 const ACCESS_OPTIONS = [
   {
@@ -41,27 +50,40 @@ const ACCESS_OPTIONS = [
 ];
 
 export function EditSpaceModal({ isOpen, onClose, classroom }) {
-  const [title, setTitle] = useState(() => classroom?.title || classroom?.name || "");
+  const [title, setTitle] = useState(
+    () => classroom?.title || classroom?.name || "",
+  );
   const [subject, setSubject] = useState(() => classroom?.subject || "");
   const [customSubject, setCustomSubject] = useState("");
-  const [section, setSection] = useState(() => classroom?.section || classroom?.subtitle || "");
-  const [description, setDescription] = useState(() => classroom?.description || "");
-  const [accessType, setAccessType] = useState(() => (classroom?.accessType || "CODE").toUpperCase());
+  const [section, setSection] = useState(
+    () => classroom?.section || classroom?.subtitle || "",
+  );
+  const [description, setDescription] = useState(
+    () => classroom?.description || "",
+  );
+  const [accessType, setAccessType] = useState(() =>
+    (classroom?.accessType || "CODE").toUpperCase(),
+  );
   const [theme, setTheme] = useState(() => classroom?.theme || "indigo");
 
   // Media state
-  const [coverPreview, setCoverPreview] = useState(() => classroom?.coverUrl || classroom?.cover || null);
+  const [coverPreview, setCoverPreview] = useState(
+    () => classroom?.coverUrl || classroom?.cover || null,
+  );
   const [coverFile, setCoverFile] = useState(null);
   const [coverRemoved, setCoverRemoved] = useState(false);
 
-  const [logoPreview, setLogoPreview] = useState(() => classroom?.logoUrl || classroom?.logo || null);
+  const [logoPreview, setLogoPreview] = useState(
+    () => classroom?.logoUrl || classroom?.logo || null,
+  );
   const [logoFile, setLogoFile] = useState(null);
   const [logoRemoved, setLogoRemoved] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState("");
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
 
-  const [updateClassroom, { isLoading: isUpdating }] = useUpdateClassroomMutation();
+  const [updateClassroom, { isLoading: isUpdating }] =
+    useUpdateClassroomMutation();
   const isSaving = isUpdating || isUploadingMedia;
 
   // Sync state when classroom or open state changes
@@ -201,7 +223,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
       onClose();
     } catch (err) {
       setErrorMsg(
-        err?.data?.message || err?.data?.error || err?.message || "Failed to update space details"
+        parseApiError(err, "Failed to update space details.").message
       );
     } finally {
       setIsUploadingMedia(false);
@@ -217,7 +239,8 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
             Edit Space Details & Branding
           </DialogTitle>
           <DialogDescription className="text-xs text-text-muted">
-            Update your space name, visual branding, domain, and access settings.
+            Update your space name, visual branding, domain, and access
+            settings.
           </DialogDescription>
         </DialogHeader>
 
@@ -236,7 +259,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
               <div
                 className={cn(
                   "group relative flex h-28 sm:h-36 w-full items-center justify-center overflow-hidden transition-all",
-                  coverPreview ? "bg-canvas" : currentTheme.gradientClass
+                  coverPreview ? "bg-canvas" : currentTheme.gradientClass,
                 )}
               >
                 {coverPreview ? (
@@ -258,7 +281,9 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
                   title="Change banner (Recommended: 1920 × 480px, 4:1 ratio · Keep important text centered)"
                 >
                   <ImagePlus className="h-4 w-4" />
-                  <span>{coverPreview ? "Change banner image" : "Upload banner"}</span>
+                  <span>
+                    {coverPreview ? "Change banner image" : "Upload banner"}
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
@@ -357,9 +382,13 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
                             c.swatchClass,
                             isSelected
                               ? "ring-2 ring-primary ring-offset-1 ring-offset-surface scale-110"
-                              : "ring-1 ring-border/80 opacity-80 hover:opacity-100"
+                              : "ring-1 ring-border/80 opacity-80 hover:opacity-100",
                           )}
-                          style={c.colorHex ? { backgroundColor: c.colorHex } : undefined}
+                          style={
+                            c.colorHex
+                              ? { backgroundColor: c.colorHex }
+                              : undefined
+                          }
                           title={`${c.name} theme`}
                           aria-label={`Select ${c.name} theme`}
                           aria-pressed={isSelected}
@@ -464,7 +493,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
                         "flex flex-col items-start rounded-xl border p-2 text-left transition-all cursor-pointer",
                         isSelected
                           ? "border-primary bg-primary/8 ring-1 ring-primary shadow-2xs"
-                          : "border-border bg-canvas/40 hover:border-border/80 hover:bg-canvas"
+                          : "border-border bg-canvas/40 hover:border-border/80 hover:bg-canvas",
                       )}
                     >
                       <div className="flex w-full items-center justify-between mb-1">
@@ -473,7 +502,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
                             "flex h-5 w-5 items-center justify-center rounded-md",
                             isSelected
                               ? "bg-primary text-white"
-                              : "bg-primary/10 text-primary"
+                              : "bg-primary/10 text-primary",
                           )}
                         >
                           <Icon className="h-3 w-3" />

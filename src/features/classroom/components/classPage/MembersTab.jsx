@@ -11,6 +11,8 @@ import {
   useUpdateClassroomMutation,
   useRemoveCourseMemberMutation,
 } from "../../api/classroomApi.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
@@ -138,21 +140,41 @@ export function MembersTab({
         courseId: classroom?.id,
         changes: { enrollmentEnabled: !isCurrentlyEnabled },
       }).unwrap();
+      toast.add({
+        title: !isCurrentlyEnabled ? "Invite code enabled" : "Invite code disabled",
+        description: !isCurrentlyEnabled
+          ? "New members can now join with the space code."
+          : "Joining with code has been turned off for this space.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to update invite code setting", err);
+      toast.add({
+        title: "Update failed",
+        description: parseApiError(err, "Failed to update invite code setting.").message,
+        type: "error",
+      });
     }
   };
 
   const handleRemoveMember = async (memberId) => {
+    setRemovingId(memberId);
     try {
-      setRemovingId(memberId);
       await removeCourseMember({
         courseId: classroom?.id,
         userId: memberId,
       }).unwrap();
       setConfirming(null);
+      toast.add({
+        title: "Member removed",
+        description: "The member has been removed from this space.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to remove member", err);
+      toast.add({
+        title: "Removal failed",
+        description: parseApiError(err, "Failed to remove member from space.").message,
+        type: "error",
+      });
     } finally {
       setRemovingId(null);
     }

@@ -50,7 +50,7 @@ store.subscribe(() => {
   persistenceTimer = setTimeout(() => {
     persistApiState(
       store.getState()[baseApi.reducerPath],
-      store.getState().auth
+      store.getState().auth,
     );
   }, 200);
 });

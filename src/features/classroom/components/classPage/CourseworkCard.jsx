@@ -12,6 +12,8 @@ import {
   useUpdateCourseworkMutation,
   useDeleteCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 import {
   Attachment,
   AttachmentContent,
@@ -76,8 +78,17 @@ export const CourseworkCard = React.memo(function CourseworkCard({
         courseworkId: item.id,
         changes: { status: "PUBLISHED" },
       }).unwrap();
+      toast.add({
+        title: "Assignment published",
+        description: "This item is now visible to all enrolled students.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to publish draft", err);
+      toast.add({
+        title: "Publish failed",
+        description: parseApiError(err, "Failed to publish draft.").message,
+        type: "error",
+      });
     }
   };
 
@@ -88,8 +99,17 @@ export const CourseworkCard = React.memo(function CourseworkCard({
         courseId: classId,
         courseworkId: item.id,
       }).unwrap();
+      toast.add({
+        title: "Item deleted",
+        description: "The coursework has been removed.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to delete item", err);
+      toast.add({
+        title: "Delete failed",
+        description: parseApiError(err, "Failed to delete item.").message,
+        type: "error",
+      });
     }
   };
 

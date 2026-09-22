@@ -23,6 +23,9 @@ const DashboardMessagesPage = lazy(
 const DashboardSavedPage = lazy(
   () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
 );
+const DashboardHeaderSearchPage = lazy(
+  () => import("../features/dashboard/pages/DashboardHeaderSearchPage.jsx"),
+);
 const ExplorePage = lazy(
   () => import("../features/explore/pages/ExplorePage.jsx"),
 );
@@ -54,6 +57,10 @@ const JoinSpacePage = lazy(
 );
 const ProfilePage = lazy(
   () => import("../features/profile/pages/ProfilePage.jsx"),
+);
+
+const CreateProfilePage = lazy(
+  () => import("../features/profile/pages/CreateProfilePage.jsx"),
 );
 const SettingsPage = lazy(
   () => import("../features/settings/pages/SettingsPage.jsx"),
@@ -147,7 +154,10 @@ export const appRouteConfig = [
                   />
                 ),
               },
-
+              {
+                path: "/search",
+                element: <DashboardHeaderSearchPage />,
+              },
               // Users & Profile
               { path: routes.profile.root, element: <ProfilePage /> },
               { path: routes.user(), element: <ProfilePage /> },
@@ -207,6 +217,10 @@ export const appRouteConfig = [
                 element: <Navigate to={routes.settings} replace />,
               },
             ],
+          },
+          {
+            path: routes.profile.new,
+            element: <CreateProfilePage />,
           },
         ],
       },

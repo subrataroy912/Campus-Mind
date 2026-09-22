@@ -20,6 +20,14 @@ export default function NotificationsMenu() {
   });
   const [markRead] = useMarkNotificationReadMutation();
 
+  const handleMarkNotificationRead = async (id) => {
+    try {
+      await markRead(id).unwrap();
+    } catch {
+      // Best-effort notification state update
+    }
+  };
+
   const apiData = Array.isArray(response)
     ? response
     : response?.content || response?.data;
@@ -72,7 +80,7 @@ export default function NotificationsMenu() {
                 key={n.id || n._id}
                 notification={n}
                 size="md"
-                onMarkRead={(id) => markRead(id)}
+                onMarkRead={handleMarkNotificationRead}
                 onClick={(item) => {
                   if (item.link) {
                     setOpen(false);

@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -67,10 +68,10 @@ function LoginPage() {
     } catch (err) {
       toast.add({
         title: "Sign-in failed",
-        description:
-          err?.data?.error ||
-          err?.message ||
-          "Please check your email and password and try again.",
+        description: parseApiError(
+          err,
+          "Please check your email and password and try again."
+        ).message,
         type: "error",
       });
     }

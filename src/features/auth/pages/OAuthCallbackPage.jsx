@@ -42,8 +42,16 @@ export default function OAuthCallbackPage() {
         }
 
         const response = normalizeAuthResponse(callback);
-        await completeOAuth(response);
-        navigate(routes.dashboard, { replace: true });
+        const finalUser = await completeOAuth(response);
+        if (
+          finalUser?.profileCompleted === false ||
+          response.user?.profileCompleted === false ||
+          callback.profileCompleted === false
+        ) {
+          navigate(routes.profile.new, { replace: true });
+        } else {
+          navigate(routes.dashboard, { replace: true });
+        }
       } catch {
         // AuthContext owns the failure state shown below.
       }

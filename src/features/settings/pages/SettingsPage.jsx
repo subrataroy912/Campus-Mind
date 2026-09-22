@@ -21,6 +21,8 @@ import {
   useUpdateNotificationSettingsMutation,
 } from "@/features/notifications/api/notificationsApi.js";
 import { initials } from "@/utils/initials.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
@@ -72,8 +74,12 @@ export default function SettingsPage() {
 
     try {
       await updateNotificationSettings(nextNotifications).unwrap();
-    } catch {
-      // RTK Query handles query cache invalidation on mutation
+    } catch (err) {
+      toast.add({
+        title: "Setting update failed",
+        description: parseApiError(err, "Unable to save notification preference.").message,
+        type: "error",
+      });
     }
   };
 
@@ -83,9 +89,14 @@ export default function SettingsPage() {
       await logout();
       navigate(routes.auth.login, { replace: true });
     } catch (err) {
-      console.error("Logout failed:", err);
-      setIsLoggingOut(false);
+      toast.add({
+        title: "Logout failed",
+        description: parseApiError(err, "Failed to sign out cleanly.").message,
+        type: "error",
+      });
       setShowLogoutConfirm(false);
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 

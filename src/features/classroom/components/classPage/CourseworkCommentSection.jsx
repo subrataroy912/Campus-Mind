@@ -4,6 +4,7 @@ import {
   useAddCourseworkCommentMutation,
   useGetCourseworkCommentsQuery,
 } from "../../api/commentApi.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function CourseworkCommentSection({ courseId, courseworkId }) {
   const [commentText, setCommentText] = useState("");
@@ -30,7 +31,9 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
       }).unwrap();
       setCommentText("");
     } catch (requestError) {
-      setCommentError(requestError?.message || "Unable to post this comment.");
+      setCommentError(
+        parseApiError(requestError, "Unable to post this comment.").message
+      );
     }
   };
 

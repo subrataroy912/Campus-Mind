@@ -19,6 +19,7 @@ import { routes } from "@/routes/paths";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 function formatLearners(count) {
   const value = Number(count);
@@ -104,10 +105,7 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
       navigate({ pathname: routes.classes.detail(courseId) });
     } catch (err) {
       setJoinErrorMessage(
-        err?.data?.error ||
-          err?.data?.message ||
-          err?.message ||
-          "Invalid class code or failed to join class.",
+        parseApiError(err, "Invalid class code or failed to join class.").message
       );
     } finally {
       setIsJoinSubmitting(false);

@@ -57,5 +57,14 @@ export function parseOAuthCallback(searchParams) {
     displayName:
       searchParams.get("displayName") || searchParams.get("display_name"),
     avatarUrl: searchParams.get("avatarUrl") || searchParams.get("avatar_url"),
+    ...(searchParams.has("isNewUser") && {
+      isNewUser: searchParams.get("isNewUser") === "true",
+    }),
+    ...(searchParams.has("profileCompleted") && {
+      profileCompleted: searchParams.get("profileCompleted") === "true",
+    }),
+    ...(searchParams.has("isLongTimeAway") && {
+      isLongTimeAway: searchParams.get("isLongTimeAway") === "true",
+    }),
   };
 }

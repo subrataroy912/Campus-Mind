@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.jsx";
 import { formatDueDate } from "@/utils/dateFormat.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 const GROUPS = ["This week", "Upcoming", "Past"];
 
@@ -75,7 +76,7 @@ export function ClassworkTab({
       handleCloseDialog();
     } catch (err) {
       setCreateError(
-        err?.data?.message || err?.data?.error || "Failed to create coursework"
+        parseApiError(err, "Failed to create coursework.").message
       );
     }
   };

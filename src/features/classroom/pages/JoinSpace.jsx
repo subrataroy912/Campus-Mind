@@ -14,6 +14,7 @@ import {
   formatClassCode,
   normalizeClassCode,
 } from "@/utils/classCode.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export default function JoinSpace() {
   const [searchParams] = useSearchParams();
@@ -332,9 +333,19 @@ export default function JoinSpace() {
 }
 
 function joinErrorMessage(error) {
-  const message = error?.data?.error || error?.message;
-  if (error?.status === 403)
-    return "This code is invalid or expired, enrollment is disabled, or your account cannot join courses.";
-  if (error?.status === 409) return message || "You have already joined this class.";
-  return message || "Unable to join this class. Please try again.";
+  if (error?.status === 403) {
+    return (
+      error?.data?.message ||
+      error?.data?.error ||
+      "This code is invalid or expired, enrollment is disabled, or your account cannot join courses."
+    );
+  }
+  if (error?.status === 409) {
+    return (
+      error?.data?.message ||
+      error?.data?.error ||
+      "You have already joined this class."
+    );
+  }
+  return parseApiError(error, "Unable to join this class. Please try again.").message;
 }

@@ -7,6 +7,8 @@ import {
   useGetCourseworkCommentsQuery,
   useAddCourseworkCommentMutation,
 } from "../api/commentApi.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export default function ClassFeedPost({ post, pinned = false }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -55,7 +57,11 @@ export default function ClassFeedPost({ post, pinned = false }) {
       }).unwrap();
       setReply("");
     } catch (err) {
-      console.error("Failed to add announcement comment:", err);
+      toast.add({
+        title: "Failed to post comment",
+        description: parseApiError(err, "Unable to post your comment right now.").message,
+        type: "error",
+      });
     }
   };
 

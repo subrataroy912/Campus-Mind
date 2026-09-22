@@ -15,6 +15,7 @@ import {
   buildUploadRequestBody,
   uploadAttachmentFile,
 } from "../../api/attachmentService.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function CourseworkSubmissionSection({ item }) {
   const [uploadedAttachments, setUploadedAttachments] = useState([]);
@@ -79,7 +80,7 @@ export function CourseworkSubmissionSection({ item }) {
       setUploadedAttachments((curr) => [...curr, attachment]);
     } catch (requestError) {
       setSubmissionError(
-        requestError?.message || "Unable to upload this file right now."
+        parseApiError(requestError, "Unable to upload this file right now.").message
       );
     } finally {
       setIsUploading(false);
@@ -108,7 +109,7 @@ export function CourseworkSubmissionSection({ item }) {
       setDraftSubmission("");
     } catch (requestError) {
       setSubmissionError(
-        requestError?.data?.message || requestError?.message || "Unable to submit this assignment right now."
+        parseApiError(requestError, "Unable to submit this assignment right now.").message
       );
     } finally {
       setIsSubmitting(false);

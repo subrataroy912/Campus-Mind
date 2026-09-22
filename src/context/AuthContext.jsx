@@ -294,6 +294,8 @@ export function AuthProvider({ children }) {
               displayName: profile?.displayName ?? result.user?.displayName ?? result.user?.name,
               canCreateCourses: Boolean(profile?.canCreateCourses ?? result.user?.canCreateCourses),
               isAdmin: Boolean(profile?.isAdmin ?? result.user?.isAdmin),
+              isNewUser: Boolean(result.user?.isNewUser ?? true),
+              profileCompleted: Boolean(profile?.profileCompleted ?? result.user?.profileCompleted ?? false),
             };
             resetApiCache(dispatch);
             commitAuthSession(dispatch, {
@@ -327,6 +329,8 @@ export function AuthProvider({ children }) {
           gender: nextProfile.gender || user?.gender,
           dateOfBirth: nextProfile.dateOfBirth || user?.dateOfBirth,
           address: nextProfile.address || user?.address,
+          profileCompleted: true,
+          isNewUser: false,
         };
         commitAuthSession(dispatch, {
           ...store.getState().auth,

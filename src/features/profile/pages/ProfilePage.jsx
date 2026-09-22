@@ -21,6 +21,8 @@ import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 import { routes } from "@/routes/paths.js";
 import { DashboardSection } from "@/features/dashboard/components/DashboardSection.jsx";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 const profileFor = (user) => ({
   ...user,
@@ -221,16 +223,34 @@ export default function ProfilePage() {
   const handleAvatarUpload = async (file) => {
     try {
       await updateProfile({ avatarFile: file });
+      toast.add({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to upload avatar", err);
+      toast.add({
+        title: "Avatar upload failed",
+        description: parseApiError(err, "Unable to upload avatar picture.").message,
+        type: "error",
+      });
     }
   };
 
   const handleBannerUpload = async (file) => {
     try {
       await updateProfile({ bannerFile: file });
+      toast.add({
+        title: "Banner updated",
+        description: "Your profile header banner has been updated.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to upload banner", err);
+      toast.add({
+        title: "Banner upload failed",
+        description: parseApiError(err, "Unable to upload banner image.").message,
+        type: "error",
+      });
     }
   };
 
@@ -320,7 +340,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6">
+    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 px-3 py-1 sm:gap-4 sm:px-6">
       {/* Back Button & Preview Bar */}
       <div className="flex items-center justify-between">
         <Button

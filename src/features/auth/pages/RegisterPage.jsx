@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip.jsx";
 import { FaGithub, FaGoogle } from "react-icons/fa";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export default function RegisterPage() {
   const { register, authError, authStatus, clearAuthError } = useAuth();
@@ -49,17 +50,17 @@ export default function RegisterPage() {
       await register(formData);
       toast.add({
         title: "Account created",
-        description: "Your account is ready. Sign in to continue.",
+        description: "Your account is ready. Complete your profile to get started.",
         type: "success",
       });
-      navigate(routes.auth.login, { replace: true, state: { registered: true } });
+      navigate(routes.profile.new, { replace: true });
     } catch (err) {
       toast.add({
         title: "Registration failed",
-        description:
-          err?.data?.error ||
-          err?.message ||
-          "Please review the form and try again.",
+        description: parseApiError(
+          err,
+          "Please review the form and try again."
+        ).message,
         type: "error",
       });
     }

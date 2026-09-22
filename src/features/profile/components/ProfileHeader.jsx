@@ -27,6 +27,7 @@ import {
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export default function ProfileHeader({
   profile,
@@ -55,10 +56,10 @@ export default function ProfileHeader({
     } catch (err) {
       toast.add({
         title: "Unlock failed",
-        description:
-          err?.data?.error ||
-          err?.message ||
-          "Failed to unlock course creation privileges. Please try again.",
+        description: parseApiError(
+          err,
+          "Failed to unlock course creation privileges. Please try again."
+        ).message,
         type: "error",
       });
     } finally {
@@ -70,7 +71,6 @@ export default function ProfileHeader({
     navigator.clipboard?.writeText(
       `${window.location.origin}${routes.user(profile.id)}`,
     );
-
   return (
     <header className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-none">
       <div className="relative h-24 sm:h-32 md:h-40 w-full overflow-hidden bg-muted/40 transition-all">

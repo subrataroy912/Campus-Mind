@@ -6,7 +6,7 @@ import SessionBootstrapSkeleton from "../features/auth/components/SessionBootstr
 import { routes } from "./paths.js";
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, authStatus } = useAuth();
+  const { isAuthenticated, authStatus, user } = useAuth();
   const location = useLocation();
 
   const routeState = getProtectedRouteState(authStatus, isAuthenticated);
@@ -15,9 +15,19 @@ export default function ProtectedRoute() {
     return <SessionBootstrapSkeleton />;
   }
 
-  return routeState === "authenticated" ? (
-    <Outlet />
-  ) : (
-    <Navigate to={routes.auth.login} replace state={{ from: location }} />
-  );
+  if (routeState !== "authenticated") {
+    return (
+      <Navigate to={routes.auth.login} replace state={{ from: location }} />
+    );
+  }
+
+  if (user?.profileCompleted === false && location.pathname !== routes.profile.new) {
+    return <Navigate to={routes.profile.new} replace />;
+  }
+
+  if (user?.profileCompleted === true && location.pathname === routes.profile.new) {
+    return <Navigate to={routes.dashboard} replace />;
+  }
+
+  return <Outlet />;
 }

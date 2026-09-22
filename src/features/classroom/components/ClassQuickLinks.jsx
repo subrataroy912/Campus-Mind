@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/dialog.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useUpdateClassroomMutation } from "../api/classroomApi.js";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 const LINK_CATEGORIES = [
   { value: "DOCUMENT", label: "Document / Notes", icon: FileText },
@@ -111,7 +113,7 @@ export default function ClassQuickLinks({ classroom, teacher = false }) {
       setCategory("DOCUMENT");
       setErrorMsg("");
     } catch (err) {
-      setErrorMsg(err?.data?.message || err?.message || "Failed to add link");
+      setErrorMsg(parseApiError(err, "Failed to add link").message);
     }
   };
 
@@ -124,8 +126,17 @@ export default function ClassQuickLinks({ classroom, teacher = false }) {
           links: nextLinks,
         },
       }).unwrap();
+      toast.add({
+        title: "Resource removed",
+        description: "The link has been removed from this space.",
+        type: "success",
+      });
     } catch (err) {
-      console.error("Failed to delete link", err);
+      toast.add({
+        title: "Failed to delete link",
+        description: parseApiError(err, "Could not remove this resource.").message,
+        type: "error",
+      });
     }
   };
 

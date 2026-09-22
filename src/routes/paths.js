@@ -16,6 +16,7 @@ export const routes = {
   messages: "/messages",
   saved: "/saved",
   explore: "/explore",
+  search: "/search",
 
   spaces: {
     list: "/spaces",
@@ -33,6 +34,7 @@ export const routes = {
 
   profile: {
     root: "/profile",
+    new: "/users/new",
     tab: (tab) =>
       tab ? `/profile?tab=${encodeURIComponent(tab)}` : "/profile",
   },

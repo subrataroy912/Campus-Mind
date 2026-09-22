@@ -12,6 +12,7 @@ import {
 } from "../api/classroomApi.js";
 import { isTeacherRole, isUserEnrolled } from "../utils/roles.js";
 import { routes } from "@/routes/paths";
+import { parseApiError } from "@/lib/errorUtils.js";
 import {
   ClassHomeTab,
   ClassworkTab,
@@ -74,11 +75,10 @@ export default function SpacePage() {
       setIsCodeModalOpen(false);
       setClassCodeInput("");
     } catch (err) {
-      const message =
-        err?.data?.error ||
-        err?.data?.message ||
-        err?.message ||
-        "Failed to join class. Please verify the code and try again.";
+      const message = parseApiError(
+        err,
+        "Failed to join class. Please verify the code and try again."
+      ).message;
       setLocalJoinError(message);
     }
   };
