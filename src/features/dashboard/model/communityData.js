@@ -13,7 +13,7 @@ export const MOCK_COMMUNITY_POSTS = [
     time: "Just now",
     author: {
       name: "CampusMind Team",
-      avatar: "/public/logo-square.webp",
+      avatar: "/logo-square.webp",
     },
     content:
       "Welcome to the official CampusMind Community Hub! 🚀 We're thrilled to have you here. This space is designed for you to connect with fellow learners, share ideas, collaborate on projects, and build together. Drop a comment below to introduce yourself and say hello to the community!",

@@ -4,7 +4,7 @@ import { Plus, Ticket, Loader2, Filter } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
-import ClassCard from "../components/ClassCard.jsx";
+import ClassCard from "../../classroom/components/ClassCard.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
@@ -28,7 +28,9 @@ export default function SpaceListPage() {
 
   const filteredSpaces = useMemo(() => {
     if (selectedType === "ALL") return classrooms;
-    return classrooms.filter((c) => (c.spaceType || "ACADEMIC_CLASS") === selectedType);
+    return classrooms.filter(
+      (c) => (c.spaceType || "ACADEMIC_CLASS") === selectedType,
+    );
   }, [classrooms, selectedType]);
 
   if (status === "loading" || status === "idle") {
@@ -40,7 +42,7 @@ export default function SpaceListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-3 sm:p-4 lg:p-5 space-y-3.5">
+    <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
       {/* Header Bar */}
       <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -87,7 +89,9 @@ export default function SpaceListPage() {
             const count =
               opt.value === "ALL"
                 ? classrooms.length
-                : classrooms.filter((c) => (c.spaceType || "ACADEMIC_CLASS") === opt.value).length;
+                : classrooms.filter(
+                    (c) => (c.spaceType || "ACADEMIC_CLASS") === opt.value,
+                  ).length;
             if (opt.value !== "ALL" && count === 0) return null;
 
             const isSelected = selectedType === opt.value;

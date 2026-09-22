@@ -11,52 +11,52 @@ import { AuthProvider } from "../context/AuthContext.jsx";
 import { routes } from "./paths.js";
 import ParamRedirect from "./ParamRedirect.jsx";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
-const DashboardHome = lazy(() =>
-  import("../features/dashboard/pages/DashboardHomePage.jsx")
+const DashboardHome = lazy(
+  () => import("../features/dashboard/pages/DashboardHomePage.jsx"),
 );
-const DashboardCommunityPage = lazy(() =>
-  import("../features/dashboard/pages/DashboardCommunityPage.jsx")
+const DashboardCommunityPage = lazy(
+  () => import("../features/dashboard/pages/DashboardCommunityPage.jsx"),
 );
-const DashboardMessagesPage = lazy(() =>
-  import("../features/dashboard/pages/DashboardMessagesPage.jsx")
+const DashboardMessagesPage = lazy(
+  () => import("../features/dashboard/pages/DashboardMessagesPage.jsx"),
 );
-const DashboardSavedPage = lazy(() =>
-  import("../features/dashboard/pages/DashboardSavedPage.jsx")
+const DashboardSavedPage = lazy(
+  () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
 );
-const ExplorePage = lazy(() =>
-  import("../features/explore/pages/ExplorePage.jsx")
+const ExplorePage = lazy(
+  () => import("../features/explore/pages/ExplorePage.jsx"),
 );
 const LoginPage = lazy(() => import("../features/auth/pages/LoginPage.jsx"));
-const RegisterPage = lazy(() =>
-  import("../features/auth/pages/RegisterPage.jsx")
+const RegisterPage = lazy(
+  () => import("../features/auth/pages/RegisterPage.jsx"),
 );
-const ForgotPasswordPage = lazy(() =>
-  import("../features/auth/pages/ForgotPasswordPage.jsx")
+const ForgotPasswordPage = lazy(
+  () => import("../features/auth/pages/ForgotPasswordPage.jsx"),
 );
-const ResetPasswordPage = lazy(() =>
-  import("../features/auth/pages/ResetPasswordPage.jsx")
+const ResetPasswordPage = lazy(
+  () => import("../features/auth/pages/ResetPasswordPage.jsx"),
 );
-const OAuthCallbackPage = lazy(() =>
-  import("../features/auth/pages/OAuthCallbackPage.jsx")
+const OAuthCallbackPage = lazy(
+  () => import("../features/auth/pages/OAuthCallbackPage.jsx"),
 );
 
-const SpaceListPage = lazy(() =>
-  import("../features/classroom/pages/SpaceListPage.jsx")
+const SpaceListPage = lazy(
+  () => import("../features/dashboard/pages/SpaceListPage.jsx"),
 );
-const SpacePage = lazy(() =>
-  import("../features/classroom/pages/SpacePage.jsx")
+const SpacePage = lazy(
+  () => import("../features/classroom/pages/SpacePage.jsx"),
 );
-const CreateSpacePage = lazy(() =>
-  import("../features/classroom/pages/CreateSpace.jsx")
+const CreateSpacePage = lazy(
+  () => import("../features/classroom/pages/CreateSpace.jsx"),
 );
-const JoinSpacePage = lazy(() =>
-  import("../features/classroom/pages/JoinSpace.jsx")
+const JoinSpacePage = lazy(
+  () => import("../features/classroom/pages/JoinSpace.jsx"),
 );
-const ProfilePage = lazy(() =>
-  import("../features/profile/pages/ProfilePage.jsx")
+const ProfilePage = lazy(
+  () => import("../features/profile/pages/ProfilePage.jsx"),
 );
-const SettingsPage = lazy(() =>
-  import("../features/settings/pages/SettingsPage.jsx")
+const SettingsPage = lazy(
+  () => import("../features/settings/pages/SettingsPage.jsx"),
 );
 const NotFound = lazy(() => import("../pages/NotFoundPage.jsx"));
 
@@ -199,9 +199,7 @@ export const appRouteConfig = [
               {
                 path: "/dashboard/profile/:userId",
                 element: (
-                  <ParamRedirect
-                    to={(params) => routes.user(params.userId)}
-                  />
+                  <ParamRedirect to={(params) => routes.user(params.userId)} />
                 ),
               },
               {

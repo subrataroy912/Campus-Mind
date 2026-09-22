@@ -121,7 +121,7 @@ export default function SpacePage() {
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
             <Link
               to={`${routes.classes.join}?courseId=${encodeURIComponent(
-                classId || ""
+                classId || "",
               )}`}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover shadow-xs"
             >
@@ -139,7 +139,7 @@ export default function SpacePage() {
     );
   }
 
-        // TODO:: Have to make a reusable component
+  // TODO:: Have to make a reusable component
   if (error) {
     return (
       <div className="grid min-h-screen place-items-center bg-canvas text-text-muted text-sm">
@@ -165,17 +165,14 @@ export default function SpacePage() {
 
   return (
     <div className="min-h-screen bg-canvas px-2.5 py-2.5 sm:px-4 sm:py-3.5 lg:px-6">
-      <div className="mx-auto max-w-5xl space-y-2.5 sm:space-y-3">
+      <div className="w-full space-y-2.5 sm:space-y-3">
         {joinError && (
           <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">
             {joinError}
           </div>
         )}
 
-        <ClassHeader
-          classroom={classroomWithNewCode}
-          teacher={teacher}
-        />
+        <ClassHeader classroom={classroomWithNewCode} teacher={teacher} />
 
         <ClassTabs
           active={activeTab}

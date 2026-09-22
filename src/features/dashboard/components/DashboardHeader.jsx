@@ -12,7 +12,11 @@ import { logoutFromHeader } from "./headerLogout.js";
 import NotificationsMenu from "@/features/notifications/components/NotificationsMenu.jsx";
 import { routes } from "@/routes/paths";
 import { Button } from "@/components/ui/button.jsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.jsx";
 import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { selectIsMobileMenuOpen } from "@/features/ui/uiSelectors.js";
 import { setMobileMenuOpen } from "@/features/ui/uiSlice.js";
@@ -44,7 +48,7 @@ export default function DashboardHeader() {
   }, [menuOpen]);
 
   return (
-    <header className="relative z-40 flex h-11 items-center justify-between gap-2 border-b border-border/70 bg-card/95 px-3 backdrop-blur-md sm:px-4">
+    <header className="relative z-40 flex h-14 items-center justify-between gap-2 border-b border-border/70 bg-card/95 px-3 backdrop-blur-md sm:px-4">
       {/* Left: Grouped Menu Button and Logo + Quick Search */}
       <div className="flex items-center gap-2 min-w-0">
         <Button

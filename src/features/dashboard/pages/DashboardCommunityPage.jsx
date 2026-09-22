@@ -68,7 +68,9 @@ function CommunityPost({ post }) {
             <span className="text-xs font-semibold text-text-heading">
               {post?.author?.name}
             </span>
-            <span className="text-[11px] text-text-muted">· {post.classroom}</span>
+            <span className="text-[11px] text-text-muted">
+              · {post.classroom}
+            </span>
             <span className="text-[11px] text-text-muted">· {post.time}</span>
           </div>
           <p className="mt-1 text-xs leading-relaxed text-text-main">
@@ -86,7 +88,12 @@ function CommunityPost({ post }) {
               onClick={toggleLike}
               className={`flex items-center gap-1 text-[11px] font-medium transition hover:text-primary ${liked ? "text-primary" : "text-text-muted"}`}
             >
-              <Heart size={12} aria-hidden="true" className={liked ? "fill-current" : ""} /> {likeCount}
+              <Heart
+                size={12}
+                aria-hidden="true"
+                className={liked ? "fill-current" : ""}
+              />{" "}
+              {likeCount}
             </button>
             <button className="flex items-center gap-1 text-[11px] font-medium text-text-muted transition hover:text-primary">
               <MessageCircle size={12} aria-hidden="true" /> {post.comments}
@@ -108,7 +115,7 @@ export default function DashboardCommunityPage() {
 
   const [localPosts, setLocalPosts] = useState(null);
 
-  const posts = localPosts ?? (data?.posts ?? EMPTY_FEED);
+  const posts = localPosts ?? data?.posts ?? EMPTY_FEED;
   const filters = data?.filters ?? EMPTY_FEED;
 
   const filteredPosts = useMemo(() => {
@@ -160,14 +167,15 @@ export default function DashboardCommunityPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
+    <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/60 pb-3">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-text-heading">
             Campus Community
           </h1>
           <p className="text-xs text-text-muted">
-            Discussions, questions, and announcements across your enrolled spaces and university peers.
+            Discussions, questions, and announcements across your enrolled
+            spaces and university peers.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -183,9 +191,17 @@ export default function DashboardCommunityPage() {
         {/* Main Feed Column */}
         <div className="min-w-0 space-y-3">
           {/* Post Composer Card */}
-          <form onSubmit={handleCreatePost} className="rounded-lg border border-border/80 bg-surface p-3 shadow-xs">
+          <form
+            onSubmit={handleCreatePost}
+            className="rounded-lg border border-border/80 bg-surface p-3 shadow-xs"
+          >
             <div className="flex gap-2.5">
-              <ClassroomAvatar to={routes.profile.root} avatar={user?.avatar} name={user?.name} size="h-7 w-7" />
+              <ClassroomAvatar
+                to={routes.profile.root}
+                avatar={user?.avatar}
+                name={user?.name}
+                size="h-7 w-7"
+              />
               <div className="flex-1">
                 <textarea
                   value={draft}
@@ -264,21 +280,35 @@ export default function DashboardCommunityPage() {
         <aside className="hidden lg:block space-y-3 shrink-0">
           {/* Community Guidelines Card */}
           <div className="rounded-lg border border-border/80 bg-surface p-3.5 shadow-xs">
-            <h2 className="text-xs font-semibold text-text-heading">About Campus Community</h2>
+            <h2 className="text-xs font-semibold text-text-heading">
+              About Campus Community
+            </h2>
             <p className="mt-1 text-[11px] leading-relaxed text-text-muted">
-              Connect with classmates, join study group discussions, and share insights across your enrolled classes.
+              Connect with classmates, join study group discussions, and share
+              insights across your enrolled classes.
             </p>
             <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-2.5 text-[11px]">
               <span className="text-text-muted">Campus Honor Code</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">Active</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                Active
+              </span>
             </div>
           </div>
 
           {/* Trending Topics Card */}
           <div className="rounded-lg border border-border/80 bg-surface p-3.5 shadow-xs">
-            <h2 className="text-xs font-semibold text-text-heading">Trending Topics</h2>
+            <h2 className="text-xs font-semibold text-text-heading">
+              Trending Topics
+            </h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {["#algorithms", "#midterms", "#hackathon2026", "#distributed-systems", "#ui-ux", "#quantum"].map((tag) => (
+              {[
+                "#algorithms",
+                "#midterms",
+                "#hackathon2026",
+                "#distributed-systems",
+                "#ui-ux",
+                "#quantum",
+              ].map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center rounded-md border border-border/60 bg-canvas/60 px-2 py-0.5 text-[10px] font-medium text-text-muted transition-colors hover:border-primary/40 hover:text-primary cursor-pointer"
@@ -291,7 +321,9 @@ export default function DashboardCommunityPage() {
 
           {/* Active Spaces Directory */}
           <div className="rounded-lg border border-border/80 bg-surface p-3.5 shadow-xs">
-            <h2 className="text-xs font-semibold text-text-heading">Active Spaces</h2>
+            <h2 className="text-xs font-semibold text-text-heading">
+              Active Spaces
+            </h2>
             <div className="mt-2 space-y-2 text-xs">
               {[
                 { name: "Algorithms & Data Structures", count: "25 members" },
@@ -300,11 +332,16 @@ export default function DashboardCommunityPage() {
                 { name: "Quantum Computing Lab", count: "14 members" },
                 { name: "Campus Hackathon 2026", count: "45 members" },
               ].map((sp) => (
-                <div key={sp.name} className="flex items-center justify-between gap-2">
+                <div
+                  key={sp.name}
+                  className="flex items-center justify-between gap-2"
+                >
                   <span className="truncate text-[11px] font-medium text-text-heading hover:text-primary cursor-pointer">
                     {sp.name}
                   </span>
-                  <span className="shrink-0 text-[10px] text-text-muted">{sp.count}</span>
+                  <span className="shrink-0 text-[10px] text-text-muted">
+                    {sp.count}
+                  </span>
                 </div>
               ))}
             </div>
