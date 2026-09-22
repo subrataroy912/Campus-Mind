@@ -29,13 +29,12 @@ function ClassCard({ classroom, priority = false }) {
     }
   };
 
-  const teacherObj =
-    classroom.instructor ||
-    classroom.teacher ||
-    (classroom.teacherName || classroom.ownerName
-      ? { name: classroom.teacherName || classroom.ownerName }
-      : null);
-  const teacher = teacherObj;
+  const ownerObj =
+    classroom.owner ||
+    (classroom.ownerName
+      ? { name: classroom.ownerName }
+      : classroom.teacher || (classroom.teacherName ? { name: classroom.teacherName } : null));
+  const owner = ownerObj;
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
   const spaceLabel = SPACE_LABELS[classroom.spaceType] || "Space";
   const category = classroom.subject
@@ -146,14 +145,14 @@ function ClassCard({ classroom, priority = false }) {
             </p>
           </div>
 
-          {/* Bottom Row: Instructor & Member Count */}
+          {/* Bottom Row: Owner & Member Count */}
           <div className="mt-2 flex items-center justify-between gap-1.5 border-t border-border/50 pt-2 text-[11px] text-muted-foreground">
-            {teacher?.name ? (
+            {owner?.name ? (
               <span
                 className="font-medium text-foreground truncate max-w-36 text-[11px]"
-                title={`with ${teacher.name}`}
+                title={`by ${owner.name}`}
               >
-                with {teacher.name}
+                by {owner.name}
               </span>
             ) : (
               <span className="text-[11px] text-muted-foreground italic">

@@ -83,19 +83,20 @@ export function ClassHomeTab({
     }).unwrap();
   };
 
-  const teacherName =
-    typeof classroom?.teacher === "string"
-      ? classroom.teacher
-      : classroom?.teacher?.name ||
-        classroom?.instructor?.name ||
-        classroom?.teacherName ||
+  const ownerName =
+    typeof classroom?.owner === "string"
+      ? classroom.owner
+      : classroom?.owner?.name ||
         classroom?.ownerName ||
-        "CampusMind Facilitator";
+        classroom?.teacher?.name ||
+        classroom?.teacherName ||
+        "Space Creator";
 
-  const teacherAvatar =
+  const ownerAvatar =
+    classroom?.owner?.avatarUrl ||
+    classroom?.ownerAvatarUrl ||
     classroom?.teacher?.avatarUrl ||
     classroom?.teacher?.avatar ||
-    classroom?.ownerAvatarUrl ||
     null;
 
   const spaceTypeLabel = SPACE_LABELS[classroom?.spaceType] || "Space";
@@ -278,26 +279,26 @@ export function ClassHomeTab({
           </div>
         )}
 
-        {/* Teacher Profile & Enrollment Stats Row */}
+        {/* Space Owner Profile & Enrollment Stats Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-border">
           <div className="flex items-center gap-2.5">
             <ClassroomAvatar
-              userId={classroom?.teacherId || classroom?.ownerId}
-              name={teacherName}
-              avatar={teacherAvatar}
+              userId={classroom?.ownerId || classroom?.teacherId}
+              name={ownerName}
+              avatar={ownerAvatar}
               size="h-8 w-8 sm:h-9 sm:w-9"
             />
             <div>
-              <p className="text-[10px] font-medium text-text-muted">Lead / Facilitator</p>
-              {classroom?.teacherId || classroom?.ownerId ? (
+              <p className="text-[10px] font-medium text-text-muted">Space Owner</p>
+              {classroom?.ownerId || classroom?.teacherId ? (
                 <Link
-                  to={routes.user(classroom.teacherId || classroom.ownerId)}
+                  to={routes.user(classroom.ownerId || classroom.teacherId)}
                   className="text-xs font-bold text-text-heading hover:text-primary hover:underline transition-colors"
                 >
-                  {teacherName}
+                  {ownerName}
                 </Link>
               ) : (
-                <p className="text-xs font-bold text-text-heading">{teacherName}</p>
+                <p className="text-xs font-bold text-text-heading">{ownerName}</p>
               )}
             </div>
           </div>
@@ -348,7 +349,7 @@ export function ClassHomeTab({
                 key={post.id}
                 post={{
                   ...post,
-                  teacherName,
+                  ownerName,
                 }}
               />
             ))}

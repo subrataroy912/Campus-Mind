@@ -304,10 +304,12 @@ export default function JoinSpace() {
                 You've joined {foundClass.title}
               </h2>
               <p className="mt-0.5 text-xs text-text-muted">
-                {foundClass.subtitle} with{" "}
-                {foundClass.instructor?.name ||
+                {foundClass.subtitle ? `${foundClass.subtitle} • ` : ""}created by{" "}
+                {foundClass.owner?.name ||
+                  foundClass.ownerName ||
+                  foundClass.instructor?.name ||
                   foundClass.teacher?.name ||
-                  "CampusMind host"}
+                  "Space Owner"}
               </p>
               <div className="mt-4 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
                 <Link

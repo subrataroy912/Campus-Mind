@@ -10,28 +10,38 @@ import {
   useGetClassroomRosterQuery,
   useUpdateClassroomMutation,
   useRemoveCourseMemberMutation,
+  useUpdateMemberRoleMutation,
 } from "../../api/classroomApi.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
 
-
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
 const MemberRow = React.memo(function MemberRow({
   member,
-  teacher,
+  isCurrentOwner,
+  isCurrentAdmin,
   confirming,
   setConfirming,
   onRemove,
   isRemoving,
+  onUpdateRole,
+  isUpdatingRole,
 }) {
   const memberName =
     member?.name ||
     member?.displayName ||
-    (member?.userId ? `Member (${member.userId.slice(-4)})` : "Class Member");
+    (member?.userId ? `Member (${member.userId.slice(-4)})` : "Space Member");
   const memberId = member?.id || member?.userId || "";
-  const isTeacherRole =
-    String(member?.role || "").toLowerCase() === "teacher" ||
-    String(member?.role || "").toLowerCase() === "owner";
+  const role = String(member?.role || "member").toLowerCase();
+  const isOwner = role === "owner";
+  const isAdmin = role === "admin";
+  const isMember = !isOwner && !isAdmin;
+
+  // Permissions:
+  // - Cannot manage space owner
+  // - Space owner can manage admins and members
+  // - Space admin can manage regular members only
+  const canManage = !isOwner && (isCurrentOwner || (isCurrentAdmin && isMember));
 
   return (
     <div className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-canvas/50 transition-colors">
@@ -58,9 +68,19 @@ const MemberRow = React.memo(function MemberRow({
           {memberName}
         </span>
       )}
-      {isTeacherRole && (
+      {isOwner && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+          Owner
+        </span>
+      )}
+      {isAdmin && (
         <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2.5 py-0.5 text-[11px] font-semibold text-secondary">
-          {String(member?.role).toLowerCase() === "owner" ? "Owner" : "Teacher"}
+          Admin
+        </span>
+      )}
+      {isMember && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
+          Member
         </span>
       )}
       <Button
@@ -72,7 +92,7 @@ const MemberRow = React.memo(function MemberRow({
       >
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
       </Button>
-      {teacher && !isTeacherRole && (
+      {canManage && (
         <div className="relative">
           <Button
             variant="ghost"
@@ -87,25 +107,49 @@ const MemberRow = React.memo(function MemberRow({
           </Button>
           {confirming === memberId && (
             <div className="absolute right-0 top-9 z-10 w-56 rounded-xl bg-surface p-3 shadow-lg ring-1 ring-border">
-              <p className="text-xs text-text-muted">
-                Remove {memberName} from this class?
+              <p className="text-xs font-medium text-text-main mb-2">
+                Manage {memberName}
               </p>
-              <div className="mt-3 flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isRemoving}
-                  onClick={() => setConfirming(null)}
-                >
-                  Cancel
-                </Button>
+              <div className="flex flex-col gap-1.5">
+                {isCurrentOwner && isMember && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    loading={isUpdatingRole}
+                    onClick={() => onUpdateRole(memberId, "ADMIN")}
+                    className="w-full justify-start text-xs h-7"
+                  >
+                    Promote to Admin
+                  </Button>
+                )}
+                {isCurrentOwner && isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    loading={isUpdatingRole}
+                    onClick={() => onUpdateRole(memberId, "MEMBER")}
+                    className="w-full justify-start text-xs h-7"
+                  >
+                    Demote to Member
+                  </Button>
+                )}
                 <Button
                   variant="destructive"
                   size="sm"
                   loading={isRemoving}
                   onClick={() => onRemove(memberId)}
+                  className="w-full justify-start text-xs h-7"
                 >
-                  Remove
+                  Remove from Space
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={isRemoving || isUpdatingRole}
+                  onClick={() => setConfirming(null)}
+                  className="w-full justify-start text-xs h-7"
+                >
+                  Cancel
                 </Button>
               </div>
             </div>
@@ -115,7 +159,6 @@ const MemberRow = React.memo(function MemberRow({
     </div>
   );
 });
-
 
 export function MembersTab({
   classroom,
@@ -127,11 +170,20 @@ export function MembersTab({
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
-  const [showAllStudents, setShowAllStudents] = useState(false);
-  const { authStatus } = useAuth();
+  const [updatingRoleId, setUpdatingRoleId] = useState(null);
+  const [showAllMembers, setShowAllMembers] = useState(false);
+  const { user, authStatus } = useAuth();
 
   const [updateClassroom, { isLoading: isUpdatingInvite }] = useUpdateClassroomMutation();
   const [removeCourseMember] = useRemoveCourseMemberMutation();
+  const [updateMemberRole] = useUpdateMemberRoleMutation();
+
+  const currentUserId = user?.id;
+  const isCurrentOwner =
+    String(classroom?.role || "").toLowerCase() === "owner" ||
+    Boolean(currentUserId && classroom?.ownerId === currentUserId);
+  const isCurrentAdmin = String(classroom?.role || "").toLowerCase() === "admin";
+  const isStaff = isCurrentOwner || isCurrentAdmin || teacher;
 
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;
@@ -180,6 +232,31 @@ export function MembersTab({
     }
   };
 
+  const handleUpdateRole = async (memberId, newRole) => {
+    setUpdatingRoleId(memberId);
+    try {
+      await updateMemberRole({
+        courseId: classroom?.id,
+        userId: memberId,
+        role: newRole,
+      }).unwrap();
+      setConfirming(null);
+      toast.add({
+        title: "Role updated",
+        description: `Member has been ${newRole === "ADMIN" ? "promoted to Admin" : "demoted to Member"}.`,
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Update failed",
+        description: parseApiError(err, "Failed to update member role.").message,
+        type: "error",
+      });
+    } finally {
+      setUpdatingRoleId(null);
+    }
+  };
+
   const { data: roster = [] } = useGetClassroomRosterQuery(classroom?.id, {
     skip: authStatus === "hydrating" || !classroom?.id || !isEnrolled,
   });
@@ -194,17 +271,18 @@ export function MembersTab({
     );
   }, [roster, query]);
 
-  const teachers = useMemo(() => {
+  const staffMembers = useMemo(() => {
     return members.filter((x) => {
       const r = String(x?.role || "").toLowerCase();
-      return r === "teacher" || r === "owner";
+      return r === "owner" || r === "admin" || r === "teacher";
     });
   }, [members]);
 
-  const students = useMemo(() => {
-    return members.filter(
-      (x) => String(x?.role || "").toLowerCase() === "student"
-    );
+  const generalMembers = useMemo(() => {
+    return members.filter((x) => {
+      const r = String(x?.role || "").toLowerCase();
+      return r !== "owner" && r !== "admin" && r !== "teacher";
+    });
   }, [members]);
 
   if (!isEnrolled) {
@@ -218,12 +296,12 @@ export function MembersTab({
             Class roster is only available to members
           </h3>
           <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
-            Join this class to view students and teachers and connect with classmates.
+            Join this space to view members and connect with participants.
           </p>
           {onJoin && (
             <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
               <UserPlus className="h-3.5 w-3.5" />
-              <span>Join Class</span>
+              <span>Join Space</span>
             </Button>
           )}
         </div>
@@ -247,10 +325,10 @@ export function MembersTab({
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Enrolled students, facilitators, and mentors in this space.
+              Enrolled members and administrators in this space.
             </p>
           </div>
-          {teacher && enrollmentCode && (
+          {isStaff && enrollmentCode && (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -290,56 +368,62 @@ export function MembersTab({
           />
         ) : (
           <div className="space-y-4">
-            {teachers.length > 0 && (
+            {staffMembers.length > 0 && (
               <div className="space-y-1.5">
                 <h3 className="text-xs font-semibold text-foreground">
-                  Instructors & Teachers ({teachers.length})
+                  Admins &amp; Owner ({staffMembers.length})
                 </h3>
                 <div className="overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card">
-                  {teachers.map((m) => (
+                  {staffMembers.map((m) => (
                     <MemberRow
-                      key={m.id}
+                      key={m.id || m.userId}
                       member={m}
-                      teacher={teacher}
+                      isCurrentOwner={isCurrentOwner}
+                      isCurrentAdmin={isCurrentAdmin}
                       confirming={confirming}
                       setConfirming={setConfirming}
                       onRemove={handleRemoveMember}
                       isRemoving={removingId === (m.id || m.userId)}
+                      onUpdateRole={handleUpdateRole}
+                      isUpdatingRole={updatingRoleId === (m.id || m.userId)}
                     />
                   ))}
                 </div>
               </div>
             )}
 
-            {students.length > 0 && (
+            {generalMembers.length > 0 && (
               <div className="space-y-1.5">
                 <h3 className="text-xs font-semibold text-foreground">
-                  Students ({students.length})
+                  Members ({generalMembers.length})
                 </h3>
                 <div className="grid overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card sm:grid-cols-2 sm:divide-x">
-                  {(showAllStudents ? students : students.slice(0, 50)).map((m) => (
+                  {(showAllMembers ? generalMembers : generalMembers.slice(0, 50)).map((m) => (
                     <MemberRow
-                      key={m.id}
+                      key={m.id || m.userId}
                       member={m}
-                      teacher={teacher}
+                      isCurrentOwner={isCurrentOwner}
+                      isCurrentAdmin={isCurrentAdmin}
                       confirming={confirming}
                       setConfirming={setConfirming}
                       onRemove={handleRemoveMember}
                       isRemoving={removingId === (m.id || m.userId)}
+                      onUpdateRole={handleUpdateRole}
+                      isUpdatingRole={updatingRoleId === (m.id || m.userId)}
                     />
                   ))}
                 </div>
-                {students.length > 50 && (
+                {generalMembers.length > 50 && (
                   <div className="pt-2 text-center">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowAllStudents((prev) => !prev)}
+                      onClick={() => setShowAllMembers((prev) => !prev)}
                       className="rounded-md text-xs h-7"
                     >
-                      {showAllStudents
-                        ? "Show fewer students"
-                        : `Show all ${students.length} students`}
+                      {showAllMembers
+                        ? "Show fewer members"
+                        : `Show all ${generalMembers.length} members`}
                     </Button>
                   </div>
                 )}
@@ -351,4 +435,3 @@ export function MembersTab({
     </section>
   );
 }
-

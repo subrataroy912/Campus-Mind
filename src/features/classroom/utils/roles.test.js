@@ -1,17 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { isTeacherRole, isUserEnrolled } from "./roles.js";
+import { isStaffRole, isTeacherRole, isUserEnrolled } from "./roles.js";
 
-describe("isTeacherRole", () => {
-  it.each(["created", "Created", " teacher ", "OWNER", "Owner"])(
-    "accepts teacher role variant %s",
+describe("isStaffRole", () => {
+  it.each(["created", "Created", "ADMIN", "admin", "OWNER", "Owner"])(
+    "accepts staff role variant %s",
     (role) => {
+      expect(isStaffRole(role)).toBe(true);
       expect(isTeacherRole(role)).toBe(true);
     }
   );
 
-  it.each(["student", "joined", "co-teacher", "admin", "", null, undefined])(
-    "rejects non-teacher role %s",
+  it.each(["member", "student", "joined", "viewer", "", null, undefined])(
+    "rejects non-staff role %s",
     (role) => {
+      expect(isStaffRole(role)).toBe(false);
       expect(isTeacherRole(role)).toBe(false);
     }
   );

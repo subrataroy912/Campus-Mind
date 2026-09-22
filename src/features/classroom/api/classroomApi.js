@@ -13,11 +13,12 @@ const discoveryFieldsChanged = (changes = {}) =>
 
 const normalizeCourse = (response = {}) => {
   const course = response?.data ?? response;
-  const teacher = course.teacher ??
-    course.instructor ??
-    course.owner ?? {
-      name: course.teacherName ?? course.ownerName ?? "CampusMind teacher",
-    };
+  const owner = course.owner ?? {
+    id: course.ownerId ?? course.teacherId,
+    name: course.ownerName ?? course.teacherName ?? "Space Owner",
+    avatarUrl: course.ownerAvatarUrl ?? course.teacher?.avatarUrl,
+  };
+  const teacher = course.teacher ?? owner;
 
   const name =
     course.name ?? course.title ?? course.className ?? "Untitled class";
@@ -39,7 +40,9 @@ const normalizeCourse = (response = {}) => {
     accessType: (
       course.accessType || (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
     ).toLowerCase(),
-    teacherId: course.teacherId ?? course.ownerId,
+    ownerId: course.ownerId ?? course.teacherId,
+    owner,
+    teacherId: course.ownerId ?? course.teacherId,
     teacher,
     instructor: teacher,
     role: course.role ?? "Joined",
@@ -95,7 +98,7 @@ export const classroomApi = baseApi.injectEndpoints({
         const payload = response?.data ?? response;
         const list = Array.isArray(payload) ? payload : payload?.content ?? [];
         return list.map((m) => {
-          const role = String(m?.role || "student").toLowerCase();
+          const role = String(m?.role || "member").toLowerCase();
           const name =
             m?.name ||
             m?.displayName ||
@@ -260,6 +263,17 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: `${courseId}:roster` },
       ],
     }),
+    updateMemberRole: builder.mutation({
+      query: ({ courseId, userId, role }) => ({
+        url: `/courses/${courseId}/members/${userId}/role`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: (_result, _error, { courseId }) => [
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: `${courseId}:roster` },
+      ],
+    }),
   }),
 });
 
@@ -274,6 +288,7 @@ export const {
   useArchiveClassroomMutation,
   useLeaveClassroomMutation,
   useRemoveCourseMemberMutation,
+  useUpdateMemberRoleMutation,
   useCreateClassroomMutation,
   useJoinClassroomMutation,
 } = classroomApi;

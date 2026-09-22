@@ -19,14 +19,14 @@ export default function ClassFeedPost({ post, pinned = false }) {
       ? post.author
       : post.author?.name ||
         post.creatorName ||
-        post.teacherName ||
-        "Instructor";
+        post.ownerName ||
+        "Author";
 
   const authorId =
     (typeof post.author === "object" ? post.author?.id : null) ||
     post.authorId ||
     post.creatorId ||
-    post.teacherId ||
+    post.ownerId ||
     null;
 
   const content = post.description || post.content || post.title || "";

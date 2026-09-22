@@ -1,10 +1,12 @@
-const TEACHER_ROLES = new Set(["created", "teacher", "owner"]);
+const STAFF_ROLES = new Set(["owner", "admin", "created"]);
 
-export function isTeacherRole(role) {
+export function isStaffRole(role) {
   return (
-    typeof role === "string" && TEACHER_ROLES.has(role.trim().toLowerCase())
+    typeof role === "string" && STAFF_ROLES.has(role.trim().toLowerCase())
   );
 }
+
+export const isTeacherRole = isStaffRole;
 
 export function isUserEnrolled(classroom, userId) {
   if (!classroom) return false;

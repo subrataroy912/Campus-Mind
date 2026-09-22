@@ -26,22 +26,23 @@ vi.mock("../../api/classroomApi.js", () => ({
       return { data: [], isLoading: false };
     }
     if (classId === "large-roster") {
-      const largeList = [{ id: "t-1", name: "Head Teacher", role: "teacher" }];
+      const largeList = [{ id: "t-1", name: "Head Owner", role: "owner" }];
       for (let i = 1; i <= 55; i++) {
-        largeList.push({ id: `s-${i}`, name: `Student ${i}`, role: "student" });
+        largeList.push({ id: `s-${i}`, name: `Member ${i}`, role: "member" });
       }
       return { data: largeList, isLoading: false };
     }
     return {
       data: [
-        { id: "u-1", name: "Alice Teacher", role: "teacher" },
-        { id: "u-2", name: "Bob Student", role: "student" },
+        { id: "u-1", name: "Alice Owner", role: "owner" },
+        { id: "u-2", name: "Bob Member", role: "member" },
       ],
       isLoading: false,
     };
   }),
   useUpdateClassroomMutation: () => [vi.fn(), { isLoading: false }],
   useRemoveCourseMemberMutation: () => [vi.fn(), { isLoading: false }],
+  useUpdateMemberRoleMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 describe("MembersTab", () => {
@@ -55,10 +56,10 @@ describe("MembersTab", () => {
       />
     );
     expect(html).toContain("Class roster is only available to members");
-    expect(html).toContain("Join Class");
+    expect(html).toContain("Join Space");
   });
 
-  it("renders instructors and students correctly", () => {
+  it("renders admins/owner and members correctly", () => {
     const html = renderToString(
       <MembersTab
         classroom={{ id: "course-1", memberCount: 2 }}
@@ -66,13 +67,13 @@ describe("MembersTab", () => {
         teacher={false}
       />
     );
-    expect(html).toContain("Instructors &amp; Teachers");
-    expect(html).toContain("Alice Teacher");
-    expect(html).toContain("Students");
-    expect(html).toContain("Bob Student");
+    expect(html).toContain("Admins &amp; Owner");
+    expect(html).toContain("Alice Owner");
+    expect(html).toContain("Members");
+    expect(html).toContain("Bob Member");
   });
 
-  it("renders invite code button for teacher", () => {
+  it("renders invite code button for staff", () => {
     const html = renderToString(
       <MembersTab
         classroom={{
@@ -80,6 +81,7 @@ describe("MembersTab", () => {
           code: "ABC12345",
           enrollmentEnabled: true,
           memberCount: 2,
+          role: "owner",
         }}
         isEnrolled={true}
         teacher={true}
@@ -96,6 +98,7 @@ describe("MembersTab", () => {
           code: "ABC12345",
           enrollmentEnabled: false,
           memberCount: 2,
+          role: "owner",
         }}
         isEnrolled={true}
         teacher={true}
@@ -104,7 +107,7 @@ describe("MembersTab", () => {
     expect(html).toContain("Code disabled");
   });
 
-  it("applies windowing and renders expand button when student count exceeds 50", () => {
+  it("applies windowing and renders expand button when member count exceeds 50", () => {
     const html = renderToString(
       <MembersTab
         classroom={{
@@ -115,11 +118,11 @@ describe("MembersTab", () => {
         teacher={false}
       />
     );
-    expect(html).toContain("Students (");
+    expect(html).toContain("Members (");
     expect(html).toContain("55");
-    expect(html).toContain("Show all 55 students");
-    expect(html).toContain("Student 50");
+    expect(html).toContain("Show all 55 members");
+    expect(html).toContain("Member 50");
     // Beyond 50 should be windowed out initially
-    expect(html).not.toContain("Student 51");
+    expect(html).not.toContain("Member 51");
   });
 });
