@@ -53,36 +53,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
 
-const SPACE_TYPE_CONFIG = {
-  ACADEMIC_CLASS: {
-    label: "Class",
-    color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  },
-  STUDY_GROUP: {
-    label: "Study Group",
-    color:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-  },
-  CLUB_SOCIETY: {
-    label: "Club & Society",
-    color:
-      "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  },
-  PROJECT_TEAM: {
-    label: "Project Team",
-    color:
-      "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20",
-  },
-  DEPARTMENT_COHORT: {
-    label: "Cohort",
-    color:
-      "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-  },
-  COMMUNITY_HUB: {
-    label: "Community",
-    color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-  },
-};
 
 export default function ClassHeader({
   classroom,
@@ -117,32 +87,15 @@ export default function ClassHeader({
         classroom?.creatorName ||
         "Space Owner";
 
-  const rawAccessType = (
-    classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "PUBLIC" : "LINK_ONLY")
-  ).toUpperCase();
-  const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(rawAccessType)
-    ? rawAccessType
-    : rawAccessType === "OPEN"
-    ? "PUBLIC"
-    : rawAccessType === "CODE"
-    ? "LINK_ONLY"
-    : "PRIVATE";
+  const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(
+    (classroom?.accessType || "").toUpperCase()
+  )
+    ? classroom.accessType.toUpperCase()
+    : "PUBLIC";
 
   const membershipStatus = classroom?.membershipStatus?.toUpperCase();
   const isPending = membershipStatus === "PENDING";
   const isRejected = membershipStatus === "REJECTED";
-
-  const spaceTypeInfo =
-    SPACE_TYPE_CONFIG[classroom?.spaceType] || SPACE_TYPE_CONFIG.ACADEMIC_CLASS;
-  const isOnline = classroom?.meetingType === "ONLINE";
-  const location = classroom?.location || classroom?.room;
-  const isMeetingLink =
-    location &&
-    (location.startsWith("http://") ||
-      location.startsWith("https://") ||
-      location.includes("zoom.us") ||
-      location.includes("meet.google"));
 
   const tags = Array.isArray(classroom?.tags) ? classroom.tags : [];
 
@@ -399,17 +352,12 @@ export default function ClassHeader({
             )}
           </div>
 
-          {/* Title, Badges & Metadata */}
+          {/* Title & Metadata */}
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="flex flex-wrap items-center gap-1.5">
               <h1 className="text-sm sm:text-base font-bold text-foreground truncate">
                 {classroom?.title || "Space"}
               </h1>
-              <span
-                className={`inline-flex items-center rounded border px-1.5 py-0.2 text-[10px] font-semibold ${spaceTypeInfo.color}`}
-              >
-                {spaceTypeInfo.label}
-              </span>
             </div>
 
             <p className="text-xs font-medium text-muted-foreground truncate">
@@ -420,35 +368,8 @@ export default function ClassHeader({
               {classroom?.subject ? ` • ${classroom.subject}` : ""}
             </p>
 
-            {/* Badges & Location Line */}
+            {/* Badges */}
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
-              {/* Meeting format */}
-              <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 font-medium">
-                {isOnline ? (
-                  <Video className="h-3 w-3 text-primary" />
-                ) : (
-                  <MapPin className="h-3 w-3 text-primary" />
-                )}
-                {isMeetingLink ? (
-                  <a
-                    href={location}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="text-primary hover:underline inline-flex items-center gap-0.5"
-                  >
-                    <span>Online Room</span>
-                    <ExternalLink className="h-2.5 w-2.5" />
-                  </a>
-                ) : (
-                  <span>
-                    {location ||
-                      (classroom?.meetingType === "ONLINE"
-                        ? "Online"
-                        : "In-Person")}
-                  </span>
-                )}
-              </span>
-
               {/* Access type */}
               <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 capitalize font-medium">
                 {accessType === "PUBLIC" ? (

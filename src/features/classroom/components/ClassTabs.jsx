@@ -1,17 +1,9 @@
 import { CLASS_TABS } from "../data/classPageData.js";
 
-export default function ClassTabs({ active, onChange, spaceType = "ACADEMIC_CLASS" }) {
-  const isAcademic = spaceType === "ACADEMIC_CLASS";
-
-  const visibleTabs = CLASS_TABS.filter((tab) => {
-    if (tab.academicOnly && !isAcademic) return false;
-    return true;
-  });
-
+export default function ClassTabs({ active, onChange }) {
   return (
     <div className="mt-2 flex gap-1 overflow-x-auto rounded-lg bg-muted/40 p-1 border border-border/60 scrollbar-none">
-      {visibleTabs.map((tab) => {
-        const label = (!isAcademic && tab.altLabel) ? tab.altLabel : tab.label;
+      {CLASS_TABS.map((tab) => {
         const isActive = active === tab.id;
         return (
           <button
@@ -23,7 +15,7 @@ export default function ClassTabs({ active, onChange, spaceType = "ACADEMIC_CLAS
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
             }`}
           >
-            {label}
+            {tab.label}
           </button>
         );
       })}

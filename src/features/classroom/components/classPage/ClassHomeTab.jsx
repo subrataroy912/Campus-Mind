@@ -4,16 +4,12 @@ import {
   BookOpen,
   Calendar,
   Clock,
-  ExternalLink,
   Globe,
   GraduationCap,
-  Layers,
-  MapPin,
   Shield,
   Tag,
   UserPlus,
   Users,
-  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -27,15 +23,6 @@ import {
 } from "../../api/courseworkApi.js";
 import { routes } from "@/routes/paths";
 
-const SPACE_LABELS = {
-  ACADEMIC_CLASS: "Class",
-  STUDY_GROUP: "Study Group",
-  CLUB_SOCIETY: "Club & Society",
-  PROJECT_TEAM: "Project Team",
-  DEPARTMENT_COHORT: "Cohort",
-  COMMUNITY_HUB: "Community Hub",
-};
-
 export function ClassHomeTab({
   isEnrolled = true,
   classroom,
@@ -43,10 +30,7 @@ export function ClassHomeTab({
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const courseId = classroom?.id;
 
-  const accessType = (
-    classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "open" : "code")
-  ).toLowerCase();
+  const accessType = (classroom?.accessType || "PUBLIC").toUpperCase();
 
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
     useGetCourseworkListQuery(
@@ -86,16 +70,6 @@ export function ClassHomeTab({
 
   const ownerAvatar =
     classroom?.owner?.avatarUrl || classroom?.ownerAvatarUrl || null;
-
-  const spaceTypeLabel = SPACE_LABELS[classroom?.spaceType] || "Space";
-  const location = classroom?.location || classroom?.room;
-  const isOnline = classroom?.meetingType === "ONLINE";
-  const isMeetingLink =
-    location &&
-    (location.startsWith("http://") ||
-      location.startsWith("https://") ||
-      location.includes("zoom.us") ||
-      location.includes("meet.google"));
 
   const tags = Array.isArray(classroom?.tags) ? classroom.tags : [];
 
@@ -162,23 +136,8 @@ export function ClassHomeTab({
           )}
         </div>
 
-        {/* Dense 4-col metadata grid */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 pt-2 border-t border-border">
-          {/* Space Type / Category */}
-          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
-            <div className="grid h-7 w-7 place-items-center rounded-md bg-primary/10 text-primary shrink-0">
-              <Layers className="h-3.5 w-3.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                Type
-              </p>
-              <p className="text-xs font-semibold text-text-heading truncate">
-                {spaceTypeLabel}
-              </p>
-            </div>
-          </div>
-
+        {/* Metadata grid */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2 border-t border-border">
           {/* Subject / Domain */}
           <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
             <div className="grid h-7 w-7 place-items-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -191,40 +150,6 @@ export function ClassHomeTab({
               <p className="text-xs font-semibold text-text-heading truncate">
                 {classroom?.subject || "General"}
               </p>
-            </div>
-          </div>
-
-          {/* Location / Meeting format */}
-          <div className="flex items-center gap-2.5 rounded-lg bg-canvas/60 p-2 border border-border/60">
-            <div className="grid h-7 w-7 place-items-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-              {isOnline ? (
-                <Video className="h-3.5 w-3.5" />
-              ) : (
-                <MapPin className="h-3.5 w-3.5" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                Format
-              </p>
-              {isMeetingLink ? (
-                <a
-                  href={location}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline truncate"
-                >
-                  <span className="truncate">Online Room</span>
-                  <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                </a>
-              ) : (
-                <p className="text-xs font-semibold text-text-heading truncate">
-                  {location ||
-                    (classroom?.meetingType === "ONLINE"
-                      ? "Online"
-                      : "In-Person")}
-                </p>
-              )}
             </div>
           </div>
 

@@ -26,7 +26,6 @@ describe("mapCreateClassPayload", () => {
       logoUrl: null,
       theme: "indigo",
       accessType: "PUBLIC",
-      visibility: "PUBLIC",
     });
 
     expect(
@@ -43,7 +42,6 @@ describe("mapCreateClassPayload", () => {
       logoUrl: null,
       theme: null,
       accessType: "LINK_ONLY",
-      visibility: "PRIVATE",
     });
 
     expect(
@@ -60,7 +58,6 @@ describe("mapCreateClassPayload", () => {
       logoUrl: null,
       theme: null,
       accessType: "PRIVATE",
-      visibility: "PUBLIC",
     });
   });
 

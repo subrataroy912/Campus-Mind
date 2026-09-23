@@ -2,20 +2,17 @@
  * Classroom domain type definitions.
  * Used as JSDoc @typedef until TypeScript migration.
  *
- * @typedef {"ACADEMIC_CLASS" | "STUDY_GROUP" | "CLUB_SOCIETY" | "PROJECT_TEAM" | "DEPARTMENT_COHORT" | "COMMUNITY_HUB"} SpaceType
+ * @typedef {"PUBLIC" | "PRIVATE" | "LINK_ONLY"} AccessType
  *
- * @typedef {"invite" | "code" | "open"} AccessType
- *
- * @typedef {"OWNER" | "ADMIN" | "MEMBER" | "VIEWER"} MemberRole
+ * @typedef {"OWNER" | "ADMIN" | "MEMBER"} MemberRole
  *
  * @typedef {Object} Space
  * @property {string} id
  * @property {string} title
  * @property {string} [description]
- * @property {SpaceType} spaceType
  * @property {AccessType} accessType
- * @property {string} [coverImage]
- * @property {string} [logoImage]
+ * @property {string} [coverUrl]
+ * @property {string} [logoUrl]
  * @property {boolean} isEnrolled
  * @property {MemberRole} role
  * @property {string} ownerId
@@ -26,7 +23,7 @@
  * @property {string} [avatarUrl]
  * @property {MemberRole} role
  *
- * @typedef {"ASSIGNMENT" | "QUIZ" | "MATERIAL" | "QUESTION"} CourseworkType
+ * @typedef {"ASSIGNMENT" | "ANNOUNCEMENT" | "MATERIAL"} CourseworkType
  *
  * @typedef {Object} Coursework
  * @property {string} id

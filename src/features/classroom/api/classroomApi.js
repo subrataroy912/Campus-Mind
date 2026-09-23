@@ -7,7 +7,7 @@ const exploreTags = [
 ];
 
 const discoveryFieldsChanged = (changes = {}) =>
-  ["title", "subject", "visibility", "status"].some((field) =>
+  ["title", "subject", "status"].some((field) =>
     Object.prototype.hasOwnProperty.call(changes, field),
   );
 
@@ -31,14 +31,9 @@ const normalizeCourse = (response = {}) => {
     subtitle: course.section ?? course.subtitle ?? course.term ?? "",
     section: course.section ?? course.subtitle ?? "",
     code: course.code ?? course.enrollmentCode ?? course.classCode ?? "",
-    spaceType: course.spaceType || "ACADEMIC_CLASS",
-    meetingType: course.meetingType || "IN_PERSON",
-    location: course.location || "",
     tags: Array.isArray(course.tags) ? course.tags : [],
     links: Array.isArray(course.links) ? course.links : [],
-    accessType: (
-      course.accessType || (course.visibility === "PUBLIC" ? "PUBLIC" : "LINK_ONLY")
-    ).toUpperCase(),
+    accessType: (course.accessType || "PUBLIC").toUpperCase(),
     membershipStatus: course.membershipStatus ?? null,
     inviteToken: course.inviteToken ?? null,
     inviteUrl: course.inviteUrl ?? null,

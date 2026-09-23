@@ -7,14 +7,6 @@ import { classroomApi } from "../api/classroomApi.js";
 import { store } from "@/app/store.js";
 import { routes } from "@/routes/paths";
 
-const SPACE_LABELS = {
-  ACADEMIC_CLASS: "Class",
-  STUDY_GROUP: "Study Group",
-  CLUB_SOCIETY: "Club",
-  PROJECT_TEAM: "Project",
-  DEPARTMENT_COHORT: "Cohort",
-  COMMUNITY_HUB: "Community",
-};
 
 function ClassCard({ classroom, priority = false }) {
   const classTheme = getClassTheme(classroom);
@@ -34,16 +26,12 @@ function ClassCard({ classroom, priority = false }) {
     (classroom.ownerName ? { name: classroom.ownerName } : null);
   const owner = ownerObj;
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
-  const spaceLabel = SPACE_LABELS[classroom.spaceType] || "Space";
   const category = classroom.subject
     ? formatDisplayText(classroom.subject)
     : classroom.role === "Created"
     ? "Lead"
     : "";
-  const accessType = (
-    classroom.accessType ||
-    (classroom.visibility === "PUBLIC" ? "open" : "code")
-  ).toLowerCase();
+  const accessType = (classroom.accessType || "PUBLIC").toUpperCase();
 
   return (
     <Link
@@ -73,7 +61,7 @@ function ClassCard({ classroom, priority = false }) {
           {/* Top Row inside Banner: Badges */}
           <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
             <span className="inline-flex items-center rounded-md bg-black/40 backdrop-blur-xs px-2 py-0.5 text-[10px] font-semibold text-white border border-white/20">
-              {spaceLabel}
+              {"Space"}
             </span>
             {accessType === "invite" ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-black/50 backdrop-blur-xs px-2 py-0.5 text-[10px] font-medium text-white border border-white/20">

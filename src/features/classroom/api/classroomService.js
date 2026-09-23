@@ -6,12 +6,6 @@ export function mapCreateClassPayload(details = {}) {
   const rawAccessType = (details.accessType || "").toUpperCase();
   const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(rawAccessType)
     ? rawAccessType
-    : rawAccessType === "OPEN"
-    ? "PUBLIC"
-    : rawAccessType === "CODE" || rawAccessType === "INVITE"
-    ? "LINK_ONLY"
-    : details.visibility === "PUBLIC"
-    ? "PUBLIC"
     : "PUBLIC";
 
   const payload = {
@@ -23,14 +17,8 @@ export function mapCreateClassPayload(details = {}) {
     logoUrl: details.logoUrl ?? details.logo ?? null,
     theme: details.theme ?? null,
     accessType,
-    visibility:
-      details.visibility ??
-      (accessType === "LINK_ONLY" ? "PRIVATE" : "PUBLIC"),
   };
 
-  if (details.spaceType) payload.spaceType = details.spaceType;
-  if (details.meetingType) payload.meetingType = details.meetingType;
-  if (details.location) payload.location = details.location;
   if (details.tags && details.tags.length > 0) payload.tags = details.tags;
   if (details.links && details.links.length > 0) payload.links = details.links;
 

@@ -1,6 +1,5 @@
-import { useState, useMemo } from "react";
 import { Link } from "react-router";
-import { Plus, Ticket, Loader2, Filter } from "lucide-react";
+import { Plus, Ticket, Loader2 } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
@@ -9,29 +8,12 @@ import EmptyState from "@/components/common/EmptyState.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
 
-const FILTER_OPTIONS = [
-  { value: "ALL", label: "All Spaces" },
-  { value: "ACADEMIC_CLASS", label: "Classes" },
-  { value: "STUDY_GROUP", label: "Study Groups" },
-  { value: "CLUB_SOCIETY", label: "Clubs" },
-  { value: "PROJECT_TEAM", label: "Projects" },
-  { value: "COMMUNITY_HUB", label: "Community" },
-];
-
 export default function SpaceListPage() {
   const { user } = useAuth();
-  const [selectedType, setSelectedType] = useState("ALL");
 
   const { classrooms = [], status } = useDashboardData({
     includeExplore: false,
   });
-
-  const filteredSpaces = useMemo(() => {
-    if (selectedType === "ALL") return classrooms;
-    return classrooms.filter(
-      (c) => (c.spaceType || "ACADEMIC_CLASS") === selectedType,
-    );
-  }, [classrooms, selectedType]);
 
   if (status === "loading" || status === "idle") {
     return (
@@ -82,44 +64,7 @@ export default function SpaceListPage() {
         </div>
       </header>
 
-      {/* Filter Tabs - Compact High-Density Pills */}
-      {classrooms.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-          {FILTER_OPTIONS.map((opt) => {
-            const count =
-              opt.value === "ALL"
-                ? classrooms.length
-                : classrooms.filter(
-                    (c) => (c.spaceType || "ACADEMIC_CLASS") === opt.value,
-                  ).length;
-            if (opt.value !== "ALL" && count === 0) return null;
 
-            const isSelected = selectedType === opt.value;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setSelectedType(opt.value)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
-                  isSelected
-                    ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
-                    : "bg-muted/40 text-muted-foreground border border-border/60 hover:bg-muted/70 hover:text-foreground"
-                }`}
-              >
-                <span>{opt.label}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0.2 text-[10px] font-semibold ${
-                    isSelected
-                      ? "bg-primary-foreground/20 text-primary-foreground"
-                      : "bg-background text-muted-foreground"
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {/* Space Cards Grid */}
       <section>
@@ -134,14 +79,10 @@ export default function SpaceListPage() {
             description="Join an existing space with an invite code or create a space."
             action={{ to: routes.classes.join, label: "Join a space" }}
           />
-        ) : filteredSpaces.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-xs text-text-muted">
-            No spaces found in this category.
-          </div>
         ) : (
           <ContentList
             layout="grid"
-            items={filteredSpaces}
+            items={classrooms}
             renderItem={(classroom) => <ClassCard classroom={classroom} />}
           />
         )}

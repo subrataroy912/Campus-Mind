@@ -197,7 +197,6 @@ export default function SpacePage() {
 
         <ClassTabs
           active={activeTab}
-          spaceType={classroom?.spaceType}
           onChange={(nextTab) => {
             setSearchParams((prev) => {
               const next = new URLSearchParams(prev);
