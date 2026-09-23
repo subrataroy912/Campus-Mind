@@ -42,8 +42,6 @@ function GradeChip({ status }) {
 export function GradesTab({
   isStaff: isStaffProp,
   isEnrolled = true,
-  onJoin,
-  isJoining = false,
 }) {
   const isStaff = Boolean(isStaffProp);
   const [selected, setSelected] = useState(null);

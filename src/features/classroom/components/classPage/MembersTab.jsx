@@ -176,8 +176,6 @@ export function MembersTab({
   classroom,
   isStaff: isStaffProp,
   isEnrolled = true,
-  onJoin,
-  isJoining = false,
 }) {
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);

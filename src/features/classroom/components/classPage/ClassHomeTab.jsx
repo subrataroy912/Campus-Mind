@@ -38,8 +38,6 @@ const SPACE_LABELS = {
 
 export function ClassHomeTab({
   isEnrolled = true,
-  onJoin,
-  isJoining = false,
   classroom,
 }) {
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);

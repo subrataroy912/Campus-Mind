@@ -25,8 +25,6 @@ export function ClassworkTab({
   classId,
   classroom,
   isEnrolled = true,
-  onJoin,
-  isJoining = false,
 }) {
   const { authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
