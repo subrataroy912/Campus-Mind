@@ -53,7 +53,8 @@ const MemberRow = React.memo(function MemberRow({
   // - Cannot manage space owner
   // - Space owner can manage admins and members
   // - Space admin can manage regular members only
-  const canManage = !isOwner && (isCurrentOwner || (isCurrentAdmin && isMember));
+  const canManage =
+    !isOwner && (isCurrentOwner || (isCurrentAdmin && isMember));
 
   return (
     <div className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-canvas/50 transition-colors">
@@ -184,7 +185,8 @@ export function MembersTab({
   const [showAllMembers, setShowAllMembers] = useState(false);
   const { user, authStatus } = useAuth();
 
-  const [updateClassroom, { isLoading: isUpdatingInvite }] = useUpdateClassroomMutation();
+  const [updateClassroom, { isLoading: isUpdatingInvite }] =
+    useUpdateClassroomMutation();
   const [removeCourseMember] = useRemoveCourseMemberMutation();
   const [updateMemberRole] = useUpdateMemberRoleMutation();
 
@@ -192,8 +194,10 @@ export function MembersTab({
   const isCurrentOwner =
     String(classroom?.role || "").toLowerCase() === "owner" ||
     Boolean(currentUserId && classroom?.ownerId === currentUserId);
-  const isCurrentAdmin = String(classroom?.role || "").toLowerCase() === "admin";
-  const isStaff = isStaffProp !== undefined ? isStaffProp : (isCurrentOwner || isCurrentAdmin);
+  const isCurrentAdmin =
+    String(classroom?.role || "").toLowerCase() === "admin";
+  const isStaff =
+    isStaffProp !== undefined ? isStaffProp : isCurrentOwner || isCurrentAdmin;
 
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;
@@ -203,7 +207,9 @@ export function MembersTab({
         changes: { enrollmentEnabled: !isCurrentlyEnabled },
       }).unwrap();
       toast.add({
-        title: !isCurrentlyEnabled ? "Invite code enabled" : "Invite code disabled",
+        title: !isCurrentlyEnabled
+          ? "Invite code enabled"
+          : "Invite code disabled",
         description: !isCurrentlyEnabled
           ? "New members can now join with the space code."
           : "Joining with code has been turned off for this space.",
@@ -212,7 +218,8 @@ export function MembersTab({
     } catch (err) {
       toast.add({
         title: "Update failed",
-        description: parseApiError(err, "Failed to update invite code setting.").message,
+        description: parseApiError(err, "Failed to update invite code setting.")
+          .message,
         type: "error",
       });
     }
@@ -234,7 +241,8 @@ export function MembersTab({
     } catch (err) {
       toast.add({
         title: "Removal failed",
-        description: parseApiError(err, "Failed to remove member from space.").message,
+        description: parseApiError(err, "Failed to remove member from space.")
+          .message,
         type: "error",
       });
     } finally {
@@ -259,7 +267,8 @@ export function MembersTab({
     } catch (err) {
       toast.add({
         title: "Update failed",
-        description: parseApiError(err, "Failed to update member role.").message,
+        description: parseApiError(err, "Failed to update member role.")
+          .message,
         type: "error",
       });
     } finally {
@@ -277,7 +286,7 @@ export function MembersTab({
     classroom?.id,
     {
       skip: authStatus === "hydrating" || !classroom?.id || !isStaff,
-    }
+    },
   );
 
   const handleApproveRequest = async (applicantUserId) => {
@@ -295,7 +304,8 @@ export function MembersTab({
     } catch (err) {
       toast.add({
         title: "Approval failed",
-        description: parseApiError(err, "Failed to approve join request.").message,
+        description: parseApiError(err, "Failed to approve join request.")
+          .message,
         type: "error",
       });
     } finally {
@@ -318,7 +328,8 @@ export function MembersTab({
     } catch (err) {
       toast.add({
         title: "Decline failed",
-        description: parseApiError(err, "Failed to decline join request.").message,
+        description: parseApiError(err, "Failed to decline join request.")
+          .message,
         type: "error",
       });
     } finally {
@@ -336,7 +347,7 @@ export function MembersTab({
     return roster.filter((member) =>
       String(member?.name || member?.displayName || "")
         .toLowerCase()
-        .includes(q)
+        .includes(q),
     );
   }, [roster, query]);
 
@@ -397,7 +408,9 @@ export function MembersTab({
           <div className="divide-y divide-border/60 rounded-lg border border-border/60 bg-card overflow-hidden">
             {pendingRequests.map((req) => {
               const applicantName = req.name || req.handle || "Applicant";
-              const applicantHandle = req.handle ? `@${req.handle}` : req.email || "";
+              const applicantHandle = req.handle
+                ? `@${req.handle}`
+                : req.email || "";
               const isProcessing = processingRequestId === req.userId;
               return (
                 <div
@@ -430,7 +443,9 @@ export function MembersTab({
                       className="h-7 text-xs font-semibold gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
                       <Check className="h-3 w-3" />
-                      <span>{isProcessing && isApproving ? "Accepting…" : "Accept"}</span>
+                      <span>
+                        {isProcessing && isApproving ? "Accepting…" : "Accept"}
+                      </span>
                     </Button>
                     <Button
                       variant="outline"
@@ -440,7 +455,9 @@ export function MembersTab({
                       className="h-7 text-xs font-medium gap-1 text-destructive hover:text-destructive border-border/70"
                     >
                       <X className="h-3 w-3" />
-                      <span>{isProcessing && isDeclining ? "Declining…" : "Decline"}</span>
+                      <span>
+                        {isProcessing && isDeclining ? "Declining…" : "Decline"}
+                      </span>
                     </Button>
                   </div>
                 </div>
@@ -535,7 +552,10 @@ export function MembersTab({
                   Members ({generalMembers.length})
                 </h3>
                 <div className="grid overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card sm:grid-cols-2 sm:divide-x">
-                  {(showAllMembers ? generalMembers : generalMembers.slice(0, 50)).map((m) => (
+                  {(showAllMembers
+                    ? generalMembers
+                    : generalMembers.slice(0, 50)
+                  ).map((m) => (
                     <MemberRow
                       key={m.id || m.userId}
                       member={m}

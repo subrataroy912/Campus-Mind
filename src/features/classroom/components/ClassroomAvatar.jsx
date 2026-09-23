@@ -10,13 +10,7 @@ export function ClassroomAvatar({
 }) {
   const safeAvatar =
     typeof avatar === "string" && avatar.trim() ? avatar : null;
-
-  const targetLink =
-    to !== "#"
-      ? to
-      : userId
-      ? routes.user(userId)
-      : "#";
+  const targetLink = to !== "#" ? to : userId ? routes.user(userId) : "#";
 
   const content = (
     <>

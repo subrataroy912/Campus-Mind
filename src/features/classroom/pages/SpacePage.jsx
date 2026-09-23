@@ -92,7 +92,7 @@ export default function SpacePage() {
     } catch (err) {
       const message = parseApiError(
         err,
-        "Failed to join space. Please try again."
+        "Failed to join space. Please try again.",
       ).message;
       setLocalJoinError(message);
     }
@@ -231,10 +231,7 @@ export default function SpacePage() {
         )}
 
         {activeTab === "quick-links" && (
-          <ClassQuickLinks
-            classroom={classroom}
-            isStaff={isStaff}
-          />
+          <ClassQuickLinks classroom={classroom} isStaff={isStaff} />
         )}
 
         {activeTab === "members" && (

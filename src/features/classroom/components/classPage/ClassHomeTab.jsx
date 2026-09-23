@@ -20,15 +20,29 @@ import ClassFeedPost from "../ClassFeedPost.jsx";
 import {
   useGetCourseworkListQuery,
   useCreateCourseworkMutation,
+  useUpdateCourseworkMutation,
+  useDeleteCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { useAuth } from "@/context/AuthContext.jsx";
+import { isStaffRole } from "../../utils/roles.js";
 import { routes } from "@/routes/paths";
+import { toast } from "@/components/ui/toast.jsx";
+import { parseApiError } from "@/lib/errorUtils.js";
 
 export function ClassHomeTab({
   isEnrolled = true,
   classroom,
+  isStaff: propIsStaff,
 }) {
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  const { user } = useAuth();
   const courseId = classroom?.id;
+
+  const isStaff =
+    propIsStaff ??
+    (isStaffRole(classroom?.role) ||
+      (Boolean(user?.id) &&
+        (user.id === classroom?.ownerId || user.id === classroom?.creatorId)));
 
   const accessType = (classroom?.accessType || "PUBLIC").toUpperCase();
 
@@ -38,8 +52,12 @@ export function ClassHomeTab({
       { skip: !courseId },
     );
 
-  const [createCoursework] = useCreateCourseworkMutation();
-  // Show both ANNOUNCEMENT posts and any stream updates
+  const [createCoursework, { isLoading: isPosting }] =
+    useCreateCourseworkMutation();
+  const [updateCoursework] = useUpdateCourseworkMutation();
+  const [deleteCoursework] = useDeleteCourseworkMutation();
+
+  // Show ANNOUNCEMENT posts and activity cards (MATERIAL, ASSIGNMENT)
   const announcements = useMemo(() => {
     const list = courseworkPage?.content ?? [];
     return list.filter(
@@ -50,17 +68,107 @@ export function ClassHomeTab({
         !item.type,
     );
   }, [courseworkPage]);
-  const handlePostAnnouncement = async (text) => {
-    if (!text?.trim() || !courseId) return;
-    await createCoursework({
-      courseId,
-      payload: {
-        type: "ANNOUNCEMENT",
-        title: "Announcement",
-        description: text.trim(),
-        status: "PUBLISHED",
-      },
-    }).unwrap();
+
+  const handlePostAnnouncement = async (input) => {
+    if (!courseId) return;
+    const text = typeof input === "string" ? input : input?.text;
+    const attachments =
+      typeof input === "object" && Array.isArray(input?.attachments)
+        ? input.attachments
+        : [];
+
+    if (!text?.trim() && attachments.length === 0) return;
+
+    try {
+      await createCoursework({
+        courseId,
+        payload: {
+          type: "ANNOUNCEMENT",
+          title: "Announcement",
+          description: text ? text.trim() : "",
+          attachments,
+          status: "PUBLISHED",
+        },
+      }).unwrap();
+      toast.add({
+        title: "Announcement posted",
+        description: "Your post is now live in the space stream.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Failed to post announcement",
+        description: parseApiError(err, "Unable to post your announcement.")
+          .message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleEditPost = async (courseworkId, changes) => {
+    try {
+      await updateCoursework({
+        courseId,
+        courseworkId,
+        changes,
+      }).unwrap();
+      toast.add({
+        title: "Post updated",
+        description: "Your changes have been saved.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Update failed",
+        description: parseApiError(err, "Unable to save your edits.").message,
+        type: "error",
+      });
+      throw err;
+    }
+  };
+
+  const handleDeletePost = async (courseworkId) => {
+    try {
+      await deleteCoursework({
+        courseId,
+        courseworkId,
+      }).unwrap();
+      toast.add({
+        title: "Post deleted",
+        description: "Announcement removed from the space.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Delete failed",
+        description: parseApiError(err, "Unable to delete announcement.")
+          .message,
+        type: "error",
+      });
+    }
+  };
+
+  const handlePinPost = async (courseworkId, pinned) => {
+    try {
+      await updateCoursework({
+        courseId,
+        courseworkId,
+        changes: { pinned },
+      }).unwrap();
+      toast.add({
+        title: pinned ? "Post pinned" : "Post unpinned",
+        description: pinned
+          ? "Announcement pinned to the top of the stream."
+          : "Announcement unpinned from stream header.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Pin action failed",
+        description: parseApiError(err, "Unable to update pin status.").message,
+        type: "error",
+      });
+    }
   };
 
   const ownerName =
@@ -102,7 +210,9 @@ export function ClassHomeTab({
               You are previewing this space
             </h3>
             <p className="text-xs text-text-muted max-w-xl leading-relaxed">
-              Use the join button in the header above to participate in discussions, access shared resources, submit coursework, and connect with peers.
+              Use the join button in the header above to participate in
+              discussions, access shared resources, submit coursework, and
+              connect with peers.
             </p>
           </div>
         </div>
@@ -238,11 +348,16 @@ export function ClassHomeTab({
           )}
         </div>
 
-        {isEnrolled && <ClassPostBox onSubmit={handlePostAnnouncement} />}
+        {isEnrolled && (
+          <ClassPostBox
+            onSubmit={handlePostAnnouncement}
+            isSubmitting={isPosting}
+          />
+        )}
 
         {isLoadingCoursework && announcements.length === 0 ? (
           <div className="rounded-xl bg-surface p-5 text-center text-xs text-text-muted ring-1 ring-border shadow-xs">
-            Loading space updates•
+            Loading space updates…
           </div>
         ) : announcements.length === 0 ? (
           <EmptyState
@@ -254,10 +369,12 @@ export function ClassHomeTab({
             {announcements.map((post) => (
               <ClassFeedPost
                 key={post.id}
-                post={{
-                  ...post,
-                  ownerName,
-                }}
+                post={post}
+                isStaff={isStaff}
+                currentUser={user}
+                onEdit={handleEditPost}
+                onDelete={handleDeletePost}
+                onPin={handlePinPost}
               />
             ))}
           </div>

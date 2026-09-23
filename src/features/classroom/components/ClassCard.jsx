@@ -7,7 +7,6 @@ import { classroomApi } from "../api/classroomApi.js";
 import { store } from "@/app/store.js";
 import { routes } from "@/routes/paths";
 
-
 function ClassCard({ classroom, priority = false }) {
   const classTheme = getClassTheme(classroom);
 
@@ -16,7 +15,7 @@ function ClassCard({ classroom, priority = false }) {
       store.dispatch(
         classroomApi.util.prefetch("findClassroomById", classroom.id, {
           force: false,
-        })
+        }),
       );
     }
   };
@@ -29,8 +28,8 @@ function ClassCard({ classroom, priority = false }) {
   const category = classroom.subject
     ? formatDisplayText(classroom.subject)
     : classroom.role === "Created"
-    ? "Lead"
-    : "";
+      ? "Lead"
+      : "";
   const accessType = (classroom.accessType || "PUBLIC").toUpperCase();
 
   return (

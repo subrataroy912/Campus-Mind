@@ -10,6 +10,10 @@ const normalizeCoursework = (item = {}) => ({
   dueAt: item.dueAt ?? item.dueDate ?? null,
   maximumPoints: item.maximumPoints ?? item.pointsPossible ?? null,
   attachments: item.attachments ?? [],
+  pinned: Boolean(item.pinned),
+  creatorName: item.creatorName ?? null,
+  creatorAvatarUrl: item.creatorAvatarUrl ?? null,
+  creatorHandle: item.creatorHandle ?? null,
   submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
   totalCount: item.totalCount ?? 0,
 });

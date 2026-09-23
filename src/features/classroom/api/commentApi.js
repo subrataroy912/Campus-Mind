@@ -3,8 +3,16 @@ import { baseApi } from "@/app/baseApi.js";
 const normalizeComment = (comment = {}) => ({
   ...comment,
   id: comment.id ?? comment.commentId,
-  content: comment.content ?? comment.message ?? "",
-  author: comment.author ?? { name: comment.authorName ?? "User" },
+  content: comment.content ?? comment.body ?? comment.message ?? "",
+  author: comment.author ?? {
+    id: comment.authorId ?? null,
+    name: comment.authorName ?? "User",
+    avatarUrl: comment.authorAvatarUrl ?? null,
+    handle: comment.authorHandle ?? null,
+  },
+  authorName: comment.authorName ?? comment.author?.name ?? "User",
+  authorAvatarUrl: comment.authorAvatarUrl ?? comment.author?.avatarUrl ?? null,
+  authorHandle: comment.authorHandle ?? comment.author?.handle ?? null,
   createdAt: comment.createdAt ?? comment.created_at ?? null,
 });
 
