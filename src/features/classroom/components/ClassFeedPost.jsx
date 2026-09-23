@@ -82,7 +82,6 @@ export default function ClassFeedPost({
     post.creatorName ||
     (typeof post.author === "string" ? post.author : post.author?.name) ||
     "Space Member";
-
   const authorAvatar =
     post.creatorAvatarUrl ||
     (typeof post.author === "object" ? post.author?.avatarUrl : null);
@@ -105,9 +104,7 @@ export default function ClassFeedPost({
 
   const content = post.description || post.content || post.title || "";
   const displayTime =
-    formatPostDate(post.publishedAt || post.createdAt) ||
-    post.time ||
-    "";
+    formatPostDate(post.publishedAt || post.createdAt) || post.time || "";
 
   const isAssignment = post.type === "ASSIGNMENT";
   const isMaterial = post.type === "MATERIAL";
@@ -510,10 +507,7 @@ export default function ClassFeedPost({
                       comment.userId ||
                       null;
                     const commentText =
-                      comment.content ||
-                      comment.body ||
-                      comment.message ||
-                      "";
+                      comment.content || comment.body || comment.message || "";
                     const commentTime = formatPostDate(comment.createdAt);
 
                     return (
@@ -559,7 +553,10 @@ export default function ClassFeedPost({
               </div>
 
               {/* Reply Form */}
-              <form onSubmit={submitReply} className="mt-2.5 flex items-center gap-2">
+              <form
+                onSubmit={submitReply}
+                className="mt-2.5 flex items-center gap-2"
+              >
                 <ClassroomAvatar
                   name={
                     currentUser?.name ||
