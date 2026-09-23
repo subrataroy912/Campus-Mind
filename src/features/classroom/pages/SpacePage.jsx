@@ -21,6 +21,7 @@ import {
   MembersTab,
 } from "../components/classPage/index.js";
 import { useCourseContextSync } from "../hooks/useCourseContext.js";
+import EmptyState from "@/components/common/EmptyState.jsx";
 
 export default function SpacePage() {
   const { classId } = useParams();
@@ -125,52 +126,40 @@ export default function SpacePage() {
   const isNotFound =
     !classroom || error?.status === 404 || error?.data?.status === 404;
 
-  // TODO:: Have to make a reusable component
   if (isNotFound) {
     return (
-      <div className="grid min-h-screen place-items-center bg-canvas px-4 py-8">
-        <div className="max-w-md rounded-2xl bg-surface p-6 shadow-xs ring-1 ring-border">
-          <h2 className="text-lg font-semibold text-text-heading">
-            Classroom Not Found
-          </h2>
-          <p className="mt-2 text-sm text-text-muted">
-            This classroom is unavailable or you are not enrolled as a member
-            yet.
-          </p>
-          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
-            <Link
-              to={`${routes.classes.join}?courseId=${encodeURIComponent(
-                classId || "",
-              )}`}
-              className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover shadow-xs"
-            >
-              Join this class
-            </Link>
-            <Link
-              to={routes.classes.list}
-              className="inline-flex items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-medium text-text-main transition hover:bg-canvas"
-            >
-              Back to classes
-            </Link>
-          </div>
+      <div className="grid min-h-[60vh] place-items-center px-4 py-8">
+        <div className="w-full max-w-md">
+          <EmptyState
+            title="Space Not Found"
+            description="This space is unavailable or you are not enrolled as a member yet."
+            action={{
+              label: "Explore Spaces",
+              to: routes.spaces.list,
+            }}
+          />
         </div>
       </div>
     );
   }
 
-  // TODO:: Have to make a reusable component
-  if (error) {
+  if (error || !classroom) {
     return (
-      <div className="grid min-h-screen place-items-center bg-canvas text-text-muted text-sm">
-        This class is unavailable at the moment.
-      </div>
-    );
-  }
-
-  if (!classroom) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-canvas text-text-muted text-sm">
-        Class not found.
+      <div className="grid min-h-[60vh] place-items-center px-4 py-8">
+        <div className="w-full max-w-md">
+          <EmptyState
+            title="Space Unavailable"
+            description={
+              error
+                ? parseApiError(error, "Unable to load space details.").message
+                : "Space not found."
+            }
+            action={{
+              label: "Back to Spaces",
+              to: routes.spaces.list,
+            }}
+          />
+        </div>
       </div>
     );
   }

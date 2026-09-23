@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge.jsx";
 import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { useNavigate } from "react-router";
+import { routes } from "@/routes/paths.js";
 
 export default function NotificationsMenu() {
   const [open, setOpen] = useState(false);
@@ -82,9 +83,18 @@ export default function NotificationsMenu() {
                 size="md"
                 onMarkRead={handleMarkNotificationRead}
                 onClick={(item) => {
-                  if (item.link) {
+                  const targetLink =
+                    item.link ||
+                    (item.courseId
+                      ? routes.spaces.detail(item.courseId)
+                      : item.resourceType === "SUBMISSION" && item.resourceId
+                        ? routes.spaces.detail(item.resourceId)
+                        : item.resourceType === "ANNOUNCEMENT" || item.resourceType === "POST_COMMENT"
+                          ? routes.spaces.detail(item.courseId || item.resourceId)
+                          : null);
+                  if (targetLink) {
                     setOpen(false);
-                    navigate(item.link); /*TODO :: have to change it.*/
+                    navigate(targetLink);
                   }
                 }}
               />

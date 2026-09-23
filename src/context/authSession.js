@@ -64,6 +64,12 @@ export function commitAuthSession(dispatch, record) {
     throw new Error("Cannot commit an invalid authenticated session.");
   }
   setStoredSessionHint(true);
+  if (session.user?.id) {
+    safeLocalStorageSet(
+      SESSION_KEY,
+      JSON.stringify({ userId: session.user.id }),
+    );
+  }
   dispatch(setSession(session));
   return session;
 }
@@ -89,6 +95,12 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
     canCreateCourses: Boolean(profile.canCreateCourses ?? current.user?.canCreateCourses),
     isAdmin: Boolean(profile.isAdmin ?? current.user?.isAdmin),
   };
+  if (user?.id) {
+    safeLocalStorageSet(
+      SESSION_KEY,
+      JSON.stringify({ userId: user.id }),
+    );
+  }
   return { ...current, user };
 }
 
