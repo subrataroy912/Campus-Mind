@@ -63,12 +63,11 @@ export default function DashboardHeader() {
         </Button>
 
         <BrandLogo fetchPriority="high" to={routes.dashboard} />
-
-        <NavbarSearch />
       </div>
 
       {/* Right: User Profile and Actions */}
       <div className="flex shrink-0 items-center gap-1.5">
+        <NavbarSearch />
         <ThemeToggle />
         <NotificationsMenu />
 
