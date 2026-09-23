@@ -305,7 +305,7 @@ export default function ProfilePage() {
             title={isOwner ? "Spaces you manage" : "Spaces they manage"}
             description={
               isOwner
-                ? "Spaces where you are an admin or teacher."
+                ? "Spaces where you are an owner or admin."
                 : "Spaces managed by this user."
             }
             icon={Shield}

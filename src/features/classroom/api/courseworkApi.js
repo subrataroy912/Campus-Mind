@@ -125,7 +125,7 @@ export const courseworkApi = baseApi.injectEndpoints({
       transformResponse: normalizeGradebook,
       providesTags: (_result, _error, { courseId, studentId }) => [{ type: "Coursework", id: `GRADEBOOK-${courseId}-${studentId}` }],
     }),
-    getTeacherGradebook: builder.query({
+    getCourseGradebook: builder.query({
       query: (courseId) => `/analytics/courses/${courseId}/gradebook`,
       transformResponse: (response) => {
         const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -139,7 +139,7 @@ export const courseworkApi = baseApi.injectEndpoints({
         }));
       },
       providesTags: (_result, _error, courseId) => [
-        { type: "Coursework", id: `TEACHER-GRADEBOOK-${courseId}` },
+        { type: "Coursework", id: `COURSE-GRADEBOOK-${courseId}` },
       ],
     }),
     getCourseAnalyticsSummary: builder.query({
@@ -232,9 +232,12 @@ export const {
   useGetSubmissionListQuery,
   useGetMySubmissionQuery,
   useGetStudentGradebookQuery,
-  useGetTeacherGradebookQuery,
+  useGetCourseGradebookQuery,
   useGetCourseAnalyticsSummaryQuery,
   useStartSubmissionMutation,
   useSaveSubmissionMutation,
   useGradeSubmissionMutation,
 } = courseworkApi;
+
+// Modern member-centric aliases
+export const useGetMemberGradebookQuery = useGetStudentGradebookQuery;

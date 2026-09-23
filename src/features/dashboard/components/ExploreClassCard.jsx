@@ -31,7 +31,12 @@ function formatLearners(count) {
   return `${value} learners`;
 }
 
-function ExploreClassCard({ classroom, className = "", priority = false }) {
+function ExploreClassCard({
+  classroom,
+  className = "",
+  priority = false,
+  isEnrolled,
+}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { classrooms = [] } = useDashboardData({ includeExplore: false });
@@ -56,12 +61,19 @@ function ExploreClassCard({ classroom, className = "", priority = false }) {
   const accessType = (classroom?.accessType || ACCESS_TYPES.OPEN).toUpperCase();
   const classTheme = getClassTheme(classroom);
 
-  const isAlreadyEnrolled = classrooms.some(
-    (item) =>
-      item.id === courseId ||
-      item.courseId === courseId ||
-      item.classId === courseId,
-  );
+  const isAlreadyEnrolled =
+    typeof isEnrolled === "boolean"
+      ? isEnrolled
+      : Boolean(
+          classroom?.isEnrolled ||
+            classroom?.enrolled ||
+            classrooms.some(
+              (item) =>
+                item.id === courseId ||
+                item.courseId === courseId ||
+                item.classId === courseId,
+            ),
+        );
 
   const learnersCount = formatLearners(
     classroom?.enrollmentCount ?? classroom?.memberCount ?? 0,

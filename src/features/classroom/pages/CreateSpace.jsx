@@ -26,8 +26,8 @@ import { routes } from "@/routes/paths.js";
 const ACCESS_OPTIONS = [
   {
     id: "code",
-    title: "Class Code",
-    description: "Students enter an 8-character enrollment code you share.",
+    title: "Space Code",
+    description: "Members enter an 8-character enrollment code you share.",
     icon: KeyRound,
   },
   {

@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isStaffRole, isTeacherRole, isUserEnrolled } from "./roles.js";
+import { isStaffRole, isUserEnrolled } from "./roles.js";
 
 describe("isStaffRole", () => {
   it.each(["created", "Created", "ADMIN", "admin", "OWNER", "Owner"])(
     "accepts staff role variant %s",
     (role) => {
       expect(isStaffRole(role)).toBe(true);
-      expect(isTeacherRole(role)).toBe(true);
     }
   );
 
@@ -14,7 +13,6 @@ describe("isStaffRole", () => {
     "rejects non-staff role %s",
     (role) => {
       expect(isStaffRole(role)).toBe(false);
-      expect(isTeacherRole(role)).toBe(false);
     }
   );
 });
@@ -31,9 +29,8 @@ describe("isUserEnrolled", () => {
     expect(isUserEnrolled({ role: "VIEWER" })).toBe(false);
   });
 
-  it("returns true when user is owner, teacher, or creator", () => {
+  it("returns true when user is owner or creator", () => {
     expect(isUserEnrolled({ ownerId: "u1" }, "u1")).toBe(true);
-    expect(isUserEnrolled({ teacherId: "u2" }, "u2")).toBe(true);
     expect(isUserEnrolled({ creatorId: "u3" }, "u3")).toBe(true);
   });
 

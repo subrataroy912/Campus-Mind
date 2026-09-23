@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Flame, Loader2, Sparkles } from "lucide-react";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
@@ -5,6 +6,7 @@ import FilterButton from "./FilterButton.jsx";
 import ExploreCardSkeleton from "./ExploreCardSkeleton.jsx";
 import ExplorePagination from "./ExplorePagination.jsx";
 import { BUILT_IN_CLASS_FILTERS } from "../model/exploreConstants.js";
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 
 export default function ExploreClassesTab({
   classes = [],
@@ -24,6 +26,18 @@ export default function ExploreClassesTab({
     classFilter === "all" && !debouncedSearchQuery && page === 0;
   const trendingItems = isDefaultBrowse ? classes.slice(0, 4) : [];
   const mainGridItems = isDefaultBrowse ? classes.slice(4) : classes;
+
+  const { classrooms = [] } = useDashboardData({ includeExplore: false });
+  const enrolledIds = useMemo(() => {
+    const ids = new Set();
+    for (const item of classrooms) {
+      if (item.id) ids.add(item.id);
+      if (item.courseId) ids.add(item.courseId);
+      if (item.classId) ids.add(item.classId);
+      if (item._id) ids.add(item._id);
+    }
+    return ids;
+  }, [classrooms]);
 
   const showSkeletons = isLoading && !pageData;
   const hasClasses = classes.length > 0;
@@ -109,6 +123,9 @@ export default function ExploreClassesTab({
                   <ExploreClassCard
                     key={classroom.courseId || classroom.id || classroom._id}
                     classroom={classroom}
+                    isEnrolled={enrolledIds.has(
+                      classroom.courseId || classroom.id || classroom._id || classroom.classId,
+                    )}
                   />
                 ))}
               </div>
@@ -127,6 +144,9 @@ export default function ExploreClassesTab({
               <ExploreClassCard
                 key={classroom.courseId || classroom.id || classroom._id}
                 classroom={classroom}
+                isEnrolled={enrolledIds.has(
+                  classroom.courseId || classroom.id || classroom._id || classroom.classId,
+                )}
               />
             ))}
           </div>

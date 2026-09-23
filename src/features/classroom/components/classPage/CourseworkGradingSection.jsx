@@ -91,7 +91,7 @@ export function CourseworkGradingSection({
       {submissionList.length > 0 && (
         <div className="space-y-3 pt-2">
           <p className="text-xs font-bold text-text-muted uppercase tracking-wider">
-            Student Submissions
+            Member Submissions
           </p>
           {submissionList.map((submission) => (
             <div
@@ -100,7 +100,7 @@ export function CourseworkGradingSection({
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-text-heading">
-                  {submission.user?.name ?? "Student submission"}
+                  {submission.user?.name ?? "Member submission"}
                 </p>
                 <span className="text-xs text-text-muted capitalize">
                   {submission.status ?? "new"}
@@ -145,7 +145,7 @@ export function CourseworkGradingSection({
                     }))
                   }
                   className="flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
-                  placeholder="Add feedback for student…"
+                  placeholder="Add feedback for member…"
                 />
                 <Button
                   variant="outline"

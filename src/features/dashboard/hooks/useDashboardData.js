@@ -4,12 +4,14 @@ import { useGetExploreFeedQuery } from "../../explore/api/exploreApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
 export function useDashboardData({ includeExplore = true } = {}) {
-  const { authStatus } = useAuth();
-  const skip = authStatus === "hydrating";
-  const classroomsQuery = useFetchClassroomsQuery(undefined, { skip });
+  const { isAuthenticated } = useAuth();
+  const canFetchClassrooms = Boolean(isAuthenticated);
+  const classroomsQuery = useFetchClassroomsQuery(undefined, {
+    skip: !canFetchClassrooms,
+  });
   const exploreQuery = useGetExploreFeedQuery(
     { page: 0, size: 20 },
-    { skip: skip || !includeExplore }
+    { skip: !includeExplore }
   );
 
   const classrooms = useMemo(() => {
@@ -21,9 +23,11 @@ export function useDashboardData({ includeExplore = true } = {}) {
   }, [exploreQuery.data]);
 
   const isLoading =
-    classroomsQuery.isLoading || (includeExplore && exploreQuery.isLoading);
+    (canFetchClassrooms && classroomsQuery.isLoading) ||
+    (includeExplore && exploreQuery.isLoading);
   const isError =
-    classroomsQuery.isError || (includeExplore && exploreQuery.isError);
+    (canFetchClassrooms && classroomsQuery.isError) ||
+    (includeExplore && exploreQuery.isError);
 
   const status = isLoading ? "loading" : isError ? "error" : "ready";
 

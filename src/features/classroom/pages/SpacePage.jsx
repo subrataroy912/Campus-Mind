@@ -10,7 +10,7 @@ import {
   useFindClassroomByIdQuery,
   useJoinClassroomMutation,
 } from "../api/classroomApi.js";
-import { isTeacherRole, isUserEnrolled } from "../utils/roles.js";
+import { isStaffRole, isUserEnrolled } from "../utils/roles.js";
 import { routes } from "@/routes/paths";
 import { parseApiError } from "@/lib/errorUtils.js";
 import {
@@ -156,7 +156,7 @@ export default function SpacePage() {
     );
   }
 
-  const teacher = isTeacherRole(classroom.role);
+  const isStaff = isStaffRole(classroom.role);
 
   const classroomWithNewCode =
     classroom.code || !location.state?.enrollmentCode
@@ -172,7 +172,10 @@ export default function SpacePage() {
           </div>
         )}
 
-        <ClassHeader classroom={classroomWithNewCode} teacher={teacher} />
+        <ClassHeader
+          classroom={classroomWithNewCode}
+          isStaff={isStaff}
+        />
 
         <ClassTabs
           active={activeTab}
@@ -201,7 +204,7 @@ export default function SpacePage() {
 
         {activeTab === "classwork" && (
           <ClassworkTab
-            teacher={teacher}
+            isStaff={isStaff}
             classId={classId}
             classroom={classroom}
             isEnrolled={isEnrolled}
@@ -211,13 +214,16 @@ export default function SpacePage() {
         )}
 
         {activeTab === "quick-links" && (
-          <ClassQuickLinks classroom={classroom} teacher={teacher} />
+          <ClassQuickLinks
+            classroom={classroom}
+            isStaff={isStaff}
+          />
         )}
 
         {activeTab === "members" && (
           <MembersTab
             classroom={classroom}
-            teacher={teacher}
+            isStaff={isStaff}
             isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}
@@ -226,7 +232,7 @@ export default function SpacePage() {
 
         {activeTab === "grades" && (
           <GradesTab
-            teacher={teacher}
+            isStaff={isStaff}
             isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}

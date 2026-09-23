@@ -84,7 +84,7 @@ export default function ClassHeader({
   isEnrolled = true,
   onJoin,
   isJoining = false,
-  teacher = false,
+  isStaff = false,
 }) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
@@ -101,14 +101,13 @@ export default function ClassHeader({
     useLeaveClassroomMutation();
 
   const classTheme = getClassTheme(classroom);
-  const teacherName =
-    typeof classroom?.teacher === "string"
-      ? classroom.teacher
-      : classroom?.teacher?.name ||
-        classroom?.instructor?.name ||
-        classroom?.teacherName ||
+  const facilitatorName =
+    typeof classroom?.owner === "string"
+      ? classroom.owner
+      : classroom?.owner?.name ||
         classroom?.ownerName ||
-        "CampusMind Facilitator";
+        classroom?.creatorName ||
+        "Space Owner";
 
   const accessType = (
     classroom?.accessType ||
@@ -231,7 +230,7 @@ export default function ClassHeader({
 
         {/* Settings & Leader Controls */}
         <div className="absolute right-2.5 top-2.5 z-20 flex items-center gap-1.5 sm:right-3.5 sm:top-3.5">
-          {isEnrolled && !teacher && (
+          {isEnrolled && !isStaff && (
             <Button
               variant="outline"
               size="sm"
@@ -248,7 +247,7 @@ export default function ClassHeader({
             </Button>
           )}
 
-          {teacher && (
+          {isStaff && (
             <>
               <Button
                 variant="outline"
@@ -346,7 +345,7 @@ export default function ClassHeader({
             </div>
 
             {/* Quick Logo Edit Button for Leaders */}
-            {teacher && (
+            {isStaff && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -379,7 +378,7 @@ export default function ClassHeader({
               {classroom?.section || classroom?.subtitle
                 ? `${classroom.section || classroom.subtitle} • `
                 : ""}
-              <span>with {teacherName}</span>
+              <span>by {facilitatorName}</span>
               {classroom?.subject ? ` • ${classroom.subject}` : ""}
             </p>
 
@@ -483,7 +482,7 @@ export default function ClassHeader({
               )}
               <span>{copied ? "Link copied!" : "Copy join link"}</span>
             </Button>
-          ) : teacher ? (
+          ) : isStaff ? (
             <Button
               variant="outline"
               size="sm"

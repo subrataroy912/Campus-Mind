@@ -51,7 +51,7 @@ describe("MembersTab", () => {
       <MembersTab
         classroom={{ id: "course-1" }}
         isEnrolled={false}
-        teacher={false}
+        isStaff={false}
         onJoin={vi.fn()}
       />
     );
@@ -64,7 +64,7 @@ describe("MembersTab", () => {
       <MembersTab
         classroom={{ id: "course-1", memberCount: 2 }}
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
     expect(html).toContain("Admins &amp; Owner");
@@ -84,7 +84,7 @@ describe("MembersTab", () => {
           role: "owner",
         }}
         isEnrolled={true}
-        teacher={true}
+        isStaff={true}
       />
     );
     expect(html).toContain("Code: ABC12345");
@@ -101,7 +101,7 @@ describe("MembersTab", () => {
           role: "owner",
         }}
         isEnrolled={true}
-        teacher={true}
+        isStaff={true}
       />
     );
     expect(html).toContain("Code disabled");
@@ -115,7 +115,7 @@ describe("MembersTab", () => {
           memberCount: 56,
         }}
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
     expect(html).toContain("Members (");

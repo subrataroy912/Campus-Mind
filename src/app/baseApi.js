@@ -6,10 +6,7 @@ import {
   setStoredSessionHint,
 } from "@/context/authSession.js";
 import { registerRefreshInvalidator } from "./refreshState.js";
-import {
-  safeLocalStorageGet,
-  safeLocalStorageSet,
-} from "@/utils/storage.js";
+import { safeLocalStorageGet, safeLocalStorageSet } from "@/utils/storage.js";
 
 export const apiBaseUrl = (() => {
   const configured = (
@@ -109,15 +106,18 @@ function validToken(value) {
 }
 
 async function refreshCredentials(api, extraOptions) {
-  const storedRefreshToken = safeLocalStorageGet("campus-mind.refreshToken") || "";
+  const storedRefreshToken =
+    safeLocalStorageGet("campus-mind.refreshToken") || "";
   const refreshResult = await publicBaseQuery(
-    { 
-      url: "/auth/refresh", 
+    {
+      url: "/auth/refresh",
       method: "POST",
-      body: storedRefreshToken ? { refreshToken: storedRefreshToken } : undefined
+      body: storedRefreshToken
+        ? { refreshToken: storedRefreshToken }
+        : undefined,
     },
     api,
-    { ...extraOptions, skipAuthRefresh: true }
+    { ...extraOptions, skipAuthRefresh: true },
   );
   const refreshed = refreshResult.data?.data ?? refreshResult.data;
 
@@ -135,7 +135,7 @@ async function refreshCredentials(api, extraOptions) {
   api.dispatch(setAccessToken(nextAccessToken));
   if (existingUser) {
     api.dispatch(
-      setSession({ accessToken: nextAccessToken, user: existingUser })
+      setSession({ accessToken: nextAccessToken, user: existingUser }),
     );
   }
   return nextAccessToken;

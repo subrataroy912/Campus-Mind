@@ -17,7 +17,7 @@ const features = [
   {
     icon: HeartHandshake,
     title: "Built for every learner",
-    text: "A clear, welcoming space for students and teachers to stay connected.",
+    text: "A clear, welcoming space for members and creators to stay connected.",
   },
 ];
 
@@ -95,7 +95,7 @@ export default function GetStartedPage() {
                 A welcoming space for every learner
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-text-muted">
-                From first-year study groups to collaborative course projects, CampusMind brings students, teachers, and mentors together in one inclusive space.
+                From study groups to collaborative projects, CampusMind brings learners, creators, and communities together in one inclusive space.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button to={routes.auth.register} size="sm" className="h-8 text-xs font-medium">
@@ -109,7 +109,7 @@ export default function GetStartedPage() {
             <div className="overflow-hidden rounded-md border border-border/60 bg-card p-1 shadow-2xs">
               <img
                 src="/images/illustrations/diverse-campus.jpg"
-                alt="Diverse CampusMind community of students and educators"
+                alt="Diverse CampusMind community of learners and creators"
                 className="w-full rounded object-cover"
                 loading="lazy"
               />

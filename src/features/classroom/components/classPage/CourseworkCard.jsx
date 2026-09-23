@@ -63,7 +63,7 @@ function StatusChip({ uiStatus }) {
 export const CourseworkCard = React.memo(function CourseworkCard({
   item,
   classId,
-  teacher,
+  isStaff = false,
   isHydrating,
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,7 +80,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
       }).unwrap();
       toast.add({
         title: "Assignment published",
-        description: "This item is now visible to all enrolled students.",
+        description: "This item is now visible to all space members.",
         type: "success",
       });
     } catch (err) {
@@ -179,8 +179,8 @@ export const CourseworkCard = React.memo(function CourseworkCard({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {/* Draft badge & action for teachers */}
-          {teacher && isDraft && (
+          {/* Draft badge & action for staff */}
+          {isStaff && isDraft && (
             <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
               <span className="rounded-full bg-muted px-1.5 py-0.2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Draft
@@ -232,7 +232,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
             </div>
           )}
 
-          {teacher ? (
+          {isStaff ? (
             <CourseworkGradingSection
               item={currentItem}
               isOpen={isOpen}
@@ -248,7 +248,7 @@ export const CourseworkCard = React.memo(function CourseworkCard({
             courseworkId={item.id}
           />
 
-          {teacher && (
+          {isStaff && (
             <div className="flex justify-end pt-2 border-t border-border">
               <Button
                 variant="ghost"

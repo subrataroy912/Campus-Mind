@@ -8,17 +8,16 @@ const exploreTags = [
 
 const discoveryFieldsChanged = (changes = {}) =>
   ["title", "subject", "visibility", "status"].some((field) =>
-    Object.prototype.hasOwnProperty.call(changes, field)
+    Object.prototype.hasOwnProperty.call(changes, field),
   );
 
 const normalizeCourse = (response = {}) => {
   const course = response?.data ?? response;
   const owner = course.owner ?? {
-    id: course.ownerId ?? course.teacherId,
-    name: course.ownerName ?? course.teacherName ?? "Space Owner",
-    avatarUrl: course.ownerAvatarUrl ?? course.teacher?.avatarUrl,
+    id: course.ownerId,
+    name: course.ownerName ?? "Space Owner",
+    avatarUrl: course.ownerAvatarUrl,
   };
-  const teacher = course.teacher ?? owner;
 
   const name =
     course.name ?? course.title ?? course.className ?? "Untitled class";
@@ -40,11 +39,8 @@ const normalizeCourse = (response = {}) => {
     accessType: (
       course.accessType || (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
     ).toLowerCase(),
-    ownerId: course.ownerId ?? course.teacherId,
+    ownerId: course.ownerId,
     owner,
-    teacherId: course.ownerId ?? course.teacherId,
-    teacher,
-    instructor: teacher,
     role: course.role ?? "Joined",
     memberCount:
       course.memberCount ?? course.rosterCount ?? course.members?.length ?? 0,
@@ -62,7 +58,7 @@ const normalizeCourse = (response = {}) => {
 
 const normalizeCourseList = (response) => {
   const payload = response?.data ?? response;
-  const courses = Array.isArray(payload) ? payload : payload?.content ?? [];
+  const courses = Array.isArray(payload) ? payload : (payload?.content ?? []);
   return courses.map(normalizeCourse);
 };
 
@@ -96,7 +92,9 @@ export const classroomApi = baseApi.injectEndpoints({
       query: (classId) => `/courses/${classId}/roster`,
       transformResponse: (response) => {
         const payload = response?.data ?? response;
-        const list = Array.isArray(payload) ? payload : payload?.content ?? [];
+        const list = Array.isArray(payload)
+          ? payload
+          : (payload?.content ?? []);
         return list.map((m) => {
           const role = String(m?.role || "member").toLowerCase();
           const name =
@@ -131,7 +129,7 @@ export const classroomApi = baseApi.injectEndpoints({
             classroomApi.util.invalidateTags([
               { type: "Classrooms", id: "LIST" },
               { type: "Profile", id: "CURRENT" },
-            ])
+            ]),
           );
         } catch {
           // The mutation error is handled by the caller.
@@ -152,7 +150,7 @@ export const classroomApi = baseApi.injectEndpoints({
       ],
       async onQueryStarted(
         { courseId, changes },
-        { dispatch, queryFulfilled }
+        { dispatch, queryFulfilled },
       ) {
         const patchResult = dispatch(
           classroomApi.util.updateQueryData(
@@ -160,8 +158,8 @@ export const classroomApi = baseApi.injectEndpoints({
             courseId,
             (draft) => {
               Object.assign(draft, changes);
-            }
-          )
+            },
+          ),
         );
         const listPatchResult = dispatch(
           classroomApi.util.updateQueryData(
@@ -170,8 +168,8 @@ export const classroomApi = baseApi.injectEndpoints({
             (draft) => {
               const course = draft.find((c) => c.id === courseId);
               if (course) Object.assign(course, changes);
-            }
-          )
+            },
+          ),
         );
         try {
           await queryFulfilled;
@@ -235,7 +233,7 @@ export const classroomApi = baseApi.injectEndpoints({
             classroomApi.util.invalidateTags([
               { type: "Classrooms", id: "LIST" },
               { type: "Profile", id: "CURRENT" },
-            ])
+            ]),
           );
         } catch {
           // The mutation error is handled by the caller.

@@ -6,7 +6,7 @@
  *
  * @typedef {"invite" | "code" | "open"} AccessType
  *
- * @typedef {"STUDENT" | "TEACHER" | "OWNER" | "VIEWER"} MemberRole
+ * @typedef {"OWNER" | "ADMIN" | "MEMBER" | "VIEWER"} MemberRole
  *
  * @typedef {Object} Space
  * @property {string} id

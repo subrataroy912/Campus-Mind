@@ -31,9 +31,7 @@ function ClassCard({ classroom, priority = false }) {
 
   const ownerObj =
     classroom.owner ||
-    (classroom.ownerName
-      ? { name: classroom.ownerName }
-      : classroom.teacher || (classroom.teacherName ? { name: classroom.teacherName } : null));
+    (classroom.ownerName ? { name: classroom.ownerName } : null);
   const owner = ownerObj;
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
   const spaceLabel = SPACE_LABELS[classroom.spaceType] || "Space";

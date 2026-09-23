@@ -22,7 +22,7 @@ describe("mapCourseworkPayload", () => {
 });
 
 describe("normalizeSubmission", () => {
-  it("normalizes teacher and student submission payloads", () => {
+  it("normalizes staff and student submission payloads", () => {
     expect(
       normalizeSubmission({
         id: "submission-1",

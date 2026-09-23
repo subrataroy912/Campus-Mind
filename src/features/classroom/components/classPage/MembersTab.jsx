@@ -162,7 +162,7 @@ const MemberRow = React.memo(function MemberRow({
 
 export function MembersTab({
   classroom,
-  teacher,
+  isStaff: isStaffProp,
   isEnrolled = true,
   onJoin,
   isJoining = false,
@@ -183,7 +183,7 @@ export function MembersTab({
     String(classroom?.role || "").toLowerCase() === "owner" ||
     Boolean(currentUserId && classroom?.ownerId === currentUserId);
   const isCurrentAdmin = String(classroom?.role || "").toLowerCase() === "admin";
-  const isStaff = isCurrentOwner || isCurrentAdmin || teacher;
+  const isStaff = isStaffProp !== undefined ? isStaffProp : (isCurrentOwner || isCurrentAdmin);
 
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;
@@ -274,14 +274,14 @@ export function MembersTab({
   const staffMembers = useMemo(() => {
     return members.filter((x) => {
       const r = String(x?.role || "").toLowerCase();
-      return r === "owner" || r === "admin" || r === "teacher";
+      return r === "owner" || r === "admin";
     });
   }, [members]);
 
   const generalMembers = useMemo(() => {
     return members.filter((x) => {
       const r = String(x?.role || "").toLowerCase();
-      return r !== "owner" && r !== "admin" && r !== "teacher";
+      return r !== "owner" && r !== "admin";
     });
   }, [members]);
 

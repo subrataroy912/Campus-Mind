@@ -6,7 +6,7 @@ export function isStaffRole(role) {
   );
 }
 
-export const isTeacherRole = isStaffRole;
+export const isAdminOrOwner = isStaffRole;
 
 export function isUserEnrolled(classroom, userId) {
   if (!classroom) return false;
@@ -21,7 +21,6 @@ export function isUserEnrolled(classroom, userId) {
   if (
     userId &&
     (classroom.ownerId === userId ||
-      classroom.teacherId === userId ||
       classroom.creatorId === userId)
   ) {
     return true;

@@ -27,15 +27,15 @@ describe("ClassHeader privacy and role checks", () => {
     subject: "Computer Science",
     code: "SECRETBIGCODE",
     accessType: "code",
-    teacher: { name: "Dr. Henderson" },
+    owner: { name: "Dr. Henderson" },
   };
 
-  it("renders settings cog and class code when viewer is a teacher", () => {
+  it("renders settings cog and class code when viewer is staff", () => {
     const html = renderToString(
       <ClassHeader
         classroom={sampleClass}
         isEnrolled={true}
-        teacher={true}
+        isStaff={true}
       />
     );
 
@@ -46,12 +46,12 @@ describe("ClassHeader privacy and role checks", () => {
     expect(html).toContain("SECRETBIGCODE");
   });
 
-  it("hides settings cog and hides raw class code when viewer is a student/non-teacher", () => {
+  it("hides settings cog and hides raw class code when viewer is a member/non-staff", () => {
     const html = renderToString(
       <ClassHeader
         classroom={sampleClass}
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
 
@@ -75,7 +75,7 @@ describe("ClassHeader privacy and role checks", () => {
       <ClassHeader
         classroom={openClass}
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
 

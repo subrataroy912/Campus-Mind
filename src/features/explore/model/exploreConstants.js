@@ -21,13 +21,13 @@ export const EXPLORE_BANNERS = {
     badge: "Discover & Learn",
     title: "Explore Spaces & Communities",
     description:
-      "Browse open spaces created by educators and fellow students. Enroll with one click or explore materials freely.",
+      "Browse open spaces created by community leaders and peers. Join with one click or explore materials freely.",
     imageSrc: "/images/illustrations/learning-ecosystem.jpg",
     imageAlt: "Interactive course discovery",
   },
   [EXPLORE_TABS.PEOPLE]: {
     badge: "Campus Network",
-    title: "Connect with Learners & Instructors",
+    title: "Connect with Members & Creators",
     description:
       "Find peers in your spaces, discover collaborators in your department, and expand your academic network.",
     imageSrc: "/images/illustrations/diverse-campus.jpg",

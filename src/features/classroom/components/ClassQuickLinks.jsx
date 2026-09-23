@@ -60,7 +60,10 @@ function getHostName(url) {
   }
 }
 
-export default function ClassQuickLinks({ classroom, teacher = false }) {
+export default function ClassQuickLinks({
+  classroom,
+  isStaff = false,
+}) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -152,7 +155,7 @@ export default function ClassQuickLinks({ classroom, teacher = false }) {
             Essential repositories, documents, communication channels, and links for this space.
           </p>
         </div>
-        {teacher && (
+        {isStaff && (
           <Button
             size="sm"
             onClick={() => setIsAddOpen(true)}
@@ -169,12 +172,12 @@ export default function ClassQuickLinks({ classroom, teacher = false }) {
         <EmptyState
           title="No resources added yet"
           description={
-            teacher
+            isStaff
               ? "Add syllabus documents, repos, video meeting rooms, or chat channels for members."
               : "Resources and important links shared for this space will appear here."
           }
           action={
-            teacher
+            isStaff
               ? {
                   onClick: () => setIsAddOpen(true),
                   label: "Add first resource",
@@ -233,7 +236,7 @@ export default function ClassQuickLinks({ classroom, teacher = false }) {
                       >
                         <ExternalLink size={12} />
                       </a>
-                      {teacher && (
+                      {isStaff && (
                         <button
                           type="button"
                           onClick={() => handleDelete(link.id)}

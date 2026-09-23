@@ -143,8 +143,8 @@ export function useCreateSpaceForm() {
       const classroom = await createClassroom(user?.id, {
         ...form,
         title: form.className.trim(),
-        spaceType: form.spaceType || "ACADEMIC_CLASS",
-        meetingType: form.meetingType || "IN_PERSON",
+        spaceType: "ACADEMIC_CLASS",
+        meetingType: "IN_PERSON",
         section: form.section?.trim() || "",
         subject: effectiveSubject,
         description: form.description?.trim() || "",

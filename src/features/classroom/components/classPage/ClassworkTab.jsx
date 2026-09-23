@@ -21,7 +21,7 @@ import { parseApiError } from "@/lib/errorUtils.js";
 const GROUPS = ["This week", "Upcoming", "Past"];
 
 export function ClassworkTab({
-  teacher,
+  isStaff = false,
   classId,
   classroom,
   isEnrolled = true,
@@ -192,15 +192,15 @@ export function ClassworkTab({
           <ClipboardList className="h-5 w-5" />
         </div>
         <h3 className="text-sm font-semibold text-foreground">
-          Classwork is reserved for enrolled students
+          Classwork is reserved for enrolled members
         </h3>
         <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
-          Join this class to access assignments, view learning materials, and submit coursework.
+          Join this space to access assignments, view shared materials, and submit coursework.
         </p>
         {onJoin && (
           <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
             <UserPlus className="h-3.5 w-3.5" />
-            <span>Join Class</span>
+            <span>Join Space</span>
           </Button>
         )}
       </div>
@@ -226,7 +226,7 @@ export function ClassworkTab({
   return (
     <div className="mt-3 grid grid-cols-1 gap-3.5 lg:grid-cols-[1fr_260px]">
       <main className="space-y-3.5">
-        {teacher && (
+        {isStaff && (
           <div className="flex justify-end">
             <div className="relative">
               <Button size="sm" onClick={() => setCreateOpen(!createOpen)} className="gap-1.5 h-7.5 text-xs rounded-lg">
@@ -263,7 +263,7 @@ export function ClassworkTab({
             title="No classwork posted yet"
             description="Assignments and learning materials will appear here when assigned."
             action={
-              teacher
+              isStaff
                 ? {
                     label: "Create your first assignment",
                     onClick: () => setCreateType("ASSIGNMENT"),
@@ -274,7 +274,7 @@ export function ClassworkTab({
         ) : (
           <>
             {/* Drafts section — visible to staff only */}
-            {teacher && (() => {
+            {isStaff && (() => {
               const drafts = items.filter((i) => i.status === "DRAFT");
               if (!drafts.length) return null;
               return (
@@ -291,7 +291,7 @@ export function ClassworkTab({
                         key={item.id}
                         item={item}
                         classId={classId}
-                        teacher={teacher}
+                        isStaff={isStaff}
                         isHydrating={isHydrating}
                       />
                     ))}
@@ -315,7 +315,7 @@ export function ClassworkTab({
                         key={item.id}
                         item={item}
                         classId={classId}
-                        teacher={teacher}
+                        isStaff={isStaff}
                         isHydrating={isHydrating}
                       />
                     ))}
@@ -420,7 +420,7 @@ export function ClassworkTab({
                   Cancel
                 </Button>
                 <div className="flex gap-2">
-                  {/* Save as draft — only teachers ever see drafts */}
+                  {/* Save as draft — only staff ever see drafts */}
                   <Button
                     type="button"
                     variant="outline"

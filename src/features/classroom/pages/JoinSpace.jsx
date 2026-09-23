@@ -169,10 +169,10 @@ export default function JoinSpace() {
             {isOpenCourse
               ? "This space has open enrollment. Anyone can join — no code required."
               : isInviteCourse
-              ? "This space requires an invitation from the host or teacher to join."
+              ? "This space requires an invitation from the space owner or admin to join."
               : optionalCourseId
               ? "Enter your code to join this space."
-              : "Ask your instructor or team lead for the code, then enter it below."}
+              : "Ask the space owner or admin for the code, then enter it below."}
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export default function JoinSpace() {
                   </div>
                   {publicCourse?.instructorName && (
                     <div className="mt-0.5 text-xs text-text-muted">
-                      Instructor: {publicCourse.instructorName}
+                      Created by: {publicCourse.instructorName}
                     </div>
                   )}
                 </div>
@@ -215,7 +215,7 @@ export default function JoinSpace() {
                     {publicCourse?.title || "Classroom"}
                   </div>
                   <p className="mt-2 text-xs text-text-muted">
-                    This classroom is invite-only. Please contact the teacher to be added to the student roster.
+                    This space is invite-only. Please contact the space owner or admin to be added.
                   </p>
                 </div>
                 <Link
@@ -307,8 +307,6 @@ export default function JoinSpace() {
                 {foundClass.subtitle ? `${foundClass.subtitle} • ` : ""}created by{" "}
                 {foundClass.owner?.name ||
                   foundClass.ownerName ||
-                  foundClass.instructor?.name ||
-                  foundClass.teacher?.name ||
                   "Space Owner"}
               </p>
               <div className="mt-4 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
@@ -346,8 +344,8 @@ function joinErrorMessage(error) {
     return (
       error?.data?.message ||
       error?.data?.error ||
-      "You have already joined this class."
+      "You have already joined this space."
     );
   }
-  return parseApiError(error, "Unable to join this class. Please try again.").message;
+  return parseApiError(error, "Unable to join this space. Please try again.").message;
 }

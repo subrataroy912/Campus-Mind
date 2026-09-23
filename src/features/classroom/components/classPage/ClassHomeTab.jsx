@@ -88,15 +88,11 @@ export function ClassHomeTab({
       ? classroom.owner
       : classroom?.owner?.name ||
         classroom?.ownerName ||
-        classroom?.teacher?.name ||
-        classroom?.teacherName ||
         "Space Creator";
 
   const ownerAvatar =
     classroom?.owner?.avatarUrl ||
     classroom?.ownerAvatarUrl ||
-    classroom?.teacher?.avatarUrl ||
-    classroom?.teacher?.avatar ||
     null;
 
   const spaceTypeLabel = SPACE_LABELS[classroom?.spaceType] || "Space";
@@ -283,16 +279,16 @@ export function ClassHomeTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-border">
           <div className="flex items-center gap-2.5">
             <ClassroomAvatar
-              userId={classroom?.ownerId || classroom?.teacherId}
+              userId={classroom?.ownerId}
               name={ownerName}
               avatar={ownerAvatar}
               size="h-8 w-8 sm:h-9 sm:w-9"
             />
             <div>
               <p className="text-[10px] font-medium text-text-muted">Space Owner</p>
-              {classroom?.ownerId || classroom?.teacherId ? (
+              {classroom?.ownerId ? (
                 <Link
-                  to={routes.user(classroom.ownerId || classroom.teacherId)}
+                  to={routes.user(classroom.ownerId)}
                   className="text-xs font-bold text-text-heading hover:text-primary hover:underline transition-colors"
                 >
                   {ownerName}

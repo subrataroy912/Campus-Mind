@@ -3,21 +3,15 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import { GradesTab } from "./GradesTab.jsx";
 
-vi.mock("@/context/AuthContext.jsx", () => ({
-  useAuth: () => ({
-    user: { id: "student-1", name: "Student One" },
-    authStatus: "authenticated",
-  }),
-}));
-
 vi.mock("react-router", () => ({
   useParams: () => ({ classId: "course-1" }),
-  useNavigate: () => vi.fn(),
-  Link: ({ children, to, ...props }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
+}));
+
+vi.mock("@/context/AuthContext.jsx", () => ({
+  useAuth: () => ({
+    user: { id: "u-1" },
+    authStatus: "authenticated",
+  }),
 }));
 
 vi.mock("../../api/courseworkApi.js", () => ({
@@ -41,7 +35,7 @@ vi.mock("../../api/courseworkApi.js", () => ({
       },
     ],
   })),
-  useGetTeacherGradebookQuery: vi.fn(() => ({
+  useGetCourseGradebookQuery: vi.fn(() => ({
     data: [
       {
         id: "student-1",
@@ -64,15 +58,15 @@ vi.mock("../../api/courseworkApi.js", () => ({
 describe("GradesTab", () => {
   it("renders unenrolled gate when not enrolled", () => {
     const html = renderToString(
-      <GradesTab isEnrolled={false} teacher={false} onJoin={vi.fn()} />
+      <GradesTab isEnrolled={false} isStaff={false} onJoin={vi.fn()} />
     );
-    expect(html).toContain("Gradebook is reserved for enrolled students");
-    expect(html).toContain("Join Class");
+    expect(html).toContain("Gradebook is reserved for enrolled members");
+    expect(html).toContain("Join Space");
   });
 
   it("renders student grades and summary metrics", () => {
     const html = renderToString(
-      <GradesTab isEnrolled={true} teacher={false} />
+      <GradesTab isEnrolled={true} isStaff={false} />
     );
     expect(html).toContain("Your grade");
     expect(html).toContain("Assignments graded");
@@ -83,9 +77,9 @@ describe("GradesTab", () => {
     expect(html).toContain("Missing");
   });
 
-  it("renders teacher gradebook view and class metrics", () => {
+  it("renders staff gradebook view and class metrics", () => {
     const html = renderToString(
-      <GradesTab isEnrolled={true} teacher={true} />
+      <GradesTab isEnrolled={true} isStaff={true} />
     );
     expect(html).toContain("Class average");
     expect(html).toContain("93%");

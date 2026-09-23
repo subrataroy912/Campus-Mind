@@ -69,12 +69,12 @@ describe("ClassworkTab", () => {
       <ClassworkTab
         classId="course-1"
         isEnrolled={false}
-        teacher={false}
+        isStaff={false}
         onJoin={vi.fn()}
       />
     );
-    expect(html).toContain("Classwork is reserved for enrolled students");
-    expect(html).toContain("Join Class");
+    expect(html).toContain("Classwork is reserved for enrolled members");
+    expect(html).toContain("Join Space");
   });
 
   it("renders empty state when there is no coursework", () => {
@@ -82,7 +82,7 @@ describe("ClassworkTab", () => {
       <ClassworkTab
         classId="empty-course"
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
     expect(html).toContain("No classwork posted yet");
@@ -93,19 +93,19 @@ describe("ClassworkTab", () => {
       <ClassworkTab
         classId="course-1"
         isEnrolled={true}
-        teacher={false}
+        isStaff={false}
       />
     );
     expect(html).toContain("Problem Set 1");
     expect(html).toContain("Assigned");
   });
 
-  it("renders create button when user is a teacher", () => {
+  it("renders create button when user is staff", () => {
     const html = renderToString(
       <ClassworkTab
         classId="course-1"
         isEnrolled={true}
-        teacher={true}
+        isStaff={true}
       />
     );
     expect(html).toContain("Create");

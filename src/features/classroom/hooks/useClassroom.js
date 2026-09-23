@@ -74,11 +74,8 @@ export function useClassroom(classId) {
       return true;
     }
 
-    // 2. If current user is the owner or teacher of this course
-    if (
-      userId &&
-      (classroom?.ownerId === userId || classroom?.teacherId === userId)
-    ) {
+    // 2. If current user is the owner of this course
+    if (userId && classroom?.ownerId === userId) {
       return true;
     }
 

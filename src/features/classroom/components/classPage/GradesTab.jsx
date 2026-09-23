@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import {
   useGetCourseAnalyticsSummaryQuery,
   useGetStudentGradebookQuery,
-  useGetTeacherGradebookQuery,
+  useGetCourseGradebookQuery,
 } from "../../api/courseworkApi.js";
 
 const statusClass = {
@@ -40,11 +40,12 @@ function GradeChip({ status }) {
 }
 
 export function GradesTab({
-  teacher,
+  isStaff: isStaffProp,
   isEnrolled = true,
   onJoin,
   isJoining = false,
 }) {
+  const isStaff = Boolean(isStaffProp);
   const [selected, setSelected] = useState(null);
   const { classId } = useParams();
   const { user, authStatus } = useAuth();
@@ -52,21 +53,21 @@ export function GradesTab({
 
   const { data: studentRows = [] } = useGetStudentGradebookQuery(
     { courseId: classId, studentId: user?.id },
-    { skip: isHydrating || teacher || !user?.id || !isEnrolled }
+    { skip: isHydrating || isStaff || !user?.id || !isEnrolled }
   );
 
-  const { data: teacherRows = [] } = useGetTeacherGradebookQuery(classId, {
-    skip: isHydrating || !teacher || !classId || !isEnrolled,
+  const { data: gradebookRows = [] } = useGetCourseGradebookQuery(classId, {
+    skip: isHydrating || !isStaff || !classId || !isEnrolled,
   });
 
   const { data: summary } = useGetCourseAnalyticsSummaryQuery(classId, {
-    skip: isHydrating || !teacher || !classId || !isEnrolled,
+    skip: isHydrating || !isStaff || !classId || !isEnrolled,
   });
 
-  const rows = teacher ? teacherRows : studentRows;
+  const rows = isStaff ? gradebookRows : studentRows;
 
   const metrics = useMemo(() => {
-    if (teacher) {
+    if (isStaff) {
       return [
         [
           "Class average",
@@ -93,7 +94,7 @@ export function GradesTab({
       ["Assignments graded", `${gradedCount} of ${studentRows.length}`],
       ["Missing submissions", String(missingCount)],
     ];
-  }, [teacher, summary, studentRows]);
+  }, [isStaff, summary, studentRows]);
 
   if (!isEnrolled) {
     return (
@@ -103,15 +104,15 @@ export function GradesTab({
             <Award className="h-4.5 w-4.5" />
           </div>
           <h3 className="text-sm font-semibold text-text-heading">
-            Gradebook is reserved for enrolled students
+            Gradebook is reserved for enrolled members
           </h3>
           <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
-            Join this class to track your grades, missing assignments, and class standing.
+            Join this space to track your grades, missing assignments, and space standing.
           </p>
           {onJoin && (
             <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3 gap-1.5 h-8 text-xs font-medium">
               <UserPlus className="h-3.5 w-3.5" />
-              <span>Join Class</span>
+              <span>Join Space</span>
             </Button>
           )}
         </div>
@@ -127,9 +128,9 @@ export function GradesTab({
             Grades & Performance
           </h2>
           <p className="text-xs text-text-muted">
-            {teacher
-              ? "Track class standing, review scores, and monitor submission trends."
-              : "Review your submitted work, scores, and instructor feedback."}
+            {isStaff
+              ? "Track space standing, review scores, and monitor submission trends."
+              : "Review your submitted work, scores, and feedback."}
           </p>
         </div>
       </header>
@@ -158,7 +159,7 @@ export function GradesTab({
           <table className="w-full min-w-140 text-left text-xs">
             <thead className="border-b border-border/70 bg-canvas/60 text-[11px] font-medium text-text-muted uppercase tracking-wider">
               <tr>
-                {teacher ? (
+                {isStaff ? (
                   <>
                     <th className="px-3.5 py-2">Student</th>
                     <th className="px-3.5 py-2">Average</th>
@@ -176,19 +177,19 @@ export function GradesTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {teacher
+              {isStaff
                 ? rows.map((row) => (
                     <Fragment key={row.id}>
                       <tr className="hover:bg-canvas/40 transition-colors">
                         <td className="px-3.5 py-2">
                           <div className="flex items-center gap-2">
                             <ClassroomAvatar
-                              name={row.studentName}
+                              name={row.studentName || row.memberName}
                               avatar={row.avatar}
                               size="h-6 w-6"
                             />
                             <span className="font-medium text-text-heading">
-                              {row.studentName}
+                              {row.studentName || row.memberName}
                             </span>
                           </div>
                         </td>
@@ -223,7 +224,7 @@ export function GradesTab({
                             colSpan="4"
                             className="bg-canvas/50 px-3.5 py-2 text-xs text-text-muted leading-relaxed"
                           >
-                            Breakdown for <strong className="text-text-heading">{row.studentName}</strong>: {row.submittedCount ?? 0} assignments submitted · {row.missingCount ?? 0} missing.
+                            Breakdown for <strong className="text-text-heading">{row.studentName || row.memberName}</strong>: {row.submittedCount ?? 0} assignments submitted · {row.missingCount ?? 0} missing.
                           </td>
                         </tr>
                       )}

@@ -63,7 +63,6 @@ export default function DashboardHomePage() {
       </div>
     );
   }
-
   const firstName = profile?.displayName?.split(" ")[0];
   const title =
     profile?.gender?.toLowerCase() === "male"
@@ -131,6 +130,7 @@ export default function DashboardHomePage() {
               <ExploreClassCard
                 key={space?.id || space?.courseId || space?._id || idx}
                 classroom={space}
+                isEnrolled={false}
               />
             ))}
           </div>
