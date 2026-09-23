@@ -111,7 +111,7 @@ export function ClassHomeTab({
       {/* Space Overview & Metadata Card */}
       <CollapsibleSection
         title="About this space"
-        subtitle={`${spaceTypeLabel} • ${classroom?.subject || classroom?.title || ""}`}
+        subtitle={classroom?.subject || classroom?.title || ""}
         defaultExpanded={true}
         className="space-y-3"
         contentClassName="space-y-3"
