@@ -24,6 +24,7 @@ import EmptyState from "@/components/common/EmptyState.jsx";
 import { useUpdateClassroomMutation } from "../api/classroomApi.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { useCourseContext } from "../hooks/useCourseContext.js";
 
 const LINK_CATEGORIES = [
   { value: "DOCUMENT", label: "Document / Notes", icon: FileText },
@@ -62,8 +63,10 @@ function getHostName(url) {
 
 export default function ClassQuickLinks({
   classroom,
-  isStaff = false,
+  isStaff: propIsStaff,
 }) {
+  const courseContext = useCourseContext();
+  const isStaff = propIsStaff !== undefined ? propIsStaff : (courseContext?.isStaff ?? false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");

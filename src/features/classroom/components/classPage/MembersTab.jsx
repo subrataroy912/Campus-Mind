@@ -26,6 +26,7 @@ import {
 } from "../../api/classroomApi.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { useCourseContext } from "../../hooks/useCourseContext.js";
 
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
 const MemberRow = React.memo(function MemberRow({
@@ -176,8 +177,10 @@ const MemberRow = React.memo(function MemberRow({
 export function MembersTab({
   classroom,
   isStaff: isStaffProp,
-  isEnrolled = true,
+  isEnrolled: isEnrolledProp,
 }) {
+  const courseContext = useCourseContext();
+  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (courseContext?.isEnrolled ?? true);
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
@@ -197,7 +200,9 @@ export function MembersTab({
   const isCurrentAdmin =
     String(classroom?.role || "").toLowerCase() === "admin";
   const isStaff =
-    isStaffProp !== undefined ? isStaffProp : isCurrentOwner || isCurrentAdmin;
+    isStaffProp !== undefined
+      ? isStaffProp
+      : courseContext?.isStaff ?? (isCurrentOwner || isCurrentAdmin);
 
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;

@@ -10,6 +10,7 @@ import {
   useGetStudentGradebookQuery,
   useGetCourseGradebookQuery,
 } from "../../api/courseworkApi.js";
+import { useCourseContext } from "../../hooks/useCourseContext.js";
 
 const statusClass = {
   assigned: "bg-canvas text-text-main border border-border",
@@ -41,11 +42,14 @@ function GradeChip({ status }) {
 
 export function GradesTab({
   isStaff: isStaffProp,
-  isEnrolled = true,
+  isEnrolled: isEnrolledProp,
 }) {
-  const isStaff = Boolean(isStaffProp);
+  const courseContext = useCourseContext();
+  const { classId: routeClassId } = useParams();
+  const classId = routeClassId || courseContext?.activeCourseId;
+  const isStaff = isStaffProp !== undefined ? Boolean(isStaffProp) : (courseContext?.isStaff ?? false);
+  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (courseContext?.isEnrolled ?? true);
   const [selected, setSelected] = useState(null);
-  const { classId } = useParams();
   const { user, authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
 

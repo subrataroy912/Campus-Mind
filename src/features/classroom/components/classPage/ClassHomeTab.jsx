@@ -28,18 +28,22 @@ import { isStaffRole } from "../../utils/roles.js";
 import { routes } from "@/routes/paths";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { useCourseContext } from "../../hooks/useCourseContext.js";
 
 export function ClassHomeTab({
-  isEnrolled = true,
+  isEnrolled: propIsEnrolled,
   classroom,
   isStaff: propIsStaff,
 }) {
+  const courseContext = useCourseContext();
+  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (courseContext?.isEnrolled ?? true);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const { user } = useAuth();
-  const courseId = classroom?.id;
+  const courseId = classroom?.id || courseContext?.activeCourseId;
 
   const isStaff =
     propIsStaff ??
+    courseContext?.isStaff ??
     (isStaffRole(classroom?.role) ||
       (Boolean(user?.id) &&
         (user.id === classroom?.ownerId || user.id === classroom?.creatorId)));

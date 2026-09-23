@@ -20,6 +20,7 @@ import {
   GradesTab,
   MembersTab,
 } from "../components/classPage/index.js";
+import { useCourseContextSync } from "../hooks/useCourseContext.js";
 
 export default function SpacePage() {
   const { classId } = useParams();
@@ -45,6 +46,9 @@ export default function SpacePage() {
     useJoinClassroomMutation();
 
   const isEnrolled = isUserEnrolled(classroom, user?.id);
+  const isStaff = isStaffRole(classroom?.role);
+
+  useCourseContextSync(classId, classroom, isEnrolled, isStaff);
 
   const rawAccessType = (
     classroom?.accessType ||
@@ -171,7 +175,6 @@ export default function SpacePage() {
     );
   }
 
-  const isStaff = isStaffRole(classroom.role);
 
   const classroomWithNewCode =
     classroom.code || !location.state?.enrollmentCode
@@ -189,10 +192,8 @@ export default function SpacePage() {
 
         <ClassHeader
           classroom={classroomWithNewCode}
-          isEnrolled={isEnrolled}
           onJoin={handleJoin}
           isJoining={isJoining}
-          isStaff={isStaff}
         />
 
         <ClassTabs
@@ -212,33 +213,27 @@ export default function SpacePage() {
 
         {activeTab === "home" && (
           <ClassHomeTab
-            isEnrolled={isEnrolled}
+            classroom={classroom}
             onJoin={handleJoin}
             isJoining={isJoining}
-            classroom={classroom}
           />
         )}
 
         {activeTab === "classwork" && (
           <ClassworkTab
-            isStaff={isStaff}
-            classId={classId}
             classroom={classroom}
-            isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}
           />
         )}
 
         {activeTab === "quick-links" && (
-          <ClassQuickLinks classroom={classroom} isStaff={isStaff} />
+          <ClassQuickLinks classroom={classroom} />
         )}
 
         {activeTab === "members" && (
           <MembersTab
             classroom={classroom}
-            isStaff={isStaff}
-            isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}
           />
@@ -246,8 +241,6 @@ export default function SpacePage() {
 
         {activeTab === "grades" && (
           <GradesTab
-            isStaff={isStaff}
-            isEnrolled={isEnrolled}
             onJoin={handleJoin}
             isJoining={isJoining}
           />

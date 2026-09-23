@@ -19,11 +19,17 @@ vi.mock("react-router", () => ({
       {children}
     </a>
   ),
-  NavLink: ({ children, to, ...props }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
+  NavLink: ({ children, to, end: _end, className, ...props }) => {
+    const resolvedClass =
+      typeof className === "function"
+        ? className({ isActive: false, isPending: false })
+        : className;
+    return (
+      <a href={to} className={resolvedClass} {...props}>
+        {children}
+      </a>
+    );
+  },
 }));
 
 describe("Sidebar navigation and creator gating", () => {

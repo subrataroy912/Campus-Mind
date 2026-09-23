@@ -3,6 +3,7 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 import { baseApi } from "./baseApi.js";
 import authReducer from "@/features/auth/authSlice.js";
 import uiReducer from "@/features/ui/uiSlice.js";
+import courseContextReducer from "@/features/classroom/courseContextSlice.js";
 import { clearCredentials, forcedSignOut } from "@/features/auth/authSlice.js";
 import {
   persistApiState,
@@ -17,6 +18,7 @@ const preloadedApiState = readPersistedApiState({
 const appReducer = {
   auth: authReducer,
   ui: uiReducer,
+  courseContext: courseContextReducer,
   [baseApi.reducerPath]: baseApi.reducer,
 };
 const combinedReducer = combineReducers(appReducer);
@@ -26,7 +28,6 @@ function rootReducer(state, action) {
     action.type === forcedSignOut.type ||
     action.type === clearCredentials.type
   ) {
-    // UI is intentionally retained because its preferences are device-scoped.
     return combinedReducer({ ui: state?.ui }, action);
   }
 

@@ -4,6 +4,12 @@ import { renderToString } from "react-dom/server";
 import ClassCard from "./ClassCard.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
 
+vi.mock("@/context/AuthContext.jsx", () => ({
+  useAuth: () => ({
+    user: { id: "user-1", name: "Test User" },
+  }),
+}));
+
 vi.mock("react-router", () => ({
   Link: ({ children, to, ...props }) => (
     <a href={to} {...props}>
@@ -22,6 +28,7 @@ describe("ClassCard", () => {
       subject: "COMPUTER_SCIENCE",
       section: "Section A - Fall 2026",
       owner: { name: "Dr. Christopher Henderson" },
+      role: "MEMBER",
       accessType: "code",
       code: "ALGO1234",
       memberCount: 25,
@@ -34,7 +41,6 @@ describe("ClassCard", () => {
     expect(html).toContain("Computer Science");
     expect(html).toContain("Section A - Fall 2026");
     expect(html).toContain("Dr. Christopher Henderson");
-    expect(html).toContain("ALGO1234");
     expect(html).toContain("new");
     expect(html).toContain("h-full");
     expect(html).toContain("w-full");

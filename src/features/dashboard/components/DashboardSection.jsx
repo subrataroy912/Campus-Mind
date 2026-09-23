@@ -27,7 +27,8 @@ export function DashboardSection({
   emptyDescription = "There are currently no items to display.",
   className,
 }) {
-  const isCarousel = layout === "carousel" && items.length > 0 && status !== "error";
+  const isCarousel =
+    layout === "carousel" && items.length > 0 && status !== "error";
 
   const sectionContent = (
     <section

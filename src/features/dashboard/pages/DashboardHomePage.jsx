@@ -29,21 +29,15 @@ export default function DashboardHomePage() {
     status,
   } = useDashboardData();
 
-  // Curate 3 new spaces for the home teaser safely
   const suggestedSpaces = useMemo(() => {
     if (!Array.isArray(exploreClassrooms)) return [];
 
-    const joinedCourseIds = new Set(
-      (classrooms || []).map(
-        (c) => c?.id || c?.courseId || c?.classId || c?._id,
-      ),
-    );
+    const getId = (c) => c?.id || c?.courseId || c?.classId || c?._id;
+
+    const joinedCourseIds = new Set(classrooms?.map(getId).filter(Boolean));
 
     return exploreClassrooms
-      .filter(
-        (c) =>
-          !joinedCourseIds.has(c?.courseId || c?.id || c?.classId || c?._id),
-      )
+      .filter((c) => !joinedCourseIds.has(getId(c)))
       .slice(0, 3);
   }, [classrooms, exploreClassrooms]);
 
@@ -75,14 +69,14 @@ export default function DashboardHomePage() {
 
   return (
     <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
-      {/* 1. One-Time Login Greeting Dialog (only for fresh profile or 3-4 days away) */}
+      {/* One-Time Login Greeting Dialog (only for fresh profile or 3-4 days away) */}
       <WelcomeModal
         greetingName={greetingName}
         userId={activeUserId}
         isLongTimeAway={user?.isLongTimeAway}
       />
 
-      {/* 2. Primary Section: My Spaces */}
+      {/* Primary Section: My Spaces */}
       <DashboardSection
         id="my-classes-heading"
         title="My spaces"
@@ -99,7 +93,7 @@ export default function DashboardHomePage() {
         emptyDescription="Explore spaces below to join courses and groups."
       />
 
-      {/* 3. Compact Suggested Shelf */}
+      {/* Compact Suggested Shelf */}
       {suggestedSpaces.length > 0 && (
         <section className="flex flex-col gap-2 rounded-lg border border-border/70 bg-card/60 p-3 shadow-none">
           <div className="flex items-center justify-between">

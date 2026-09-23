@@ -66,13 +66,13 @@ function ExploreClassCard({
       ? isEnrolled
       : Boolean(
           classroom?.isEnrolled ||
-            classroom?.enrolled ||
-            classrooms.some(
-              (item) =>
-                item.id === courseId ||
-                item.courseId === courseId ||
-                item.classId === courseId,
-            ),
+          classroom?.enrolled ||
+          classrooms.some(
+            (item) =>
+              item.id === courseId ||
+              item.courseId === courseId ||
+              item.classId === courseId,
+          ),
         );
 
   const learnersCount = formatLearners(
@@ -117,7 +117,8 @@ function ExploreClassCard({
       navigate({ pathname: routes.classes.detail(courseId) });
     } catch (err) {
       setJoinErrorMessage(
-        parseApiError(err, "Invalid class code or failed to join class.").message
+        parseApiError(err, "Invalid class code or failed to join class.")
+          .message,
       );
     } finally {
       setIsJoinSubmitting(false);

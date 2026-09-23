@@ -17,15 +17,20 @@ import {
 } from "@/components/ui/dialog.jsx";
 import { formatDueDate } from "@/utils/dateFormat.js";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { useCourseContext } from "../../hooks/useCourseContext.js";
 
 const GROUPS = ["This week", "Upcoming", "Past"];
 
 export function ClassworkTab({
-  isStaff = false,
-  classId,
+  isStaff: propIsStaff,
+  classId: propClassId,
   classroom,
-  isEnrolled = true,
+  isEnrolled: propIsEnrolled,
 }) {
+  const courseContext = useCourseContext();
+  const classId = propClassId || courseContext?.activeCourseId;
+  const isStaff = propIsStaff !== undefined ? propIsStaff : (courseContext?.isStaff ?? false);
+  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (courseContext?.isEnrolled ?? true);
   const { authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
   const [createOpen, setCreateOpen] = useState(false);
@@ -90,10 +95,36 @@ export function ClassworkTab({
     }
   );
 
-  const coursework = useMemo(
-    () => courseworkPage?.content ?? [],
-    [courseworkPage]
-  );
+  const typeFilter = courseContext?.filters?.typeFilter;
+  const statusFilter = courseContext?.filters?.statusFilter;
+  const searchQuery = courseContext?.filters?.searchQuery;
+
+  const coursework = useMemo(() => {
+    let list = courseworkPage?.content ?? [];
+    if (typeFilter && typeFilter !== "ALL") {
+      list = list.filter(
+        (item) =>
+          (item.type || "").toUpperCase() === typeFilter.toUpperCase(),
+      );
+    }
+    if (statusFilter && statusFilter !== "ALL") {
+      list = list.filter(
+        (item) =>
+          (item.status || "").toUpperCase() === statusFilter.toUpperCase(),
+      );
+    }
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (item) =>
+          (item.title || item.name || "").toLowerCase().includes(q) ||
+          (item.instructions || item.description || "")
+            .toLowerCase()
+            .includes(q),
+      );
+    }
+    return list;
+  }, [courseworkPage, typeFilter, statusFilter, searchQuery]);
 
   // Normalise list items once. Keep the backend `status` (PUBLISHED/DRAFT/ARCHIVED)
   // intact and compute a separate `uiStatus` used only by the status chip.

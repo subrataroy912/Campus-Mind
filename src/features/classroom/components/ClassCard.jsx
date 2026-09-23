@@ -6,9 +6,15 @@ import { getClassTheme } from "../utils/classTheme.js";
 import { classroomApi } from "../api/classroomApi.js";
 import { store } from "@/app/store.js";
 import { routes } from "@/routes/paths";
+import { useAuth } from "@/context/AuthContext.jsx";
 
 function ClassCard({ classroom, priority = false }) {
   const classTheme = getClassTheme(classroom);
+
+  const { user: currentUser } = useAuth();
+
+  const isOwner =
+    classroom.role === "OWNER" || currentUser?.id === classroom.ownerId;
 
   const handlePrefetch = () => {
     if (classroom?.id) {
@@ -24,12 +30,15 @@ function ClassCard({ classroom, priority = false }) {
     classroom.owner ||
     (classroom.ownerName ? { name: classroom.ownerName } : null);
   const owner = ownerObj;
+
   const unread = classroom.unreadCount ?? classroom.unreadMessages ?? 0;
+
   const category = classroom.subject
     ? formatDisplayText(classroom.subject)
     : classroom.role === "Created"
       ? "Lead"
       : "";
+
   const accessType = (classroom.accessType || "PUBLIC").toUpperCase();
 
   return (
@@ -71,11 +80,6 @@ function ClassCard({ classroom, priority = false }) {
               <span className="inline-flex items-center gap-1 rounded-md bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-white shadow-2xs">
                 <Globe size={10} />
                 Public
-              </span>
-            ) : classroom.code ? (
-              <span className="inline-flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-xs px-2 py-0.5 font-mono text-[10px] font-semibold text-amber-300 border border-amber-400/30">
-                <KeyRound size={10} className="text-amber-400" />
-                {classroom.code}
               </span>
             ) : null}
           </div>
@@ -132,7 +136,15 @@ function ClassCard({ classroom, priority = false }) {
 
           {/* Bottom Row: Owner & Member Count */}
           <div className="mt-2 flex items-center justify-between gap-1.5 border-t border-border/50 pt-2 text-[11px] text-muted-foreground">
-            {owner?.name ? (
+            {/* UPDATED LOGIC HERE */}
+            {isOwner ? (
+              <span
+                className="font-medium text-foreground truncate max-w-36 text-[11px]"
+                title="Created by You"
+              >
+                By You
+              </span>
+            ) : owner?.name ? (
               <span
                 className="font-medium text-foreground truncate max-w-36 text-[11px]"
                 title={`by ${owner.name}`}
@@ -144,6 +156,8 @@ function ClassCard({ classroom, priority = false }) {
                 Self-paced
               </span>
             )}
+            {/* END UPDATED LOGIC */}
+
             <span className="inline-flex shrink-0 items-center gap-1 font-medium text-[11px]">
               <Users size={11} />
               {classroom.memberCount || 0}
