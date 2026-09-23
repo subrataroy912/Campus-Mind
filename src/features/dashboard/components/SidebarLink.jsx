@@ -1,5 +1,4 @@
 import { NavLink } from "react-router";
-import { routes } from "@/routes/paths.js";
 
 export function SidebarLink({
   to,
@@ -9,7 +8,13 @@ export function SidebarLink({
   onNavigate,
   end,
 }) {
-  const isEnd = end ?? to === routes.dashboard;
+  // Default to exact-match (`end=true`) so a nav item is only highlighted when
+  // the current path matches it exactly — not when it merely starts with the
+  // same prefix. Without this, "/spaces" lights up on "/spaces/new" and
+  // "/spaces/join" because NavLink uses a prefix match when end=false.
+  // Callers can pass `end={false}` explicitly for items that should stay active
+  // across a full sub-tree (e.g. a section that owns many nested pages).
+  const isEnd = end ?? true;
 
   return (
     <NavLink
