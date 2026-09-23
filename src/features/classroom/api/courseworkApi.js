@@ -69,7 +69,7 @@ export const courseworkApi = baseApi.injectEndpoints({
         normalizeCoursework(response?.data ?? response),
       invalidatesTags: (result, _error, { courseId }) => [
         { type: "Coursework", id: `LIST-${courseId}` },
-        "Classrooms", 
+        { type: "Classrooms", id: courseId },
         "Profile"
       ],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
@@ -87,7 +87,7 @@ export const courseworkApi = baseApi.injectEndpoints({
       invalidatesTags: (result, _error, { courseId, courseworkId }) => [
         { type: "Coursework", id: courseworkId },
         { type: "Coursework", id: `LIST-${courseId}` },
-        "Classrooms"
+        { type: "Classrooms", id: courseId },
       ],
       async onQueryStarted({ courseId, courseworkId, changes }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
@@ -107,7 +107,7 @@ export const courseworkApi = baseApi.injectEndpoints({
       invalidatesTags: (result, _error, { courseId, courseworkId }) => [
         { type: "Coursework", id: courseworkId },
         { type: "Coursework", id: `LIST-${courseId}` },
-        "Classrooms"
+        { type: "Classrooms", id: courseId },
       ],
     }),
     getSubmissionList: builder.query({

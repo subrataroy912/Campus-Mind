@@ -182,7 +182,7 @@ export default function SpacePage() {
       : { ...classroom, code: location.state.enrollmentCode };
 
   return (
-    <div className="min-h-screen bg-canvas px-2.5 py-2.5 sm:px-4 sm:py-3.5 lg:px-6">
+    <div className="min-h-screen bg-canvas px-2.5 pt-2.5 pb-12 sm:px-4 sm:pt-3.5 sm:pb-16 lg:px-6 lg:pb-20">
       <div className="w-full space-y-2.5 sm:space-y-3">
         {joinError && (
           <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-2.5 text-xs text-destructive">

@@ -1,10 +1,21 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { ArrowLeft, Eye, Lock, Shield, Users, UserX } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  LayoutGrid,
+  List,
+  Lock,
+  Search,
+  UserX,
+  X,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
+import CompactSpaceRow from "@/features/classroom/components/CompactSpaceRow.jsx";
+import { ContentList } from "@/components/common/ContentList.jsx";
 import {
   getSharedClassCount,
   getSharedClassIds,
@@ -20,9 +31,11 @@ import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 import { routes } from "@/routes/paths.js";
-import { DashboardSection } from "@/features/dashboard/components/DashboardSection.jsx";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { cn } from "@/lib/utils.js";
+
+const VIEW_MODE_KEY = "campus_mind_spaces_view_mode";
 
 const profileFor = (user) => ({
   ...user,
@@ -115,12 +128,60 @@ export default function ProfilePage() {
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
-  const createdClasses = classes.filter(
-    (item) => item.ownerId === viewedUser?.id,
+  const isCreatedByMe = (item) => {
+    const role = String(item?.role || "").toUpperCase();
+    return (
+      item.ownerId === viewedUser?.id ||
+      (isOwner && (role === "OWNER" || role === "CREATED"))
+    );
+  };
+
+  const createdClasses = useMemo(
+    () => classes.filter(isCreatedByMe),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [classes, viewedUser?.id, isOwner],
   );
-  const joinedClasses = classes.filter(
-    (item) => item.ownerId !== viewedUser?.id,
+
+  const joinedClasses = useMemo(
+    () => classes.filter((item) => !isCreatedByMe(item)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [classes, viewedUser?.id, isOwner],
   );
+
+  const [spacesTab, setSpacesTab] = useState("all");
+  const [spacesSearch, setSpacesSearch] = useState("");
+  const [spacesViewMode, setSpacesViewMode] = useState(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return localStorage.getItem(VIEW_MODE_KEY) || "list";
+    }
+    return "list";
+  });
+
+  const handleSpacesViewModeToggle = (mode) => {
+    setSpacesViewMode(mode);
+    try {
+      localStorage.setItem(VIEW_MODE_KEY, mode);
+    } catch {
+      // storage disabled / unsupported
+    }
+  };
+
+  const currentSpacesTabItems = useMemo(() => {
+    if (spacesTab === "created") return createdClasses;
+    if (spacesTab === "joined") return joinedClasses;
+    return classes;
+  }, [spacesTab, classes, createdClasses, joinedClasses]);
+
+  const filteredProfileSpaces = useMemo(() => {
+    const q = spacesSearch.trim().toLowerCase();
+    if (!q) return currentSpacesTabItems;
+    return currentSpacesTabItems.filter((c) => {
+      const title = (c.title || "").toLowerCase();
+      const subject = (c.subject || "").toLowerCase();
+      const subtitle = (c.subtitle || c.section || "").toLowerCase();
+      return title.includes(q) || subject.includes(q) || subtitle.includes(q);
+    });
+  }, [currentSpacesTabItems, spacesSearch]);
 
   if (
     authStatus === "hydrating" ||
@@ -297,42 +358,172 @@ export default function ProfilePage() {
       );
     }
 
-    return (
-      <div className="flex flex-col gap-4">
-        {createdClasses.length > 0 && (
-          <DashboardSection
-            id="managed-spaces-heading"
-            title={isOwner ? "Spaces you manage" : "Spaces they manage"}
-            description={
-              isOwner
-                ? "Spaces where you are an owner or admin."
-                : "Spaces managed by this user."
-            }
-            icon={Shield}
-            iconWrapperClass="bg-blue-500/10 text-blue-600 dark:text-blue-400"
-            items={createdClasses}
-            layout="grid"
-            renderItem={(classroom) => <ClassCard classroom={classroom} />}
-          />
-        )}
+    const spacesTabs = [
+      { id: "all", label: "All", count: classes.length },
+      {
+        id: "created",
+        label: isOwner ? "Created by Me" : "Managed",
+        count: createdClasses.length,
+      },
+      {
+        id: "joined",
+        label: isOwner ? "Joined" : "Shared",
+        count: joinedClasses.length,
+      },
+    ];
 
-        {joinedClasses.length > 0 && (
-          <DashboardSection
-            id="joined-spaces-heading"
-            title={isOwner ? "Spaces you've joined" : "Shared spaces"}
-            description={
-              isOwner
-                ? "Communities you are actively participating in."
-                : "Communities you both belong to."
-            }
-            icon={Users}
-            iconWrapperClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            items={joinedClasses}
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Filter Toolbar: Segmented Tabs + Search + View Mode Switcher */}
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          {/* Segmented Tabs */}
+          <div className="flex items-center gap-1 overflow-x-auto rounded-lg bg-muted/50 p-1 border border-border/60 scrollbar-none">
+            {spacesTabs.map((tab) => {
+              const isActive = spacesTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSpacesTab(tab.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 shrink-0 rounded-md px-2.5 py-1 text-xs transition-all cursor-pointer",
+                    isActive
+                      ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60 font-medium",
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.2 text-[10px] font-semibold",
+                      isActive
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search + View Toggle */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:w-52 min-w-0">
+              <Search
+                size={13}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                value={spacesSearch}
+                onChange={(e) => setSpacesSearch(e.target.value)}
+                placeholder="Search spaces…"
+                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
+              />
+              {spacesSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSpacesSearch("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center rounded-lg border border-border/60 bg-muted/50 p-0.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleSpacesViewModeToggle("list")}
+                aria-label="List view"
+                title="Dense list view"
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                  spacesViewMode === "list"
+                    ? "bg-card text-foreground shadow-2xs border border-border/50"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <List size={14} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSpacesViewModeToggle("grid")}
+                aria-label="Grid view"
+                title="Card grid view"
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                  spacesViewMode === "grid"
+                    ? "bg-card text-foreground shadow-2xs border border-border/50"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <LayoutGrid size={14} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Spaces Listing Content */}
+        {filteredProfileSpaces.length === 0 ? (
+          spacesSearch.trim() ? (
+            <EmptyState
+              title="No matching spaces"
+              description={`No spaces found matching "${spacesSearch}".`}
+              action={{
+                onClick: () => setSpacesSearch(""),
+                label: "Clear search",
+              }}
+            />
+          ) : spacesTab === "created" ? (
+            <EmptyState
+              title="No managed spaces"
+              description={
+                isOwner
+                  ? "You haven't created or led any spaces yet."
+                  : "This user does not manage any spaces."
+              }
+              action={
+                isOwner && profile?.canCreateCourses
+                  ? { to: routes.spaces.new, label: "Create a space" }
+                  : undefined
+              }
+            />
+          ) : (
+            <EmptyState
+              title="No joined spaces"
+              description={
+                isOwner
+                  ? "You haven't joined any spaces as a member yet."
+                  : "No shared joined spaces found."
+              }
+              action={
+                isOwner
+                  ? { to: routes.classes.join, label: "Join a space" }
+                  : undefined
+              }
+            />
+          )
+        ) : spacesViewMode === "list" ? (
+          /* High-Density Horizontal Row Stack (~56px height) */
+          <div className="flex flex-col gap-2">
+            {filteredProfileSpaces.map((classroom) => (
+              <CompactSpaceRow
+                key={classroom.id || classroom.courseId}
+                classroom={classroom}
+              />
+            ))}
+          </div>
+        ) : (
+          /* Card Grid View */
+          <ContentList
             layout="grid"
+            items={filteredProfileSpaces}
             renderItem={(classroom) => <ClassCard classroom={classroom} />}
-            className={
-              createdClasses.length > 0 ? "border-t border-border/60 pt-4" : ""
-            }
           />
         )}
       </div>

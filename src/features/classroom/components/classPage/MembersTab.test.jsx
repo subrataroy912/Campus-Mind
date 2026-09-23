@@ -128,4 +128,20 @@ describe("MembersTab", () => {
     // Beyond 50 should be windowed out initially
     expect(html).not.toContain("Member 51");
   });
+
+  it("renders manage trigger button for members when viewer is owner", () => {
+    const html = renderToString(
+      <MembersTab
+        classroom={{
+          id: "course-1",
+          memberCount: 2,
+          role: "owner",
+          ownerId: "user-1",
+        }}
+        isEnrolled={true}
+        isStaff={true}
+      />
+    );
+    expect(html).toContain("Manage Bob Member");
+  });
 });

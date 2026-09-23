@@ -7,14 +7,12 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState([]);
-  const [activeDrawer, setActiveDrawer] = useState(null); // "file" | "link" | null
+  const [activeDrawer, setActiveDrawer] = useState(null); 
 
-  // File/Media URL input state
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaTitle, setMediaTitle] = useState("");
   const [mediaType, setMediaType] = useState("IMAGE");
 
-  // Link/Video URL input state
   const [linkUrl, setLinkUrl] = useState("");
   const [linkTitle, setLinkTitle] = useState("");
 

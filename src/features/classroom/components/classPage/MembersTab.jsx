@@ -26,7 +26,15 @@ import {
 } from "../../api/classroomApi.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
-import { useCourseContext } from "../../hooks/useCourseContext.js";
+import {
+  useCourseIsEnrolled,
+  useCourseIsStaff,
+} from "../../hooks/useCourseContext.js";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover.jsx";
 
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
 const MemberRow = React.memo(function MemberRow({
@@ -107,68 +115,77 @@ const MemberRow = React.memo(function MemberRow({
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
       </Button>
       {canManage && (
-        <div className="relative">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Manage ${memberName}`}
-            onClick={() =>
-              setConfirming(confirming === memberId ? null : memberId)
+        <Popover
+          open={confirming === memberId}
+          onOpenChange={(open) =>
+            setConfirming(open ? memberId : null)
+          }
+        >
+          <PopoverTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Manage ${memberName}`}
+                className="rounded-lg text-text-muted hover:text-text-main"
+              >
+                <MoreVertical className="h-4 w-4" aria-hidden="true" />
+              </Button>
             }
-            className="rounded-lg text-text-muted hover:text-text-main"
+          />
+          <PopoverContent
+            align="end"
+            side="bottom"
+            sideOffset={6}
+            className="w-56 rounded-xl bg-surface p-3 text-text-main shadow-lg ring-1 ring-border border-0"
           >
-            <MoreVertical className="h-4 w-4" aria-hidden="true" />
-          </Button>
-          {confirming === memberId && (
-            <div className="absolute right-0 top-9 z-10 w-56 rounded-xl bg-surface p-3 shadow-lg ring-1 ring-border">
-              <p className="text-xs font-medium text-text-main mb-2">
-                Manage {memberName}
-              </p>
-              <div className="flex flex-col gap-1.5">
-                {isCurrentOwner && isMember && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    loading={isUpdatingRole}
-                    onClick={() => onUpdateRole(memberId, "ADMIN")}
-                    className="w-full justify-start text-xs h-7"
-                  >
-                    Promote to Admin
-                  </Button>
-                )}
-                {isCurrentOwner && isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    loading={isUpdatingRole}
-                    onClick={() => onUpdateRole(memberId, "MEMBER")}
-                    className="w-full justify-start text-xs h-7"
-                  >
-                    Demote to Member
-                  </Button>
-                )}
+            <p className="text-xs font-medium text-text-main mb-2">
+              Manage {memberName}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {isCurrentOwner && isMember && (
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  loading={isRemoving}
-                  onClick={() => onRemove(memberId)}
+                  loading={isUpdatingRole}
+                  onClick={() => onUpdateRole(memberId, "ADMIN")}
                   className="w-full justify-start text-xs h-7"
                 >
-                  Remove from Space
+                  Promote to Admin
                 </Button>
+              )}
+              {isCurrentOwner && isAdmin && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  disabled={isRemoving || isUpdatingRole}
-                  onClick={() => setConfirming(null)}
+                  loading={isUpdatingRole}
+                  onClick={() => onUpdateRole(memberId, "MEMBER")}
                   className="w-full justify-start text-xs h-7"
                 >
-                  Cancel
+                  Demote to Member
                 </Button>
-              </div>
+              )}
+              <Button
+                variant="destructive"
+                size="sm"
+                loading={isRemoving}
+                onClick={() => onRemove(memberId)}
+                className="w-full justify-start text-xs h-7"
+              >
+                Remove from Space
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isRemoving || isUpdatingRole}
+                onClick={() => setConfirming(null)}
+                className="w-full justify-start text-xs h-7"
+              >
+                Cancel
+              </Button>
             </div>
-          )}
-        </div>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );
@@ -179,8 +196,9 @@ export function MembersTab({
   isStaff: isStaffProp,
   isEnrolled: isEnrolledProp,
 }) {
-  const courseContext = useCourseContext();
-  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (courseContext?.isEnrolled ?? true);
+  const contextIsEnrolled = useCourseIsEnrolled();
+  const contextIsStaff = useCourseIsStaff();
+  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (contextIsEnrolled ?? true);
   const [query, setQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
@@ -202,7 +220,7 @@ export function MembersTab({
   const isStaff =
     isStaffProp !== undefined
       ? isStaffProp
-      : courseContext?.isStaff ?? (isCurrentOwner || isCurrentAdmin);
+      : contextIsStaff ?? (isCurrentOwner || isCurrentAdmin);
 
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;

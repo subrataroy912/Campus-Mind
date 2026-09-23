@@ -17,7 +17,14 @@ import {
 } from "@/components/ui/dialog.jsx";
 import { formatDueDate } from "@/utils/dateFormat.js";
 import { parseApiError } from "@/lib/errorUtils.js";
-import { useCourseContext } from "../../hooks/useCourseContext.js";
+import {
+  useActiveCourseId,
+  useCourseIsStaff,
+  useCourseIsEnrolled,
+  useCourseTypeFilter,
+  useCourseStatusFilter,
+  useCourseSearchQuery,
+} from "../../hooks/useCourseContext.js";
 
 const GROUPS = ["This week", "Upcoming", "Past"];
 
@@ -27,10 +34,12 @@ export function ClassworkTab({
   classroom,
   isEnrolled: propIsEnrolled,
 }) {
-  const courseContext = useCourseContext();
-  const classId = propClassId || courseContext?.activeCourseId;
-  const isStaff = propIsStaff !== undefined ? propIsStaff : (courseContext?.isStaff ?? false);
-  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (courseContext?.isEnrolled ?? true);
+  const contextCourseId = useActiveCourseId();
+  const contextIsStaff = useCourseIsStaff();
+  const contextIsEnrolled = useCourseIsEnrolled();
+  const classId = propClassId || contextCourseId;
+  const isStaff = propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
+  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const { authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
   const [createOpen, setCreateOpen] = useState(false);
@@ -95,9 +104,9 @@ export function ClassworkTab({
     }
   );
 
-  const typeFilter = courseContext?.filters?.typeFilter;
-  const statusFilter = courseContext?.filters?.statusFilter;
-  const searchQuery = courseContext?.filters?.searchQuery;
+  const typeFilter = useCourseTypeFilter();
+  const statusFilter = useCourseStatusFilter();
+  const searchQuery = useCourseSearchQuery();
 
   const coursework = useMemo(() => {
     let list = courseworkPage?.content ?? [];

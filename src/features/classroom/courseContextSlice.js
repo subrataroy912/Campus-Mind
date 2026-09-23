@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   activeCourseId: null,
@@ -71,21 +71,55 @@ export const {
 
 // --- Selectors ---
 export const selectCourseContext = (state) => state.courseContext;
-export const selectActiveCourseId = (state) =>
-  state.courseContext.activeCourseId;
-export const selectActiveCourseworkId = (state) =>
-  state.courseContext.activeCourseworkId;
-export const selectCourseRole = (state) => state.courseContext.userRole;
-export const selectIsStaff = (state) => state.courseContext.isStaff;
-export const selectIsEnrolled = (state) => state.courseContext.isEnrolled;
-export const selectCourseFilters = (state) => state.courseContext.filters;
-export const selectCourseSearchQuery = (state) =>
-  state.courseContext.filters.searchQuery;
-export const selectCourseTypeFilter = (state) =>
-  state.courseContext.filters.typeFilter;
-export const selectCourseStatusFilter = (state) =>
-  state.courseContext.filters.statusFilter;
-export const selectIsCourseSidebarOpen = (state) =>
-  state.courseContext.isCourseSidebarOpen;
+
+export const selectActiveCourseId = createSelector(
+  [selectCourseContext],
+  (ctx) => ctx?.activeCourseId ?? null,
+);
+
+export const selectActiveCourseworkId = createSelector(
+  [selectCourseContext],
+  (ctx) => ctx?.activeCourseworkId ?? null,
+);
+
+export const selectCourseRole = createSelector(
+  [selectCourseContext],
+  (ctx) => ctx?.userRole ?? null,
+);
+
+export const selectIsStaff = createSelector(
+  [selectCourseContext],
+  (ctx) => Boolean(ctx?.isStaff),
+);
+
+export const selectIsEnrolled = createSelector(
+  [selectCourseContext],
+  (ctx) => Boolean(ctx?.isEnrolled),
+);
+
+export const selectCourseFilters = createSelector(
+  [selectCourseContext],
+  (ctx) => ctx?.filters ?? initialState.filters,
+);
+
+export const selectCourseSearchQuery = createSelector(
+  [selectCourseFilters],
+  (filters) => filters?.searchQuery ?? "",
+);
+
+export const selectCourseTypeFilter = createSelector(
+  [selectCourseFilters],
+  (filters) => filters?.typeFilter ?? "ALL",
+);
+
+export const selectCourseStatusFilter = createSelector(
+  [selectCourseFilters],
+  (filters) => filters?.statusFilter ?? "ALL",
+);
+
+export const selectIsCourseSidebarOpen = createSelector(
+  [selectCourseContext],
+  (ctx) => ctx?.isCourseSidebarOpen ?? true,
+);
 
 export default courseContextSlice.reducer;

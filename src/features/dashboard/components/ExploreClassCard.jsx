@@ -39,8 +39,6 @@ function ExploreClassCard({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { classrooms = [] } = useDashboardData({ includeExplore: false });
-
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [classCodeInput, setClassCodeInput] = useState("");
@@ -60,6 +58,16 @@ function ExploreClassCard({
   const logoUrl = classroom?.logoUrl || classroom?.logo || null;
   const accessType = (classroom?.accessType || ACCESS_TYPES.OPEN).toUpperCase();
   const classTheme = getClassTheme(classroom);
+
+  const needsEnrollmentCheck =
+    typeof isEnrolled !== "boolean" &&
+    !classroom?.isEnrolled &&
+    !classroom?.enrolled;
+
+  const { classrooms = [] } = useDashboardData({
+    includeExplore: false,
+    skip: !needsEnrollmentCheck,
+  });
 
   const isAlreadyEnrolled =
     typeof isEnrolled === "boolean"

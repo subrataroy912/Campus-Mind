@@ -14,11 +14,39 @@ export const notificationsApi = baseApi.injectEndpoints({
         url: `/notifications/${notificationId}/read`,
         method: "PATCH",
       }),
+      async onQueryStarted(notificationId, { dispatch, queryFulfilled }) {
+        // Optimistically mark as read in notification list cache
+        const patchResult = dispatch(
+          notificationsApi.util.updateQueryData(
+            "listNotifications",
+            { unreadOnly: true, page: 0, size: 10 },
+            (draft) => {
+              const list = Array.isArray(draft)
+                ? draft
+                : draft?.content || draft?.data;
+              if (Array.isArray(list)) {
+                const item = list.find(
+                  (n) => n.id === notificationId || n._id === notificationId,
+                );
+                if (item) {
+                  item.read = true;
+                  item.isRead = true;
+                }
+              }
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Notifications"],
     }),
     getNotificationSettings: builder.query({
       query: () => "/notifications/settings",
-      providesTags: ["Notifications"],
+      providesTags: ["NotificationSettings"],
     }),
     updateNotificationSettings: builder.mutation({
       query: (settings) => ({
@@ -26,7 +54,7 @@ export const notificationsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: settings,
       }),
-      invalidatesTags: ["Notifications"],
+      invalidatesTags: ["NotificationSettings"],
     }),
   }),
 });

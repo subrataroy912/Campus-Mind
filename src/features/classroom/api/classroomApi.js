@@ -82,7 +82,6 @@ export const classroomApi = baseApi.injectEndpoints({
       query: (classId) => `/courses/${classId}`,
       transformResponse: normalizeCourse,
       providesTags: (_result, _error, classId) => [
-        { type: "Classrooms", id: "LIST" },
         { type: "Classrooms", id: classId },
       ],
       keepUnusedDataFor: 300,
@@ -121,19 +120,6 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Profile", id: "CURRENT" },
         ...(details?.visibility === "PUBLIC" ? exploreTags : []),
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          dispatch(
-            classroomApi.util.invalidateTags([
-              { type: "Classrooms", id: "LIST" },
-              { type: "Profile", id: "CURRENT" },
-            ]),
-          );
-        } catch {
-          // The mutation error is handled by the caller.
-        }
-      },
     }),
     updateClassroom: builder.mutation({
       query: ({ courseId, changes }) => ({
@@ -225,19 +211,6 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Profile", id: "CURRENT" },
         ...exploreTags,
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          dispatch(
-            classroomApi.util.invalidateTags([
-              { type: "Classrooms", id: "LIST" },
-              { type: "Profile", id: "CURRENT" },
-            ]),
-          );
-        } catch {
-          // The mutation error is handled by the caller.
-        }
-      },
     }),
     leaveClassroom: builder.mutation({
       query: (courseId) => ({

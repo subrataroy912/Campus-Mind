@@ -40,6 +40,12 @@ function ClassCard({ classroom, priority = false }) {
       : "";
 
   const accessType = (classroom.accessType || "PUBLIC").toUpperCase();
+  const isInvite =
+    accessType === "INVITE" ||
+    accessType === "LINK_ONLY" ||
+    accessType === "PRIVATE" ||
+    accessType === "CODE";
+  const isPublic = accessType === "PUBLIC" || accessType === "OPEN";
 
   return (
     <Link
@@ -71,12 +77,12 @@ function ClassCard({ classroom, priority = false }) {
             <span className="inline-flex items-center rounded-md bg-black/40 backdrop-blur-xs px-2 py-0.5 text-[10px] font-semibold text-white border border-white/20">
               {"Space"}
             </span>
-            {accessType === "invite" ? (
+            {isInvite ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-black/50 backdrop-blur-xs px-2 py-0.5 text-[10px] font-medium text-white border border-white/20">
                 <Lock size={10} />
                 Invite
               </span>
-            ) : accessType === "open" ? (
+            ) : isPublic ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-white shadow-2xs">
                 <Globe size={10} />
                 Public

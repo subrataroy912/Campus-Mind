@@ -3,23 +3,25 @@ import { useFetchClassroomsQuery } from "../../classroom/api/classroomApi.js";
 import { useGetExploreFeedQuery } from "../../explore/api/exploreApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
-export function useDashboardData({ includeExplore = true } = {}) {
+const EMPTY_ARRAY = Object.freeze([]);
+
+export function useDashboardData({ includeExplore = true, skip = false } = {}) {
   const { isAuthenticated } = useAuth();
-  const canFetchClassrooms = Boolean(isAuthenticated);
+  const canFetchClassrooms = Boolean(isAuthenticated) && !skip;
   const classroomsQuery = useFetchClassroomsQuery(undefined, {
     skip: !canFetchClassrooms,
   });
   const exploreQuery = useGetExploreFeedQuery(
     { page: 0, size: 20 },
-    { skip: !includeExplore }
+    { skip: !includeExplore || skip }
   );
 
   const classrooms = useMemo(() => {
-    return classroomsQuery.data?.data ?? classroomsQuery.data ?? [];
+    return classroomsQuery.data?.data ?? classroomsQuery.data ?? EMPTY_ARRAY;
   }, [classroomsQuery.data]);
 
   const exploreClassrooms = useMemo(() => {
-    return exploreQuery.data?.content ?? [];
+    return exploreQuery.data?.content ?? EMPTY_ARRAY;
   }, [exploreQuery.data]);
 
   const isLoading =

@@ -52,7 +52,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.jsx";
-import { useCourseContext } from "../hooks/useCourseContext.js";
+import {
+  useCourseIsStaff,
+  useCourseIsEnrolled,
+} from "../hooks/useCourseContext.js";
 
 export default function ClassHeader({
   classroom,
@@ -61,9 +64,10 @@ export default function ClassHeader({
   isJoining = false,
   isStaff: propIsStaff,
 }) {
-  const courseContext = useCourseContext();
-  const isStaff = propIsStaff !== undefined ? propIsStaff : (courseContext?.isStaff ?? false);
-  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (courseContext?.isEnrolled ?? true);
+  const contextIsStaff = useCourseIsStaff();
+  const contextIsEnrolled = useCourseIsEnrolled();
+  const isStaff = propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
+  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

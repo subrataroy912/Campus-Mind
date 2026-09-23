@@ -24,6 +24,9 @@ export const commentApi = baseApi.injectEndpoints({
         const list = Array.isArray(response) ? response : response?.data ?? [];
         return list.map(normalizeComment);
       },
+      providesTags: (_result, _error, { courseworkId }) => [
+        { type: "CourseworkComments", id: courseworkId },
+      ],
     }),
     addCourseworkComment: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({
@@ -33,6 +36,28 @@ export const commentApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeComment(response?.data ?? response),
+      invalidatesTags: (_result, _error, { courseworkId }) => [
+        { type: "CourseworkComments", id: courseworkId },
+      ],
+      async onQueryStarted({ courseworkId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newComment } = await queryFulfilled;
+          dispatch(
+            commentApi.util.updateQueryData(
+              "getCourseworkComments",
+              { courseworkId },
+              (draft) => {
+                const exists = draft.some((c) => c.id === newComment.id);
+                if (!exists) {
+                  draft.push(newComment);
+                }
+              },
+            ),
+          );
+        } catch {
+          // Handled by caller/toast
+        }
+      },
     }),
     getSubmissionComments: builder.query({
       query: ({ submissionId }) => `/submissions/${submissionId}/comments`,
@@ -40,6 +65,9 @@ export const commentApi = baseApi.injectEndpoints({
         const list = Array.isArray(response) ? response : response?.data ?? [];
         return list.map(normalizeComment);
       },
+      providesTags: (_result, _error, { submissionId }) => [
+        { type: "SubmissionComments", id: submissionId },
+      ],
     }),
     addSubmissionComment: builder.mutation({
       query: ({ submissionId, payload = {} }) => ({
@@ -49,6 +77,28 @@ export const commentApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) =>
         normalizeComment(response?.data ?? response),
+      invalidatesTags: (_result, _error, { submissionId }) => [
+        { type: "SubmissionComments", id: submissionId },
+      ],
+      async onQueryStarted({ submissionId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newComment } = await queryFulfilled;
+          dispatch(
+            commentApi.util.updateQueryData(
+              "getSubmissionComments",
+              { submissionId },
+              (draft) => {
+                const exists = draft.some((c) => c.id === newComment.id);
+                if (!exists) {
+                  draft.push(newComment);
+                }
+              },
+            ),
+          );
+        } catch {
+          // Handled by caller/toast
+        }
+      },
     }),
   }),
 });

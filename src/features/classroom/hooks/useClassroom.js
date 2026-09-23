@@ -21,15 +21,14 @@ export function useClassroom(classId) {
     skip,
   });
 
-  const { data: classrooms } = useFetchClassroomsQuery(undefined, {
+  const { cachedCourse } = useFetchClassroomsQuery(undefined, {
     skip: authStatus === "hydrating",
+    selectFromResult: ({ data }) => ({
+      cachedCourse: data?.find(
+        (c) => c.id === classId || c.courseId === classId,
+      ),
+    }),
   });
-
-  const cachedCourse = useMemo(() => {
-    return classrooms?.find(
-      (c) => c.id === classId || c.courseId === classId
-    );
-  }, [classrooms, classId]);
 
   // Check public course endpoint if detailData failed with 404 or 403 (user is not an enrolled member)
   const shouldFetchPublic = Boolean(
@@ -70,9 +69,6 @@ export function useClassroom(classId) {
   const isEnrolled = useMemo(() => {
     // 1. If course is found in user's enrolled classrooms list
     if (cachedCourse) return true;
-    if (classrooms?.some((c) => c.id === classId || c.courseId === classId)) {
-      return true;
-    }
 
     // 2. If current user is the owner of this course
     if (userId && classroom?.ownerId === userId) {
@@ -92,7 +88,7 @@ export function useClassroom(classId) {
     }
 
     return Boolean(classroom && classroom.role && classroom.role !== "VIEWER");
-  }, [cachedCourse, classrooms, userId, classroom, classId]);
+  }, [cachedCourse, userId, classroom]);
 
   const notFoundDetails = !publicCourse ? getCourseNotFoundDetails(error, classId) : null;
 

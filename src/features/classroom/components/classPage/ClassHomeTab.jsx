@@ -28,22 +28,28 @@ import { isStaffRole } from "../../utils/roles.js";
 import { routes } from "@/routes/paths";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
-import { useCourseContext } from "../../hooks/useCourseContext.js";
+import {
+  useActiveCourseId,
+  useCourseIsEnrolled,
+  useCourseIsStaff,
+} from "../../hooks/useCourseContext.js";
 
 export function ClassHomeTab({
   isEnrolled: propIsEnrolled,
   classroom,
   isStaff: propIsStaff,
 }) {
-  const courseContext = useCourseContext();
-  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (courseContext?.isEnrolled ?? true);
+  const contextCourseId = useActiveCourseId();
+  const contextIsEnrolled = useCourseIsEnrolled();
+  const contextIsStaff = useCourseIsStaff();
+  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const { user } = useAuth();
-  const courseId = classroom?.id || courseContext?.activeCourseId;
+  const courseId = classroom?.id || contextCourseId;
 
   const isStaff =
     propIsStaff ??
-    courseContext?.isStaff ??
+    contextIsStaff ??
     (isStaffRole(classroom?.role) ||
       (Boolean(user?.id) &&
         (user.id === classroom?.ownerId || user.id === classroom?.creatorId)));

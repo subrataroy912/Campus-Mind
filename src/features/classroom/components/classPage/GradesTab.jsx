@@ -10,7 +10,11 @@ import {
   useGetStudentGradebookQuery,
   useGetCourseGradebookQuery,
 } from "../../api/courseworkApi.js";
-import { useCourseContext } from "../../hooks/useCourseContext.js";
+import {
+  useActiveCourseId,
+  useCourseIsStaff,
+  useCourseIsEnrolled,
+} from "../../hooks/useCourseContext.js";
 
 const statusClass = {
   assigned: "bg-canvas text-text-main border border-border",
@@ -44,11 +48,13 @@ export function GradesTab({
   isStaff: isStaffProp,
   isEnrolled: isEnrolledProp,
 }) {
-  const courseContext = useCourseContext();
+  const contextCourseId = useActiveCourseId();
+  const contextIsStaff = useCourseIsStaff();
+  const contextIsEnrolled = useCourseIsEnrolled();
   const { classId: routeClassId } = useParams();
-  const classId = routeClassId || courseContext?.activeCourseId;
-  const isStaff = isStaffProp !== undefined ? Boolean(isStaffProp) : (courseContext?.isStaff ?? false);
-  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (courseContext?.isEnrolled ?? true);
+  const classId = routeClassId || contextCourseId;
+  const isStaff = isStaffProp !== undefined ? Boolean(isStaffProp) : (contextIsStaff ?? false);
+  const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (contextIsEnrolled ?? true);
   const [selected, setSelected] = useState(null);
   const { user, authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";

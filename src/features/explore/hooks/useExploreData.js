@@ -5,6 +5,8 @@ import {
   useSearchExploreCoursesQuery,
 } from "../api/exploreApi.js";
 
+const EMPTY_ARRAY = Object.freeze([]);
+
 /**
  * Selects the API endpoint without ever turning an empty search into a feed.
  * The API requires a nonblank q, while subject filtering belongs to the feed.
@@ -57,7 +59,7 @@ export function useExploreData({
     active.data ?? (keepPreviousData ? previousData : undefined);
 
   return {
-    classes: resolvedData?.content ?? [],
+    classes: resolvedData?.content ?? EMPTY_ARRAY,
     page: resolvedData,
     query: active,
     isPlaceholderData,
