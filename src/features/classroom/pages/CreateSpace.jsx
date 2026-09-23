@@ -5,7 +5,7 @@ import {
   Check,
   Globe,
   ImagePlus,
-  KeyRound,
+  Link2,
   Loader2,
   Lock,
   PlusCircle,
@@ -25,22 +25,22 @@ import { routes } from "@/routes/paths.js";
 
 const ACCESS_OPTIONS = [
   {
-    id: "code",
-    title: "Space Code",
-    description: "Members enter an 8-character enrollment code you share.",
-    icon: KeyRound,
-  },
-  {
-    id: "open",
-    title: "Public / Open",
-    description: "Anyone browsing explore or with the link can join directly.",
+    id: "PUBLIC",
+    title: "Public",
+    description: "Discoverable. Anyone can join directly.",
     icon: Globe,
   },
   {
-    id: "invite",
-    title: "Invite Only",
-    description: "Only members specifically invited or added by you can join.",
+    id: "PRIVATE",
+    title: "Private",
+    description: "Discoverable. Join requests require admin approval.",
     icon: Lock,
+  },
+  {
+    id: "LINK_ONLY",
+    title: "Link Only",
+    description: "Hidden. Join only with a 48h invitation link.",
+    icon: Link2,
   },
 ];
 
@@ -411,7 +411,7 @@ export default function CreateSpace() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {ACCESS_OPTIONS.map((opt) => {
                 const Icon = opt.icon;
-                const isSelected = (form.accessType || "code") === opt.id;
+                const isSelected = (form.accessType || "PUBLIC").toUpperCase() === opt.id;
                 return (
                   <button
                     key={opt.id}

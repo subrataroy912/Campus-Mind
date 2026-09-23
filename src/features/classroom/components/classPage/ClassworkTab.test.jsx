@@ -74,7 +74,7 @@ describe("ClassworkTab", () => {
       />
     );
     expect(html).toContain("Classwork is reserved for enrolled members");
-    expect(html).toContain("Join Space");
+    expect(html).not.toContain("Join Space");
   });
 
   it("renders empty state when there is no coursework", () => {

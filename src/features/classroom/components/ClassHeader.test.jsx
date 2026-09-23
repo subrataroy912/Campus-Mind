@@ -17,6 +17,8 @@ vi.mock("../api/classroomApi.js", () => ({
   useDeleteClassroomMutation: () => [vi.fn(), { isLoading: false }],
   useLeaveClassroomMutation: () => [vi.fn(), { isLoading: false }],
   useUpdateClassroomMutation: () => [vi.fn(), { isLoading: false }],
+  useCancelJoinRequestMutation: () => [vi.fn(), { isLoading: false }],
+  useGenerateInviteLinkMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 describe("ClassHeader privacy and role checks", () => {
@@ -26,11 +28,11 @@ describe("ClassHeader privacy and role checks", () => {
     section: "CS 301",
     subject: "Computer Science",
     code: "SECRETBIGCODE",
-    accessType: "code",
+    accessType: "LINK_ONLY",
     owner: { name: "Dr. Henderson" },
   };
 
-  it("renders settings cog and class code when viewer is staff", () => {
+  it("renders settings cog and invite link when viewer is staff on LINK_ONLY space", () => {
     const html = renderToString(
       <ClassHeader
         classroom={sampleClass}
@@ -41,12 +43,11 @@ describe("ClassHeader privacy and role checks", () => {
 
     // Settings cog must be present
     expect(html).toContain("Class settings");
-    // Raw class code must be present
-    expect(html).toContain("Class code:");
-    expect(html).toContain("SECRETBIGCODE");
+    // Staff gets Invite Link button for LINK_ONLY space
+    expect(html).toContain("Invite Link");
   });
 
-  it("hides settings cog and hides raw class code when viewer is a member/non-staff", () => {
+  it("hides settings cog and hides invite link when viewer is a member/non-staff", () => {
     const html = renderToString(
       <ClassHeader
         classroom={sampleClass}
@@ -57,18 +58,17 @@ describe("ClassHeader privacy and role checks", () => {
 
     // Settings cog must NOT be rendered
     expect(html).not.toContain("Class settings");
-    expect(html).not.toContain("Edit class details");
-    // Raw class code must NOT be leaked
-    expect(html).not.toContain("SECRETBIGCODE");
-    expect(html).not.toContain("Class code:");
+    expect(html).not.toContain("Edit space &amp; branding");
+    // Invite link must NOT be visible to regular members on LINK_ONLY space
+    expect(html).not.toContain("Invite Link");
     // Enrolled status indicator is rendered instead
     expect(html).toContain("Enrolled");
   });
 
-  it("renders public join link for open access courses regardless of role", () => {
+  it("renders public copy space link for PUBLIC access spaces", () => {
     const openClass = {
       ...sampleClass,
-      accessType: "open",
+      accessType: "PUBLIC",
     };
 
     const html = renderToString(
@@ -79,7 +79,7 @@ describe("ClassHeader privacy and role checks", () => {
       />
     );
 
-    expect(html).toContain("Copy join link");
+    expect(html).toContain("Copy link");
     expect(html).not.toContain("Class settings");
   });
 });

@@ -197,12 +197,6 @@ export function ClassworkTab({
         <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
           Join this space to access assignments, view shared materials, and submit coursework.
         </p>
-        {onJoin && (
-          <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
-            <UserPlus className="h-3.5 w-3.5" />
-            <span>Join Space</span>
-          </Button>
-        )}
       </div>
     );
   }

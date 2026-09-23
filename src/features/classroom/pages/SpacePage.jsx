@@ -13,6 +13,7 @@ import {
 import { isStaffRole, isUserEnrolled } from "../utils/roles.js";
 import { routes } from "@/routes/paths";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { toast } from "@/components/ui/toast.jsx";
 import {
   ClassHomeTab,
   ClassworkTab,
@@ -47,10 +48,11 @@ export default function SpacePage() {
 
   const rawAccessType = (
     classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "OPEN" : "CODE")
+    (classroom?.visibility === "PUBLIC" ? "PUBLIC" : "LINK_ONLY")
   ).toUpperCase();
   const isCodeProtected =
-    rawAccessType === "CODE" && classroom?.visibility !== "PUBLIC";
+    (rawAccessType === "CODE" || rawAccessType === "LINK_ONLY") &&
+    classroom?.visibility !== "PUBLIC";
 
   const handleJoin = async (overrideCode) => {
     if (!classId) return;
@@ -68,16 +70,29 @@ export default function SpacePage() {
 
     setLocalJoinError("");
     try {
-      await joinClassroom({
+      const result = await joinClassroom({
         courseId: classId,
         code: effectiveCode || undefined,
       }).unwrap();
       setIsCodeModalOpen(false);
       setClassCodeInput("");
+      if (result?.membershipStatus === "PENDING") {
+        toast.add({
+          title: "Request submitted",
+          description: "Your join request has been sent for admin review.",
+          type: "success",
+        });
+      } else {
+        toast.add({
+          title: "Joined space",
+          description: "You are now a member of this space.",
+          type: "success",
+        });
+      }
     } catch (err) {
       const message = parseApiError(
         err,
-        "Failed to join class. Please verify the code and try again."
+        "Failed to join space. Please try again."
       ).message;
       setLocalJoinError(message);
     }
@@ -174,6 +189,9 @@ export default function SpacePage() {
 
         <ClassHeader
           classroom={classroomWithNewCode}
+          isEnrolled={isEnrolled}
+          onJoin={handleJoin}
+          isJoining={isJoining}
           isStaff={isStaff}
         />
 

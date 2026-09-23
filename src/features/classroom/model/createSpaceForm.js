@@ -28,7 +28,7 @@ export const INITIAL_SPACE_FORM = {
   subject: "",
   customSubject: "",
   description: "",
-  accessType: "invite",
+  accessType: "PUBLIC",
   theme: "indigo",
   coverImage: null,
   logoImage: null,

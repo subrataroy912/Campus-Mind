@@ -10,7 +10,7 @@ describe("createSpaceForm model", () => {
     expect(INITIAL_SPACE_FORM.customSubject).toBe("");
     expect(INITIAL_SPACE_FORM.subject).toBe("");
     expect(INITIAL_SPACE_FORM.className).toBe("");
-    expect(INITIAL_SPACE_FORM.accessType).toBe("invite");
+    expect(INITIAL_SPACE_FORM.accessType).toBe("PUBLIC");
   });
 
   it("includes 'Other' as a selectable option in SUBJECTS", () => {
@@ -24,14 +24,14 @@ describe("createSpaceForm model", () => {
       className: "Future Tech 101",
       section: "Lab 3",
       subject: effectiveSubject,
-      accessType: "code",
+      accessType: "PUBLIC",
     });
 
     expect(payload).toMatchObject({
       title: "Future Tech 101",
       section: "Lab 3",
       subject: "Robotics & Artificial Intelligence",
-      accessType: "CODE",
+      accessType: "PUBLIC",
     });
   });
 });

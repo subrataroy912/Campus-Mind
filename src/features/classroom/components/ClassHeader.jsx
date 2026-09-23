@@ -5,15 +5,18 @@ import {
   Archive,
   Camera,
   Check,
+  Clock,
   Copy,
   ExternalLink,
   Globe,
   ImagePlus,
   KeyRound,
+  Link2,
   Lock,
   LogOut,
   MapPin,
   Pencil,
+  RefreshCw,
   Settings,
   Trash2,
   UserPlus,
@@ -33,8 +36,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.jsx";
 import { EditSpaceModal } from "./EditSpaceModal.jsx";
+import { InviteLinkModal } from "./InviteLinkModal.jsx";
 import {
   useArchiveClassroomMutation,
+  useCancelJoinRequestMutation,
   useDeleteClassroomMutation,
   useLeaveClassroomMutation,
 } from "../api/classroomApi.js";
@@ -89,6 +94,7 @@ export default function ClassHeader({
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
@@ -99,6 +105,8 @@ export default function ClassHeader({
     useDeleteClassroomMutation();
   const [leaveClassroom, { isLoading: isLeaving }] =
     useLeaveClassroomMutation();
+  const [cancelJoinRequest, { isLoading: isCancelling }] =
+    useCancelJoinRequestMutation();
 
   const classTheme = getClassTheme(classroom);
   const facilitatorName =
@@ -109,10 +117,21 @@ export default function ClassHeader({
         classroom?.creatorName ||
         "Space Owner";
 
-  const accessType = (
+  const rawAccessType = (
     classroom?.accessType ||
-    (classroom?.visibility === "PUBLIC" ? "Public" : "code")
-  ).toLowerCase();
+    (classroom?.visibility === "PUBLIC" ? "PUBLIC" : "LINK_ONLY")
+  ).toUpperCase();
+  const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(rawAccessType)
+    ? rawAccessType
+    : rawAccessType === "OPEN"
+    ? "PUBLIC"
+    : rawAccessType === "CODE"
+    ? "LINK_ONLY"
+    : "PRIVATE";
+
+  const membershipStatus = classroom?.membershipStatus?.toUpperCase();
+  const isPending = membershipStatus === "PENDING";
+  const isRejected = membershipStatus === "REJECTED";
 
   const spaceTypeInfo =
     SPACE_TYPE_CONFIG[classroom?.spaceType] || SPACE_TYPE_CONFIG.ACADEMIC_CLASS;
@@ -128,16 +147,35 @@ export default function ClassHeader({
   const tags = Array.isArray(classroom?.tags) ? classroom.tags : [];
 
   const handleCopy = () => {
-    let textToCopy = classroom?.code || classroom?.enrollmentCode || "";
-    if (accessType === "open") {
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
-      textToCopy = `${origin}/join?courseId=${classroom?.id || ""}`;
-    }
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const textToCopy = `${origin}/spaces/${classroom?.id || ""}`;
     if (!textToCopy) return;
     navigator.clipboard?.writeText(textToCopy).catch(() => {});
     setCopied(true);
+    toast.add({
+      title: "Link copied",
+      description: "Space link copied to clipboard.",
+      type: "success",
+    });
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleCancelRequest = async () => {
+    if (!classroom?.id) return;
+    try {
+      await cancelJoinRequest(classroom.id).unwrap();
+      toast.add({
+        title: "Request cancelled",
+        description: "Your join request has been cancelled.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Cancellation failed",
+        description: parseApiError(err, "Failed to cancel join request.").message,
+        type: "error",
+      });
+    }
   };
 
   const handleArchive = async () => {
@@ -413,17 +451,20 @@ export default function ClassHeader({
 
               {/* Access type */}
               <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 capitalize font-medium">
-                <ClassroomIcon
-                  name={
-                    accessType === "open"
-                      ? "globe"
-                      : accessType === "code"
-                      ? "key"
-                      : "lock"
-                  }
-                  className="h-3 w-3 text-muted-foreground"
-                />
-                <span>{accessType}</span>
+                {accessType === "PUBLIC" ? (
+                  <Globe className="h-3 w-3 text-muted-foreground" />
+                ) : accessType === "LINK_ONLY" ? (
+                  <Link2 className="h-3 w-3 text-muted-foreground" />
+                ) : (
+                  <Lock className="h-3 w-3 text-muted-foreground" />
+                )}
+                <span>
+                  {accessType === "PUBLIC"
+                    ? "Public"
+                    : accessType === "LINK_ONLY"
+                    ? "Link only"
+                    : "Private"}
+                </span>
               </span>
 
               {/* Space Tags */}
@@ -439,25 +480,62 @@ export default function ClassHeader({
           </div>
         </div>
 
-        {/* Action Buttons - Compact */}
+        {/* Action Buttons - Compact Single Action */}
         <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-end">
           {!isEnrolled ? (
-            accessType === "invite" ? (
-              <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
-                <Lock className="h-3.5 w-3.5 text-text-muted" />
-                <span>Invite only</span>
-              </div>
-            ) : accessType === "code" && classroom?.visibility !== "PUBLIC" ? (
-              <Link
-                to={`${routes.classes.join}?courseId=${encodeURIComponent(
-                  classroom?.id || ""
-                )}&accessType=code`}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-hover sm:w-auto"
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                <span>Join with Code</span>
-              </Link>
+            accessType === "PRIVATE" ? (
+              isPending ? (
+                <div className="flex w-full items-center gap-1.5 sm:w-auto">
+                  <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Request Pending</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelRequest}
+                    disabled={isCancelling}
+                    className="h-8 text-xs font-medium"
+                  >
+                    {isCancelling ? "Cancelling…" : "Cancel"}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={onJoin}
+                  disabled={isJoining}
+                  className="w-full sm:w-auto h-8 text-xs font-semibold gap-1.5"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>
+                    {isJoining
+                      ? "Requesting…"
+                      : isRejected
+                      ? "Re-request to Join"
+                      : "Request to Join"}
+                  </span>
+                </Button>
+              )
+            ) : accessType === "LINK_ONLY" ? (
+              classroom?.inviteToken || onJoin ? (
+                <Button
+                  size="sm"
+                  onClick={onJoin}
+                  disabled={isJoining}
+                  className="w-full sm:w-auto h-8 text-xs font-semibold gap-1.5"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>{isJoining ? "Joining…" : "Join Space"}</span>
+                </Button>
+              ) : (
+                <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
+                  <Lock className="h-3.5 w-3.5 text-text-muted" />
+                  <span>Invite only</span>
+                </div>
+              )
             ) : (
+              /* PUBLIC */
               <Button
                 size="sm"
                 onClick={onJoin}
@@ -465,52 +543,72 @@ export default function ClassHeader({
                 className="w-full sm:w-auto h-8 text-xs font-semibold gap-1.5"
               >
                 <UserPlus className="h-3.5 w-3.5" />
-                <span>{isJoining ? "Joining•" : "Join Space"}</span>
+                <span>{isJoining ? "Joining…" : "Join Space"}</span>
               </Button>
             )
-          ) : accessType === "open" ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-              className="w-full sm:w-auto h-8 text-xs gap-1.5"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-success" />
-              ) : (
-                <Copy className="h-3.5 w-3.5 text-text-muted" />
-              )}
-              <span>{copied ? "Link copied!" : "Copy join link"}</span>
-            </Button>
           ) : isStaff ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopy}
-              className="w-full sm:w-auto h-8 text-xs gap-1.5 font-mono"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-success" />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {accessType === "LINK_ONLY" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsInviteModalOpen(true)}
+                  className="w-full sm:w-auto h-8 text-xs gap-1.5"
+                >
+                  <Link2 className="h-3.5 w-3.5 text-primary" />
+                  <span>Invite Link</span>
+                </Button>
               ) : (
-                <KeyRound className="h-3.5 w-3.5 text-primary" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopy}
+                  className="w-full sm:w-auto h-8 text-xs gap-1.5"
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-text-muted" />
+                  )}
+                  <span>{copied ? "Link copied!" : "Copy space link"}</span>
+                </Button>
               )}
-              <span>
-                {copied ? "Copied!" : "Class code: "}
-                {!copied && (
-                  <span className="font-mono text-primary">
-                    {classroom?.code}
-                  </span>
-                )}
-              </span>
-            </Button>
+            </div>
           ) : (
-            <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
-              <Check className="h-3.5 w-3.5 text-success" />
-              <span className="font-semibold text-text-heading">Enrolled</span>
+            /* Regular Enrolled Member */
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
+                <Check className="h-3.5 w-3.5 text-success" />
+                <span className="font-semibold text-text-heading">Enrolled</span>
+              </div>
+              {accessType !== "LINK_ONLY" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopy}
+                  className="w-full sm:w-auto h-8 text-xs gap-1.5"
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-text-muted" />
+                  )}
+                  <span>{copied ? "Copied!" : "Copy link"}</span>
+                </Button>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Invite Link Modal for Staff */}
+      {isInviteModalOpen && (
+        <InviteLinkModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          classroom={classroom}
+        />
+      )}
 
       {/* Edit Space Modal */}
       {isEditModalOpen && (

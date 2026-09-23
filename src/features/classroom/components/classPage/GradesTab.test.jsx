@@ -61,7 +61,7 @@ describe("GradesTab", () => {
       <GradesTab isEnrolled={false} isStaff={false} onJoin={vi.fn()} />
     );
     expect(html).toContain("Gradebook is reserved for enrolled members");
-    expect(html).toContain("Join Space");
+    expect(html).not.toContain("Join Space");
   });
 
   it("renders student grades and summary metrics", () => {

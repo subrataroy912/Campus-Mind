@@ -13,15 +13,10 @@ import { parseApiError } from "@/lib/errorUtils.js";
 export default function ClassFeedPost({ post, pinned = false }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [reply, setReply] = useState("");
-
   const authorName =
     typeof post.author === "string"
       ? post.author
-      : post.author?.name ||
-        post.creatorName ||
-        post.ownerName ||
-        "Author";
-
+      : post.author?.name || post.creatorName || post.ownerName || "Author";
   const authorId =
     (typeof post.author === "object" ? post.author?.id : null) ||
     post.authorId ||
@@ -41,7 +36,7 @@ export default function ClassFeedPost({ post, pinned = false }) {
   const { data: comments = [], isLoading: isLoadingComments } =
     useGetCourseworkCommentsQuery(
       { courseworkId: post.id },
-      { skip: !commentsOpen || !post?.id }
+      { skip: !commentsOpen || !post?.id },
     );
 
   const [addComment, { isLoading: isSubmittingComment }] =
@@ -59,7 +54,10 @@ export default function ClassFeedPost({ post, pinned = false }) {
     } catch (err) {
       toast.add({
         title: "Failed to post comment",
-        description: parseApiError(err, "Unable to post your comment right now.").message,
+        description: parseApiError(
+          err,
+          "Unable to post your comment right now.",
+        ).message,
         type: "error",
       });
     }
@@ -90,7 +88,9 @@ export default function ClassFeedPost({ post, pinned = false }) {
               </span>
             )}
             {displayTime && (
-              <span className="text-[11px] text-muted-foreground">{displayTime}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {displayTime}
+              </span>
             )}
           </div>
           {post.title && post.title !== "Announcement" && (
@@ -110,9 +110,7 @@ export default function ClassFeedPost({ post, pinned = false }) {
                 className="flex items-center gap-1.5 transition-colors hover:text-foreground cursor-pointer font-medium text-[11px]"
               >
                 <ClassroomIcon name="comment" className="h-3.5 w-3.5" />
-                <span>
-                  {commentsOpen ? "Hide discussion" : "Discussion"}
-                </span>
+                <span>{commentsOpen ? "Hide discussion" : "Discussion"}</span>
                 {comments.length > 0 && <span>({comments.length})</span>}
               </button>
             </div>
@@ -122,7 +120,9 @@ export default function ClassFeedPost({ post, pinned = false }) {
             <div className="mt-2.5 border-t border-border/50 pt-2.5">
               <div className="space-y-1.5">
                 {isLoadingComments ? (
-                  <p className="text-[11px] text-muted-foreground">Loading discussion…</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Loading discussion…
+                  </p>
                 ) : comments.length ? (
                   comments.map((comment) => {
                     const commentAuthor =
@@ -154,7 +154,9 @@ export default function ClassFeedPost({ post, pinned = false }) {
                               {commentAuthor}{" "}
                             </span>
                           )}
-                          <p className="text-xs text-foreground/90 mt-0.5">{comment.content}</p>
+                          <p className="text-xs text-foreground/90 mt-0.5">
+                            {comment.content}
+                          </p>
                         </div>
                       </div>
                     );

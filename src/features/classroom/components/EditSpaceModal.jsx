@@ -4,7 +4,7 @@ import {
   ImagePlus,
   Loader2,
   X,
-  KeyRound,
+  Link2,
   Globe,
   Lock,
 } from "lucide-react";
@@ -30,24 +30,31 @@ import { parseApiError } from "@/lib/errorUtils.js";
 
 const ACCESS_OPTIONS = [
   {
-    id: "CODE",
-    title: "Class Code",
-    description: "Protected by an 8-character code",
-    icon: KeyRound,
-  },
-  {
-    id: "OPEN",
-    title: "Public / Open",
-    description: "Anyone can view and join directly",
+    id: "PUBLIC",
+    title: "Public",
+    description: "Discoverable. Anyone can join directly.",
     icon: Globe,
   },
   {
-    id: "INVITE",
-    title: "Invite Only",
-    description: "Only members you add can join",
+    id: "PRIVATE",
+    title: "Private",
+    description: "Discoverable. Join requests require admin approval.",
     icon: Lock,
   },
+  {
+    id: "LINK_ONLY",
+    title: "Link Only",
+    description: "Hidden. Join only with a 48h invitation link.",
+    icon: Link2,
+  },
 ];
+
+const normalizeAccessType = (val) => {
+  const u = String(val || "PUBLIC").toUpperCase();
+  if (u === "OPEN") return "PUBLIC";
+  if (u === "CODE" || u === "INVITE") return "LINK_ONLY";
+  return u;
+};
 
 export function EditSpaceModal({ isOpen, onClose, classroom }) {
   const [title, setTitle] = useState(
@@ -62,7 +69,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
     () => classroom?.description || "",
   );
   const [accessType, setAccessType] = useState(() =>
-    (classroom?.accessType || "CODE").toUpperCase(),
+    normalizeAccessType(classroom?.accessType),
   );
   const [theme, setTheme] = useState(() => classroom?.theme || "indigo");
 
@@ -103,7 +110,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
       }
       setSection(classroom.section || classroom.subtitle || "");
       setDescription(classroom.description || "");
-      setAccessType((classroom.accessType || "CODE").toUpperCase());
+      setAccessType(normalizeAccessType(classroom.accessType));
       setTheme(classroom.theme || "indigo");
       setCoverPreview(classroom.coverUrl || classroom.cover || null);
       setCoverFile(null);
@@ -213,7 +220,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
           location: classroom?.location || undefined,
           tags: classroom?.tags || [],
           accessType,
-          visibility: accessType === "OPEN" ? "PUBLIC" : "PRIVATE",
+          visibility: accessType === "LINK_ONLY" ? "PRIVATE" : "PUBLIC",
           theme,
           coverUrl: coverUrl !== undefined ? coverUrl : undefined,
           logoUrl: logoUrl !== undefined ? logoUrl : undefined,

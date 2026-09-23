@@ -43,6 +43,9 @@ vi.mock("../../api/classroomApi.js", () => ({
   useUpdateClassroomMutation: () => [vi.fn(), { isLoading: false }],
   useRemoveCourseMemberMutation: () => [vi.fn(), { isLoading: false }],
   useUpdateMemberRoleMutation: () => [vi.fn(), { isLoading: false }],
+  useGetPendingJoinRequestsQuery: () => ({ data: [], isLoading: false }),
+  useApproveJoinRequestMutation: () => [vi.fn(), { isLoading: false }],
+  useDeclineJoinRequestMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 describe("MembersTab", () => {
@@ -56,7 +59,7 @@ describe("MembersTab", () => {
       />
     );
     expect(html).toContain("Class roster is only available to members");
-    expect(html).toContain("Join Space");
+    expect(html).not.toContain("Join Space");
   });
 
   it("renders admins/owner and members correctly", () => {

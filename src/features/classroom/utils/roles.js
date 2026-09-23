@@ -10,6 +10,12 @@ export const isAdminOrOwner = isStaffRole;
 
 export function isUserEnrolled(classroom, userId) {
   if (!classroom) return false;
+  if (
+    classroom.membershipStatus === "PENDING" ||
+    classroom.membershipStatus === "REJECTED"
+  ) {
+    return false;
+  }
   if (classroom.isEnrolled === true || classroom.enrolled === true) return true;
   if (
     classroom.isEnrolled === false ||

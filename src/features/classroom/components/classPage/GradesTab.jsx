@@ -109,12 +109,6 @@ export function GradesTab({
           <p className="mx-auto mt-1 max-w-sm text-xs text-text-muted">
             Join this space to track your grades, missing assignments, and space standing.
           </p>
-          {onJoin && (
-            <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3 gap-1.5 h-8 text-xs font-medium">
-              <UserPlus className="h-3.5 w-3.5" />
-              <span>Join Space</span>
-            </Button>
-          )}
         </div>
       </section>
     );

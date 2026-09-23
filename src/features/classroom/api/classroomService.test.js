@@ -14,7 +14,7 @@ describe("mapCreateClassPayload", () => {
         gradeLevel: "Grade 10",
         room: "Room 204",
         description: "Advanced algebra",
-        accessType: "open",
+        accessType: "PUBLIC",
         theme: "indigo",
       })
     ).toEqual({
@@ -25,14 +25,14 @@ describe("mapCreateClassPayload", () => {
       coverUrl: null,
       logoUrl: null,
       theme: "indigo",
-      accessType: "OPEN",
+      accessType: "PUBLIC",
       visibility: "PUBLIC",
     });
 
     expect(
       mapCreateClassPayload({
         className: "Biology Honors",
-        accessType: "invite",
+        accessType: "LINK_ONLY",
       })
     ).toEqual({
       title: "Biology Honors",
@@ -42,14 +42,14 @@ describe("mapCreateClassPayload", () => {
       coverUrl: null,
       logoUrl: null,
       theme: null,
-      accessType: "INVITE",
+      accessType: "LINK_ONLY",
       visibility: "PRIVATE",
     });
 
     expect(
       mapCreateClassPayload({
         className: "Chemistry 101",
-        accessType: "code",
+        accessType: "PRIVATE",
       })
     ).toEqual({
       title: "Chemistry 101",
@@ -59,8 +59,8 @@ describe("mapCreateClassPayload", () => {
       coverUrl: null,
       logoUrl: null,
       theme: null,
-      accessType: "CODE",
-      visibility: "PRIVATE",
+      accessType: "PRIVATE",
+      visibility: "PUBLIC",
     });
   });
 

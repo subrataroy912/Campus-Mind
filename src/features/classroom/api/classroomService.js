@@ -4,11 +4,15 @@ import { unwrapResponse } from "@/lib/apiUtils.js";
 
 export function mapCreateClassPayload(details = {}) {
   const rawAccessType = (details.accessType || "").toUpperCase();
-  const accessType = ["INVITE", "CODE", "OPEN"].includes(rawAccessType)
+  const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(rawAccessType)
     ? rawAccessType
+    : rawAccessType === "OPEN"
+    ? "PUBLIC"
+    : rawAccessType === "CODE" || rawAccessType === "INVITE"
+    ? "LINK_ONLY"
     : details.visibility === "PUBLIC"
-    ? "OPEN"
-    : "CODE";
+    ? "PUBLIC"
+    : "PUBLIC";
 
   const payload = {
     title: details.title ?? details.name ?? details.className ?? "",
@@ -21,7 +25,7 @@ export function mapCreateClassPayload(details = {}) {
     accessType,
     visibility:
       details.visibility ??
-      (accessType === "OPEN" ? "PUBLIC" : "PRIVATE"),
+      (accessType === "LINK_ONLY" ? "PRIVATE" : "PUBLIC"),
   };
 
   if (details.spaceType) payload.spaceType = details.spaceType;

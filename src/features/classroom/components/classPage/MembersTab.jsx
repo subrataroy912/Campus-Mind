@@ -1,6 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { MessageCircle, MoreVertical, Search, Ticket, UserPlus } from "lucide-react";
+import {
+  Check,
+  Clock,
+  MessageCircle,
+  MoreVertical,
+  Search,
+  Ticket,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
@@ -11,6 +20,9 @@ import {
   useUpdateClassroomMutation,
   useRemoveCourseMemberMutation,
   useUpdateMemberRoleMutation,
+  useGetPendingJoinRequestsQuery,
+  useApproveJoinRequestMutation,
+  useDeclineJoinRequestMutation,
 } from "../../api/classroomApi.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
@@ -257,6 +269,65 @@ export function MembersTab({
     }
   };
 
+  const [processingRequestId, setProcessingRequestId] = useState(null);
+  const [approveJoinRequest, { isLoading: isApproving }] =
+    useApproveJoinRequestMutation();
+  const [declineJoinRequest, { isLoading: isDeclining }] =
+    useDeclineJoinRequestMutation();
+
+  const { data: pendingRequests = [] } = useGetPendingJoinRequestsQuery(
+    classroom?.id,
+    {
+      skip: authStatus === "hydrating" || !classroom?.id || !isStaff,
+    }
+  );
+
+  const handleApproveRequest = async (applicantUserId) => {
+    setProcessingRequestId(applicantUserId);
+    try {
+      await approveJoinRequest({
+        courseId: classroom?.id,
+        userId: applicantUserId,
+      }).unwrap();
+      toast.add({
+        title: "Request approved",
+        description: "Member has been accepted into the space.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Approval failed",
+        description: parseApiError(err, "Failed to approve join request.").message,
+        type: "error",
+      });
+    } finally {
+      setProcessingRequestId(null);
+    }
+  };
+
+  const handleDeclineRequest = async (applicantUserId) => {
+    setProcessingRequestId(applicantUserId);
+    try {
+      await declineJoinRequest({
+        courseId: classroom?.id,
+        userId: applicantUserId,
+      }).unwrap();
+      toast.add({
+        title: "Request declined",
+        description: "Join request has been declined.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Decline failed",
+        description: parseApiError(err, "Failed to decline join request.").message,
+        type: "error",
+      });
+    } finally {
+      setProcessingRequestId(null);
+    }
+  };
+
   const { data: roster = [] } = useGetClassroomRosterQuery(classroom?.id, {
     skip: authStatus === "hydrating" || !classroom?.id || !isEnrolled,
   });
@@ -298,12 +369,6 @@ export function MembersTab({
           <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
             Join this space to view members and connect with participants.
           </p>
-          {onJoin && (
-            <Button onClick={onJoin} loading={isJoining} size="sm" className="mt-3.5 gap-1.5 rounded-lg text-xs">
-              <UserPlus className="h-3.5 w-3.5" />
-              <span>Join Space</span>
-            </Button>
-          )}
         </div>
       </section>
     );
@@ -312,7 +377,81 @@ export function MembersTab({
   const enrollmentCode = classroom?.code || classroom?.enrollmentCode;
 
   return (
-    <section className="mt-3">
+    <section className="mt-3 space-y-3">
+      {/* Pending Requests Queue for Space Staff */}
+      {isStaff && pendingRequests.length > 0 && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5 sm:p-4 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <h3 className="text-sm font-bold text-foreground">
+                Pending Join Requests
+              </h3>
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.2 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                {pendingRequests.length}
+              </span>
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              Review requests to join this space
+            </span>
+          </div>
+
+          <div className="divide-y divide-border/60 rounded-lg border border-border/60 bg-card overflow-hidden">
+            {pendingRequests.map((req) => {
+              const applicantName = req.name || req.handle || "Applicant";
+              const applicantHandle = req.handle ? `@${req.handle}` : req.email || "";
+              const isProcessing = processingRequestId === req.userId;
+              return (
+                <div
+                  key={req.userId}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ClassroomAvatar
+                      name={applicantName}
+                      userId={req.userId}
+                      avatar={req.avatarUrl}
+                      size="h-8 w-8"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {applicantName}
+                      </p>
+                      {applicantHandle && (
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {applicantHandle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApproveRequest(req.userId)}
+                      disabled={isProcessing}
+                      className="h-7 text-xs font-semibold gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <Check className="h-3 w-3" />
+                      <span>{isProcessing && isApproving ? "Accepting…" : "Accept"}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeclineRequest(req.userId)}
+                      disabled={isProcessing}
+                      className="h-7 text-xs font-medium gap-1 text-destructive hover:text-destructive border-border/70"
+                    >
+                      <X className="h-3 w-3" />
+                      <span>{isProcessing && isDeclining ? "Declining…" : "Decline"}</span>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl bg-card p-3.5 sm:p-4 border border-border/70 shadow-2xs space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>

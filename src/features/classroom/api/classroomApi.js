@@ -37,8 +37,12 @@ const normalizeCourse = (response = {}) => {
     tags: Array.isArray(course.tags) ? course.tags : [],
     links: Array.isArray(course.links) ? course.links : [],
     accessType: (
-      course.accessType || (course.visibility === "PUBLIC" ? "OPEN" : "CODE")
-    ).toLowerCase(),
+      course.accessType || (course.visibility === "PUBLIC" ? "PUBLIC" : "LINK_ONLY")
+    ).toUpperCase(),
+    membershipStatus: course.membershipStatus ?? null,
+    inviteToken: course.inviteToken ?? null,
+    inviteUrl: course.inviteUrl ?? null,
+    inviteExpiresAt: course.inviteExpiresAt ?? null,
     ownerId: course.ownerId,
     owner,
     role: course.role ?? "Joined",
@@ -272,6 +276,55 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: `${courseId}:roster` },
       ],
     }),
+    cancelJoinRequest: builder.mutation({
+      query: (courseId) => ({
+        url: `/courses/${courseId}/join-request`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, courseId) => [
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: "LIST" },
+      ],
+    }),
+    getPendingJoinRequests: builder.query({
+      query: (courseId) => `/courses/${courseId}/join-requests`,
+      providesTags: (_result, _error, courseId) => [
+        { type: "Classrooms", id: `${courseId}:requests` },
+      ],
+    }),
+    approveJoinRequest: builder.mutation({
+      query: ({ courseId, userId }) => ({
+        url: `/courses/${courseId}/join-requests/${userId}/approve`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, { courseId }) => [
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: `${courseId}:roster` },
+        { type: "Classrooms", id: `${courseId}:requests` },
+      ],
+    }),
+    declineJoinRequest: builder.mutation({
+      query: ({ courseId, userId }) => ({
+        url: `/courses/${courseId}/join-requests/${userId}/decline`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, { courseId }) => [
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: `${courseId}:requests` },
+      ],
+    }),
+    generateInviteLink: builder.mutation({
+      query: (courseId) => ({
+        url: `/courses/${courseId}/invite-link`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, courseId) => [
+        { type: "Classrooms", id: courseId },
+      ],
+    }),
+    validateInviteToken: builder.query({
+      query: (token) => `/courses/invite/${token}/validate`,
+    }),
   }),
 });
 
@@ -289,4 +342,10 @@ export const {
   useUpdateMemberRoleMutation,
   useCreateClassroomMutation,
   useJoinClassroomMutation,
+  useCancelJoinRequestMutation,
+  useGetPendingJoinRequestsQuery,
+  useApproveJoinRequestMutation,
+  useDeclineJoinRequestMutation,
+  useGenerateInviteLinkMutation,
+  useValidateInviteTokenQuery,
 } = classroomApi;
