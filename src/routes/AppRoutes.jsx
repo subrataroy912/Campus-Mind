@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import AuthLayout from "../app/layouts/AuthLayout.jsx";
 import DashboardLayout from "../app/layouts/DashboardLayout.jsx";
 import RootLayout from "../app/layouts/RootLayout.jsx";
@@ -7,6 +7,9 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 import PublicRoute from "./PublicRoute.jsx";
 import CreatorRoute from "./CreatorRoute.jsx";
 import ServerDown from "@/pages/ServerDown.jsx";
+import RouteErrorBoundary from "@/components/common/RouteErrorBoundary.jsx";
+import SessionBootstrapSkeleton from "@/features/auth/components/SessionBootstrapSkeleton.jsx";
+import SafeScrollRestoration from "./SafeScrollRestoration.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 import { routes } from "./paths.js";
 import ParamRedirect from "./ParamRedirect.jsx";
@@ -71,9 +74,13 @@ export const appRouteConfig = [
   {
     element: (
       <AuthProvider>
-        <Outlet />
+        <SafeScrollRestoration />
+        <Suspense fallback={<SessionBootstrapSkeleton />}>
+          <Outlet />
+        </Suspense>
       </AuthProvider>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       /* =====================================================================
           PUBLIC ROUTES
@@ -114,6 +121,7 @@ export const appRouteConfig = [
         children: [
           {
             element: <DashboardLayout />,
+            errorElement: <RouteErrorBoundary isInline />,
             children: [
               // Application Core
               { path: routes.dashboard, element: <DashboardHome /> },
@@ -155,7 +163,7 @@ export const appRouteConfig = [
                 ),
               },
               {
-                path: "/search",
+                path: routes.search,
                 element: <DashboardHeaderSearchPage />,
               },
               // Users & Profile
@@ -226,8 +234,16 @@ export const appRouteConfig = [
       },
 
       /* =====================================================================
-          SYSTEM ROUTES
+          SYSTEM ROUTES & CONVENIENCE REDIRECTS
           ===================================================================== */
+      {
+        path: "/login",
+        element: <Navigate to={routes.auth.login} replace />,
+      },
+      {
+        path: "/register",
+        element: <Navigate to={routes.auth.register} replace />,
+      },
       {
         path: routes.serverDown,
         element: <ServerDown />,

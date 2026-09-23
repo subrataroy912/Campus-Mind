@@ -57,4 +57,29 @@ describe("application route auth restoration", () => {
     );
     expect(createSpaceRoute).toBeDefined();
   });
+
+  it("configures RouteErrorBoundary at root and dashboard layout levels", () => {
+    const rootRoute = appRouteConfig[0];
+    expect(rootRoute.errorElement).toBeDefined();
+
+    const protectedRoute = rootRoute.children.find(
+      (route) => route.element?.type?.name === "ProtectedRoute"
+    );
+    const dashboardLayoutRoute = protectedRoute?.children?.[0];
+    expect(dashboardLayoutRoute?.errorElement).toBeDefined();
+  });
+
+  it("provides top-level convenience redirects for direct /login and /register URLs", () => {
+    const rootRoute = appRouteConfig[0];
+    const loginRedirect = rootRoute.children.find(
+      (route) => route.path === "/login"
+    );
+    const registerRedirect = rootRoute.children.find(
+      (route) => route.path === "/register"
+    );
+
+    expect(loginRedirect?.element?.props?.to).toBe("/auth/login");
+    expect(registerRedirect?.element?.props?.to).toBe("/auth/register");
+  });
 });
+

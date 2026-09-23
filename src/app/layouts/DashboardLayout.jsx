@@ -1,15 +1,25 @@
+import { Suspense, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import Sidebar from "../../features/dashboard/components/Sidebar";
+import DashboardSkeleton from "../../features/dashboard/components/DashboardSkeleton";
 import { selectIsSidebarOpen } from "../../features/ui/uiSelectors.js";
 import { toggleSidebar } from "../../features/ui/uiSlice.js";
 
 function DashboardLayout() {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const mainRef = useRef(null);
   const isSidebarOpen = useSelector(selectIsSidebarOpen);
   const isCompact = !isSidebarOpen;
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
@@ -39,9 +49,12 @@ function DashboardLayout() {
         {/* Primary Scrollable Viewport */}
         <main
           id="main-content"
+          ref={mainRef}
           className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
         >
-          <Outlet />
+          <Suspense fallback={<DashboardSkeleton />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
