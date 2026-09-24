@@ -50,17 +50,16 @@ export default function RegisterPage() {
       await register(formData);
       toast.add({
         title: "Account created",
-        description: "Your account is ready. Complete your profile to get started.",
+        description:
+          "Your account is ready. Complete your profile to get started.",
         type: "success",
       });
       navigate(routes.profile.new, { replace: true });
     } catch (err) {
       toast.add({
         title: "Registration failed",
-        description: parseApiError(
-          err,
-          "Please review the form and try again."
-        ).message,
+        description: parseApiError(err, "Please review the form and try again.")
+          .message,
         type: "error",
       });
     }
@@ -89,7 +88,7 @@ export default function RegisterPage() {
             name="firstName"
             value={formData.firstName}
             onChange={updateField}
-            placeholder="Subrata"
+            placeholder="First Name"
             required
             disabled={loading}
             autoComplete="name"
@@ -100,7 +99,7 @@ export default function RegisterPage() {
             name="lastName"
             value={formData.lastName}
             onChange={updateField}
-            placeholder="Roy"
+            placeholder="Last Name"
             required
             disabled={loading}
             autoComplete="name"
@@ -131,7 +130,11 @@ export default function RegisterPage() {
           disabled={loading}
           autoComplete="new-password"
         />
-        <Button className="w-full h-9 text-xs font-semibold" type="submit" disabled={loading}>
+        <Button
+          className="w-full h-9 text-xs font-semibold"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Creating account…" : "Create account"}
         </Button>
       </form>
