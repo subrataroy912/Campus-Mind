@@ -24,7 +24,7 @@ const normalizeCourse = (response = {}) => {
 
   return {
     ...course,
-    id: course.id ?? course.courseId ?? course.classId,
+    id: course.id ?? course.courseId ?? course.classId ?? course._id,
     name,
     title: name,
     className: course.className ?? name,
@@ -128,21 +128,43 @@ export const classroomApi = baseApi.injectEndpoints({
         body: changes,
       }),
       transformResponse: normalizeCourse,
-      invalidatesTags: (result, _error, { changes = {} } = {}) => [
+      invalidatesTags: (result, _error, { courseId, changes = {} } = {}) => [
         { type: "Classrooms", id: "LIST" },
-        { type: "Classrooms", id: result?.id ?? "unknown" },
+        { type: "Classrooms", id: result?.id ?? courseId ?? "unknown" },
         ...(discoveryFieldsChanged(changes) ? exploreTags : []),
       ],
       async onQueryStarted(
         { courseId, changes },
         { dispatch, queryFulfilled },
       ) {
+        if (!courseId) return;
+
+        const targetId = String(courseId);
+
         const patchResult = dispatch(
           classroomApi.util.updateQueryData(
             "findClassroomById",
             courseId,
             (draft) => {
+              if (!draft) return;
               Object.assign(draft, changes);
+              if (changes.title) {
+                draft.title = changes.title;
+                draft.name = changes.title;
+                draft.className = changes.title;
+              }
+              if (changes.section !== undefined) {
+                draft.section = changes.section;
+                draft.subtitle = changes.section;
+              }
+              if (changes.logoUrl !== undefined) {
+                draft.logoUrl = changes.logoUrl;
+                draft.logo = changes.logoUrl;
+              }
+              if (changes.coverUrl !== undefined) {
+                draft.coverUrl = changes.coverUrl;
+                draft.cover = changes.coverUrl;
+              }
             },
           ),
         );
@@ -151,13 +173,61 @@ export const classroomApi = baseApi.injectEndpoints({
             "fetchClassrooms",
             undefined,
             (draft) => {
-              const course = draft.find((c) => c.id === courseId);
-              if (course) Object.assign(course, changes);
+              if (!Array.isArray(draft)) return;
+              const course = draft.find(
+                (c) => String(c?.id || c?.courseId || c?._id) === targetId,
+              );
+              if (course) {
+                Object.assign(course, changes);
+                if (changes.title) {
+                  course.title = changes.title;
+                  course.name = changes.title;
+                  course.className = changes.title;
+                }
+                if (changes.section !== undefined) {
+                  course.section = changes.section;
+                  course.subtitle = changes.section;
+                }
+                if (changes.logoUrl !== undefined) {
+                  course.logoUrl = changes.logoUrl;
+                  course.logo = changes.logoUrl;
+                }
+                if (changes.coverUrl !== undefined) {
+                  course.coverUrl = changes.coverUrl;
+                  course.cover = changes.coverUrl;
+                }
+              }
             },
           ),
         );
         try {
-          await queryFulfilled;
+          const { data: updated } = await queryFulfilled;
+          if (updated) {
+            dispatch(
+              classroomApi.util.updateQueryData(
+                "findClassroomById",
+                courseId,
+                (draft) => {
+                  if (draft) Object.assign(draft, updated);
+                },
+              ),
+            );
+            dispatch(
+              classroomApi.util.updateQueryData(
+                "fetchClassrooms",
+                undefined,
+                (draft) => {
+                  if (!Array.isArray(draft)) return;
+                  const idx = draft.findIndex(
+                    (c) => String(c?.id || c?.courseId || c?._id) === targetId,
+                  );
+                  if (idx !== -1) {
+                    draft[idx] = { ...draft[idx], ...updated };
+                  }
+                },
+              ),
+            );
+          }
         } catch {
           patchResult.undo();
           listPatchResult.undo();

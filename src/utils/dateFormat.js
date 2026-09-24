@@ -41,24 +41,39 @@ export function formatDueDate(iso) {
  */
 export function formatRelativeDate(iso) {
   if (!iso) return null;
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
 
-  const diffMs = Date.now() - d.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return "Just now";
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
+  const d = new Date(iso);
+  const time = d.getTime();
+  if (isNaN(time)) return null;
 
   const now = new Date();
-  const isThisYear = d.getFullYear() === now.getFullYear();
+  const diffSec = Math.floor((now.getTime() - time) / 1000);
+
+  if (diffSec < 60) return "Just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+
   return d.toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
-    ...(isThisYear ? {} : { year: "numeric" }),
+    year: d.getFullYear() === now.getFullYear() ? undefined : "numeric",
+  });
+}
+/**
+ * Formats a date for Group profiles, About pages, or Headers.
+ * @param {string} iso - The ISO date string from the backend.
+ * @param {boolean} includeDay - If false, returns "September 2024" instead of "Sep 24, 2024".
+ */
+export function formatAbsoluteDate(iso, includeDay = true) {
+  if (!iso) return null;
+
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: includeDay ? "short" : "long",
+    ...(includeDay && { day: "numeric" }),
   });
 }

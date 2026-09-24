@@ -208,8 +208,14 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
         logoUrl = "";
       }
 
+      const effectiveCourseId =
+        classroom?.id || classroom?.courseId || classroom?._id;
+      if (!effectiveCourseId) {
+        throw new Error("Unable to identify this space. Please refresh the page.");
+      }
+
       await updateClassroom({
-        courseId: classroom.id,
+        courseId: effectiveCourseId,
         changes: {
           title: title.trim(),
           subject: effectiveSubject || undefined,
@@ -220,6 +226,9 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
           theme,
           coverUrl: coverUrl !== undefined ? coverUrl : undefined,
           logoUrl: logoUrl !== undefined ? logoUrl : undefined,
+          ...(classroom?.enrollmentEnabled !== undefined
+            ? { enrollmentEnabled: classroom.enrollmentEnabled }
+            : {}),
         },
       }).unwrap();
 

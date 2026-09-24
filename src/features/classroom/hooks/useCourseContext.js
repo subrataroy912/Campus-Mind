@@ -174,9 +174,11 @@ export function useCourseContextSync(classId, classroom, isEnrolled, isStaff) {
         isEnrolled,
       }),
     );
-
-    return () => {
-      dispatch(resetCourseContext());
-    };
   }, [dispatch, classId, role, isStaff, isEnrolled]);
+
+  useEffect(() => {
+    return () => {
+      dispatch?.(resetCourseContext());
+    };
+  }, [dispatch]);
 }

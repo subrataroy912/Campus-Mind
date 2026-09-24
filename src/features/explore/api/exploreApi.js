@@ -2,11 +2,7 @@ import { baseApi } from "@/app/baseApi.js";
 
 const normalizeDiscoveryCourse = (course = {}) => {
   const courseId =
-    course.courseId ??
-    course.id ??
-    course._id ??
-    course.classId ??
-    null;
+    course.courseId ?? course.id ?? course._id ?? course.classId ?? null;
 
   return {
     courseId,
@@ -32,7 +28,6 @@ export const normalizeDiscoveryPage = (response = {}) => {
   };
 };
 
-/** Public feed/search retain PageResponse metadata; recommendations are signed in. */
 export const exploreApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getExploreFeed: builder.query({
@@ -60,25 +55,37 @@ export const exploreApi = baseApi.injectEndpoints({
       providesTags: [{ type: "CourseRecommendations", id: "LIST" }],
     }),
     getExplorePeople: builder.query({
-      query: () => ({
+      query: ({ page = 0, size = 20, q = "" } = {}) => ({
         url: "/users",
+        params: {
+          page,
+          size,
+          ...(q ? { q } : {}),
+        },
       }),
+
       transformResponse: (response) => {
-        const payload = response?.data ?? response;
+        const payload = response?.content ?? response?.data ?? response;
         const users = Array.isArray(payload) ? payload : [];
-        return users.map((u) => ({
+
+        const transformedUsers = users.map((u) => ({
           ...u,
           id: u.id ?? u.userId,
           name:
             u.name ||
             u.displayName ||
-            ([u.firstName, u.lastName].filter(Boolean).join(" ") ||
-              "CampusMind member"),
+            [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+            "CampusMind member",
           avatar: u.avatar ?? u.avatarUrl,
-          department:
-            u.department ?? u.headline ?? "CampusMind learner",
+          department: u.department ?? u.headline ?? "CampusMind learner",
         }));
+
+        return {
+          ...response,
+          content: transformedUsers,
+        };
       },
+
       providesTags: [{ type: "Profile", id: "LIST" }],
     }),
     getPublicCourse: builder.query({

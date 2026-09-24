@@ -36,5 +36,6 @@ const ICONS = {
 
 export function ClassroomIcon({ name, className = "h-4 w-4" }) {
   const Icon = ICONS[name];
+  if (!Icon) return null;
   return <Icon className={className} aria-hidden="true" />;
 }

@@ -3,6 +3,8 @@ import { useGetExplorePeopleQuery } from "../api/exploreApi.js";
 import { filterAndSortPeople } from "../model/peopleFilter.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
+const EMPTY_USERS = [];
+
 export function useExplorePeople({
   searchQuery = "",
   personFilter = "all",
@@ -13,20 +15,17 @@ export function useExplorePeople({
   const effectiveCurrentUser =
     propCurrentUser !== undefined ? propCurrentUser : user;
 
-  const {
-    data: users = [],
-    isLoading,
-    isFetching,
-    isError,
-  } = useGetExplorePeopleQuery(undefined, {
-    skip: !enabled,
-  });
+  const { data, isLoading, isFetching, isError } = useGetExplorePeopleQuery(
+    undefined,
+    { skip: !enabled },
+  );
+
+  const users = data?.content || EMPTY_USERS;
 
   const departments = useMemo(
     () => [...new Set(users.map((item) => item.department).filter(Boolean))],
-    [users]
+    [users],
   );
-
   const filteredPeople = useMemo(
     () =>
       filterAndSortPeople(users, {
@@ -34,15 +33,8 @@ export function useExplorePeople({
         personFilter,
         currentUser: effectiveCurrentUser,
       }),
-    [users, searchQuery, personFilter, effectiveCurrentUser]
+    [users, searchQuery, personFilter, effectiveCurrentUser],
   );
 
-  return {
-    users,
-    filteredPeople,
-    departments,
-    isLoading,
-    isFetching,
-    isError,
-  };
+  return { users, filteredPeople, departments, isLoading, isFetching, isError };
 }

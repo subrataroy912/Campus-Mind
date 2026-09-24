@@ -156,14 +156,18 @@ export function useCreateSpaceForm() {
       if (coverUrl && !classroom.coverUrl) updates.coverUrl = coverUrl;
       if (logoUrl && !classroom.logoUrl) updates.logoUrl = logoUrl;
 
+      const targetCourseId =
+        classroom?.id || classroom?.courseId || classroom?._id;
       const savedClassroom =
-        Object.keys(updates).length > 0
-          ? await updateClassroom(classroom.id, updates)
+        Object.keys(updates).length > 0 && targetCourseId
+          ? await updateClassroom(targetCourseId, updates)
           : classroom;
 
       triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
-      navigate(routes.spaces.detail(savedClassroom.id), {
+      const destinationId =
+        savedClassroom?.id || savedClassroom?.courseId || targetCourseId;
+      navigate(routes.spaces.detail(destinationId), {
         state: { enrollmentCode: classroom.code },
       });
     } catch (error) {

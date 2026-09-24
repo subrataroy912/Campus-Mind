@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useParams, useSearchParams } from "react-router";
+import { useLocation, useParams, useSearchParams } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
 import ClassHeader from "../components/ClassHeader.jsx";
 import ClassTabs from "../components/ClassTabs.jsx";
@@ -62,11 +62,12 @@ export default function SpacePage() {
   const handleJoin = async (overrideCode) => {
     if (!classId) return;
 
-    // If this classroom requires a code and no code was provided yet, open the modal
-    const effectiveCode =
-      typeof overrideCode === "string"
-        ? overrideCode.trim()
-        : classCodeInput.trim();
+    const isStringCode = typeof overrideCode === "string";
+
+    const effectiveCode = isStringCode
+      ? overrideCode.trim()
+      : (classCodeInput || "").trim();
+
     if (isCodeProtected && !effectiveCode) {
       setLocalJoinError("");
       setIsCodeModalOpen(true);
@@ -74,13 +75,16 @@ export default function SpacePage() {
     }
 
     setLocalJoinError("");
+
     try {
       const result = await joinClassroom({
         courseId: classId,
         code: effectiveCode || undefined,
       }).unwrap();
+
       setIsCodeModalOpen(false);
       setClassCodeInput("");
+
       if (result?.membershipStatus === "PENDING") {
         toast.add({
           title: "Request submitted",
@@ -164,7 +168,6 @@ export default function SpacePage() {
     );
   }
 
-
   const classroomWithNewCode =
     classroom.code || !location.state?.enrollmentCode
       ? classroom
@@ -229,10 +232,7 @@ export default function SpacePage() {
         )}
 
         {activeTab === "grades" && (
-          <GradesTab
-            onJoin={handleJoin}
-            isJoining={isJoining}
-          />
+          <GradesTab onJoin={handleJoin} isJoining={isJoining} />
         )}
 
         <CodePromptModal

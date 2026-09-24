@@ -1,30 +1,23 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
-  ArrowLeft,
   Archive,
+  ArrowLeft,
+  Calendar,
   Camera,
   Check,
   Clock,
   Copy,
-  ExternalLink,
   Globe,
   ImagePlus,
-  KeyRound,
   Link2,
   Lock,
   LogOut,
-  MapPin,
   Pencil,
-  RefreshCw,
   Settings,
   Trash2,
   UserPlus,
-  Video,
-  LogOutIcon,
-  PencilIcon,
 } from "lucide-react";
-import { ClassroomIcon } from "./ClassroomIcon.jsx";
 import { getClassTheme } from "../utils/classTheme.js";
 import { routes } from "@/routes/paths";
 import { Button } from "@/components/ui/button.jsx";
@@ -56,6 +49,7 @@ import {
   useCourseIsStaff,
   useCourseIsEnrolled,
 } from "../hooks/useCourseContext.js";
+import { formatAbsoluteDate } from "@/utils/dateFormat.js";
 
 export default function ClassHeader({
   classroom,
@@ -66,8 +60,10 @@ export default function ClassHeader({
 }) {
   const contextIsStaff = useCourseIsStaff();
   const contextIsEnrolled = useCourseIsEnrolled();
-  const isStaff = propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
-  const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
+  const isStaff =
+    propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
+  const isEnrolled =
+    propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -95,7 +91,7 @@ export default function ClassHeader({
         "Space Owner";
 
   const accessType = ["PUBLIC", "PRIVATE", "LINK_ONLY"].includes(
-    (classroom?.accessType || "").toUpperCase()
+    (classroom?.accessType || "").toUpperCase(),
   )
     ? classroom.accessType.toUpperCase()
     : "PUBLIC";
@@ -105,7 +101,7 @@ export default function ClassHeader({
   const isRejected = membershipStatus === "REJECTED";
 
   const tags = Array.isArray(classroom?.tags) ? classroom.tags : [];
-
+  const createdAt = formatAbsoluteDate(classroom?.createdAt);
   const handleCopy = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const textToCopy = `${origin}/spaces/${classroom?.id || ""}`;
@@ -132,7 +128,8 @@ export default function ClassHeader({
     } catch (err) {
       toast.add({
         title: "Cancellation failed",
-        description: parseApiError(err, "Failed to cancel join request.").message,
+        description: parseApiError(err, "Failed to cancel join request.")
+          .message,
         type: "error",
       });
     }
@@ -151,7 +148,8 @@ export default function ClassHeader({
     } catch (err) {
       toast.add({
         title: "Archive failed",
-        description: parseApiError(err, "Failed to archive this space.").message,
+        description: parseApiError(err, "Failed to archive this space.")
+          .message,
         type: "error",
       });
     }
@@ -197,7 +195,6 @@ export default function ClassHeader({
 
   return (
     <div className="overflow-hidden rounded-xl bg-card border border-border/70 shadow-2xs">
-      {/* Responsive Facebook-style Banner Section */}
       <div
         className={`relative h-28 sm:h-36 md:h-44 lg:h-52 w-full overflow-hidden ${classTheme.gradientClass} transition-all`}
       >
@@ -240,7 +237,7 @@ export default function ClassHeader({
               }}
               className="h-7 border-white/20 bg-black/40 px-2.5 text-[11px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/60 hover:text-white"
             >
-              <LogOutIcon className="mr-1 h-3 w-3" />
+              <LogOut className="mr-1 h-3 w-3" />
               <span className="hidden sm:inline">Leave</span>
             </Button>
           )}
@@ -293,7 +290,7 @@ export default function ClassHeader({
                     onClick={() => setIsEditModalOpen(true)}
                     className="cursor-pointer gap-2"
                   >
-                    <PencilIcon className="h-3.5 w-3.5 text-primary" />
+                    <Pencil className="h-3.5 w-3.5 text-primary" />
                     <span>Edit space & branding</span>
                   </DropdownMenuItem>
 
@@ -321,10 +318,8 @@ export default function ClassHeader({
         </div>
       </div>
 
-      {/* Content Section - Facebook-style Left-Anchored Overlapping Identity */}
       <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-end sm:justify-between sm:px-5 sm:pb-3 sm:pt-0">
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 min-w-0 flex-1">
-          {/* Responsive Floating Logo (h-14 mobile, h-18 tablet, h-21 desktop) */}
           <div className="relative -mt-7 sm:-mt-9 md:-mt-11 h-14 w-14 sm:h-18 sm:w-18 md:h-21 md:w-21 z-10 shrink-0">
             <div className="h-full w-full overflow-hidden rounded-2xl border-2 sm:border-[3px] md:border-4 border-card bg-background shadow-md">
               {classroom?.logo || classroom?.logoUrl ? (
@@ -375,7 +370,7 @@ export default function ClassHeader({
               {classroom?.subject ? ` • ${classroom.subject}` : ""}
             </p>
 
-            {/* Badges */}
+            {/* Badges & Created At */}
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
               {/* Access type */}
               <span className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-0.5 text-muted-foreground border border-border/60 capitalize font-medium">
@@ -390,8 +385,8 @@ export default function ClassHeader({
                   {accessType === "PUBLIC"
                     ? "Public"
                     : accessType === "LINK_ONLY"
-                    ? "Link only"
-                    : "Private"}
+                      ? "Link only"
+                      : "Private"}
                 </span>
               </span>
 
@@ -404,6 +399,22 @@ export default function ClassHeader({
                   #{tag}
                 </span>
               ))}
+
+              {/* Created At */}
+              {createdAt && (
+                <>
+                  {/* Subtle dot separator */}
+                  <span className="text-muted-foreground/40 mx-0.5 hidden sm:inline-block">
+                    •
+                  </span>
+
+                  {/* Date with Icon */}
+                  <span className="flex items-center gap-1 text-muted-foreground font-medium">
+                    <Calendar className="h-3 w-3 opacity-70" />
+                    <span>Created {createdAt}</span>
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -440,8 +451,8 @@ export default function ClassHeader({
                     {isJoining
                       ? "Requesting…"
                       : isRejected
-                      ? "Re-request to Join"
-                      : "Request to Join"}
+                        ? "Re-request to Join"
+                        : "Request to Join"}
                   </span>
                 </Button>
               )
@@ -507,7 +518,9 @@ export default function ClassHeader({
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
                 <Check className="h-3.5 w-3.5 text-success" />
-                <span className="font-semibold text-text-heading">Enrolled</span>
+                <span className="font-semibold text-text-heading">
+                  Enrolled
+                </span>
               </div>
               {accessType !== "LINK_ONLY" && (
                 <Button
@@ -529,7 +542,6 @@ export default function ClassHeader({
         </div>
       </div>
 
-      {/* Invite Link Modal for Staff */}
       {isInviteModalOpen && (
         <InviteLinkModal
           isOpen={isInviteModalOpen}
@@ -538,7 +550,6 @@ export default function ClassHeader({
         />
       )}
 
-      {/* Edit Space Modal */}
       {isEditModalOpen && (
         <EditSpaceModal
           isOpen={isEditModalOpen}
@@ -547,7 +558,6 @@ export default function ClassHeader({
         />
       )}
 
-      {/* Archive Confirmation Dialog */}
       <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>
@@ -580,7 +590,6 @@ export default function ClassHeader({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>
@@ -613,7 +622,6 @@ export default function ClassHeader({
         </DialogContent>
       </Dialog>
 
-      {/* Leave Space Confirmation Dialog */}
       <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
         <DialogContent className="max-w-sm p-4">
           <DialogHeader>

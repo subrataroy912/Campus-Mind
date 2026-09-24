@@ -58,7 +58,7 @@ export default function ProfileHeader({
         title: "Unlock failed",
         description: parseApiError(
           err,
-          "Failed to unlock course creation privileges. Please try again."
+          "Failed to unlock course creation privileges. Please try again.",
         ).message,
         type: "error",
       });
@@ -92,7 +92,6 @@ export default function ProfileHeader({
             className="absolute bottom-2 right-2 flex cursor-pointer items-center gap-1 rounded-md bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background"
           >
             <Camera className="h-3 w-3" />
-            <span>Banner (1200×300)</span>
             <input
               type="file"
               accept="image/*"

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import {
   Check,
   Clock,
+  Copy,
   MessageCircle,
   MoreVertical,
   Search,
@@ -222,11 +223,30 @@ export function MembersTab({
       ? isStaffProp
       : contextIsStaff ?? (isCurrentOwner || isCurrentAdmin);
 
+  const enrollmentCode = classroom?.code || classroom?.enrollmentCode;
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const handleCopyCode = () => {
+    if (!enrollmentCode) return;
+    navigator.clipboard?.writeText(enrollmentCode).catch(() => {});
+    setCopiedCode(true);
+    toast.add({
+      title: "Code copied",
+      description: `Space code ${enrollmentCode} copied to clipboard.`,
+      type: "success",
+    });
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   const handleToggleInvite = async () => {
     const isCurrentlyEnabled = classroom?.enrollmentEnabled !== false;
+    const effectiveCourseId =
+      classroom?.id || classroom?.courseId || classroom?._id;
+    if (!effectiveCourseId) return;
+
     try {
       await updateClassroom({
-        courseId: classroom?.id,
+        courseId: effectiveCourseId,
         changes: { enrollmentEnabled: !isCurrentlyEnabled },
       }).unwrap();
       toast.add({
@@ -406,8 +426,6 @@ export function MembersTab({
     );
   }
 
-  const enrollmentCode = classroom?.code || classroom?.enrollmentCode;
-
   return (
     <section className="mt-3 space-y-3">
       {/* Pending Requests Queue for Space Staff */}
@@ -506,21 +524,52 @@ export function MembersTab({
             </p>
           </div>
           {isStaff && enrollmentCode && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                loading={isUpdatingInvite}
-                onClick={handleToggleInvite}
-                className="h-7 rounded-md gap-1.5 text-xs border-border/70"
-              >
-                <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>
-                  {classroom?.enrollmentEnabled !== false
-                    ? `Code: ${enrollmentCode}`
-                    : "Code disabled"}
-                </span>
-              </Button>
+            <div className="flex items-center gap-1.5">
+              {classroom?.enrollmentEnabled !== false ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyCode}
+                    title="Click to copy space code"
+                    className="h-7 rounded-md gap-1.5 text-xs border-border/70"
+                  >
+                    <Ticket className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{`Code: ${enrollmentCode}`}</span>
+                    {copiedCode ? (
+                      <Check className="h-3 w-3 text-success ml-0.5" />
+                    ) : (
+                      <Copy className="h-3 w-3 text-muted-foreground ml-0.5" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    loading={isUpdatingInvite}
+                    onClick={handleToggleInvite}
+                    title="Turn off joining with code"
+                    className="h-7 px-2 text-[11px] text-muted-foreground hover:text-destructive"
+                  >
+                    Disable
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground">
+                    <Ticket className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
+                    <span>Code disabled</span>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    loading={isUpdatingInvite}
+                    onClick={handleToggleInvite}
+                    className="h-7 rounded-md px-2 text-xs font-medium text-primary hover:text-primary"
+                  >
+                    Enable
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

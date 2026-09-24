@@ -105,9 +105,13 @@ export default function ClassQuickLinks({
       description: description.trim() || undefined,
     };
 
+    const effectiveCourseId =
+      classroom?.id || classroom?.courseId || classroom?._id;
+    if (!effectiveCourseId) return;
+
     try {
       await updateClassroom({
-        courseId: classroom.id,
+        courseId: effectiveCourseId,
         changes: {
           links: [...links, newLink],
         },
@@ -124,10 +128,14 @@ export default function ClassQuickLinks({
   };
 
   const handleDelete = async (linkId) => {
+    const effectiveCourseId =
+      classroom?.id || classroom?.courseId || classroom?._id;
+    if (!effectiveCourseId) return;
+
     const nextLinks = links.filter((l) => l.id !== linkId);
     try {
       await updateClassroom({
-        courseId: classroom.id,
+        courseId: effectiveCourseId,
         changes: {
           links: nextLinks,
         },
