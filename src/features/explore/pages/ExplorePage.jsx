@@ -44,7 +44,9 @@ export default function ExplorePage() {
 
   const {
     filteredPeople = [],
+    recommendations = [],
     departments = [],
+    currentUser,
     isLoading: isLoadingUsers,
   } = useExplorePeople({
     searchQuery,
@@ -136,9 +138,11 @@ export default function ExplorePage() {
       ) : (
         <ExplorePeopleTab
           filteredPeople={filteredPeople}
+          recommendations={recommendations}
           departments={departments}
           personFilter={personFilter}
           searchQuery={searchQuery}
+          currentUser={currentUser}
           isLoading={isLoadingUsers}
           onFilterChange={(val) => updateParam("personFilter", val)}
         />

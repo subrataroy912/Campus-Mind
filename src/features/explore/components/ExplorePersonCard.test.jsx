@@ -70,4 +70,25 @@ describe("ExplorePersonCard", () => {
 
     expect(html).toContain("src=\"https://example.com/avatar.jpg\"");
   });
+
+  it("renders recommendation badges for same department and featured creator", () => {
+    const person = {
+      id: "u-104",
+      name: "Professor Higgins",
+      department: "Linguistics",
+      sharedCoursesCount: 2,
+      sameDepartment: true,
+      recommendationReason: "FEATURED_CREATOR",
+    };
+
+    const html = renderToString(
+      <MemoryRouter>
+        <ExplorePersonCard person={person} currentUser={{ department: "Linguistics" }} />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Shares 2 Spaces with you");
+    expect(html).toContain("Same Department");
+    expect(html).toContain("Featured Creator");
+  });
 });

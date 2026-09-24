@@ -25,8 +25,20 @@ export function filterAndSortPeople(
     .filter((person) => {
       if (!person) return false;
       if (personFilter === "all") return true;
+      if (personFilter === "recommended") {
+        return (
+          Boolean(person.recommendationReason) ||
+          (person.sharedCoursesCount ?? 0) > 0 ||
+          Boolean(person.sameDepartment) ||
+          Boolean(person.canCreateCourses) ||
+          getSharedClassCount(currentUser, person) > 0
+        );
+      }
       if (personFilter === "shared") {
-        return getSharedClassCount(currentUser, person) > 0;
+        return (
+          (person.sharedCoursesCount ?? 0) > 0 ||
+          getSharedClassCount(currentUser, person) > 0
+        );
       }
       return person.department === personFilter;
     })
@@ -40,8 +52,21 @@ export function filterAndSortPeople(
       );
     })
     .sort((a, b) => {
-      const sharedDiff =
-        getSharedClassCount(currentUser, b) - getSharedClassCount(currentUser, a);
+      if (personFilter === "recommended") {
+        const scoreA =
+          ((a.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, a)) * 10 +
+          (a.sameDepartment || (a.department && a.department === currentUser?.department) ? 5 : 0) +
+          (a.canCreateCourses ? 2 : 0);
+        const scoreB =
+          ((b.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, b)) * 10 +
+          (b.sameDepartment || (b.department && b.department === currentUser?.department) ? 5 : 0) +
+          (b.canCreateCourses ? 2 : 0);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+      }
+
+      const sharedA = (a.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, a);
+      const sharedB = (b.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, b);
+      const sharedDiff = sharedB - sharedA;
       if (sharedDiff !== 0) return sharedDiff;
 
       const deptA = Number(Boolean(a.department && a.department === currentUser?.department));

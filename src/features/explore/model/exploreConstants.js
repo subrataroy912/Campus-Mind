@@ -13,7 +13,8 @@ export const BUILT_IN_CLASS_FILTERS = [
 
 export const BUILT_IN_PERSON_FILTERS = [
   { id: "all", label: "All departments" },
-  { id: "shared", label: "Shares a class with you" },
+  { id: "recommended", label: "Recommended" },
+  { id: "shared", label: "Shares a space with you" },
 ];
 
 export const EXPLORE_BANNERS = {

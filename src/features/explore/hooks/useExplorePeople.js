@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import { useGetExplorePeopleQuery } from "../api/exploreApi.js";
+import {
+  useGetExplorePeopleQuery,
+  useGetExplorePeopleRecommendationsQuery,
+} from "../api/exploreApi.js";
 import { filterAndSortPeople } from "../model/peopleFilter.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 
@@ -20,21 +23,64 @@ export function useExplorePeople({
     { skip: !enabled },
   );
 
-  const users = data?.content || EMPTY_USERS;
+  const {
+    data: recData,
+    isLoading: isLoadingRecs,
+    isFetching: isFetchingRecs,
+  } = useGetExplorePeopleRecommendationsQuery(
+    { page: 0, size: 6 },
+    { skip: !enabled },
+  );
+
+  const rawUsers = data?.content || EMPTY_USERS;
+  const recommendations = recData?.content || EMPTY_USERS;
+
+  const recMap = useMemo(() => {
+    const map = new Map();
+    recommendations.forEach((r) => {
+      if (r?.id) map.set(r.id, r);
+    });
+    return map;
+  }, [recommendations]);
+
+  const enrichedUsers = useMemo(() => {
+    const combined = rawUsers.map((u) => {
+      const rec = recMap.get(u.id);
+      return rec ? { ...u, ...rec } : u;
+    });
+
+    recommendations.forEach((rec) => {
+      if (rec?.id && !combined.some((u) => u.id === rec.id)) {
+        combined.push(rec);
+      }
+    });
+
+    return combined;
+  }, [rawUsers, recommendations, recMap]);
 
   const departments = useMemo(
-    () => [...new Set(users.map((item) => item.department).filter(Boolean))],
-    [users],
+    () => [...new Set(enrichedUsers.map((item) => item.department).filter(Boolean))],
+    [enrichedUsers],
   );
+
   const filteredPeople = useMemo(
     () =>
-      filterAndSortPeople(users, {
+      filterAndSortPeople(enrichedUsers, {
         searchQuery,
         personFilter,
         currentUser: effectiveCurrentUser,
       }),
-    [users, searchQuery, personFilter, effectiveCurrentUser],
+    [enrichedUsers, searchQuery, personFilter, effectiveCurrentUser],
   );
 
-  return { users, filteredPeople, departments, isLoading, isFetching, isError };
+  return {
+    users: enrichedUsers,
+    recommendations,
+    filteredPeople,
+    departments,
+    currentUser: effectiveCurrentUser,
+    isLoading: isLoading || isLoadingRecs,
+    isFetching: isFetching || isFetchingRecs,
+    isError,
+  };
 }

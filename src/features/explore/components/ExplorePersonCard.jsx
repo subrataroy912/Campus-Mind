@@ -12,7 +12,16 @@ import { AuthContext } from "@/context/AuthContext.jsx";
 function ExplorePersonCard({ person, currentUser: propCurrentUser }) {
   const auth = useContext(AuthContext);
   const currentUser = propCurrentUser !== undefined ? propCurrentUser : auth?.user;
-  const sharedClassCount = getSharedClassCount(currentUser, person);
+  const sharedClassCount =
+    person?.sharedCoursesCount ?? getSharedClassCount(currentUser, person);
+  const isSameDepartment =
+    person?.sameDepartment ??
+    Boolean(
+      currentUser?.department &&
+        person?.department &&
+        currentUser.department.trim().toLowerCase() ===
+          person.department.trim().toLowerCase()
+    );
   const handlePrefetch = () => {
     if (person?.id) {
       store.dispatch(
@@ -72,8 +81,17 @@ function ExplorePersonCard({ person, currentUser: propCurrentUser }) {
           </Badge>
           {sharedClassCount > 0 && (
             <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary border border-primary/20">
-              Shares {sharedClassCount}{" "}
-              {sharedClassCount === 1 ? "Space" : "Spaces"} with you
+              {`Shares ${sharedClassCount} ${sharedClassCount === 1 ? "Space" : "Spaces"} with you`}
+            </span>
+          )}
+          {isSameDepartment && (
+            <span className="rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-medium border border-emerald-500/20">
+              Same Department
+            </span>
+          )}
+          {person?.recommendationReason === "FEATURED_CREATOR" && (
+            <span className="rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[10px] font-medium border border-amber-500/20">
+              Featured Creator
             </span>
           )}
         </div>

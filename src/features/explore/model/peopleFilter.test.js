@@ -100,4 +100,33 @@ describe("peopleFilter", () => {
 
     expect(result.map((u) => u.id)).toEqual(["user-1"]);
   });
+
+  it("filters and ranks users when personFilter is 'recommended'", () => {
+    const recommendedUsers = [
+      {
+        id: "user-rec-1",
+        name: "Zachary Peer",
+        sharedCoursesCount: 3,
+        sameDepartment: true,
+      },
+      {
+        id: "user-rec-2",
+        name: "Aaron Creator",
+        canCreateCourses: true,
+        recommendationReason: "FEATURED_CREATOR",
+      },
+      {
+        id: "user-rec-3",
+        name: "Bob Plain",
+      },
+    ];
+
+    const result = filterAndSortPeople(recommendedUsers, {
+      searchQuery: "",
+      personFilter: "recommended",
+      currentUser,
+    });
+
+    expect(result.map((u) => u.id)).toEqual(["user-rec-1", "user-rec-2"]);
+  });
 });

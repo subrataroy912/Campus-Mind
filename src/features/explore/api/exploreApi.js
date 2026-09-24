@@ -88,6 +88,34 @@ export const exploreApi = baseApi.injectEndpoints({
 
       providesTags: [{ type: "Profile", id: "LIST" }],
     }),
+    getExplorePeopleRecommendations: builder.query({
+      query: ({ page = 0, size = 10 } = {}) => ({
+        url: "/explore/people/recommendations",
+        params: { page, size },
+      }),
+      transformResponse: (response) => {
+        const payload = response?.content ?? response?.data ?? response;
+        const users = Array.isArray(payload) ? payload : [];
+
+        const transformedUsers = users.map((u) => ({
+          ...u,
+          id: u.id ?? u.userId,
+          name:
+            u.name ||
+            u.displayName ||
+            [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+            "CampusMind member",
+          avatar: u.avatar ?? u.avatarUrl,
+          department: u.department ?? u.headline ?? "CampusMind learner",
+        }));
+
+        return {
+          ...response,
+          content: transformedUsers,
+        };
+      },
+      providesTags: [{ type: "Profile", id: "RECOMMENDATIONS" }],
+    }),
     getPublicCourse: builder.query({
       query: (courseId) => `/explore/courses/${courseId}`,
       transformResponse: (response) => {
@@ -112,5 +140,6 @@ export const {
   useSearchExploreCoursesQuery,
   useGetExploreRecommendationsQuery,
   useGetExplorePeopleQuery,
+  useGetExplorePeopleRecommendationsQuery,
   useGetPublicCourseQuery,
 } = exploreApi;
