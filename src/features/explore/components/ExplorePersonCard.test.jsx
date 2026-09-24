@@ -5,53 +5,46 @@ import { MemoryRouter } from "react-router";
 import ExplorePersonCard from "./ExplorePersonCard.jsx";
 
 describe("ExplorePersonCard", () => {
-  it("renders member name, handle, department badge, and initials fallback", () => {
+  it("renders member name and initials fallback when no avatar", () => {
     const person = {
       id: "u-101",
       name: "Jane Doe",
       handle: "janedoe",
-      department: "Physics",
-      canCreateCourses: false,
     };
 
     const html = renderToString(
       <MemoryRouter>
-        <ExplorePersonCard person={person} currentUser={{ id: "me" }} />
+        <ExplorePersonCard person={person} />
       </MemoryRouter>
     );
 
     expect(html).toContain("Jane Doe");
-    expect(html).toContain("janedoe");
-    expect(html).toContain("Physics");
     expect(html).toContain("JD"); // initials for Jane Doe
   });
 
-  it("renders creator badge and shared classes count badge when applicable", () => {
+  it("does not render handle, department, or badges", () => {
     const person = {
       id: "u-102",
       name: "Dr. Smith",
       handle: "drsmith",
       department: "Mathematics",
       canCreateCourses: true,
-      joined_class_ids: ["c-1", "c-2"],
-    };
-
-    const currentUser = {
-      id: "me",
-      joined_class_ids: ["c-1", "c-2"],
+      sharedCoursesCount: 2,
+      sameDepartment: true,
     };
 
     const html = renderToString(
       <MemoryRouter>
-        <ExplorePersonCard person={person} currentUser={currentUser} />
+        <ExplorePersonCard person={person} />
       </MemoryRouter>
     );
 
     expect(html).toContain("Dr. Smith");
-    expect(html).toContain("Mathematics");
-    expect(html).toContain("Shares");
-    expect(html).toContain("Spaces");
-    expect(html).toContain("Course Creator");
+    expect(html).not.toContain("drsmith");
+    expect(html).not.toContain("Mathematics");
+    expect(html).not.toContain("Shares");
+    expect(html).not.toContain("Same Department");
+    expect(html).not.toContain("Course Creator");
   });
 
   it("renders avatar image when avatar URL is present", () => {
@@ -59,35 +52,58 @@ describe("ExplorePersonCard", () => {
       id: "u-103",
       name: "Avatar User",
       avatar: "https://example.com/avatar.jpg",
-      department: "Arts",
     };
 
     const html = renderToString(
       <MemoryRouter>
-        <ExplorePersonCard person={person} currentUser={null} />
+        <ExplorePersonCard person={person} />
       </MemoryRouter>
     );
 
-    expect(html).toContain("src=\"https://example.com/avatar.jpg\"");
+    expect(html).toContain('src="https://example.com/avatar.jpg"');
   });
 
-  it("renders recommendation badges for same department and mutual space peers", () => {
-    const person = {
+  it("shows mutual friends count only when mutualPeersCount > 0", () => {
+    const personWith = {
       id: "u-104",
       name: "Professor Higgins",
-      department: "Linguistics",
       mutualPeersCount: 3,
-      sameDepartment: true,
-      recommendationReason: "MUTUAL_SPACE_PEERS",
+    };
+    const personWithout = {
+      id: "u-105",
+      name: "No Peers",
+      mutualPeersCount: 0,
+    };
+
+    const htmlWith = renderToString(
+      <MemoryRouter>
+        <ExplorePersonCard person={personWith} />
+      </MemoryRouter>
+    );
+    const htmlWithout = renderToString(
+      <MemoryRouter>
+        <ExplorePersonCard person={personWithout} />
+      </MemoryRouter>
+    );
+
+    expect(htmlWith).toContain("3 mutual friends");
+    expect(htmlWithout).not.toContain("mutual friend");
+  });
+
+  it("uses singular 'mutual friend' when count is 1", () => {
+    const person = {
+      id: "u-106",
+      name: "Solo Friend",
+      mutualPeersCount: 1,
     };
 
     const html = renderToString(
       <MemoryRouter>
-        <ExplorePersonCard person={person} currentUser={{ department: "Linguistics" }} />
+        <ExplorePersonCard person={person} />
       </MemoryRouter>
     );
 
-    expect(html).toContain("3 mutual space peers");
-    expect(html).toContain("Same Department");
+    expect(html).toContain("1 mutual friend");
+    expect(html).not.toContain("1 mutual friends");
   });
 });
