@@ -111,9 +111,9 @@ describe("peopleFilter", () => {
       },
       {
         id: "user-rec-2",
-        name: "Aaron Creator",
-        canCreateCourses: true,
-        recommendationReason: "FEATURED_CREATOR",
+        name: "Aaron Mutual",
+        mutualPeersCount: 2,
+        recommendationReason: "MUTUAL_SPACE_PEERS",
       },
       {
         id: "user-rec-3",

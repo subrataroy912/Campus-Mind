@@ -101,11 +101,17 @@ export default function ExplorePeopleTab({
       ) : (
         <div className="mt-6">
           <EmptyState
-            title="No people found"
+            title={
+              personFilter === "recommended"
+                ? "No suggestions yet"
+                : "No people found"
+            }
             description={
               searchQuery
                 ? "Try adjusting your search query or department filter."
-                : "No public profiles are currently discoverable."
+                : personFilter === "recommended"
+                  ? "Join or create spaces to discover classmates and mutual space peers."
+                  : "No public profiles are currently discoverable."
             }
           />
         </div>

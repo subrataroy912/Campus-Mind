@@ -14,6 +14,7 @@ function ExplorePersonCard({ person, currentUser: propCurrentUser }) {
   const currentUser = propCurrentUser !== undefined ? propCurrentUser : auth?.user;
   const sharedClassCount =
     person?.sharedCoursesCount ?? getSharedClassCount(currentUser, person);
+  const mutualPeersCount = person?.mutualPeersCount ?? 0;
   const isSameDepartment =
     person?.sameDepartment ??
     Boolean(
@@ -79,19 +80,20 @@ function ExplorePersonCard({ person, currentUser: propCurrentUser }) {
               />
             )}
           </Badge>
-          {sharedClassCount > 0 && (
+          {sharedClassCount > 0 ? (
             <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary border border-primary/20">
               {`Shares ${sharedClassCount} ${sharedClassCount === 1 ? "Space" : "Spaces"} with you`}
             </span>
-          )}
+          ) : mutualPeersCount > 0 ? (
+            <span className="rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[10px] font-medium border border-indigo-500/20">
+              {mutualPeersCount === 1
+                ? "1 mutual space peer"
+                : `${mutualPeersCount} mutual space peers`}
+            </span>
+          ) : null}
           {isSameDepartment && (
             <span className="rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-medium border border-emerald-500/20">
               Same Department
-            </span>
-          )}
-          {person?.recommendationReason === "FEATURED_CREATOR" && (
-            <span className="rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[10px] font-medium border border-amber-500/20">
-              Featured Creator
             </span>
           )}
         </div>

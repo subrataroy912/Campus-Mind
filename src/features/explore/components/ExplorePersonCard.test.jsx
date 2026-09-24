@@ -71,14 +71,14 @@ describe("ExplorePersonCard", () => {
     expect(html).toContain("src=\"https://example.com/avatar.jpg\"");
   });
 
-  it("renders recommendation badges for same department and featured creator", () => {
+  it("renders recommendation badges for same department and mutual space peers", () => {
     const person = {
       id: "u-104",
       name: "Professor Higgins",
       department: "Linguistics",
-      sharedCoursesCount: 2,
+      mutualPeersCount: 3,
       sameDepartment: true,
-      recommendationReason: "FEATURED_CREATOR",
+      recommendationReason: "MUTUAL_SPACE_PEERS",
     };
 
     const html = renderToString(
@@ -87,8 +87,7 @@ describe("ExplorePersonCard", () => {
       </MemoryRouter>
     );
 
-    expect(html).toContain("Shares 2 Spaces with you");
+    expect(html).toContain("3 mutual space peers");
     expect(html).toContain("Same Department");
-    expect(html).toContain("Featured Creator");
   });
 });
