@@ -68,22 +68,24 @@ describe("ExplorePeopleTab", () => {
     expect(html).not.toContain("Suggested for you");
   });
 
-  it("activates department filter button case-insensitively", () => {
+  it("activates built-in filter buttons correctly", () => {
     const html = renderToString(
       <MemoryRouter>
         <ExplorePeopleTab
           recommendations={[]}
           filteredPeople={[]}
-          departments={["Computer Science and Engineering"]}
-          personFilter="computer science and engineering"
+          personFilter="recommended"
           searchQuery=""
           onFilterChange={vi.fn()}
         />
       </MemoryRouter>
     );
 
+    // Built-in filters rendered
+    expect(html).toContain("All departments");
+    expect(html).toContain("Recommended");
+    expect(html).toContain("Shares a space with you");
     // Active variant contains bg-primary
-    expect(html).toContain("Computer Science and Engineering");
     expect(html).toContain("bg-primary text-primary-foreground");
   });
 });

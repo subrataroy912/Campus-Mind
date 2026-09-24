@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
@@ -45,7 +45,6 @@ export default function ExplorePage() {
   const {
     filteredPeople = [],
     recommendations = [],
-    departments = [],
     currentUser,
     isLoading: isLoadingUsers,
   } = useExplorePeople({
@@ -64,11 +63,6 @@ export default function ExplorePage() {
     });
     if (resetPage) setPage(0);
   };
-
-  const classSubjects = useMemo(
-    () => [...new Set(classes.map((item) => item.subject).filter(Boolean))],
-    [classes],
-  );
 
   if (status === "error") {
     return (
@@ -126,7 +120,6 @@ export default function ExplorePage() {
           pageData={pageData}
           page={page}
           classFilter={classFilter}
-          classSubjects={classSubjects}
           debouncedSearchQuery={searchQuery}
           isLoading={query.isLoading}
           isFetching={query.isFetching || isFetching}
@@ -139,7 +132,6 @@ export default function ExplorePage() {
         <ExplorePeopleTab
           filteredPeople={filteredPeople}
           recommendations={recommendations}
-          departments={departments}
           personFilter={personFilter}
           searchQuery={searchQuery}
           currentUser={currentUser}

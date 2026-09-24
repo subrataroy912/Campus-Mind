@@ -7,7 +7,6 @@ import { BUILT_IN_PERSON_FILTERS } from "../model/exploreConstants.js";
 export default function ExplorePeopleTab({
   filteredPeople = [],
   recommendations = [],
-  departments = [],
   personFilter = "all",
   searchQuery = "",
   currentUser = null,
@@ -29,15 +28,6 @@ export default function ExplorePeopleTab({
             onClick={() => onFilterChange(f.id)}
           >
             {f.label}
-          </FilterButton>
-        ))}
-        {departments.map((department) => (
-          <FilterButton
-            key={department}
-            active={personFilter.trim().toLowerCase() === department.trim().toLowerCase()}
-            onClick={() => onFilterChange(department)}
-          >
-            {department}
           </FilterButton>
         ))}
       </div>

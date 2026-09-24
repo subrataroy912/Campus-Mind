@@ -13,7 +13,6 @@ export default function ExploreClassesTab({
   pageData = null,
   page = 0,
   classFilter = "all",
-  classSubjects = [],
   debouncedSearchQuery = "",
   isLoading = false,
   isFetching = false,
@@ -45,7 +44,7 @@ export default function ExploreClassesTab({
 
   return (
     <div className="flex flex-col gap-3.5">
-      {/* 1. Persistent Filter & Subject Pills */}
+      {/* 1. Persistent Filter Pills */}
       <div className="flex flex-wrap items-center gap-1.5">
         {BUILT_IN_CLASS_FILTERS.map((f) => (
           <FilterButton
@@ -56,21 +55,6 @@ export default function ExploreClassesTab({
             {f.label}
           </FilterButton>
         ))}
-
-        {classSubjects.length > 0 && (
-          <>
-            <span className="mx-1 h-3.5 w-px bg-border/80" aria-hidden="true" />
-            {classSubjects.map((subject) => (
-              <FilterButton
-                key={subject}
-                active={classFilter === subject}
-                onClick={() => onFilterChange(subject)}
-              >
-                {subject}
-              </FilterButton>
-            ))}
-          </>
-        )}
       </div>
 
       {/* 2. Content Area */}
