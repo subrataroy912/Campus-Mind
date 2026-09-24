@@ -34,7 +34,7 @@ export default function ExplorePeopleTab({
         {departments.map((department) => (
           <FilterButton
             key={department}
-            active={personFilter === department}
+            active={personFilter.trim().toLowerCase() === department.trim().toLowerCase()}
             onClick={() => onFilterChange(department)}
           >
             {department}
@@ -61,7 +61,7 @@ export default function ExplorePeopleTab({
               </button>
             )}
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
             {recommendations.slice(0, 3).map((person) => (
               <ExplorePersonCard
                 key={`rec-${person.id}`}
@@ -80,16 +80,16 @@ export default function ExplorePeopleTab({
       )}
 
       {isLoading ? (
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="h-40 rounded-2xl border border-border bg-surface p-4 animate-pulse"
+              className="h-20 rounded-lg border border-border bg-surface p-2.5 animate-pulse"
             />
           ))}
         </div>
       ) : filteredPeople.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
           {filteredPeople.map((person) => (
             <ExplorePersonCard
               key={person.id}

@@ -58,10 +58,24 @@ export function useExplorePeople({
     return combined;
   }, [rawUsers, recommendations, recMap]);
 
-  const departments = useMemo(
-    () => [...new Set(enrichedUsers.map((item) => item.department).filter(Boolean))],
-    [enrichedUsers],
-  );
+  const departments = useMemo(() => {
+    const map = new Map();
+    for (const item of enrichedUsers) {
+      const rawDept = item.department?.trim();
+      if (rawDept) {
+        const key = rawDept.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, rawDept);
+        } else {
+          const existing = map.get(key);
+          if (existing === existing.toLowerCase() && rawDept !== rawDept.toLowerCase()) {
+            map.set(key, rawDept);
+          }
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+  }, [enrichedUsers]);
 
   const filteredPeople = useMemo(
     () =>

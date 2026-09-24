@@ -81,6 +81,22 @@ describe("peopleFilter", () => {
     expect(result.map((u) => u.id)).toEqual(["user-2", "user-4"]);
   });
 
+  it("filters by department case-insensitively and handles mixed casings", () => {
+    const mixedUsers = [
+      { id: "u-1", name: "User 1", department: "computer science and engineering" },
+      { id: "u-2", name: "User 2", department: "Computer Science and Engineering" },
+      { id: "u-3", name: "User 3", department: "Electrical Engineering" },
+    ];
+
+    const result = filterAndSortPeople(mixedUsers, {
+      searchQuery: "",
+      personFilter: "Computer Science And Engineering",
+      currentUser: null,
+    });
+
+    expect(result.map((u) => u.id)).toEqual(["u-1", "u-2"]);
+  });
+
   it("prepends current user when searchQuery matches current user", () => {
     const result = filterAndSortPeople(sampleUsers, {
       searchQuery: "Alice",

@@ -40,7 +40,10 @@ export function filterAndSortPeople(
           getSharedClassCount(currentUser, person) > 0
         );
       }
-      return person.department === personFilter;
+      return (
+        Boolean(person.department) &&
+        person.department.trim().toLowerCase() === personFilter.trim().toLowerCase()
+      );
     })
     .filter((person) => {
       if (!trimmedQuery) return true;
