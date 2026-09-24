@@ -39,7 +39,7 @@ export default function NotificationsMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className="relative flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-canvas hover:text-text-main cursor-pointer"
+        className="relative flex min-h-9 min-w-9 sm:h-8 sm:w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-canvas hover:text-text-main cursor-pointer"
         aria-label={`Notifications (${unreadCount} unread)`}
       >
         <Bell size={16} aria-hidden="true" />
@@ -50,7 +50,7 @@ export default function NotificationsMenu() {
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-80 p-0 sm:w-96">
+      <DropdownMenuContent align="end" className="w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 p-0">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-3 py-2">
           <span className="font-semibold text-xs text-text-heading">

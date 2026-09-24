@@ -54,12 +54,12 @@ export default function DashboardHeader() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 md:hidden text-muted-foreground hover:text-foreground"
+          className="min-h-10 min-w-10 sm:h-8 sm:w-8 md:hidden text-muted-foreground hover:text-foreground inline-flex items-center justify-center"
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
         >
-          {menuOpen ? <X size={16} /> : <Menu size={16} />}
+          {menuOpen ? <X size={18} /> : <Menu size={18} />}
         </Button>
 
         <BrandLogo fetchPriority="high" to={routes.dashboard} />
@@ -100,12 +100,12 @@ export default function DashboardHeader() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+          className="min-h-9 min-w-9 sm:h-7 sm:w-7 text-muted-foreground hover:text-foreground inline-flex items-center justify-center"
           onClick={() => logoutFromHeader(logout, navigate)}
           aria-label="Sign out"
           title="Sign out"
         >
-          <LogOut size={14} aria-hidden="true" />
+          <LogOut size={15} aria-hidden="true" />
         </Button>
       </div>
 
@@ -113,14 +113,14 @@ export default function DashboardHeader() {
       {menuOpen && (
         <>
           <div
-            className="fixed inset-0 top-11 z-40 bg-black/50 backdrop-blur-xs md:hidden"
+            className="fixed inset-0 top-14 z-40 bg-black/50 backdrop-blur-xs md:hidden"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
 
-          <aside className="fixed left-0 top-11 z-50 md:hidden">
+          <aside className="fixed left-0 top-14 z-50 md:hidden">
             <Sidebar
-              isAbsolute="h-[calc(100dvh-2.75rem)] w-60 max-w-[85vw] shadow-xl overflow-y-auto bg-card border-r border-border"
+              isAbsolute="h-[calc(100dvh-3.5rem)] w-60 max-w-[85vw] shadow-xl overflow-y-auto bg-card border-r border-border"
               onNavigate={() => setMenuOpen(false)}
             />
           </aside>

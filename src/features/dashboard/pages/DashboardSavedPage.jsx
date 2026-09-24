@@ -21,8 +21,8 @@ export default function DashboardSavedPage() {
   } = useSavedItems();
 
   return (
-    <div className="min-h-screen bg-canvas py-3 px-2 sm:py-5 sm:px-4 lg:px-6">
-      <div className="mx-auto max-w-5xl">
+    <div className="w-full bg-canvas py-3 px-3 sm:py-5 sm:px-6 lg:px-8 min-w-0">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-4 sm:mb-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -57,12 +57,12 @@ export default function DashboardSavedPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search your saved items…"
-              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-xs text-text-heading outline-none transition focus:ring-1 focus:ring-primary"
+              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-base sm:text-xs text-text-heading outline-none transition focus:ring-1 focus:ring-primary"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main"
+                className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-text-muted hover:text-text-main cursor-pointer"
                 aria-label="Clear search"
               >
                 <svg

@@ -583,7 +583,7 @@ export function MembersTab({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roster members by name…"
-            className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
+            className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
           />
         </div>
 

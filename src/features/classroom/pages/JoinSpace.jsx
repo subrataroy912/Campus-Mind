@@ -225,13 +225,13 @@ export default function JoinSpace() {
           : "Ask the space owner or admin for the code, then enter it below.";
 
   return (
-    <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">
+    <div className="w-full bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8 min-w-0">
       <div className="mx-auto max-w-md">
         {/* Back Link */}
         <div className="mb-3">
           <Link
             to={routes.spaces.list}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
+            className="inline-flex min-h-9 items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to spaces</span>

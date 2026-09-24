@@ -19,7 +19,7 @@ export default function ThemeToggle({ className = "" }) {
           <Button
             variant="ghost"
             size="icon"
-            className={`h-7 w-7 text-muted-foreground hover:text-foreground transition-colors ${className}`}
+            className={`min-h-9 min-w-9 sm:h-7 sm:w-7 text-muted-foreground hover:text-foreground transition-colors inline-flex items-center justify-center ${className}`}
             aria-label={`Theme: ${theme}. Click to switch theme.`}
             title="Toggle theme"
           >

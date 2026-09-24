@@ -167,7 +167,7 @@ export default function DashboardCommunityPage() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5 lg:px-8 min-w-0">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/60 pb-3">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-text-heading">
@@ -208,14 +208,14 @@ export default function DashboardCommunityPage() {
                   onChange={(event) => setDraft(event.target.value)}
                   rows={2}
                   placeholder="Ask a question or share something with your classes…"
-                  className="w-full resize-none rounded-md border border-border/70 bg-canvas px-2.5 py-1.5 text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
+                  className="w-full resize-none rounded-md border border-border/70 bg-canvas px-2.5 py-1.5 text-base sm:text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
                 />
                 <div className="mt-2 flex justify-end">
                   <Button
                     size="sm"
                     type="submit"
                     disabled={!draft.trim()}
-                    className="h-7 px-3 text-xs gap-1.5 cursor-pointer"
+                    className="min-h-9 sm:h-7 px-3 text-xs gap-1.5 cursor-pointer"
                   >
                     <Send size={12} aria-hidden="true" />
                     Post

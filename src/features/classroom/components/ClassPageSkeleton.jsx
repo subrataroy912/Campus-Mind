@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton.jsx";
 export function ClassPageSkeleton() {
   return (
     <div
-      className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8 animate-in fade-in duration-200"
+      className="w-full min-h-dvh bg-canvas px-4 py-6 sm:px-6 sm:py-8 lg:px-8 animate-in fade-in duration-200"
       role="status"
       aria-label="Loading classroom content"
     >

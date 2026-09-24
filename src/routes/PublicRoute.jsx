@@ -9,7 +9,7 @@ export default function PublicRoute() {
   if (routeState === "hydrating") {
     return (
       <main
-        className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background"
+        className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-background"
         role="status"
         aria-live="polite"
       >

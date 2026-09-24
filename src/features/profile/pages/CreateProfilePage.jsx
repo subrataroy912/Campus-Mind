@@ -47,7 +47,7 @@ export default function CreateProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-dvh bg-background py-8 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">

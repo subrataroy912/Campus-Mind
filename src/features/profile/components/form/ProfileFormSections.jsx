@@ -79,7 +79,9 @@ export function ProfileMediaSection({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-muted-foreground text-xs font-medium">Avatar</span>
+              <span className="text-muted-foreground text-xs font-medium">
+                Avatar
+              </span>
             )}
           </div>
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer rounded-full bg-black/0 group-hover:bg-black/30 transition-colors">
@@ -155,7 +157,10 @@ export function ProfileIdentitySection({
           </FieldError>
         </Field>
 
-        <Field data-invalid={Boolean(errors.handle)} className="sm:col-span-2 lg:col-span-1">
+        <Field
+          data-invalid={Boolean(errors.handle)}
+          className="sm:col-span-2 lg:col-span-1"
+        >
           <FieldLabel htmlFor="profile-handle">Username / Handle</FieldLabel>
           <div className="relative flex items-center">
             <span className="absolute left-3 text-sm text-muted-foreground select-none">
@@ -175,13 +180,12 @@ export function ProfileIdentitySection({
               maxLength={30}
             />
           </div>
-          <FieldError id="profile-handle-error">
-            {errors.handle}
-          </FieldError>
+          <FieldError id="profile-handle-error">{errors.handle}</FieldError>
         </Field>
       </div>
       <p className="text-xs text-muted-foreground">
-        Your handle is unique and used across discussions and spaces. Note: handles can only be updated twice within 14 days.
+        Your handle is unique and used across discussions and spaces. Note:
+        handles can only be updated twice within 14 days.
       </p>
     </FieldSet>
   );
@@ -216,10 +220,10 @@ export function ProfileDetailsSection({
           placeholder="e.g. Computer Science Student | Open Source Contributor"
           maxLength={200}
         />
-        <FieldDescription>A brief summary shown below your name.</FieldDescription>
-        <FieldError id="profile-headline-error">
-          {errors.headline}
-        </FieldError>
+        <FieldDescription>
+          A brief summary shown below your name.
+        </FieldDescription>
+        <FieldError id="profile-headline-error">{errors.headline}</FieldError>
       </Field>
 
       <Field data-invalid={Boolean(errors.bio)}>
@@ -239,9 +243,7 @@ export function ProfileDetailsSection({
           placeholder="Share your interests, goals, or background..."
           maxLength={MAX_BIO_LENGTH}
         />
-        <FieldError id="profile-bio-error">
-          {errors.bio}
-        </FieldError>
+        <FieldError id="profile-bio-error">{errors.bio}</FieldError>
       </Field>
     </FieldSet>
   );
@@ -274,9 +276,7 @@ export function ProfileLocationSection({
           placeholder="Street or neighborhood"
           maxLength={250}
         />
-        <FieldError id="profile-address-error">
-          {errors.address}
-        </FieldError>
+        <FieldError id="profile-address-error">{errors.address}</FieldError>
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -288,7 +288,7 @@ export function ProfileLocationSection({
             disabled={disabled}
             onChange={(e) => handleChange("city", e.target.value)}
             onBlur={() => handleBlur("city")}
-            placeholder="e.g. Boston"
+            placeholder="e.g. Siliguri"
             maxLength={100}
           />
           <FieldError id="profile-city-error">{errors.city}</FieldError>
@@ -302,12 +302,10 @@ export function ProfileLocationSection({
             disabled={disabled}
             onChange={(e) => handleChange("country", e.target.value)}
             onBlur={() => handleBlur("country")}
-            placeholder="e.g. United States"
+            placeholder="e.g. India"
             maxLength={100}
           />
-          <FieldError id="profile-country-error">
-            {errors.country}
-          </FieldError>
+          <FieldError id="profile-country-error">{errors.country}</FieldError>
         </Field>
       </div>
 
@@ -388,7 +386,10 @@ export function ProfilePersonalSection({
             <option value="Other" className="bg-background text-foreground">
               Other
             </option>
-            <option value="Prefer not to say" className="bg-background text-foreground">
+            <option
+              value="Prefer not to say"
+              className="bg-background text-foreground"
+            >
               Prefer not to say
             </option>
           </select>
@@ -405,9 +406,7 @@ export function ProfilePersonalSection({
             onChange={(e) => handleChange("dateOfBirth", e.target.value)}
             onBlur={() => handleBlur("dateOfBirth")}
           />
-          <FieldError id="profile-dob-error">
-            {errors.dateOfBirth}
-          </FieldError>
+          <FieldError id="profile-dob-error">{errors.dateOfBirth}</FieldError>
         </Field>
       </div>
     </FieldSet>
@@ -439,7 +438,7 @@ export function ProfileLinksSection({
   const handleRemoveLink = (index) => {
     handleChange(
       "links",
-      links.filter((_, i) => i !== index)
+      links.filter((_, i) => i !== index),
     );
   };
 
@@ -451,7 +450,8 @@ export function ProfileLinksSection({
             Social & Web Links
           </FieldLegend>
           <FieldDescription>
-            Share links to your website, GitHub, LinkedIn, or portfolio (up to 5).
+            Share links to your website, GitHub, LinkedIn, or portfolio (up to
+            5).
           </FieldDescription>
         </div>
         <Button
@@ -468,7 +468,8 @@ export function ProfileLinksSection({
 
       {links.length === 0 ? (
         <p className="py-2 text-xs italic text-muted-foreground">
-          No links added yet. Click &quot;Add link&quot; to share your web presence.
+          No links added yet. Click &quot;Add link&quot; to share your web
+          presence.
         </p>
       ) : (
         <div className="space-y-3 pt-1">
@@ -481,7 +482,9 @@ export function ProfileLinksSection({
                 placeholder="Label (e.g. GitHub)"
                 value={link?.name || ""}
                 disabled={disabled}
-                onChange={(e) => handleLinkChange(index, "name", e.target.value)}
+                onChange={(e) =>
+                  handleLinkChange(index, "name", e.target.value)
+                }
                 className="w-full sm:w-1/3 text-sm"
                 maxLength={50}
               />

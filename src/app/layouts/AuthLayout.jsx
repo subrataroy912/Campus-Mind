@@ -17,7 +17,7 @@ function AuthLoadingFallback() {
 
 function AuthLayout() {
   return (
-    <main className="flex min-h-screen flex-col justify-center bg-canvas px-4 py-8">
+    <main className="flex min-h-dvh flex-col justify-center bg-canvas px-4 py-8 pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <div className="mx-auto w-full max-w-sm">
         <div className="flex justify-center">
           <BrandLogo />

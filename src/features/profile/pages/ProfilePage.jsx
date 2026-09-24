@@ -421,14 +421,14 @@ export default function ProfilePage() {
                 value={spacesSearch}
                 onChange={(e) => setSpacesSearch(e.target.value)}
                 placeholder="Search spaces…"
-                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
+                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
               />
               {spacesSearch && (
                 <button
                   type="button"
                   onClick={() => setSpacesSearch("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X size={13} />
                 </button>
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                 aria-label="List view"
                 title="Dense list view"
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                  "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                   spacesViewMode === "list"
                     ? "bg-card text-foreground shadow-2xs border border-border/50"
                     : "text-muted-foreground hover:text-foreground",
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                 aria-label="Grid view"
                 title="Card grid view"
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                  "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                   spacesViewMode === "grid"
                     ? "bg-card text-foreground shadow-2xs border border-border/50"
                     : "text-muted-foreground hover:text-foreground",
@@ -538,7 +538,7 @@ export default function ProfilePage() {
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="-ml-2 h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+          className="-ml-2 min-h-9 sm:h-7 gap-1 px-2.5 text-xs text-muted-foreground hover:text-foreground inline-flex items-center"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back
         </Button>

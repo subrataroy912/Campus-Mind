@@ -72,13 +72,13 @@ export default function CreateSpace() {
     : form.subject || "Subject";
 
   return (
-    <div className="min-h-screen bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8">
+    <div className="w-full bg-canvas py-4 px-3 sm:py-6 sm:px-6 lg:px-8 min-w-0">
       <div className="mx-auto max-w-2xl">
         {/* Back Link */}
         <div className="mb-3">
           <Link
             to={routes.spaces.list}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
+            className="inline-flex min-h-9 items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-heading transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to spaces</span>
@@ -160,7 +160,7 @@ export default function CreateSpace() {
                 <button
                   type="button"
                   onClick={removeCoverImage}
-                  className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100 cursor-pointer"
+                  className="absolute top-2 right-2 flex min-h-8 min-w-8 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-100 sm:opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100 cursor-pointer"
                   title="Remove banner"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -212,10 +212,10 @@ export default function CreateSpace() {
                   <button
                     type="button"
                     onClick={removeLogoImage}
-                    className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 cursor-pointer shadow-xs"
+                    className="absolute -top-1.5 -right-1.5 flex min-h-6 min-w-6 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 cursor-pointer shadow-xs"
                     title="Remove logo"
                   >
-                    <X className="h-2.5 w-2.5" />
+                    <X className="h-3 w-3" />
                   </button>
                 )}
               </div>

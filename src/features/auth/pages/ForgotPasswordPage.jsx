@@ -97,15 +97,15 @@ export default function ForgotPasswordPage() {
           required
           autoComplete="email"
         />
-        <Button className="w-full h-9 text-xs font-semibold" type="submit">
+        <Button className="w-full min-h-11 text-xs font-semibold" type="submit">
           Send reset link
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-xs text-text-muted">
+      <p className="mt-4 text-center text-xs text-text-muted flex items-center justify-center gap-1">
         Remembered it after all?{" "}
         <Link
-          className="font-semibold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline min-h-11 inline-flex items-center"
           to={routes.auth.login}
         >
           Sign in

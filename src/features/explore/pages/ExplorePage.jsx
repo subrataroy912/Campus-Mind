@@ -75,12 +75,12 @@ export default function ExplorePage() {
     );
   }
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 w-full min-w-0">
+    <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5 lg:px-8 w-full min-w-0">
       <ExploreHeroBanner tab={tab} />
 
       {/* Action Row: Compact Tab Pills & Search Input */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex h-8 w-fit items-center rounded-lg bg-muted p-1 text-muted-foreground">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex h-9 sm:h-8 w-fit items-center rounded-lg bg-muted p-1 text-muted-foreground">
           {TABS.map(({ id, label, paramVal }) => {
             const isActive = tab === id;
             return (
@@ -90,7 +90,7 @@ export default function ExplorePage() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => updateParam("tab", paramVal, true)}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                className={`inline-flex min-h-8 sm:min-h-7 items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-background text-foreground shadow-sm"
                     : "hover:text-foreground"

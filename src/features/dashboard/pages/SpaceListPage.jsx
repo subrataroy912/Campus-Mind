@@ -99,7 +99,7 @@ export default function SpaceListPage() {
   ];
 
   return (
-    <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5 lg:px-8 min-w-0">
       {/* Header Bar */}
       <header className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -116,12 +116,12 @@ export default function SpaceListPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             to={routes.classes.join}
             variant="outline"
             size="sm"
-            className="h-7.5 gap-1.5 text-xs rounded-lg border-border/70"
+            className="min-h-9 sm:h-7.5 gap-1.5 text-xs rounded-lg border-border/70"
           >
             <Ticket size={13} aria-hidden="true" />
             <span>Join with code</span>
@@ -130,7 +130,7 @@ export default function SpaceListPage() {
             <Button
               to={routes.spaces.new}
               size="sm"
-              className="h-7.5 gap-1.5 text-xs rounded-lg font-semibold"
+              className="min-h-9 sm:h-7.5 gap-1.5 text-xs rounded-lg font-semibold"
             >
               <Plus size={13} aria-hidden="true" />
               <span>Create space</span>
@@ -186,13 +186,13 @@ export default function SpaceListPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search spaces…"
-              className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
+              className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X size={13} />
               </button>
@@ -206,7 +206,7 @@ export default function SpaceListPage() {
               aria-label="List view"
               title="Dense list view"
               className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                 viewMode === "list"
                   ? "bg-card text-foreground shadow-2xs border border-border/50"
                   : "text-muted-foreground hover:text-foreground",
@@ -219,7 +219,7 @@ export default function SpaceListPage() {
               aria-label="Grid view"
               title="Card grid view"
               className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md transition-all cursor-pointer",
+                "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                 viewMode === "grid"
                   ? "bg-card text-foreground shadow-2xs border border-border/50"
                   : "text-muted-foreground hover:text-foreground",

@@ -26,7 +26,7 @@ import { parseApiError } from "@/lib/errorUtils.js";
 
 function SettingRow({ title, description, checked, onChange }) {
   return (
-    <label className="flex items-center justify-between gap-4 py-2 first:pt-0 last:pb-0 cursor-pointer">
+    <label className="flex min-h-11 items-center justify-between gap-4 py-2.5 first:pt-1 last:pb-1 cursor-pointer">
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-medium text-text-heading">
           {title}
@@ -109,13 +109,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl p-3 sm:p-4 space-y-3.5">
+    <div className="mx-auto max-w-3xl p-3 sm:p-5 lg:p-6 space-y-3.5 w-full min-w-0">
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="h-7 gap-1.5 text-xs text-text-muted hover:text-text-heading -ml-1.5 px-2"
+          className="min-h-9 sm:h-7 gap-1.5 text-xs text-text-muted hover:text-text-heading -ml-1.5 px-2.5 inline-flex items-center"
         >
           <ArrowLeft size={14} /> Back
         </Button>

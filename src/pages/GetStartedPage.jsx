@@ -23,11 +23,16 @@ const features = [
 
 export default function GetStartedPage() {
   return (
-    <main className="min-h-screen bg-canvas px-4 py-4 sm:px-6 lg:px-8">
+    <main className="min-h-dvh bg-canvas px-4 py-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <header className="flex items-center justify-between py-2.5 border-b border-border/60">
           <BrandLogo />
-          <Button to={routes.auth.login} variant="ghost" size="sm" className="h-8 px-3 text-xs font-medium">
+          <Button
+            to={routes.auth.login}
+            variant="ghost"
+            size="sm"
+            className="min-h-11 px-3 text-xs font-medium sm:min-h-8 sm:h-8"
+          >
             Sign in
           </Button>
         </header>
@@ -37,15 +42,19 @@ export default function GetStartedPage() {
             <span className="inline-flex rounded-md border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
               A shared space for campus life
             </span>
-            <h1 className="mt-3.5 max-w-xl text-3xl font-semibold tracking-tight text-text-heading sm:text-4xl">
+            <h1 className="mt-3.5 max-w-xl text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-text-heading">
               Stay organized. Feel connected. Learn together.
             </h1>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-text-muted">
+            <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-text-muted">
               CampusMind helps classes share the everyday details that make
               learning easier—without making school feel more complicated.
             </p>
             <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
-              <Button to={routes.auth.register} className="h-9 px-4 text-xs font-semibold gap-1.5" size="sm">
+              <Button
+                to={routes.auth.register}
+                className="min-h-11 px-5 text-sm sm:h-9 sm:min-h-9 sm:text-xs font-semibold gap-1.5"
+                size="sm"
+              >
                 Get Started <ArrowRight size={14} />
               </Button>
             </div>
@@ -56,8 +65,10 @@ export default function GetStartedPage() {
               <img
                 src="/images/illustrations/learning-ecosystem.jpg"
                 alt="CampusMind learning and collaboration ecosystem"
-                className="w-full rounded object-cover"
+                className="w-full aspect-16/10 rounded object-cover"
                 loading="eager"
+                width={800}
+                height={500}
               />
             </div>
             <div className="mt-2 flex items-center justify-between px-1.5 text-[11px] text-text-muted">
@@ -98,10 +109,19 @@ export default function GetStartedPage() {
                 From study groups to collaborative projects, CampusMind brings learners, creators, and communities together in one inclusive space.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button to={routes.auth.register} size="sm" className="h-8 text-xs font-medium">
+                <Button
+                  to={routes.auth.register}
+                  size="sm"
+                  className="min-h-11 px-4 text-xs font-medium sm:min-h-8 sm:h-8"
+                >
                   Join the Community
                 </Button>
-                <Button to={routes.explore} variant="outline" size="sm" className="h-8 text-xs font-medium">
+                <Button
+                  to={routes.explore}
+                  variant="outline"
+                  size="sm"
+                  className="min-h-11 px-4 text-xs font-medium sm:min-h-8 sm:h-8"
+                >
                   Explore Courses
                 </Button>
               </div>
@@ -110,8 +130,10 @@ export default function GetStartedPage() {
               <img
                 src="/images/illustrations/diverse-campus.jpg"
                 alt="Diverse CampusMind community of learners and creators"
-                className="w-full rounded object-cover"
+                className="w-full aspect-16/10 rounded object-cover"
                 loading="lazy"
+                width={800}
+                height={500}
               />
             </div>
           </div>

@@ -113,7 +113,7 @@ export default function DashboardHomePage() {
   const activeUserId = profile?.id || profile?._id || user?.id;
 
   return (
-    <div className="flex w-full flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 min-w-0">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5 lg:px-8 min-w-0">
       <WelcomeModal
         greetingName={greetingName}
         userId={activeUserId}

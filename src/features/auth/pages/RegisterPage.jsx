@@ -81,7 +81,7 @@ export default function RegisterPage() {
         </p>
       )}
       <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <AuthInput
             icon={UserRound}
             label="First Name"
@@ -131,7 +131,7 @@ export default function RegisterPage() {
           autoComplete="new-password"
         />
         <Button
-          className="w-full h-9 text-xs font-semibold"
+          className="w-full min-h-11 text-xs font-semibold"
           type="submit"
           disabled={loading}
         >
@@ -142,7 +142,7 @@ export default function RegisterPage() {
         Already have an account?{" "}
         <Link
           to={routes.auth.login}
-          className="font-semibold text-primary hover:underline"
+          className="font-semibold text-primary hover:underline min-h-11 inline-flex items-center"
         >
           Sign in
         </Link>
@@ -154,7 +154,7 @@ export default function RegisterPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8"
+                className="min-h-11 min-w-11"
                 aria-label="Sign up with Google"
                 onClick={() => startOAuth("google")}
                 disabled={loading}
@@ -171,7 +171,7 @@ export default function RegisterPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8"
+                className="min-h-11 min-w-11"
                 aria-label="Sign up with GitHub"
                 onClick={() => startOAuth("github")}
                 disabled={loading}

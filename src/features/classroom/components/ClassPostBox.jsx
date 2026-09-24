@@ -115,7 +115,7 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="Share an announcement or update with this space…"
-            className="w-full resize-none rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
+            className="w-full resize-none rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-base sm:text-xs text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
           />
 
           {/* Attachments preview chips */}
@@ -282,7 +282,7 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
             onClick={() =>
               setActiveDrawer((prev) => (prev === "file" ? null : "file"))
             }
-            className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex min-h-8 sm:min-h-7 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
               activeDrawer === "file"
                 ? "bg-primary/10 text-primary font-semibold"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -296,7 +296,7 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
             onClick={() =>
               setActiveDrawer((prev) => (prev === "link" ? null : "link"))
             }
-            className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex min-h-8 sm:min-h-7 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
               activeDrawer === "link"
                 ? "bg-primary/10 text-primary font-semibold"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -310,7 +310,7 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
           type="button"
           onClick={submit}
           disabled={!hasContent || isSubmitting}
-          className="rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-2xs transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="inline-flex min-h-8 sm:min-h-7 items-center rounded-md bg-primary px-3.5 py-1 text-xs font-semibold text-primary-foreground shadow-2xs transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           {isSubmitting ? "Posting…" : "Post"}
         </button>

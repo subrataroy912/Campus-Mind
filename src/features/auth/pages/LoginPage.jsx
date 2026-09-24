@@ -101,7 +101,7 @@ function LoginPage() {
           <button
             type="button"
             onClick={() => setShowCookieNotice(false)}
-            className="text-amber-600/70 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 p-0.5 transition-colors focus:outline-none cursor-pointer"
+            className="flex min-h-11 min-w-11 items-center justify-center text-amber-600/70 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded cursor-pointer -mr-1"
             aria-label="Dismiss cookie notice"
           >
             <X size={14} />
@@ -154,7 +154,7 @@ function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-text-muted hover:text-text-main focus:outline-none cursor-pointer"
+                    className="flex min-h-11 min-w-11 items-center justify-center text-text-muted hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded cursor-pointer"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }

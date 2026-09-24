@@ -73,10 +73,10 @@ function ChatThread({ conversation, onBack }) {
       <div className="flex items-center gap-2.5 border-b border-border/70 px-3 py-2 bg-surface">
         <button
           onClick={onBack}
-          className="rounded-md p-1 text-text-main hover:bg-canvas lg:hidden"
+          className="min-h-10 min-w-10 sm:min-h-8 sm:min-w-8 inline-flex items-center justify-center rounded-md p-1 text-text-main hover:bg-canvas lg:hidden cursor-pointer"
           aria-label="Back to conversations"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={18} />
         </button>
         <ClassroomAvatar
           avatar={conversation.avatar}
@@ -130,14 +130,14 @@ function ChatThread({ conversation, onBack }) {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Write a message…"
-          className="flex-1 h-8 rounded-md border border-border/70 bg-canvas px-3 text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
+          className="flex-1 h-9 sm:h-8 rounded-md border border-border/70 bg-canvas px-3 text-base sm:text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
         />
         <Button
           type="submit"
           size="icon"
           disabled={!draft.trim()}
           aria-label="Send message"
-          className="h-8 w-8"
+          className="min-h-9 min-w-9 sm:h-8 sm:w-8"
         >
           <Send size={13} aria-hidden="true" />
         </Button>
@@ -209,7 +209,7 @@ export default function DashboardMessagesPage() {
   }
 
   return (
-    <div className="w-full flex h-[calc(100dvh-3.5rem)] flex-col p-2 sm:p-3">
+    <div className="mx-auto flex h-[calc(100dvh-3.5rem)] w-full max-w-7xl flex-col p-2 sm:p-3">
       <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border border-border/80 bg-surface shadow-xs lg:grid-cols-[280px_1fr]">
         <div
           className={`flex min-h-0 flex-col border-border/70 lg:border-r ${
@@ -227,7 +227,7 @@ export default function DashboardMessagesPage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search conversations…"
-                className="h-8 w-full rounded-md border border-border/70 bg-canvas py-1.5 pl-8 pr-2.5 text-xs text-text-heading outline-none focus:border-primary focus:ring-1 focus:ring-focus placeholder:text-text-muted"
+                className="h-8 w-full rounded-md border border-border/70 bg-canvas py-1.5 pl-8 pr-2.5 text-base sm:text-xs text-text-heading outline-none focus:border-primary focus:ring-1 focus:ring-focus placeholder:text-text-muted"
               />
             </div>
           </div>

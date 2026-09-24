@@ -3,7 +3,7 @@ import BrandLogo from "@/components/common/BrandLogo.jsx";
 export default function SessionBootstrapSkeleton() {
   return (
     <main
-      className="flex min-h-screen flex-col bg-canvas p-4 sm:p-6"
+      className="flex min-h-dvh flex-col bg-canvas p-4 sm:p-6"
       role="status"
       aria-live="polite"
       aria-label="Restoring session"

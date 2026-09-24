@@ -71,9 +71,9 @@ export default function SearchInput({
         placeholder={placeholder}
         aria-label={placeholder}
         className={cn(
-          "w-full rounded-md border border-input bg-background pr-7 text-xs outline-none transition",
+          "w-full rounded-md border border-input bg-background pr-7 text-base outline-none transition sm:text-xs",
           "placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring",
-          isSmall ? "h-8 pl-8" : "h-9 pl-9 text-sm",
+          isSmall ? "h-8 pl-8" : "h-9 pl-9 sm:text-sm",
         )}
         {...props}
       />
@@ -83,7 +83,7 @@ export default function SearchInput({
           type="button"
           onClick={handleClear}
           aria-label="Clear search"
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground"
+          className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center rounded p-1 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-3.5 w-3.5" />
         </button>

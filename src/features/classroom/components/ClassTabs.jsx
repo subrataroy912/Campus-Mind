@@ -8,8 +8,11 @@ export default function ClassTabs({ active, onChange }) {
         return (
           <button
             key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => onChange(tab.id)}
-            className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+            className={`inline-flex min-h-8 sm:min-h-7 items-center justify-center shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               isActive
                 ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
