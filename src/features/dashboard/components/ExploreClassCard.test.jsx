@@ -71,4 +71,23 @@ describe("ExploreClassCard", () => {
     expect(html).toContain("1 learner");
     expect(html).toContain("ML");
   });
+
+  it("renders private badge for private courses", () => {
+    const classroom = {
+      courseId: "course-private-4",
+      title: "Private Study Group",
+      accessType: "PRIVATE",
+      memberCount: 5,
+    };
+
+    const html = renderToString(
+      <MemoryRouter>
+        <ExploreClassCard classroom={classroom} />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Private Study Group");
+    expect(html).toContain("Private");
+    expect(html).toContain("5 learners");
+  });
 });

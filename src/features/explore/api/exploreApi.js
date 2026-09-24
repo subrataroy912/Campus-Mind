@@ -16,7 +16,7 @@ const normalizeDiscoveryCourse = (course = {}) => {
     enrollmentCount: course.enrollmentCount ?? course.memberCount ?? 0,
     popularityScore: course.popularityScore ?? 0,
     lastActivityAt: course.lastActivityAt ?? null,
-    accessType: (course.accessType || "OPEN").toUpperCase(),
+    accessType: (course.accessType || "PUBLIC").toUpperCase(),
   };
 };
 
@@ -96,7 +96,7 @@ export const exploreApi = baseApi.injectEndpoints({
           ...payload,
           accessType: (
             payload?.accessType ||
-            (payload?.visibility === "PUBLIC" ? "OPEN" : "CODE")
+            (payload?.visibility === "PUBLIC" ? "PUBLIC" : "PRIVATE")
           ).toUpperCase(),
         };
       },

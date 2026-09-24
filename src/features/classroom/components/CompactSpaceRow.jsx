@@ -32,11 +32,12 @@ function CompactSpaceRow({ classroom, className = "" }) {
 
   const unread = classroom?.unreadCount ?? classroom?.unreadMessages ?? 0;
   const accessType = String(classroom?.accessType || "PUBLIC").toUpperCase();
+  const isPrivate = accessType === "PRIVATE";
   const isPublic = accessType === "PUBLIC" || accessType === "OPEN";
   const isInvite =
     accessType === "INVITE" ||
     accessType === "LINK_ONLY" ||
-    accessType === "PRIVATE";
+    accessType === "CODE";
 
   const subject = classroom?.subject
     ? formatDisplayText(classroom.subject)
@@ -119,6 +120,15 @@ function CompactSpaceRow({ classroom, className = "" }) {
                 </span>
               )}
 
+              {isPrivate && (
+                <>
+                  <span className="text-muted-foreground/60">•</span>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                    <Lock size={9} aria-hidden="true" />
+                    <span>Private</span>
+                  </span>
+                </>
+              )}
               {isInvite && (
                 <>
                   <span className="text-muted-foreground/60">•</span>

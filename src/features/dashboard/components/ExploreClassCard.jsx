@@ -56,7 +56,7 @@ function ExploreClassCard({
   const cardSubject = classroom?.subject || "";
   const coverUrl = classroom?.coverUrl || classroom?.cover || null;
   const logoUrl = classroom?.logoUrl || classroom?.logo || null;
-  const accessType = (classroom?.accessType || ACCESS_TYPES.OPEN).toUpperCase();
+  const accessType = (classroom?.accessType || ACCESS_TYPES.PUBLIC).toUpperCase();
   const classTheme = getClassTheme(classroom);
 
   const needsEnrollmentCheck =
@@ -91,7 +91,12 @@ function ExploreClassCard({
     if (e) e.preventDefault();
     if (!courseId) return;
 
-    if (isAlreadyEnrolled || accessType === ACCESS_TYPES.OPEN) {
+    if (
+      isAlreadyEnrolled ||
+      accessType === ACCESS_TYPES.PUBLIC ||
+      accessType === ACCESS_TYPES.OPEN ||
+      accessType === ACCESS_TYPES.PRIVATE
+    ) {
       navigate({ pathname: routes.classes.detail(courseId) });
       return;
     }
@@ -101,7 +106,10 @@ function ExploreClassCard({
       return;
     }
 
-    if (accessType === ACCESS_TYPES.INVITE) {
+    if (
+      accessType === ACCESS_TYPES.INVITE ||
+      accessType === ACCESS_TYPES.LINK_ONLY
+    ) {
       setIsInviteModalOpen(true);
       return;
     }

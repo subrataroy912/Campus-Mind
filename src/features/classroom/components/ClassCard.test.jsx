@@ -63,6 +63,32 @@ describe("ClassCard", () => {
     expect(html).toContain("w-full");
   });
 
+  it("renders Private badge when accessType is PRIVATE", () => {
+    const classroom = {
+      id: "class-private",
+      title: "Algorithms Lab",
+      accessType: "PRIVATE",
+    };
+
+    const html = renderToString(<ClassCard classroom={classroom} />);
+
+    expect(html).toContain("Private");
+    expect(html).not.toContain("Invite");
+  });
+
+  it("renders Public badge when accessType is PUBLIC", () => {
+    const classroom = {
+      id: "class-public",
+      title: "Open Seminar",
+      accessType: "PUBLIC",
+    };
+
+    const html = renderToString(<ClassCard classroom={classroom} />);
+
+    expect(html).toContain("Public");
+    expect(html).not.toContain("Private");
+  });
+
   it("ContentList applies uniform width and items-stretch to carousel items", () => {
     const classrooms = [
       { id: "c-1", title: "Course 1" },
