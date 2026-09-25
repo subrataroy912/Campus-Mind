@@ -57,6 +57,7 @@ export default function Sidebar({
         </p>
         <Button
           to={routes.classes.join}
+          onClick={onNavigate}
           variant="outline"
           size="sm"
           className={`w-full h-7 text-xs border-border/70 ${
@@ -70,6 +71,7 @@ export default function Sidebar({
         {(user?.canCreateCourses || user?.isAdmin) && (
           <Button
             to={routes.spaces.new}
+            onClick={onNavigate}
             size="sm"
             className={`w-full h-7 text-xs ${
               compact ? "justify-center px-0" : "justify-start"
@@ -88,6 +90,7 @@ export default function Sidebar({
       >
         <Link
           to={routes.settings}
+          onClick={onNavigate}
           className={`flex items-center rounded-md text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground ${
             compact ? "justify-center py-1.5 px-0" : "gap-2.5 px-2 py-1.5"
           }`}

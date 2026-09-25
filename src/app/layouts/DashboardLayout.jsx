@@ -5,21 +5,29 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import Sidebar from "../../features/dashboard/components/Sidebar";
 import DashboardSkeleton from "../../features/dashboard/components/DashboardSkeleton";
-import { selectIsSidebarOpen } from "../../features/ui/uiSelectors.js";
-import { toggleSidebar } from "../../features/ui/uiSlice.js";
+import {
+  selectIsMobileMenuOpen,
+  selectIsSidebarOpen,
+} from "../../features/ui/uiSelectors.js";
+import {
+  setMobileMenuOpen,
+  toggleSidebar,
+} from "../../features/ui/uiSlice.js";
 
 function DashboardLayout() {
   const dispatch = useDispatch();
   const location = useLocation();
   const mainRef = useRef(null);
   const isSidebarOpen = useSelector(selectIsSidebarOpen);
+  const isMobileMenuOpen = useSelector(selectIsMobileMenuOpen);
   const isCompact = !isSidebarOpen;
 
   useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo(0, 0);
     }
-  }, [location.pathname]);
+    dispatch(setMobileMenuOpen(false));
+  }, [location.pathname, dispatch]);
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
@@ -50,7 +58,12 @@ function DashboardLayout() {
         <main
           id="main-content"
           ref={mainRef}
-          className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
+          aria-hidden={isMobileMenuOpen ? "true" : undefined}
+          className={`flex min-w-0 flex-1 flex-col overflow-x-hidden ${
+            isMobileMenuOpen
+              ? "max-md:pointer-events-none max-md:touch-none max-md:overflow-hidden max-md:select-none md:overflow-y-auto"
+              : "overflow-y-auto"
+          }`}
         >
           <Suspense fallback={<DashboardSkeleton />}>
             <Outlet />
@@ -62,3 +75,4 @@ function DashboardLayout() {
 }
 
 export default DashboardLayout;
+
