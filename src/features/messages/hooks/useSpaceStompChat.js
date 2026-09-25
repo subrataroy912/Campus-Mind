@@ -207,24 +207,35 @@ export function useSpaceStompChat(spaceIdOrOptions) {
   }, [spaceId]);
 
   const sendMessage = useCallback(
-    ({ content, attachments = [] }) => {
-      if (!spaceId) return false;
+    async ({ content, attachments = [] }) => {
+      if (!spaceId) return null;
       lastTypingSentAtRef.current = 0;
-      sendRest({ spaceId, content, attachments })
-        .unwrap()
-        .then((eventDto) => {
-          handleIncomingEvent(eventDto);
-        })
-        .catch(() => {
-          // Fallback to direct STOMP publish if REST request encountered transient error
-          if (clientRef.current?.connected) {
-            clientRef.current.publish({
-              destination: `/app/spaces/${spaceId}.send`,
-              body: JSON.stringify({ content, attachments }),
-            });
-          }
-        });
-      return true;
+      try {
+        const eventDto = await sendRest({
+          spaceId,
+          content,
+          attachments,
+        }).unwrap();
+        const hydratedDto =
+          eventDto &&
+          (!Array.isArray(eventDto.attachments) ||
+            eventDto.attachments.length === 0) &&
+          attachments.length > 0
+            ? { ...eventDto, attachments }
+            : eventDto;
+        handleIncomingEvent(hydratedDto);
+        return hydratedDto;
+      } catch (err) {
+        // Fallback to direct STOMP publish if REST request encountered transient error
+        if (clientRef.current?.connected) {
+          clientRef.current.publish({
+            destination: `/app/spaces/${spaceId}.send`,
+            body: JSON.stringify({ content, attachments }),
+          });
+          return { fallbackStomp: true };
+        }
+        throw err;
+      }
     },
     [spaceId, sendRest, handleIncomingEvent],
   );

@@ -165,6 +165,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const [locallyDeletedIds, setLocallyDeletedIds] = useState(() => new Set());
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
   const [sendCooldownLeftMs, setSendCooldownLeftMs] = useState(0);
+  const [pendingMessages, setPendingMessages] = useState([]);
 
   const messagesEndRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
@@ -283,14 +284,19 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     }
   };
 
-  // Merge older pages + initial history + live STOMP events
+  // Merge older pages + initial history + live STOMP events + optimistic pending messages
   const mergedMessages = useMemo(() => {
     const baseHistory = Array.isArray(initialHistory?.items)
       ? initialHistory.items
       : Array.isArray(initialHistory?.messages)
         ? initialHistory.messages
         : [];
-    const combined = [...olderMessages, ...baseHistory, ...liveEvents];
+    const combined = [
+      ...olderMessages,
+      ...baseHistory,
+      ...liveEvents,
+      ...pendingMessages,
+    ];
     const byId = new Map();
 
     for (const msg of combined) {
@@ -317,6 +323,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     olderMessages,
     initialHistory,
     liveEvents,
+    pendingMessages,
     locallyDeletedIds,
     deletedEventIds,
     reactionPatches,
@@ -405,22 +412,79 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
 
     const text = draft.trim();
     const cleanUrl = attachmentUrl.trim();
-    if (!text && !cleanUrl && !selectedImageFile) return;
+    const fileToUpload = selectedImageFile;
+    const previewForBubble = selectedImagePreview;
+    const labelForUrl = attachmentName.trim();
 
-    const attachments = [];
+    if (!text && !cleanUrl && !fileToUpload) return;
 
-    if (selectedImageFile) {
-      setIsUploadingImage(true);
-      setImageUploadError(null);
+    const isImgUrl =
+      Boolean(cleanUrl) &&
+      (/^data:image\//i.test(cleanUrl) ||
+        /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(cleanUrl));
+
+    const optimisticAttachments = [];
+    if (fileToUpload && previewForBubble) {
+      optimisticAttachments.push({
+        url: previewForBubble,
+        name: fileToUpload.name || "chat-image.webp",
+        type: "IMAGE",
+        mimeType: fileToUpload.type || "image/webp",
+        sizeBytes: fileToUpload.size,
+        isUploading: true,
+      });
+    }
+    if (cleanUrl) {
+      optimisticAttachments.push({
+        url: cleanUrl,
+        name: labelForUrl || cleanUrl,
+        type: isImgUrl ? "IMAGE" : "LINK",
+        mimeType: isImgUrl ? "image/webp" : undefined,
+        isUploading: false,
+      });
+    }
+
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const optimisticMsg = {
+      eventId: tempId,
+      type: optimisticAttachments.length > 0 ? "MEDIA_MESSAGE" : "TEXT_MESSAGE",
+      spaceId: room.spaceId,
+      senderId: currentUserId,
+      sender: {
+        userId: currentUserId,
+        username: "You",
+      },
+      content: text,
+      attachments: optimisticAttachments,
+      reactions: {},
+      timestamp: new Date().toISOString(),
+      isOptimisticUploading: Boolean(fileToUpload),
+    };
+
+    // 1. Immediately show message bubble in chat thread and reset composer
+    setPendingMessages((prev) => [...prev, optimisticMsg]);
+    setDraft("");
+    setAttachmentUrl("");
+    setAttachmentName("");
+    setShowAttachmentInput(false);
+    handleClearImageFile();
+    shouldAutoScrollRef.current = true;
+    startSendCooldown();
+
+    // 2. Upload image (if any) and dispatch message to backend
+    const finalAttachments = [];
+
+    if (fileToUpload) {
       try {
         const optimizedFile =
-          selectedImageFile.size <= IMAGE_PROFILES.FEED_ATTACHMENT.maxBytes &&
-          selectedImageFile.type === "image/webp"
-            ? selectedImageFile
+          fileToUpload.size <= IMAGE_PROFILES.FEED_ATTACHMENT.maxBytes &&
+          fileToUpload.type === "image/webp"
+            ? fileToUpload
             : await optimizeImage(
-                selectedImageFile,
+                fileToUpload,
                 IMAGE_PROFILES.FEED_ATTACHMENT,
               );
+
         let uploadedAttachment = null;
         try {
           uploadedAttachment = await uploadSpaceChatImage({
@@ -428,68 +492,110 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
             file: optimizedFile,
           }).unwrap();
         } catch {
-          const dataUrl =
-            selectedImagePreview || (await fileToDataUrl(optimizedFile));
+          // Compress to compact inline WebP (< 40 KB) so REST/STOMP payload always succeeds
+          const compactFallbackFile = await optimizeImage(optimizedFile, {
+            maxWidth: 960,
+            maxHeight: 720,
+            maxBytes: 38 * 1024,
+            initialQuality: 0.72,
+            minQuality: 0.32,
+          });
+          const dataUrl = await fileToDataUrl(compactFallbackFile);
           uploadedAttachment = {
             url: dataUrl,
             name: optimizedFile.name || "chat-image.webp",
             type: "IMAGE",
-            mimeType: optimizedFile.type || "image/webp",
-            size: optimizedFile.size,
+            mimeType: "image/webp",
+            sizeBytes: compactFallbackFile.size,
           };
         }
 
-        if (uploadedAttachment?.url) {
-          attachments.push({
-            url: uploadedAttachment.url,
+        const resolvedUrl = uploadedAttachment?.url || previewForBubble;
+        if (resolvedUrl) {
+          finalAttachments.push({
+            url: resolvedUrl,
             name:
-              uploadedAttachment.name ||
-              selectedImageFile.name ||
+              uploadedAttachment?.name ||
+              optimizedFile.name ||
               "chat-image.webp",
             type: "IMAGE",
             mimeType:
-              uploadedAttachment.mimeType ||
+              uploadedAttachment?.mimeType ||
               optimizedFile.type ||
               "image/webp",
-            size: uploadedAttachment.size || optimizedFile.size,
+            sizeBytes:
+              uploadedAttachment?.sizeBytes ||
+              uploadedAttachment?.size ||
+              optimizedFile.size,
           });
         }
-      } catch (err) {
-        setImageUploadError(
-          err?.data?.message || err?.message || "Failed to process image.",
-        );
-        setIsUploadingImage(false);
-        return;
-      } finally {
-        setIsUploadingImage(false);
+      } catch {
+        if (previewForBubble) {
+          finalAttachments.push({
+            url: previewForBubble,
+            name: fileToUpload.name || "chat-image.webp",
+            type: "IMAGE",
+            mimeType: "image/webp",
+            sizeBytes: fileToUpload.size,
+          });
+        }
       }
     }
 
     if (cleanUrl) {
-      const isImgUrl =
-        /^data:image\//i.test(cleanUrl) ||
-        /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(cleanUrl);
-      attachments.push({
+      finalAttachments.push({
         url: cleanUrl,
-        name: attachmentName.trim() || cleanUrl,
+        name: labelForUrl || cleanUrl,
         type: isImgUrl ? "IMAGE" : "LINK",
         mimeType: isImgUrl ? "image/webp" : undefined,
       });
     }
 
-    const sent = sendStompMessage({
-      content: text,
-      attachments,
-    });
+    try {
+      const resultDto = await sendStompMessage({
+        content: text,
+        attachments: finalAttachments,
+      });
 
-    if (sent) {
-      setDraft("");
-      setAttachmentUrl("");
-      setAttachmentName("");
-      setShowAttachmentInput(false);
-      handleClearImageFile();
-      shouldAutoScrollRef.current = true;
-      startSendCooldown();
+      if (resultDto?.eventId) {
+        // Real message is now in liveEvents & cache; remove the temporary optimistic bubble
+        setPendingMessages((prev) => prev.filter((m) => m.eventId !== tempId));
+      } else {
+        // Mark the optimistic bubble as finished uploading with the final attachment URLs
+        setPendingMessages((prev) =>
+          prev.map((m) =>
+            m.eventId === tempId
+              ? {
+                  ...m,
+                  isOptimisticUploading: false,
+                  attachments: finalAttachments.map((a) => ({
+                    ...a,
+                    isUploading: false,
+                  })),
+                }
+              : m,
+          ),
+        );
+      }
+    } catch {
+      // Keep message in thread with uploading spinner cleared so user's image/text stays visible
+      setPendingMessages((prev) =>
+        prev.map((m) =>
+          m.eventId === tempId
+            ? {
+                ...m,
+                isOptimisticUploading: false,
+                attachments: (finalAttachments.length
+                  ? finalAttachments
+                  : m.attachments
+                ).map((a) => ({
+                  ...a,
+                  isUploading: false,
+                })),
+              }
+            : m,
+        ),
+      );
     }
   };
 
@@ -719,21 +825,40 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                                 /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(
                                   att.url || "",
                                 );
+                              const isAttUploading = Boolean(
+                                att.isUploading || message.isOptimisticUploading,
+                              );
                               return isImageAttachment ? (
-                                <a
+                                <div
                                   key={`${att.url}-${idx}`}
-                                  href={att.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="block overflow-hidden rounded-lg border border-border/40"
+                                  className="relative overflow-hidden rounded-lg border border-border/40"
                                 >
-                                  <img
-                                    src={att.url}
-                                    alt={att.name || "Attachment"}
-                                    className="max-h-56 w-auto object-cover"
-                                    loading="lazy"
-                                  />
-                                </a>
+                                  <a
+                                    href={att.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block"
+                                  >
+                                    <img
+                                      src={att.url}
+                                      alt={att.name || "Attachment"}
+                                      className={`max-h-56 w-auto object-cover transition ${
+                                        isAttUploading
+                                          ? "opacity-70 blur-[1px]"
+                                          : "opacity-100"
+                                      }`}
+                                      loading="lazy"
+                                    />
+                                  </a>
+                                  {isAttUploading && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/45">
+                                      <span className="inline-flex items-center gap-1.5 rounded-full bg-black/75 px-3 py-1 text-[11px] font-medium text-white shadow-sm">
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        <span>Uploading…</span>
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
                               ) : (
                                 <a
                                   key={`${att.url}-${idx}`}
