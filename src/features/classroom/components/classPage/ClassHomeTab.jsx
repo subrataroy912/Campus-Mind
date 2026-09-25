@@ -23,6 +23,7 @@ import {
   useUpdateCourseworkMutation,
   useDeleteCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { isStaffRole } from "../../utils/roles.js";
 import { routes } from "@/routes/paths";
@@ -58,8 +59,7 @@ export function ClassHomeTab({
 
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
     useGetCourseworkListQuery(
-      { courseId, page: 0, size: 50 },
-      { skip: !courseId },
+      courseId ? { courseId, page: 0, size: 20 } : skipToken,
     );
 
   const [createCoursework, { isLoading: isPosting }] =

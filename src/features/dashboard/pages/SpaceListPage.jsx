@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useLayoutEffect } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 import {
   Plus,
   Ticket,
-  Loader2,
   LayoutGrid,
   List,
   Search,
@@ -15,11 +16,25 @@ import { ContentList } from "@/components/common/ContentList.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import CompactSpaceRow from "@/features/classroom/components/CompactSpaceRow.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
+import SpaceListSkeleton from "@/features/dashboard/components/SpaceListSkeleton.jsx";
+import {
+  selectCreatedSpaces,
+  selectJoinedSpaces,
+} from "@/features/classroom/classroomSelectors.js";
 import { Button } from "@/components/ui/button.jsx";
 import { routes } from "@/routes/paths.js";
 import { cn } from "@/lib/utils.js";
 
 const VIEW_MODE_KEY = "campus_mind_spaces_view_mode";
+
+const isCreatedSpace = (c, userId) => {
+  const role = String(c?.role || "").toUpperCase();
+  return (
+    role === "OWNER" ||
+    role === "CREATED" ||
+    (Boolean(userId) && c?.ownerId === userId)
+  );
+};
 
 export default function SpaceListPage() {
   const { user } = useAuth();
@@ -46,26 +61,22 @@ export default function SpaceListPage() {
     includeExplore: false,
   });
 
-  const isCreatedByMe = (c) => {
-    const role = String(c?.role || "").toUpperCase();
-    return (
-      role === "OWNER" ||
-      role === "CREATED" ||
-      (user?.id && c?.ownerId === user.id)
-    );
-  };
-
-  const createdSpaces = useMemo(
-    () => classrooms.filter(isCreatedByMe),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [classrooms, user?.id],
+  const memoizedCreated = useSelector((state) =>
+    selectCreatedSpaces(state, user?.id)
+  );
+  const memoizedJoined = useSelector((state) =>
+    selectJoinedSpaces(state, user?.id)
   );
 
-  const joinedSpaces = useMemo(
-    () => classrooms.filter((c) => !isCreatedByMe(c)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [classrooms, user?.id],
-  );
+  const createdSpaces = useMemo(() => {
+    if (memoizedCreated && memoizedCreated.length > 0) return memoizedCreated;
+    return classrooms.filter((c) => isCreatedSpace(c, user?.id));
+  }, [memoizedCreated, classrooms, user?.id]);
+
+  const joinedSpaces = useMemo(() => {
+    if (memoizedJoined && memoizedJoined.length > 0) return memoizedJoined;
+    return classrooms.filter((c) => !isCreatedSpace(c, user?.id));
+  }, [memoizedJoined, classrooms, user?.id]);
 
   const currentTabItems = useMemo(() => {
     if (activeTab === "created") return createdSpaces;
@@ -84,19 +95,32 @@ export default function SpaceListPage() {
     });
   }, [currentTabItems, searchQuery]);
 
-  if (status === "loading" || status === "idle") {
-    return (
-      <div className="flex h-64 w-full items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const isLoadingSpaces =
+    (status === "loading" || status === "idle") && classrooms.length === 0;
 
   const tabs = [
     { id: "all", label: "All", count: classrooms.length },
     { id: "created", label: "Created by Me", count: createdSpaces.length },
     { id: "joined", label: "Joined", count: joinedSpaces.length },
   ];
+
+  const listRef = useRef(null);
+  const [listOffset, setListOffset] = useState(0);
+
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      setListOffset(
+        listRef.current.getBoundingClientRect().top + window.scrollY
+      );
+    }
+  }, [filteredSpaces.length, viewMode, isLoadingSpaces, status]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: filteredSpaces.length,
+    estimateSize: () => 64, // estimated pixel height of CompactSpaceRow
+    overscan: 10,
+    scrollMargin: listOffset,
+  });
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5 lg:px-8 min-w-0">
@@ -233,7 +257,9 @@ export default function SpaceListPage() {
 
       {/* Spaces Listing Content */}
       <section className="pt-1">
-        {status === "error" ? (
+        {isLoadingSpaces ? (
+          <SpaceListSkeleton viewMode={viewMode} />
+        ) : status === "error" ? (
           <EmptyState
             title="We could not load your spaces"
             description="Please refresh the page and try again."
@@ -273,13 +299,35 @@ export default function SpaceListPage() {
           )
         ) : viewMode === "list" ? (
           /* High-Density Horizontal Row Stack (~56px height) */
-          <div className="flex flex-col gap-2">
-            {filteredSpaces.map((classroom) => (
-              <CompactSpaceRow
-                key={classroom.id || classroom.courseId}
-                classroom={classroom}
-              />
-            ))}
+          <div
+            ref={listRef}
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const classroom = filteredSpaces[virtualRow.index];
+              return (
+                <div
+                  key={classroom.id || classroom.courseId}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${
+                      virtualRow.start - virtualizer.options.scrollMargin
+                    }px)`,
+                    paddingBottom: "8px", // gap equivalent
+                  }}
+                >
+                  <CompactSpaceRow classroom={classroom} />
+                </div>
+              );
+            })}
           </div>
         ) : (
           /* Card Grid View */

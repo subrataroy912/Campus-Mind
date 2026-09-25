@@ -175,15 +175,16 @@ export default function ClassHeader({
   };
 
   const handleLeave = async () => {
+    setIsLeaveDialogOpen(false);
+    const leavePromise = leaveClassroom(classroom.id).unwrap();
+    if (navigate) navigate(routes.spaces.list);
     try {
-      await leaveClassroom(classroom.id).unwrap();
-      setIsLeaveDialogOpen(false);
+      await leavePromise;
       toast.add({
         title: "Left space",
         description: "You have un-enrolled from this space.",
         type: "success",
       });
-      if (navigate) navigate(routes.spaces.list);
     } catch (err) {
       toast.add({
         title: "Leave failed",

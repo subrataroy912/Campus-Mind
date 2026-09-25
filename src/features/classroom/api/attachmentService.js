@@ -1,5 +1,3 @@
-import { unwrapResponse } from "@/lib/apiUtils.js";
-
 export function buildUploadRequestBody(file = {}) {
   return {
     resourceType: file.resourceType ?? "COURSEWORK",
@@ -18,18 +16,6 @@ export function normalizeAttachment(attachment = {}) {
     downloadUrl: attachment.downloadUrl ?? attachment.download_url ?? null,
     detail: attachment.detail ?? "File",
   };
-}
-
-export async function requestUploadUrl(request) {
-  return unwrapResponse(request);
-}
-
-export async function completeUpload(attachmentId, payload = {}) {
-  return unwrapResponse(payload);
-}
-
-export async function deleteAttachment(attachmentId) {
-  return attachmentId;
 }
 
 export async function uploadAttachmentFile(uploadRequest, file) {

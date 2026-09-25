@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { Provider } from "react-redux";
+import { store } from "@/app/store.js";
 import { GradesTab } from "./GradesTab.jsx";
+
+const renderWithStore = (ui) =>
+  renderToString(<Provider store={store}>{ui}</Provider>);
 
 vi.mock("react-router", () => ({
   useParams: () => ({ classId: "course-1" }),
@@ -16,7 +21,7 @@ vi.mock("@/context/AuthContext.jsx", () => ({
 
 vi.mock("../../api/courseworkApi.js", () => ({
   useGetStudentGradebookQuery: vi.fn(() => ({
-    data: [
+    studentRows: [
       {
         id: "sub-1",
         assignmentTitle: "Quiz 1",
@@ -36,7 +41,7 @@ vi.mock("../../api/courseworkApi.js", () => ({
     ],
   })),
   useGetCourseGradebookQuery: vi.fn(() => ({
-    data: [
+    gradebookRows: [
       {
         id: "student-1",
         studentName: "Student One",
@@ -57,7 +62,7 @@ vi.mock("../../api/courseworkApi.js", () => ({
 
 describe("GradesTab", () => {
   it("renders unenrolled gate when not enrolled", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <GradesTab isEnrolled={false} isStaff={false} onJoin={vi.fn()} />
     );
     expect(html).toContain("Gradebook is reserved for enrolled members");
@@ -65,7 +70,7 @@ describe("GradesTab", () => {
   });
 
   it("renders student grades and summary metrics", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <GradesTab isEnrolled={true} isStaff={false} />
     );
     expect(html).toContain("Your grade");
@@ -78,7 +83,7 @@ describe("GradesTab", () => {
   });
 
   it("renders staff gradebook view and class metrics", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <GradesTab isEnrolled={true} isStaff={true} />
     );
     expect(html).toContain("Class average");

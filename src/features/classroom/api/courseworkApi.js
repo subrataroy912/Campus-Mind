@@ -1,5 +1,5 @@
 import { baseApi } from "@/app/baseApi.js";
-import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
+import { normalizeSubmission } from "./courseworkService.js";
 
 const normalizeCoursework = (item = {}) => ({
   ...item,
@@ -16,15 +16,6 @@ const normalizeCoursework = (item = {}) => ({
   creatorHandle: item.creatorHandle ?? null,
   submittedCount: item.submittedCount ?? item.submissionCount ?? 0,
   totalCount: item.totalCount ?? 0,
-});
-
-const normalizeSubmission = (submission = {}) => ({
-  ...submission,
-  id: submission.id ?? submission.submissionId,
-  status: submission.status ?? "DRAFT",
-  submittedAt: submission.submittedAt ?? submission.submitted_on ?? null,
-  score: submission.score ?? submission.grade ?? null,
-  submitted: submission.submitted ?? Boolean(submission.submittedAt),
 });
 
 const normalizeGradebook = (response) => {
@@ -72,10 +63,28 @@ export const courseworkApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
         "Profile"
       ],
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ courseId }, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled;
-          triggerLifecycleRefresh(dispatch, "coursework-published");
+          const { data: newCoursework } = await queryFulfilled;
+          if (newCoursework && courseId) {
+            dispatch(
+              courseworkApi.util.updateQueryData(
+                "getCourseworkList",
+                { courseId, page: 0, size: 20 },
+                (draft) => {
+                  if (draft && Array.isArray(draft.content)) {
+                    const exists = draft.content.some((item) => item.id === newCoursework.id);
+                    if (!exists) {
+                      draft.content.unshift(newCoursework);
+                      if (typeof draft.totalElements === "number") {
+                        draft.totalElements += 1;
+                      }
+                    }
+                  }
+                },
+              ),
+            );
+          }
         } catch {
           // The mutation error is already surfaced to the caller.
         }
@@ -90,15 +99,26 @@ export const courseworkApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
       ],
       async onQueryStarted({ courseId, courseworkId, changes }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
+        const itemPatchResult = dispatch(
           courseworkApi.util.updateQueryData("getCourseworkById", { courseId, courseworkId }, (draft) => {
             Object.assign(draft, changes);
+          })
+        );
+        const listPatchResult = dispatch(
+          courseworkApi.util.updateQueryData("getCourseworkList", { courseId, page: 0, size: 20 }, (draft) => {
+            if (draft && Array.isArray(draft.content)) {
+              const item = draft.content.find((c) => c.id === courseworkId);
+              if (item) {
+                Object.assign(item, changes);
+              }
+            }
           })
         );
         try {
           await queryFulfilled;
         } catch {
-          patchResult.undo();
+          itemPatchResult.undo();
+          listPatchResult.undo();
         }
       },
     }),
@@ -109,6 +129,24 @@ export const courseworkApi = baseApi.injectEndpoints({
         { type: "Coursework", id: `LIST-${courseId}` },
         { type: "Classrooms", id: courseId },
       ],
+      async onQueryStarted({ courseId, courseworkId }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          courseworkApi.util.updateQueryData("getCourseworkList", { courseId, page: 0, size: 20 }, (draft) => {
+            if (draft && Array.isArray(draft.content)) {
+              const prevLen = draft.content.length;
+              draft.content = draft.content.filter((c) => c.id !== courseworkId);
+              if (draft.content.length < prevLen && typeof draft.totalElements === "number" && draft.totalElements > 0) {
+                draft.totalElements -= 1;
+              }
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     getSubmissionList: builder.query({
       query: ({ courseworkId, page = 0, size = 20 }) => ({ url: `/coursework/${courseworkId}/submissions`, params: { page, size } }),
@@ -218,7 +256,6 @@ export const courseworkApi = baseApi.injectEndpoints({
         );
         try {
           await queryFulfilled;
-          triggerLifecycleRefresh(dispatch, "submission-graded");
         } catch {
           listPatchResult.undo();
         }

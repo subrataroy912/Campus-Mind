@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { setAccessToken, setSession } from "@/features/auth/authSlice.js";
+import { setAccessToken } from "@/features/auth/authSlice.js";
 import {
   clearLocalAuthSession,
   isExpiredSessionError,
@@ -75,6 +75,7 @@ function normalizeError(error) {
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
   credentials: "include",
+  cache: "no-store",
   prepareHeaders: (headers, { getState, endpoint }) => {
     prepareCookieHeaders(headers);
     if (
@@ -91,6 +92,7 @@ const rawBaseQuery = fetchBaseQuery({
 const publicBaseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
   credentials: "include",
+  cache: "no-store",
   prepareHeaders: prepareCookieHeaders,
 });
 
@@ -130,14 +132,8 @@ async function refreshCredentials(api, extraOptions) {
   }
   setStoredSessionHint(true);
 
-  const existingUser = api.getState().auth?.user ?? null;
   const nextAccessToken = refreshed.accessToken;
   api.dispatch(setAccessToken(nextAccessToken));
-  if (existingUser) {
-    api.dispatch(
-      setSession({ accessToken: nextAccessToken, user: existingUser }),
-    );
-  }
   return nextAccessToken;
 }
 

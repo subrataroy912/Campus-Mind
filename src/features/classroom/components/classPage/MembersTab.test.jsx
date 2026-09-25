@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { Provider } from "react-redux";
+import { store } from "@/app/store.js";
 import { MembersTab } from "./MembersTab.jsx";
+
+const renderWithStore = (ui) =>
+  renderToString(<Provider store={store}>{ui}</Provider>);
 
 vi.mock("@/context/AuthContext.jsx", () => ({
   useAuth: () => ({
@@ -20,20 +25,33 @@ vi.mock("react-router", () => ({
   ),
 }));
 
+vi.mock("@tanstack/react-virtual", () => ({
+  useWindowVirtualizer: ({ count }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }).map((_, index) => ({
+        index,
+        size: 64,
+        start: index * 64,
+      })),
+    getTotalSize: () => count * 64,
+    options: { scrollMargin: 0 },
+  }),
+}));
+
 vi.mock("../../api/classroomApi.js", () => ({
   useGetClassroomRosterQuery: vi.fn((classId) => {
     if (classId === "empty-course") {
-      return { data: [], isLoading: false };
+      return { roster: [], isLoading: false };
     }
     if (classId === "large-roster") {
       const largeList = [{ id: "t-1", name: "Head Owner", role: "owner" }];
       for (let i = 1; i <= 55; i++) {
         largeList.push({ id: `s-${i}`, name: `Member ${i}`, role: "member" });
       }
-      return { data: largeList, isLoading: false };
+      return { roster: largeList, isLoading: false };
     }
     return {
-      data: [
+      roster: [
         { id: "u-1", name: "Alice Owner", role: "owner" },
         { id: "u-2", name: "Bob Member", role: "member" },
       ],
@@ -43,14 +61,14 @@ vi.mock("../../api/classroomApi.js", () => ({
   useUpdateClassroomMutation: () => [vi.fn(), { isLoading: false }],
   useRemoveCourseMemberMutation: () => [vi.fn(), { isLoading: false }],
   useUpdateMemberRoleMutation: () => [vi.fn(), { isLoading: false }],
-  useGetPendingJoinRequestsQuery: () => ({ data: [], isLoading: false }),
+  useGetPendingJoinRequestsQuery: () => ({ pendingRequests: [], isLoading: false }),
   useApproveJoinRequestMutation: () => [vi.fn(), { isLoading: false }],
   useDeclineJoinRequestMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
 describe("MembersTab", () => {
   it("renders unenrolled gate when not enrolled", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <MembersTab
         classroom={{ id: "course-1" }}
         isEnrolled={false}
@@ -63,7 +81,7 @@ describe("MembersTab", () => {
   });
 
   it("renders admins/owner and members correctly", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <MembersTab
         classroom={{ id: "course-1", memberCount: 2 }}
         isEnrolled={true}
@@ -77,7 +95,7 @@ describe("MembersTab", () => {
   });
 
   it("renders invite code button for staff", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <MembersTab
         classroom={{
           id: "course-1",
@@ -94,7 +112,7 @@ describe("MembersTab", () => {
   });
 
   it("renders disabled code button when enrollment is disabled", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <MembersTab
         classroom={{
           id: "course-1",
@@ -110,27 +128,8 @@ describe("MembersTab", () => {
     expect(html).toContain("Code disabled");
   });
 
-  it("applies windowing and renders expand button when member count exceeds 50", () => {
-    const html = renderToString(
-      <MembersTab
-        classroom={{
-          id: "large-roster",
-          memberCount: 56,
-        }}
-        isEnrolled={true}
-        isStaff={false}
-      />
-    );
-    expect(html).toContain("Members (");
-    expect(html).toContain("55");
-    expect(html).toContain("Show all 55 members");
-    expect(html).toContain("Member 50");
-    // Beyond 50 should be windowed out initially
-    expect(html).not.toContain("Member 51");
-  });
-
   it("renders manage trigger button for members when viewer is owner", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <MembersTab
         classroom={{
           id: "course-1",

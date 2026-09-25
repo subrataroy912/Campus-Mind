@@ -13,6 +13,17 @@ import SafeScrollRestoration from "./SafeScrollRestoration.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 import { routes } from "./paths.js";
 import ParamRedirect from "./ParamRedirect.jsx";
+import { store } from "../app/store.js";
+import {
+  createDashboardLoader,
+  createSpacesLoader,
+  createSpaceDetailLoader,
+  createExploreLoader,
+  dashboardShouldRevalidate,
+  spacesShouldRevalidate,
+  spaceDetailShouldRevalidate,
+  exploreShouldRevalidate,
+} from "./routeLoaders.js";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(
   () => import("../features/dashboard/pages/DashboardHomePage.jsx"),
@@ -124,16 +135,36 @@ export const appRouteConfig = [
             errorElement: <RouteErrorBoundary isInline />,
             children: [
               // Application Core
-              { path: routes.dashboard, element: <DashboardHome /> },
+              {
+                path: routes.dashboard,
+                element: <DashboardHome />,
+                loader: createDashboardLoader(store),
+                shouldRevalidate: dashboardShouldRevalidate,
+              },
               { path: routes.community, element: <DashboardCommunityPage /> },
               { path: routes.messages, element: <DashboardMessagesPage /> },
               { path: routes.saved, element: <DashboardSavedPage /> },
-              { path: routes.explore, element: <ExplorePage /> },
+              {
+                path: routes.explore,
+                element: <ExplorePage />,
+                loader: createExploreLoader(store),
+                shouldRevalidate: exploreShouldRevalidate,
+              },
 
               // Spaces (formerly Classes)
-              { path: routes.spaces.list, element: <SpaceListPage /> },
+              {
+                path: routes.spaces.list,
+                element: <SpaceListPage />,
+                loader: createSpacesLoader(store),
+                shouldRevalidate: spacesShouldRevalidate,
+              },
               { path: routes.spaces.join, element: <JoinSpacePage /> },
-              { path: routes.spaces.detail(), element: <SpacePage /> },
+              {
+                path: routes.spaces.detail(),
+                element: <SpacePage />,
+                loader: createSpaceDetailLoader(store),
+                shouldRevalidate: spaceDetailShouldRevalidate,
+              },
               {
                 element: <CreatorRoute />,
                 children: [

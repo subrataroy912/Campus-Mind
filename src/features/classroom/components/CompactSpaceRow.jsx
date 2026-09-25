@@ -4,6 +4,7 @@ import { ChevronRight, Globe, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 import { getClassTheme } from "../utils/classTheme.js";
 import { classroomApi } from "../api/classroomApi.js";
+import { courseworkApi } from "../api/courseworkApi.js";
 import { store } from "@/app/store.js";
 import { routes } from "@/routes/paths.js";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -26,6 +27,13 @@ function CompactSpaceRow({ classroom, className = "" }) {
         classroomApi.util.prefetch("findClassroomById", classroom.id, {
           force: false,
         }),
+      );
+      store.dispatch(
+        courseworkApi.util.prefetch(
+          "getCourseworkList",
+          { courseId: classroom.id, page: 0, size: 20 },
+          { force: false },
+        ),
       );
     }
   };
@@ -55,6 +63,7 @@ function CompactSpaceRow({ classroom, className = "" }) {
   return (
     <Link
       to={routes.spaces.detail(classroom.id)}
+      prefetch="intent"
       onMouseEnter={handlePrefetch}
       onFocus={handlePrefetch}
       aria-label={`Open ${classroom.title}`}

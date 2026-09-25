@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { Provider } from "react-redux";
+import { store } from "@/app/store.js";
 import { ClassworkTab } from "./ClassworkTab.jsx";
+
+const renderWithStore = (ui) =>
+  renderToString(<Provider store={store}>{ui}</Provider>);
 
 vi.mock("@/context/AuthContext.jsx", () => ({
   useAuth: () => ({
@@ -13,6 +18,8 @@ vi.mock("@/context/AuthContext.jsx", () => ({
 vi.mock("react-router", () => ({
   useParams: () => ({ classId: "course-1" }),
   useNavigate: () => vi.fn(),
+  useBlocker: () => ({ state: "unblocked", reset: vi.fn(), proceed: vi.fn() }),
+  useBeforeUnload: vi.fn(),
   Link: ({ children, to, ...props }) => (
     <a href={to} {...props}>
       {children}
@@ -65,7 +72,7 @@ vi.mock("../../api/attachmentApi.js", () => ({
 
 describe("ClassworkTab", () => {
   it("renders unenrolled gate when user is not enrolled", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassworkTab
         classId="course-1"
         isEnrolled={false}
@@ -78,7 +85,7 @@ describe("ClassworkTab", () => {
   });
 
   it("renders empty state when there is no coursework", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassworkTab
         classId="empty-course"
         isEnrolled={true}
@@ -89,7 +96,7 @@ describe("ClassworkTab", () => {
   });
 
   it("renders coursework cards when items are available", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassworkTab
         classId="course-1"
         isEnrolled={true}
@@ -101,7 +108,7 @@ describe("ClassworkTab", () => {
   });
 
   it("renders create button when user is staff", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassworkTab
         classId="course-1"
         isEnrolled={true}

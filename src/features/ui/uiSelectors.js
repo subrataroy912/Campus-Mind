@@ -1,13 +1,6 @@
-import { createSelector } from "@reduxjs/toolkit";
-
 export const selectUiState = (state) => state.ui;
 
-export const selectIsSidebarOpen = createSelector(
-  [selectUiState],
-  (ui) => Boolean(ui?.isSidebarOpen)
-);
+export const selectIsSidebarOpen = (state) => Boolean(state.ui?.isSidebarOpen);
 
-export const selectIsMobileMenuOpen = createSelector(
-  [selectUiState],
-  (ui) => Boolean(ui?.isMobileMenuOpen)
-);
+export const selectIsMobileMenuOpen = (state) =>
+  Boolean(state.ui?.isMobileMenuOpen);

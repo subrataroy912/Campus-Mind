@@ -14,12 +14,30 @@ vi.mock("@/context/AuthContext.jsx", () => ({
   }),
 }));
 
+vi.mock("react-redux", () => ({
+  useSelector: (selector) => selector({ baseApi: { queries: {} } }),
+  useDispatch: () => vi.fn(),
+}));
+
 vi.mock("react-router", () => ({
   Link: ({ children, to, ...props }) => (
     <a href={to} {...props}>
       {children}
     </a>
   ),
+}));
+
+vi.mock("@tanstack/react-virtual", () => ({
+  useWindowVirtualizer: ({ count }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }).map((_, index) => ({
+        index,
+        size: 64,
+        start: index * 64,
+      })),
+    getTotalSize: () => count * 64,
+    options: { scrollMargin: 0 },
+  }),
 }));
 
 describe("SpaceListPage", () => {
@@ -81,13 +99,14 @@ describe("SpaceListPage", () => {
     expect(html).toContain("Join a space");
   });
 
-  it("renders loader during loading status", () => {
+  it("renders skeleton placeholder during loading status", () => {
     mockUseDashboardData.mockReturnValue({
       status: "loading",
       classrooms: [],
     });
 
     const html = renderToString(<SpaceListPage />);
-    expect(html).not.toContain("Spaces");
+    expect(html).toContain("Spaces");
+    expect(html).toContain("space-list-skeleton-list");
   });
 });

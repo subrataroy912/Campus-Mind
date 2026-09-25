@@ -28,6 +28,28 @@ export const normalizeDiscoveryPage = (response = {}) => {
   };
 };
 
+const normalizePeoplePage = (response = {}) => {
+  const payload = response?.content ?? response?.data ?? response;
+  const users = Array.isArray(payload) ? payload : [];
+
+  const transformedUsers = users.map((u) => ({
+    ...u,
+    id: u.id ?? u.userId,
+    name:
+      u.name ||
+      u.displayName ||
+      [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+      "CampusMind member",
+    avatar: u.avatar ?? u.avatarUrl,
+    department: u.department ?? u.headline ?? "CampusMind learner",
+  }));
+
+  return {
+    ...response,
+    content: transformedUsers,
+  };
+};
+
 export const exploreApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getExploreFeed: builder.query({
@@ -63,29 +85,7 @@ export const exploreApi = baseApi.injectEndpoints({
           ...(q ? { q } : {}),
         },
       }),
-
-      transformResponse: (response) => {
-        const payload = response?.content ?? response?.data ?? response;
-        const users = Array.isArray(payload) ? payload : [];
-
-        const transformedUsers = users.map((u) => ({
-          ...u,
-          id: u.id ?? u.userId,
-          name:
-            u.name ||
-            u.displayName ||
-            [u.firstName, u.lastName].filter(Boolean).join(" ") ||
-            "CampusMind member",
-          avatar: u.avatar ?? u.avatarUrl,
-          department: u.department ?? u.headline ?? "CampusMind learner",
-        }));
-
-        return {
-          ...response,
-          content: transformedUsers,
-        };
-      },
-
+      transformResponse: normalizePeoplePage,
       providesTags: [{ type: "Profile", id: "LIST" }],
     }),
     getExplorePeopleRecommendations: builder.query({
@@ -93,27 +93,7 @@ export const exploreApi = baseApi.injectEndpoints({
         url: "/explore/people/recommendations",
         params: { page, size },
       }),
-      transformResponse: (response) => {
-        const payload = response?.content ?? response?.data ?? response;
-        const users = Array.isArray(payload) ? payload : [];
-
-        const transformedUsers = users.map((u) => ({
-          ...u,
-          id: u.id ?? u.userId,
-          name:
-            u.name ||
-            u.displayName ||
-            [u.firstName, u.lastName].filter(Boolean).join(" ") ||
-            "CampusMind member",
-          avatar: u.avatar ?? u.avatarUrl,
-          department: u.department ?? u.headline ?? "CampusMind learner",
-        }));
-
-        return {
-          ...response,
-          content: transformedUsers,
-        };
-      },
+      transformResponse: normalizePeoplePage,
       providesTags: [{ type: "Profile", id: "RECOMMENDATIONS" }],
     }),
     getPublicCourse: builder.query({

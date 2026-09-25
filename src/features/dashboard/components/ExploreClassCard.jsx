@@ -2,11 +2,13 @@ import { memo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Users } from "lucide-react";
 
-import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
+import { useSelector } from "react-redux";
+import { selectEnrolledCourseIds } from "@/features/classroom/classroomSelectors.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/classroom/api/classroomService.js";
 import { getClassTheme } from "@/features/classroom/utils/classTheme.js";
 import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { courseworkApi } from "@/features/classroom/api/courseworkApi.js";
 import { store } from "@/app/store.js";
 import { initials } from "@/utils/initials.js";
 import {
@@ -59,15 +61,7 @@ function ExploreClassCard({
   const accessType = (classroom?.accessType || ACCESS_TYPES.PUBLIC).toUpperCase();
   const classTheme = getClassTheme(classroom);
 
-  const needsEnrollmentCheck =
-    typeof isEnrolled !== "boolean" &&
-    !classroom?.isEnrolled &&
-    !classroom?.enrolled;
-
-  const { classrooms = [] } = useDashboardData({
-    includeExplore: false,
-    skip: !needsEnrollmentCheck,
-  });
+  const enrolledCourseIds = useSelector(selectEnrolledCourseIds);
 
   const isAlreadyEnrolled =
     typeof isEnrolled === "boolean"
@@ -75,12 +69,7 @@ function ExploreClassCard({
       : Boolean(
           classroom?.isEnrolled ||
           classroom?.enrolled ||
-          classrooms.some(
-            (item) =>
-              item.id === courseId ||
-              item.courseId === courseId ||
-              item.classId === courseId,
-          ),
+          (courseId && enrolledCourseIds?.has(courseId)),
         );
 
   const learnersCount = formatLearners(
@@ -147,6 +136,13 @@ function ExploreClassCard({
         classroomApi.util.prefetch("findClassroomById", courseId, {
           force: false,
         }),
+      );
+      store.dispatch(
+        courseworkApi.util.prefetch(
+          "getCourseworkList",
+          { courseId, page: 0, size: 20 },
+          { force: false },
+        ),
       );
     }
   };

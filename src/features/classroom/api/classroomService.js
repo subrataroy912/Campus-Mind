@@ -43,22 +43,6 @@ function formatClassCodeFromInput(value) {
     .toUpperCase();
 }
 
-export async function fetchClassrooms() {
-  return unwrapResponse(
-    await store
-      .dispatch(classroomApi.endpoints.fetchClassrooms.initiate())
-      .unwrap()
-  );
-}
-
-export async function findClassroomById(_userId, classId) {
-  return unwrapResponse(
-    await store
-      .dispatch(classroomApi.endpoints.findClassroomById.initiate(classId))
-      .unwrap()
-  );
-}
-
 export async function createClassroom(_userId, details) {
   const payload = mapCreateClassPayload(details);
 

@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 import {
   createClassroom,
   requestCourseCoverUpload,
@@ -16,7 +14,6 @@ import { parseApiError } from "@/lib/errorUtils.js";
 
 export function useCreateSpaceForm() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { user } = useAuth();
   const [form, setForm] = useState(INITIAL_SPACE_FORM);
   const [preview, setPreview] = useState(null);
@@ -163,7 +160,6 @@ export function useCreateSpaceForm() {
           ? await updateClassroom(targetCourseId, updates)
           : classroom;
 
-      triggerLifecycleRefresh(dispatch, "course-created");
       setSubmitted(true);
       const destinationId =
         savedClassroom?.id || savedClassroom?.courseId || targetCourseId;

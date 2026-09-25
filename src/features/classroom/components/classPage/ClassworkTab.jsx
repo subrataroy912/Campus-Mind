@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
+import { useBlocker, useBeforeUnload } from "react-router";
 import { ClipboardList, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
@@ -7,6 +8,7 @@ import {
   useGetCourseworkListQuery,
   useCreateCourseworkMutation,
 } from "../../api/courseworkApi.js";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { CourseworkCard } from "./CourseworkCard.jsx";
 import { UpcomingPanel } from "./UpcomingPanel.jsx";
 import {
@@ -61,6 +63,23 @@ export function ClassworkTab({
     setCreateError("");
   };
 
+  const isFormDirty =
+    Boolean(createType) &&
+    (formTitle.trim() !== "" || formDescription.trim() !== "");
+
+  const blocker = useBlocker(isFormDirty && !isCreating);
+
+  const beforeUnloadHandler = useCallback(
+    (event) => {
+      if (isFormDirty && !isCreating) {
+        event.preventDefault();
+        return (event.returnValue = "You have unsaved coursework. Leave without saving?");
+      }
+    },
+    [isFormDirty, isCreating],
+  );
+  useBeforeUnload(beforeUnloadHandler);
+
   const buildPayload = (publishImmediately) => {
     const payload = {
       type: createType,
@@ -98,10 +117,9 @@ export function ClassworkTab({
     isLoading,
     error,
   } = useGetCourseworkListQuery(
-    { courseId: classId, page: 0, size: 20 },
-    {
-      skip: isHydrating || !classId || !isEnrolled,
-    }
+    isHydrating || !classId || !isEnrolled
+      ? skipToken
+      : { courseId: classId, page: 0, size: 20 },
   );
 
   const typeFilter = useCourseTypeFilter();
@@ -467,6 +485,31 @@ export function ClassworkTab({
                 </div>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {blocker.state === "blocked" && (
+        <Dialog open onOpenChange={() => blocker.reset()}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Unsaved changes</DialogTitle>
+              <DialogDescription>
+                You have an unsaved coursework draft. If you leave now, your work will be lost.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={() => blocker.reset()}>
+                Stay and keep editing
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => blocker.proceed()}
+              >
+                Leave without saving
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       )}

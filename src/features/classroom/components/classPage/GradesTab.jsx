@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
+import { skipToken } from "@reduxjs/toolkit/query";
 import {
   useGetCourseAnalyticsSummaryQuery,
   useGetStudentGradebookQuery,
@@ -59,18 +60,28 @@ export function GradesTab({
   const { user, authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
 
-  const { data: studentRows = [] } = useGetStudentGradebookQuery(
-    { courseId: classId, studentId: user?.id },
-    { skip: isHydrating || isStaff || !user?.id || !isEnrolled }
+  // Student gradebook — skip via skipToken; selectFromResult exposes only the rows array
+  const { studentRows = [] } = useGetStudentGradebookQuery(
+    isHydrating || isStaff || !user?.id || !isEnrolled
+      ? skipToken
+      : { courseId: classId, studentId: user.id },
+    {
+      selectFromResult: ({ data }) => ({ studentRows: data ?? [] }),
+    },
   );
 
-  const { data: gradebookRows = [] } = useGetCourseGradebookQuery(classId, {
-    skip: isHydrating || !isStaff || !classId || !isEnrolled,
-  });
+  // Staff gradebook — skip via skipToken; selectFromResult exposes only the rows array
+  const { gradebookRows = [] } = useGetCourseGradebookQuery(
+    isHydrating || !isStaff || !classId || !isEnrolled ? skipToken : classId,
+    {
+      selectFromResult: ({ data }) => ({ gradebookRows: data ?? [] }),
+    },
+  );
 
-  const { data: summary } = useGetCourseAnalyticsSummaryQuery(classId, {
-    skip: isHydrating || !isStaff || !classId || !isEnrolled,
-  });
+  // Analytics summary — staff-only
+  const { data: summary } = useGetCourseAnalyticsSummaryQuery(
+    isHydrating || !isStaff || !classId || !isEnrolled ? skipToken : classId,
+  );
 
   const rows = isStaff ? gradebookRows : studentRows;
 

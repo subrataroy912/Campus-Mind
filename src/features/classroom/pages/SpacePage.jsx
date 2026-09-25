@@ -184,6 +184,8 @@ export default function SpacePage() {
 
         <ClassHeader
           classroom={classroomWithNewCode}
+          isEnrolled={isEnrolled}
+          isStaff={isStaff}
           onJoin={handleJoin}
           isJoining={isJoining}
         />
@@ -206,6 +208,8 @@ export default function SpacePage() {
         {activeTab === "home" && (
           <ClassHomeTab
             classroom={classroom}
+            isEnrolled={isEnrolled}
+            isStaff={isStaff}
             onJoin={handleJoin}
             isJoining={isJoining}
           />
@@ -214,6 +218,8 @@ export default function SpacePage() {
         {activeTab === "classwork" && (
           <ClassworkTab
             classroom={classroom}
+            isEnrolled={isEnrolled}
+            isStaff={isStaff}
             onJoin={handleJoin}
             isJoining={isJoining}
           />
@@ -226,13 +232,20 @@ export default function SpacePage() {
         {activeTab === "members" && (
           <MembersTab
             classroom={classroom}
+            isEnrolled={isEnrolled}
+            isStaff={isStaff}
             onJoin={handleJoin}
             isJoining={isJoining}
           />
         )}
 
         {activeTab === "grades" && (
-          <GradesTab onJoin={handleJoin} isJoining={isJoining} />
+          <GradesTab
+            isEnrolled={isEnrolled}
+            isStaff={isStaff}
+            onJoin={handleJoin}
+            isJoining={isJoining}
+          />
         )}
 
         <CodePromptModal

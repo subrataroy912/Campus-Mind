@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "deploy": "wrangler deploy",
@@ -17,13 +16,12 @@
     "@fontsource-variable/geist": "^5.3.0",
     "@reduxjs/toolkit": "^2.12.0",
     "@shadcn/react": "^0.3.1",
+    "@tanstack/react-virtual": "^3.14.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "cn": "^0.2.5",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
-    "inngest": "^4.20.0",
     "input-otp": "^1.5.0",
     "lucide-react": "latest",
     "react": "^19.2.8",
@@ -53,5 +51,9 @@
     "vite-plugin-checker": "^0.14.5",
     "vitest": "^5.0.0",
     "wrangler": "^4.131.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260911.1": true
   }
 }

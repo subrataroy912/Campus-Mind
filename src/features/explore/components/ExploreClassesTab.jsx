@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useSelector } from "react-redux";
 import { Flame, Loader2, Sparkles } from "lucide-react";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
@@ -6,7 +6,7 @@ import FilterButton from "./FilterButton.jsx";
 import ExploreCardSkeleton from "./ExploreCardSkeleton.jsx";
 import ExplorePagination from "./ExplorePagination.jsx";
 import { BUILT_IN_CLASS_FILTERS } from "../model/exploreConstants.js";
-import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
+import { selectEnrolledCourseIds } from "@/features/classroom/classroomSelectors.js";
 
 export default function ExploreClassesTab({
   classes = [],
@@ -26,17 +26,7 @@ export default function ExploreClassesTab({
   const trendingItems = isDefaultBrowse ? classes.slice(0, 4) : [];
   const mainGridItems = isDefaultBrowse ? classes.slice(4) : classes;
 
-  const { classrooms = [] } = useDashboardData({ includeExplore: false });
-  const enrolledIds = useMemo(() => {
-    const ids = new Set();
-    for (const item of classrooms) {
-      if (item.id) ids.add(item.id);
-      if (item.courseId) ids.add(item.courseId);
-      if (item.classId) ids.add(item.classId);
-      if (item._id) ids.add(item._id);
-    }
-    return ids;
-  }, [classrooms]);
+  const enrolledIds = useSelector(selectEnrolledCourseIds);
 
   // Fix 1: Better skeleton logic to cover filter changes/refetches when data is empty
   const hasClasses = classes.length > 0;

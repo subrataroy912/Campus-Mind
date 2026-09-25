@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useBlocker, useBeforeUnload } from "react-router";
 import {
   Camera,
   ImagePlus,
@@ -92,6 +93,43 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
   const [updateClassroom, { isLoading: isUpdating }] =
     useUpdateClassroomMutation();
   const isSaving = isUpdating || isUploadingMedia;
+
+  // Dirty detection: compare current form state to the source classroom prop.
+  const isDirty =
+    isOpen &&
+    (title !== (classroom?.title || classroom?.name || "") ||
+      section !== (classroom?.section || classroom?.subtitle || "") ||
+      description !== (classroom?.description || "") ||
+      normalizeAccessType(accessType) !==
+        normalizeAccessType(classroom?.accessType) ||
+      theme !== (classroom?.theme || "indigo") ||
+      coverFile !== null ||
+      coverRemoved ||
+      logoFile !== null ||
+      logoRemoved);
+
+  /**
+   * Block client-side SPA navigations when the modal has unsaved changes.
+   * Docs: https://reactrouter.com/how-to/navigation-blocking
+   */
+  const blocker = useBlocker(isDirty && !isSaving);
+
+  /**
+   * Warn when the user tries to close the browser tab / refresh the page
+   * with unsaved changes. Works in tandem with useBlocker for in-app nav.
+   */
+  const beforeUnloadHandler = useCallback(
+    (event) => {
+      if (isDirty && !isSaving) {
+        event.preventDefault();
+        // Modern browsers show their own generic message; the return value is legacy.
+        return (event.returnValue =
+          "You have unsaved changes. Leave without saving?");
+      }
+    },
+    [isDirty, isSaving],
+  );
+  useBeforeUnload(beforeUnloadHandler);
 
   // Sync state when classroom or open state changes
   useEffect(() => {
@@ -243,7 +281,8 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg p-0 overflow-hidden flex flex-col max-h-[88vh]">
         {/* Fixed Header */}
         <DialogHeader className="px-5 py-3.5 border-b border-border shrink-0">
@@ -564,5 +603,33 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Navigation blocker confirmation — fires when user tries to leave with unsaved edits */}
+    {blocker.state === "blocked" && (
+      <Dialog open onOpenChange={() => blocker.reset()}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Unsaved changes</DialogTitle>
+            <DialogDescription>
+              You have unsaved changes in the space editor. If you leave now,
+              your edits will be lost.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => blocker.reset()}>
+              Stay and keep editing
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => blocker.proceed()}
+            >
+              Leave without saving
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
+    </>
   );
 }

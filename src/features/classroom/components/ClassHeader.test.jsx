@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { Provider } from "react-redux";
+import { store } from "@/app/store.js";
 import ClassHeader from "./ClassHeader.jsx";
 
 vi.mock("react-router", () => ({
@@ -21,6 +23,9 @@ vi.mock("../api/classroomApi.js", () => ({
   useGenerateInviteLinkMutation: () => [vi.fn(), { isLoading: false }],
 }));
 
+const renderWithStore = (ui) =>
+  renderToString(<Provider store={store}>{ui}</Provider>);
+
 describe("ClassHeader privacy and role checks", () => {
   const sampleClass = {
     id: "course-123",
@@ -33,7 +38,7 @@ describe("ClassHeader privacy and role checks", () => {
   };
 
   it("renders settings cog and invite link when viewer is staff on LINK_ONLY space", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassHeader
         classroom={sampleClass}
         isEnrolled={true}
@@ -48,7 +53,7 @@ describe("ClassHeader privacy and role checks", () => {
   });
 
   it("hides settings cog and hides invite link when viewer is a member/non-staff", () => {
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassHeader
         classroom={sampleClass}
         isEnrolled={true}
@@ -71,7 +76,7 @@ describe("ClassHeader privacy and role checks", () => {
       accessType: "PUBLIC",
     };
 
-    const html = renderToString(
+    const html = renderWithStore(
       <ClassHeader
         classroom={openClass}
         isEnrolled={true}

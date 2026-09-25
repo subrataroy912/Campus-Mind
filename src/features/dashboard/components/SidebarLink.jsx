@@ -20,6 +20,7 @@ export function SidebarLink({
     <NavLink
       to={to}
       end={isEnd}
+      prefetch="intent"
       className={(navState) => {
         const isActive = typeof navState === "object" ? navState?.isActive : false;
         return `group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${

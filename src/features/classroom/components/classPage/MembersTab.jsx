@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useLayoutEffect } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Link } from "react-router";
 import {
   Check,
@@ -16,6 +17,7 @@ import EmptyState from "@/components/common/EmptyState.jsx";
 import { ClassroomAvatar } from "../ClassroomAvatar.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
+import { skipToken } from "@reduxjs/toolkit/query";
 import {
   useGetClassroomRosterQuery,
   useUpdateClassroomMutation,
@@ -204,7 +206,6 @@ export function MembersTab({
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
   const [updatingRoleId, setUpdatingRoleId] = useState(null);
-  const [showAllMembers, setShowAllMembers] = useState(false);
   const { user, authStatus } = useAuth();
 
   const [updateClassroom, { isLoading: isUpdatingInvite }] =
@@ -325,10 +326,12 @@ export function MembersTab({
   const [declineJoinRequest, { isLoading: isDeclining }] =
     useDeclineJoinRequestMutation();
 
-  const { data: pendingRequests = [] } = useGetPendingJoinRequestsQuery(
-    classroom?.id,
+  const { pendingRequests = [] } = useGetPendingJoinRequestsQuery(
+    authStatus === "hydrating" || !classroom?.id || !isStaff
+      ? skipToken
+      : classroom.id,
     {
-      skip: authStatus === "hydrating" || !classroom?.id || !isStaff,
+      selectFromResult: ({ data }) => ({ pendingRequests: data ?? [] }),
     },
   );
 
@@ -380,9 +383,14 @@ export function MembersTab({
     }
   };
 
-  const { data: roster = [] } = useGetClassroomRosterQuery(classroom?.id, {
-    skip: authStatus === "hydrating" || !classroom?.id || !isEnrolled,
-  });
+  const { roster = [] } = useGetClassroomRosterQuery(
+    authStatus === "hydrating" || !classroom?.id || !isEnrolled
+      ? skipToken
+      : classroom.id,
+    {
+      selectFromResult: ({ data }) => ({ roster: data ?? [] }),
+    },
+  );
 
   const members = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -407,6 +415,24 @@ export function MembersTab({
       return r !== "owner" && r !== "admin";
     });
   }, [members]);
+
+  const listRef = useRef(null);
+  const [listOffset, setListOffset] = useState(0);
+
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      setListOffset(
+        listRef.current.getBoundingClientRect().top + window.scrollY
+      );
+    }
+  }, [generalMembers.length, query]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: generalMembers.length,
+    estimateSize: () => 64, // ~64px row height for members
+    overscan: 10,
+    scrollMargin: listOffset,
+  });
 
   if (!isEnrolled) {
     return (
@@ -623,39 +649,47 @@ export function MembersTab({
                 <h3 className="text-xs font-semibold text-foreground">
                   Members ({generalMembers.length})
                 </h3>
-                <div className="grid overflow-hidden rounded-lg border border-border/70 divide-y divide-border/60 bg-card sm:grid-cols-2 sm:divide-x">
-                  {(showAllMembers
-                    ? generalMembers
-                    : generalMembers.slice(0, 50)
-                  ).map((m) => (
-                    <MemberRow
-                      key={m.id || m.userId}
-                      member={m}
-                      isCurrentOwner={isCurrentOwner}
-                      isCurrentAdmin={isCurrentAdmin}
-                      confirming={confirming}
-                      setConfirming={setConfirming}
-                      onRemove={handleRemoveMember}
-                      isRemoving={removingId === (m.id || m.userId)}
-                      onUpdateRole={handleUpdateRole}
-                      isUpdatingRole={updatingRoleId === (m.id || m.userId)}
-                    />
-                  ))}
+                <div
+                  ref={listRef}
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: "100%",
+                    position: "relative",
+                  }}
+                  className="rounded-lg border border-border/70 bg-card overflow-hidden"
+                >
+                  {virtualizer.getVirtualItems().map((virtualRow) => {
+                    const m = generalMembers[virtualRow.index];
+                    return (
+                      <div
+                        key={m.id || m.userId}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${
+                            virtualRow.start - virtualizer.options.scrollMargin
+                          }px)`,
+                        }}
+                        className="border-b border-border/60"
+                      >
+                        <MemberRow
+                          member={m}
+                          isCurrentOwner={isCurrentOwner}
+                          isCurrentAdmin={isCurrentAdmin}
+                          confirming={confirming}
+                          setConfirming={setConfirming}
+                          onRemove={handleRemoveMember}
+                          isRemoving={removingId === (m.id || m.userId)}
+                          onUpdateRole={handleUpdateRole}
+                          isUpdatingRole={updatingRoleId === (m.id || m.userId)}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-                {generalMembers.length > 50 && (
-                  <div className="pt-2 text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowAllMembers((prev) => !prev)}
-                      className="rounded-md text-xs h-7"
-                    >
-                      {showAllMembers
-                        ? "Show fewer members"
-                        : `Show all ${generalMembers.length} members`}
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
           </div>

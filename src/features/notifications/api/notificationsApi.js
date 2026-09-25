@@ -15,31 +15,49 @@ export const notificationsApi = baseApi.injectEndpoints({
         method: "PATCH",
       }),
       async onQueryStarted(notificationId, { dispatch, queryFulfilled }) {
-        // Optimistically mark as read in notification list cache
-        const patchResult = dispatch(
-          notificationsApi.util.updateQueryData(
-            "listNotifications",
-            { unreadOnly: true, page: 0, size: 10 },
-            (draft) => {
-              const list = Array.isArray(draft)
-                ? draft
-                : draft?.content || draft?.data;
-              if (Array.isArray(list)) {
-                const item = list.find(
-                  (n) => n.id === notificationId || n._id === notificationId,
-                );
-                if (item) {
-                  item.read = true;
-                  item.isRead = true;
-                }
-              }
-            },
+        const markInDraft = (draft) => {
+          const list = Array.isArray(draft)
+            ? draft
+            : draft?.content || draft?.data;
+          if (Array.isArray(list)) {
+            const item = list.find(
+              (n) => n.id === notificationId || n._id === notificationId,
+            );
+            if (item) {
+              item.read = true;
+              item.isRead = true;
+            }
+          }
+        };
+
+        const patches = [
+          dispatch(
+            notificationsApi.util.updateQueryData(
+              "listNotifications",
+              { unreadOnly: true, page: 0, size: 10 },
+              markInDraft,
+            ),
           ),
-        );
+          dispatch(
+            notificationsApi.util.updateQueryData(
+              "listNotifications",
+              { unreadOnly: false, page: 0, size: 20 },
+              markInDraft,
+            ),
+          ),
+          dispatch(
+            notificationsApi.util.updateQueryData(
+              "listNotifications",
+              undefined,
+              markInDraft,
+            ),
+          ),
+        ];
+
         try {
           await queryFulfilled;
         } catch {
-          patchResult.undo();
+          patches.forEach((p) => p.undo());
         }
       },
       invalidatesTags: ["Notifications"],

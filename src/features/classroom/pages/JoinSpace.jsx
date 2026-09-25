@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link, useSearchParams } from "react-router";
 import { ArrowLeft, Globe, Link2, Lock, UserPlus } from "lucide-react";
 import { joinClassroom } from "../api/classroomService.js";
 import { useValidateInviteTokenQuery } from "../api/classroomApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { triggerLifecycleRefresh } from "@/app/refreshEvents.js";
 import { useGetPublicCourseQuery } from "@/features/explore/api/exploreApi.js";
 import { routes } from "@/routes/paths";
 import {
@@ -45,7 +43,6 @@ function getJoinErrorMessage(error) {
 
 export default function JoinSpace() {
   const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
   const { user } = useAuth();
 
   const initialCode = normalizeClassCode(searchParams.get("code") || "");
@@ -114,7 +111,6 @@ export default function JoinSpace() {
         optionalCourseId || undefined,
         isOpenCourse ? "" : classCode || "",
       );
-      triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(joined);
       setStatus("joined");
       toast.add({
@@ -137,7 +133,6 @@ export default function JoinSpace() {
     setStatus("loading");
     try {
       const joined = await joinClassroom(user?.id, optionalCourseId, "");
-      triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(joined);
       setStatus("joined");
       toast.add({
@@ -164,7 +159,6 @@ export default function JoinSpace() {
         inviteData.courseId,
         inviteToken,
       );
-      triggerLifecycleRefresh(dispatch, "course-created");
       setFoundClass(
         joined || {
           id: inviteData.courseId,

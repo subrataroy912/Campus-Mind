@@ -1,4 +1,5 @@
 import { baseApi } from "@/app/baseApi.js";
+import { setActiveCourse } from "../courseContextSlice.js";
 
 const exploreTags = [
   { type: "CourseFeed", id: "LIST" },
@@ -40,7 +41,15 @@ const normalizeCourse = (response = {}) => {
     inviteExpiresAt: course.inviteExpiresAt ?? null,
     ownerId: course.ownerId,
     owner,
-    role: course.role ?? "Joined",
+    role:
+      course.role ??
+      (course.enrolled || course.isEnrolled ? "MEMBER" : "VIEWER"),
+    isEnrolled:
+      typeof course.enrolled === "boolean"
+        ? course.enrolled
+        : typeof course.isEnrolled === "boolean"
+        ? course.isEnrolled
+        : Boolean(course.role && String(course.role).toUpperCase() !== "VIEWER"),
     memberCount:
       course.memberCount ?? course.rosterCount ?? course.members?.length ?? 0,
     popularity: course.popularity ?? course.popularityScore ?? 0,
@@ -59,6 +68,38 @@ const normalizeCourseList = (response) => {
   const payload = response?.data ?? response;
   const courses = Array.isArray(payload) ? payload : (payload?.content ?? []);
   return courses.map(normalizeCourse);
+};
+
+const getDraftCourseList = (draft) =>
+  Array.isArray(draft)
+    ? draft
+    : Array.isArray(draft?.data)
+    ? draft.data
+    : null;
+
+const matchesCourseId = (course, targetId) =>
+  String(course?.id || course?.courseId || course?._id) === String(targetId);
+
+const applyClassroomChanges = (target, changes = {}) => {
+  if (!target) return;
+  Object.assign(target, changes);
+  if (changes.title) {
+    target.title = changes.title;
+    target.name = changes.title;
+    target.className = changes.title;
+  }
+  if (changes.section !== undefined) {
+    target.section = changes.section;
+    target.subtitle = changes.section;
+  }
+  if (changes.logoUrl !== undefined) {
+    target.logoUrl = changes.logoUrl;
+    target.logo = changes.logoUrl;
+  }
+  if (changes.coverUrl !== undefined) {
+    target.coverUrl = changes.coverUrl;
+    target.cover = changes.coverUrl;
+  }
 };
 
 export const classroomApi = baseApi.injectEndpoints({
@@ -120,6 +161,31 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Profile", id: "CURRENT" },
         ...(details?.visibility === "PUBLIC" ? exploreTags : []),
       ],
+      async onQueryStarted(details, { dispatch, queryFulfilled }) {
+        try {
+          const { data: newCourse } = await queryFulfilled;
+          if (newCourse && newCourse.id) {
+            dispatch(
+              classroomApi.util.upsertQueryData(
+                "findClassroomById",
+                newCourse.id,
+                newCourse,
+              ),
+            );
+            dispatch(
+              classroomApi.util.updateQueryData(
+                "fetchClassrooms",
+                undefined,
+                (draft) => {
+                  getDraftCourseList(draft)?.unshift(newCourse);
+                },
+              ),
+            );
+          }
+        } catch {
+          // handled by invalidation
+        }
+      },
     }),
     updateClassroom: builder.mutation({
       query: ({ courseId, changes }) => ({
@@ -139,33 +205,11 @@ export const classroomApi = baseApi.injectEndpoints({
       ) {
         if (!courseId) return;
 
-        const targetId = String(courseId);
-
         const patchResult = dispatch(
           classroomApi.util.updateQueryData(
             "findClassroomById",
             courseId,
-            (draft) => {
-              if (!draft) return;
-              Object.assign(draft, changes);
-              if (changes.title) {
-                draft.title = changes.title;
-                draft.name = changes.title;
-                draft.className = changes.title;
-              }
-              if (changes.section !== undefined) {
-                draft.section = changes.section;
-                draft.subtitle = changes.section;
-              }
-              if (changes.logoUrl !== undefined) {
-                draft.logoUrl = changes.logoUrl;
-                draft.logo = changes.logoUrl;
-              }
-              if (changes.coverUrl !== undefined) {
-                draft.coverUrl = changes.coverUrl;
-                draft.cover = changes.coverUrl;
-              }
-            },
+            (draft) => applyClassroomChanges(draft, changes),
           ),
         );
         const listPatchResult = dispatch(
@@ -173,30 +217,9 @@ export const classroomApi = baseApi.injectEndpoints({
             "fetchClassrooms",
             undefined,
             (draft) => {
-              if (!Array.isArray(draft)) return;
-              const course = draft.find(
-                (c) => String(c?.id || c?.courseId || c?._id) === targetId,
-              );
-              if (course) {
-                Object.assign(course, changes);
-                if (changes.title) {
-                  course.title = changes.title;
-                  course.name = changes.title;
-                  course.className = changes.title;
-                }
-                if (changes.section !== undefined) {
-                  course.section = changes.section;
-                  course.subtitle = changes.section;
-                }
-                if (changes.logoUrl !== undefined) {
-                  course.logoUrl = changes.logoUrl;
-                  course.logo = changes.logoUrl;
-                }
-                if (changes.coverUrl !== undefined) {
-                  course.coverUrl = changes.coverUrl;
-                  course.cover = changes.coverUrl;
-                }
-              }
+              const list = getDraftCourseList(draft);
+              const course = list?.find((c) => matchesCourseId(c, courseId));
+              applyClassroomChanges(course, changes);
             },
           ),
         );
@@ -217,12 +240,13 @@ export const classroomApi = baseApi.injectEndpoints({
                 "fetchClassrooms",
                 undefined,
                 (draft) => {
-                  if (!Array.isArray(draft)) return;
-                  const idx = draft.findIndex(
-                    (c) => String(c?.id || c?.courseId || c?._id) === targetId,
+                  const list = getDraftCourseList(draft);
+                  if (!list) return;
+                  const idx = list.findIndex((c) =>
+                    matchesCourseId(c, courseId),
                   );
                   if (idx !== -1) {
-                    draft[idx] = { ...draft[idx], ...updated };
+                    list[idx] = { ...list[idx], ...updated };
                   }
                 },
               ),
@@ -236,11 +260,32 @@ export const classroomApi = baseApi.injectEndpoints({
     }),
     deleteClassroom: builder.mutation({
       query: (courseId) => ({ url: `/courses/${courseId}`, method: "DELETE" }),
-      invalidatesTags: [
+      invalidatesTags: (_result, _error, courseId) => [
         { type: "Classrooms", id: "LIST" },
+        { type: "Classrooms", id: courseId },
         { type: "Profile", id: "CURRENT" },
         ...exploreTags,
       ],
+      async onQueryStarted(courseId, { dispatch, queryFulfilled }) {
+        if (!courseId) return;
+        const patchResult = dispatch(
+          classroomApi.util.updateQueryData(
+            "fetchClassrooms",
+            undefined,
+            (draft) => {
+              const list = getDraftCourseList(draft);
+              if (!list) return;
+              const idx = list.findIndex((c) => matchesCourseId(c, courseId));
+              if (idx !== -1) list.splice(idx, 1);
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     archiveClassroom: builder.mutation({
       query: (courseId) => ({
@@ -275,23 +320,264 @@ export const classroomApi = baseApi.injectEndpoints({
         };
       },
       transformResponse: normalizeCourse,
-      invalidatesTags: (result) => [
-        { type: "Classrooms", id: "LIST" },
-        { type: "Classrooms", id: result?.id ?? "unknown" },
-        { type: "Profile", id: "CURRENT" },
-        ...exploreTags,
-      ],
+      invalidatesTags: (result, _error, arg) => {
+        const courseId =
+          result?.id ?? (typeof arg === "string" ? arg : arg?.courseId) ?? "unknown";
+        return [
+          { type: "Classrooms", id: "LIST" },
+          { type: "Classrooms", id: courseId },
+          { type: "Classrooms", id: `${courseId}:roster` },
+          { type: "Profile", id: "CURRENT" },
+          ...exploreTags,
+        ];
+      },
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const courseId = typeof arg === "string" ? arg : arg?.courseId;
+        const patches = [];
+        const previousContext = getState()?.courseContext;
+
+        // 1. Optimistically update findClassroomById and fetchClassrooms if courseId is known
+        if (courseId) {
+          const cachedCourse =
+            classroomApi.endpoints.findClassroomById.select(courseId)(
+              getState(),
+            )?.data;
+          const isPrivateSpace =
+            String(cachedCourse?.accessType || "").toUpperCase() === "PRIVATE";
+
+          patches.push(
+            dispatch(
+              classroomApi.util.updateQueryData(
+                "findClassroomById",
+                courseId,
+                (draft) => {
+                  if (!draft) return;
+                  if (
+                    String(draft.accessType || "").toUpperCase() === "PRIVATE"
+                  ) {
+                    draft.membershipStatus = "PENDING";
+                    draft.isEnrolled = false;
+                    draft.enrolled = false;
+                  } else {
+                    draft.role =
+                      draft.role && draft.role !== "VIEWER"
+                        ? draft.role
+                        : "MEMBER";
+                    draft.isEnrolled = true;
+                    draft.enrolled = true;
+                    draft.membershipStatus = "ENROLLED";
+                    draft.memberCount = (draft.memberCount || 0) + 1;
+                  }
+                },
+              ),
+            ),
+          );
+
+          if (!isPrivateSpace) {
+            if (previousContext?.activeCourseId === courseId) {
+              dispatch(
+                setActiveCourse({
+                  courseId,
+                  role:
+                    previousContext.userRole &&
+                    previousContext.userRole !== "VIEWER"
+                      ? previousContext.userRole
+                      : "MEMBER",
+                  isStaff: Boolean(previousContext.isStaff),
+                  isEnrolled: true,
+                }),
+              );
+            }
+
+            if (cachedCourse) {
+              const optimisticCourse = {
+                ...cachedCourse,
+                role:
+                  cachedCourse.role && cachedCourse.role !== "VIEWER"
+                    ? cachedCourse.role
+                    : "MEMBER",
+                isEnrolled: true,
+                enrolled: true,
+                membershipStatus: "ENROLLED",
+                memberCount: (cachedCourse.memberCount || 0) + 1,
+              };
+              patches.push(
+                dispatch(
+                  classroomApi.util.updateQueryData(
+                    "fetchClassrooms",
+                    undefined,
+                    (draft) => {
+                      const list = getDraftCourseList(draft);
+                      if (!list) return;
+                      const idx = list.findIndex((c) =>
+                        matchesCourseId(c, courseId),
+                      );
+                      if (idx !== -1) {
+                        list[idx] = { ...list[idx], ...optimisticCourse };
+                      } else {
+                        list.unshift(optimisticCourse);
+                      }
+                    },
+                  ),
+                ),
+              );
+            }
+          }
+        }
+
+        try {
+          const { data: joinedCourse } = await queryFulfilled;
+          const targetId = joinedCourse?.id || courseId;
+          if (targetId && joinedCourse) {
+            const isPendingJoin =
+              String(joinedCourse.membershipStatus || "").toUpperCase() ===
+              "PENDING";
+
+            // Seed findClassroomById with complete server response
+            dispatch(
+              classroomApi.util.upsertQueryData(
+                "findClassroomById",
+                targetId,
+                joinedCourse,
+              ),
+            );
+
+            if (getState()?.courseContext?.activeCourseId === targetId) {
+              dispatch(
+                setActiveCourse({
+                  courseId: targetId,
+                  role: joinedCourse.role || "MEMBER",
+                  isStaff: Boolean(previousContext?.isStaff),
+                  isEnrolled: !isPendingJoin && Boolean(joinedCourse.isEnrolled),
+                }),
+              );
+            }
+
+            // Immediately prepend or update in fetchClassrooms cache if enrolled
+            if (!isPendingJoin) {
+              dispatch(
+                classroomApi.util.updateQueryData(
+                  "fetchClassrooms",
+                  undefined,
+                  (draft) => {
+                    const list = getDraftCourseList(draft);
+                    if (list) {
+                      const idx = list.findIndex((c) =>
+                        matchesCourseId(c, targetId),
+                      );
+                      if (idx !== -1) {
+                        list[idx] = { ...list[idx], ...joinedCourse };
+                      } else {
+                        list.unshift(joinedCourse);
+                      }
+                    }
+                  },
+                ),
+              );
+            }
+          }
+        } catch {
+          patches.forEach((patch) => patch.undo());
+          if (courseId && previousContext?.activeCourseId === courseId) {
+            dispatch(
+              setActiveCourse({
+                courseId,
+                role: previousContext.userRole,
+                isStaff: previousContext.isStaff,
+                isEnrolled: previousContext.isEnrolled,
+              }),
+            );
+          }
+        }
+      },
     }),
     leaveClassroom: builder.mutation({
       query: (courseId) => ({
         url: `/courses/${courseId}/enrollment`,
         method: "DELETE",
       }),
-      invalidatesTags: [
+      invalidatesTags: (_result, _error, courseId) => [
         { type: "Classrooms", id: "LIST" },
+        { type: "Classrooms", id: courseId },
+        { type: "Classrooms", id: `${courseId}:roster` },
         { type: "Profile", id: "CURRENT" },
         ...exploreTags,
       ],
+      async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
+        const courseId = typeof arg === "string" ? arg : arg?.courseId;
+        if (!courseId) return;
+        const patches = [];
+        const previousContext = getState()?.courseContext;
+
+        if (previousContext?.activeCourseId === courseId) {
+          dispatch(
+            setActiveCourse({
+              courseId,
+              role: "VIEWER",
+              isStaff: false,
+              isEnrolled: false,
+            }),
+          );
+        }
+
+        // 1. Optimistically update findClassroomById
+        patches.push(
+          dispatch(
+            classroomApi.util.updateQueryData(
+              "findClassroomById",
+              courseId,
+              (draft) => {
+                if (draft) {
+                  draft.role = "VIEWER";
+                  draft.isEnrolled = false;
+                  draft.enrolled = false;
+                  draft.membershipStatus = null;
+                  if (draft.memberCount && draft.memberCount > 0) {
+                    draft.memberCount -= 1;
+                  }
+                }
+              },
+            ),
+          ),
+        );
+
+        // 2. Optimistically remove from fetchClassrooms list
+        patches.push(
+          dispatch(
+            classroomApi.util.updateQueryData(
+              "fetchClassrooms",
+              undefined,
+              (draft) => {
+                const list = getDraftCourseList(draft);
+                if (list) {
+                  const idx = list.findIndex((c) =>
+                    matchesCourseId(c, courseId),
+                  );
+                  if (idx !== -1) {
+                    list.splice(idx, 1);
+                  }
+                }
+              },
+            ),
+          ),
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+          if (previousContext?.activeCourseId === courseId) {
+            dispatch(
+              setActiveCourse({
+                courseId,
+                role: previousContext.userRole,
+                isStaff: previousContext.isStaff,
+                isEnrolled: previousContext.isEnrolled,
+              }),
+            );
+          }
+        }
+      },
     }),
     removeCourseMember: builder.mutation({
       query: ({ courseId, userId }) => ({
@@ -323,6 +609,28 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
         { type: "Classrooms", id: "LIST" },
       ],
+      async onQueryStarted(courseId, { dispatch, queryFulfilled }) {
+        if (!courseId) return;
+        const patchResult = dispatch(
+          classroomApi.util.updateQueryData(
+            "findClassroomById",
+            courseId,
+            (draft) => {
+              if (draft) {
+                draft.membershipStatus = null;
+                draft.isEnrolled = false;
+                draft.enrolled = false;
+                draft.role = "VIEWER";
+              }
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
     getPendingJoinRequests: builder.query({
       query: (courseId) => `/courses/${courseId}/join-requests`,

@@ -6,6 +6,7 @@ import { useDashboardData } from "../hooks/useDashboardData.js";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import ClassCard from "@/features/classroom/components/ClassCard.jsx";
 import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
+import ExploreCardSkeleton from "@/features/explore/components/ExploreCardSkeleton.jsx";
 import { useGetCurrentProfileQuery } from "@/features/profile/api/profileApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
@@ -13,7 +14,11 @@ import { DashboardSection } from "../components/DashboardSection.jsx";
 import WelcomeModal from "../components/WelcomeModal.jsx";
 import DashboardSkeleton from "../components/DashboardSkeleton.jsx";
 
-const SuggestedSpacesSection = ({ exploreClassrooms, classrooms }) => {
+const SuggestedSpacesSection = ({
+  exploreClassrooms,
+  classrooms,
+  isLoading = false,
+}) => {
   const suggestedSpaces = useMemo(() => {
     if (!Array.isArray(exploreClassrooms) || !Array.isArray(classrooms))
       return [];
@@ -31,7 +36,7 @@ const SuggestedSpacesSection = ({ exploreClassrooms, classrooms }) => {
     return suggestions;
   }, [classrooms, exploreClassrooms]);
 
-  if (suggestedSpaces.length === 0) return null;
+  if (!isLoading && suggestedSpaces.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-2 rounded-lg border border-border/70 bg-card/60 p-3 shadow-none">
@@ -59,13 +64,19 @@ const SuggestedSpacesSection = ({ exploreClassrooms, classrooms }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-        {suggestedSpaces.map((space, idx) => (
-          <ExploreClassCard
-            key={space?.id || space?.courseId || space?._id || idx}
-            classroom={space}
-            isEnrolled={false}
-          />
-        ))}
+        {isLoading && suggestedSpaces.length === 0 ? (
+          Array.from({ length: 3 }).map((_, idx) => (
+            <ExploreCardSkeleton key={idx} />
+          ))
+        ) : (
+          suggestedSpaces.map((space, idx) => (
+            <ExploreClassCard
+              key={space?.id || space?.courseId || space?._id || idx}
+              classroom={space}
+              isEnrolled={false}
+            />
+          ))
+        )}
       </div>
     </section>
   );
@@ -76,7 +87,6 @@ export default function DashboardHomePage() {
 
   const {
     data: profile,
-    isLoading,
     error,
   } = useGetCurrentProfileQuery(undefined, {
     skip: authStatus === "hydrating",
@@ -86,13 +96,15 @@ export default function DashboardHomePage() {
     classrooms = [],
     exploreClassrooms = [],
     status,
+    isExploreLoading,
   } = useDashboardData();
 
-  if (status === "loading" || status === "idle" || isLoading) {
+  // Fast path: Only block the full dashboard if classrooms are actively loading and no cached data exists
+  if ((status === "loading" || status === "idle") && classrooms.length === 0) {
     return <DashboardSkeleton />;
   }
 
-  if (error) {
+  if (error && !user) {
     return (
       <div className="mx-auto max-w-7xl p-4 sm:p-6">
         <EmptyState
@@ -103,7 +115,7 @@ export default function DashboardHomePage() {
     );
   }
 
-  const firstName = profile?.displayName?.split(" ")[0];
+  const firstName = (profile?.displayName || user?.name)?.split(" ")[0];
   const genderStr = profile?.gender?.toLowerCase();
 
   const titlePrefix =
@@ -139,6 +151,7 @@ export default function DashboardHomePage() {
       <SuggestedSpacesSection
         exploreClassrooms={exploreClassrooms}
         classrooms={classrooms}
+        isLoading={isExploreLoading}
       />
     </div>
   );
