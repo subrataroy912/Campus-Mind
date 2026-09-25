@@ -13,6 +13,7 @@ import {
   Link2,
   Lock,
   LogOut,
+  MessageSquare,
   Pencil,
   Settings,
   Trash2,
@@ -497,6 +498,19 @@ export default function ClassHeader({
             )
           ) : isStaff ? (
             <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate &&
+                  classroom?.id &&
+                  navigate(`${routes.messages}?space=${classroom.id}`)
+                }
+                className="w-full sm:w-auto h-8 text-xs gap-1.5"
+              >
+                <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                <span>Space Chat</span>
+              </Button>
               {accessType === "LINK_ONLY" ? (
                 <Button
                   variant="outline"
@@ -526,6 +540,19 @@ export default function ClassHeader({
           ) : (
             /* Regular Enrolled Member */
             <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate &&
+                  classroom?.id &&
+                  navigate(`${routes.messages}?space=${classroom.id}`)
+                }
+                className="w-full sm:w-auto h-8 text-xs gap-1.5"
+              >
+                <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                <span>Space Chat</span>
+              </Button>
               <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-canvas/70 px-3 py-1.5 text-xs font-medium text-text-muted sm:w-auto">
                 <Check className="h-3.5 w-3.5 text-success" />
                 <span className="font-semibold text-text-heading">
