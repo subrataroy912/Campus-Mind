@@ -25,7 +25,6 @@ export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const isClassesTab = tab === EXPLORE_TABS.CLASSES;
-  const isPeopleTab = tab === EXPLORE_TABS.PEOPLE;
 
   const {
     classes = [],
@@ -44,13 +43,12 @@ export default function ExplorePage() {
 
   const {
     filteredPeople = [],
-    recommendations = [],
     currentUser,
     isLoading: isLoadingUsers,
   } = useExplorePeople({
     searchQuery,
     personFilter,
-    enabled: isPeopleTab,
+    enabled: true,
   });
 
   // Reusable URL parameter updater
@@ -131,7 +129,6 @@ export default function ExplorePage() {
       ) : (
         <ExplorePeopleTab
           filteredPeople={filteredPeople}
-          recommendations={recommendations}
           personFilter={personFilter}
           searchQuery={searchQuery}
           currentUser={currentUser}

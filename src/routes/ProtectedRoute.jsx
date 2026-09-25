@@ -5,7 +5,7 @@ import { getProtectedRouteState } from "../context/authSession.js";
 import SessionBootstrapSkeleton from "../features/auth/components/SessionBootstrapSkeleton.jsx";
 import { routes } from "./paths.js";
 
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ unauthenticatedHomeElement = null }) {
   const { isAuthenticated, authStatus, user } = useAuth();
   const location = useLocation();
 
@@ -16,6 +16,9 @@ export default function ProtectedRoute() {
   }
 
   if (routeState !== "authenticated") {
+    if (location.pathname === routes.home && unauthenticatedHomeElement) {
+      return unauthenticatedHomeElement;
+    }
     return (
       <Navigate to={routes.auth.login} replace state={{ from: location }} />
     );
@@ -26,7 +29,7 @@ export default function ProtectedRoute() {
   }
 
   if (user?.profileCompleted === true && location.pathname === routes.profile.new) {
-    return <Navigate to={routes.dashboard} replace />;
+    return <Navigate to={routes.home} replace />;
   }
 
   return <Outlet />;

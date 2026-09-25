@@ -137,13 +137,15 @@ function ExploreClassCard({
           force: false,
         }),
       );
-      store.dispatch(
-        courseworkApi.util.prefetch(
-          "getCourseworkList",
-          { courseId, page: 0, size: 20 },
-          { force: false },
-        ),
-      );
+      if (isAlreadyEnrolled || accessType === ACCESS_TYPES.PUBLIC) {
+        store.dispatch(
+          courseworkApi.util.prefetch(
+            "getCourseworkList",
+            { courseId, page: 0, size: 20 },
+            { force: false },
+          ),
+        );
+      }
     }
   };
 

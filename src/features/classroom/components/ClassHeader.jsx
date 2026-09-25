@@ -57,6 +57,8 @@ export default function ClassHeader({
   onJoin,
   isJoining = false,
   isStaff: propIsStaff,
+  isSettingsRouteOpen = false,
+  onCloseSettingsRoute,
 }) {
   const contextIsStaff = useCourseIsStaff();
   const contextIsEnrolled = useCourseIsEnrolled();
@@ -67,6 +69,13 @@ export default function ClassHeader({
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const effectiveEditOpen = isEditModalOpen || Boolean(isSettingsRouteOpen);
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    if (isSettingsRouteOpen) {
+      onCloseSettingsRoute?.();
+    }
+  };
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -551,10 +560,10 @@ export default function ClassHeader({
         />
       )}
 
-      {isEditModalOpen && (
+      {effectiveEditOpen && (
         <EditSpaceModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          isOpen={effectiveEditOpen}
+          onClose={handleCloseEditModal}
           classroom={classroom}
         />
       )}

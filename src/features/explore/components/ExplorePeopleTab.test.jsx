@@ -5,87 +5,65 @@ import { MemoryRouter } from "react-router";
 import ExplorePeopleTab from "./ExplorePeopleTab.jsx";
 
 describe("ExplorePeopleTab", () => {
-  it("renders suggested for you section when recommendations are present", () => {
-    const recommendations = [
+  it("renders unified Recommended for you section without All Community Members", () => {
+    const filteredPeople = [
       {
         id: "rec-1",
         name: "Recommended Peer",
         handle: "recpeer",
-        department: "AI Research",
-        recommendationReason: "SHARED_SPACES",
-        sharedCoursesCount: 1,
-      },
-    ];
-
-    const filteredPeople = [
-      {
-        id: "person-1",
-        name: "General Member",
-        handle: "genmember",
-        department: "Design",
+        recommendationReason: "MUTUAL_SPACE_PEERS",
+        mutualPeersCount: 2,
       },
     ];
 
     const html = renderToString(
       <MemoryRouter>
         <ExplorePeopleTab
-          recommendations={recommendations}
           filteredPeople={filteredPeople}
-          departments={["Design", "AI Research"]}
           personFilter="all"
           searchQuery=""
           onFilterChange={vi.fn()}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(html).toContain("Suggested for you");
+    expect(html).toContain("Recommended for you");
     expect(html).toContain("Recommended Peer");
-    expect(html).toContain("All Community Members");
-    expect(html).toContain("General Member");
+    expect(html).toContain("2 mutual friends");
+    expect(html).not.toContain("All Community Members");
+    expect(html).not.toContain("All departments");
   });
 
-  it("hides suggested section when searching", () => {
-    const recommendations = [
-      {
-        id: "rec-1",
-        name: "Recommended Peer",
-      },
-    ];
-
+  it("renders empty state when no recommendations match", () => {
     const html = renderToString(
       <MemoryRouter>
         <ExplorePeopleTab
-          recommendations={recommendations}
           filteredPeople={[]}
           personFilter="all"
-          searchQuery="someone"
-          onFilterChange={vi.fn()}
-        />
-      </MemoryRouter>
-    );
-
-    expect(html).not.toContain("Suggested for you");
-  });
-
-  it("activates built-in filter buttons correctly", () => {
-    const html = renderToString(
-      <MemoryRouter>
-        <ExplorePeopleTab
-          recommendations={[]}
-          filteredPeople={[]}
-          personFilter="recommended"
           searchQuery=""
           onFilterChange={vi.fn()}
         />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    // Built-in filters rendered
-    expect(html).toContain("All departments");
-    expect(html).toContain("Recommended");
-    expect(html).toContain("Shares a space with you");
-    // Active variant contains bg-primary
+    expect(html).toContain("No recommendations yet");
+  });
+
+  it("activates built-in recommendation filter buttons correctly", () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <ExplorePeopleTab
+          filteredPeople={[]}
+          personFilter="mutual"
+          searchQuery=""
+          onFilterChange={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain("All Recommendations");
+    expect(html).toContain("Mutual Space Peers");
+    expect(html).toContain("Shares a Space");
     expect(html).toContain("bg-primary text-primary-foreground");
   });
 });

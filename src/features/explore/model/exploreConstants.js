@@ -12,9 +12,9 @@ export const BUILT_IN_CLASS_FILTERS = [
 ];
 
 export const BUILT_IN_PERSON_FILTERS = [
-  { id: "all", label: "All departments" },
-  { id: "recommended", label: "Recommended" },
-  { id: "shared", label: "Shares a space with you" },
+  { id: "all", label: "All Recommendations" },
+  { id: "mutual", label: "Mutual Space Peers" },
+  { id: "shared", label: "Shares a Space" },
 ];
 
 export const EXPLORE_BANNERS = {
@@ -30,7 +30,7 @@ export const EXPLORE_BANNERS = {
     badge: "Campus Network",
     title: "Connect with Members & Creators",
     description:
-      "Find peers in your spaces, discover collaborators in your department, and expand your academic network.",
+      "Find peers in your spaces, connect through mutual space friends, and expand your academic network.",
     imageSrc: "/images/illustrations/diverse-campus.jpg",
     imageAlt: "Diverse campus community",
   },

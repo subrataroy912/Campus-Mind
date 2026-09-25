@@ -36,6 +36,7 @@ import {
 } from "../../hooks/useCourseContext.js";
 
 export function ClassHomeTab({
+  classId: propClassId,
   isEnrolled: propIsEnrolled,
   classroom,
   isStaff: propIsStaff,
@@ -45,8 +46,9 @@ export function ClassHomeTab({
   const contextIsStaff = useCourseIsStaff();
   const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
-  const { user } = useAuth();
-  const courseId = classroom?.id || contextCourseId;
+  const { user, authStatus } = useAuth();
+  const isHydrating = authStatus === "hydrating";
+  const courseId = propClassId || classroom?.id || contextCourseId;
 
   const isStaff =
     propIsStaff ??
@@ -59,7 +61,9 @@ export function ClassHomeTab({
 
   const { data: courseworkPage, isLoading: isLoadingCoursework } =
     useGetCourseworkListQuery(
-      courseId ? { courseId, page: 0, size: 20 } : skipToken,
+      isHydrating || !courseId || (!isEnrolled && accessType !== "PUBLIC")
+        ? skipToken
+        : { courseId, page: 0, size: 20 },
     );
 
   const [createCoursework, { isLoading: isPosting }] =
@@ -213,16 +217,24 @@ export function ClassHomeTab({
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 sm:p-4 text-text-main shadow-xs">
           <div className="space-y-0.5">
             <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-              <Globe className="h-3 w-3" />
-              Space Preview
+              {accessType === "PRIVATE" ? (
+                <Shield className="h-3 w-3" />
+              ) : (
+                <Globe className="h-3 w-3" />
+              )}
+              {accessType === "PRIVATE"
+                ? "Private Space — Restricted View"
+                : "Space Preview"}
             </div>
             <h3 className="text-sm sm:text-base font-semibold text-text-heading">
-              You are previewing this space
+              {accessType === "PRIVATE"
+                ? "Approval required to access this space"
+                : "You are previewing this space"}
             </h3>
             <p className="text-xs text-text-muted max-w-xl leading-relaxed">
-              Use the join button in the header above to participate in
-              discussions, access shared resources, submit coursework, and
-              connect with peers.
+              {accessType === "PRIVATE"
+                ? "This is a private space. Use the Request to Join button in the header above to request membership from the space admins."
+                : "Use the join button in the header above to participate in discussions, access shared resources, submit coursework, and connect with peers."}
             </p>
           </div>
         </div>
@@ -365,7 +377,19 @@ export function ClassHomeTab({
           />
         )}
 
-        {isLoadingCoursework && announcements.length === 0 ? (
+        {!isEnrolled && accessType === "PRIVATE" ? (
+          <div className="rounded-xl border border-dashed border-border/80 bg-card/60 p-6 text-center shadow-2xs">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-2.5">
+              <Shield className="h-5 w-5" />
+            </div>
+            <h3 className="text-sm font-semibold text-foreground">
+              Stream is restricted to space members
+            </h3>
+            <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
+              Request to join this private space to view announcements, discussions, and shared updates.
+            </p>
+          </div>
+        ) : isLoadingCoursework && announcements.length === 0 ? (
           <div className="rounded-xl bg-surface p-5 text-center text-xs text-text-muted ring-1 ring-border shadow-xs">
             Loading space updates…
           </div>

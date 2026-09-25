@@ -7,6 +7,13 @@ import { Link } from "react-router";
 
 function ExplorePersonCard({ person }) {
   const mutualPeersCount = person?.mutualPeersCount ?? 0;
+  const sharedCoursesCount = person?.sharedCoursesCount ?? 0;
+  const connectionSubtitle =
+    mutualPeersCount > 0
+      ? `${mutualPeersCount} mutual friend${mutualPeersCount === 1 ? "" : "s"}`
+      : sharedCoursesCount > 0
+        ? `${sharedCoursesCount} shared space${sharedCoursesCount === 1 ? "" : "s"}`
+        : "";
 
   const handlePrefetch = () => {
     if (person?.id) {
@@ -43,9 +50,9 @@ function ExplorePersonCard({ person }) {
             <h3 className="truncate text-[13px] sm:text-sm font-semibold text-text-heading leading-tight group-hover:text-primary transition-colors">
               {person.name || "CampusMind member"}
             </h3>
-            {mutualPeersCount > 0 && (
+            {connectionSubtitle && (
               <p className="text-[10px] sm:text-[11px] text-text-muted leading-tight mt-0.5">
-                {`${mutualPeersCount} mutual friend${mutualPeersCount === 1 ? "" : "s"}`}
+                {connectionSubtitle}
               </p>
             )}
           </div>

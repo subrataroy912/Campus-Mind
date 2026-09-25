@@ -10,11 +10,12 @@ export const dashboardShouldRevalidate = () => false;
 export const spacesShouldRevalidate = () => false;
 
 /**
- * /spaces/:classId — only re-run when navigating to a *different* space.
+ * /spaces/:spaceId — only re-run when navigating to a *different* space.
  * Same-space tab switches or mutations don't need the loader to re-fire.
  */
 export const spaceDetailShouldRevalidate = ({ currentParams, nextParams }) =>
-  currentParams.classId !== nextParams.classId;
+  (currentParams.spaceId || currentParams.classId) !==
+  (nextParams.spaceId || nextParams.classId);
 
 /** /explore — no dynamic params; tab changes are query-param driven and RTK handles them. */
 export const exploreShouldRevalidate = () => false;
@@ -71,8 +72,8 @@ export const createSpacesLoader = (store) => () => {
 export const createSpaceDetailLoader =
   (store) =>
   ({ params }) => {
-    if (!store || !params?.classId) return null;
-    const classId = params.classId;
+    const classId = params?.spaceId || params?.classId;
+    if (!store || !classId) return null;
 
     store.dispatch(
       classroomApi.util.prefetch("findClassroomById", classId, {
@@ -94,45 +95,37 @@ export const createSpaceDetailLoader =
     return null;
   };
 
-export const createExploreLoader =
-  (store) =>
-  ({ request }) => {
-    if (!store) return null;
+export const createExploreLoader = (store) => (args = {}) => {
+  if (!store) return null;
 
-    try {
-      const url = new URL(request.url);
-      const tab = url.searchParams.get("tab");
-      if (tab === "people") {
-        store.dispatch(
-          exploreApi.util.prefetch("getExplorePeople", undefined, {
-            force: false,
-          }),
-        );
-        store.dispatch(
-          exploreApi.util.prefetch(
-            "getExplorePeopleRecommendations",
-            undefined,
-            { force: false },
-          ),
-        );
-      } else {
-        store.dispatch(
-          exploreApi.util.prefetch(
-            "getExploreFeed",
-            { subject: undefined, page: 0, size: 20 },
-            { force: false },
-          ),
-        );
-      }
-    } catch {
-      store.dispatch(
-        exploreApi.util.prefetch(
-          "getExploreFeed",
-          { page: 0, size: 20 },
-          { force: false },
-        ),
-      );
+  store.dispatch(
+    exploreApi.util.prefetch(
+      "getExploreFeed",
+      { subject: undefined, page: 0, size: 20 },
+      { force: false },
+    ),
+  );
+
+  let isPeopleTab = false;
+  try {
+    if (args?.request?.url) {
+      const url = new URL(args.request.url);
+      isPeopleTab = url.searchParams.get("tab") === "people";
     }
+  } catch {
+    isPeopleTab = false;
+  }
 
-    return null;
-  };
+  if (isPeopleTab && store.getState()?.auth?.accessToken) {
+    store.dispatch(
+      exploreApi.util.prefetch(
+        "getExplorePeopleRecommendations",
+        { page: 0, size: 20 },
+        { force: false },
+      ),
+    );
+  }
+
+  return null;
+};
+

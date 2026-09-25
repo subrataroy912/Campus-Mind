@@ -46,6 +46,8 @@ function GradeChip({ status }) {
 }
 
 export function GradesTab({
+  classId: propClassId,
+  classroom,
   isStaff: isStaffProp,
   isEnrolled: isEnrolledProp,
 }) {
@@ -53,30 +55,38 @@ export function GradesTab({
   const contextIsStaff = useCourseIsStaff();
   const contextIsEnrolled = useCourseIsEnrolled();
   const { classId: routeClassId } = useParams();
-  const classId = routeClassId || contextCourseId;
+  const classId = propClassId || classroom?.id || routeClassId || contextCourseId;
   const isStaff = isStaffProp !== undefined ? Boolean(isStaffProp) : (contextIsStaff ?? false);
   const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (contextIsEnrolled ?? true);
   const [selected, setSelected] = useState(null);
   const { user, authStatus } = useAuth();
   const isHydrating = authStatus === "hydrating";
 
-  // Student gradebook — skip via skipToken; selectFromResult exposes only the rows array
-  const { studentRows = [] } = useGetStudentGradebookQuery(
-    isHydrating || isStaff || !user?.id || !isEnrolled
-      ? skipToken
-      : { courseId: classId, studentId: user.id },
-    {
-      selectFromResult: ({ data }) => ({ studentRows: data ?? [] }),
-    },
-  );
+  // Student gradebook — skip via skipToken; selectFromResult exposes rows and loading state
+  const { studentRows = [], isLoading: isLoadingStudentGrades = false } =
+    useGetStudentGradebookQuery(
+      isHydrating || isStaff || !user?.id || !classId || !isEnrolled
+        ? skipToken
+        : { courseId: classId, studentId: user.id },
+      {
+        selectFromResult: ({ data, isLoading }) => ({
+          studentRows: data ?? [],
+          isLoading: Boolean(isLoading),
+        }),
+      },
+    );
 
-  // Staff gradebook — skip via skipToken; selectFromResult exposes only the rows array
-  const { gradebookRows = [] } = useGetCourseGradebookQuery(
-    isHydrating || !isStaff || !classId || !isEnrolled ? skipToken : classId,
-    {
-      selectFromResult: ({ data }) => ({ gradebookRows: data ?? [] }),
-    },
-  );
+  // Staff gradebook — skip via skipToken; selectFromResult exposes rows and loading state
+  const { gradebookRows = [], isLoading: isLoadingCourseGrades = false } =
+    useGetCourseGradebookQuery(
+      isHydrating || !isStaff || !classId || !isEnrolled ? skipToken : classId,
+      {
+        selectFromResult: ({ data, isLoading }) => ({
+          gradebookRows: data ?? [],
+          isLoading: Boolean(isLoading),
+        }),
+      },
+    );
 
   // Analytics summary — staff-only
   const { data: summary } = useGetCourseAnalyticsSummaryQuery(
@@ -84,6 +94,7 @@ export function GradesTab({
   );
 
   const rows = isStaff ? gradebookRows : studentRows;
+  const isLoadingGrades = isStaff ? isLoadingCourseGrades : isLoadingStudentGrades;
 
   const metrics = useMemo(() => {
     if (isStaff) {
@@ -162,7 +173,11 @@ export function GradesTab({
         ))}
       </div>
 
-      {rows.length === 0 ? (
+      {isLoadingGrades && rows.length === 0 ? (
+        <div className="rounded-lg border border-border/80 bg-surface p-6 text-center text-xs text-text-muted shadow-xs">
+          Loading gradebook…
+        </div>
+      ) : rows.length === 0 ? (
         <EmptyState
           title="No grades available yet"
           description="Grades will appear here as coursework is completed and reviewed."

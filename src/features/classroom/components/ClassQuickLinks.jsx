@@ -64,9 +64,11 @@ function getHostName(url) {
 export default function ClassQuickLinks({
   classroom,
   isStaff: propIsStaff,
+  isEnrolled: propIsEnrolled = true,
 }) {
   const contextIsStaff = useCourseIsStaff();
   const isStaff = propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
+  const accessType = (classroom?.accessType || "PUBLIC").toUpperCase();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -78,6 +80,22 @@ export default function ClassQuickLinks({
   const [updateClassroom, { isLoading: isSaving }] = useUpdateClassroomMutation();
 
   const links = Array.isArray(classroom?.links) ? classroom.links : [];
+
+  if (!propIsEnrolled && accessType === "PRIVATE") {
+    return (
+      <div className="mt-3 rounded-xl border border-dashed border-border/80 bg-card/60 p-6 text-center shadow-2xs">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-2.5">
+          <Bookmark className="h-5 w-5" />
+        </div>
+        <h3 className="text-sm font-semibold text-foreground">
+          Resources are reserved for enrolled members
+        </h3>
+        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-normal">
+          Request to join this private space to access shared documents, repositories, and communication channels.
+        </p>
+      </div>
+    );
+  }
 
   const handleCopy = (id, linkUrl) => {
     navigator.clipboard?.writeText(linkUrl).catch(() => {});

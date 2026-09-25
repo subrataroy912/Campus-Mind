@@ -39,7 +39,7 @@ export function ClassworkTab({
   const contextCourseId = useActiveCourseId();
   const contextIsStaff = useCourseIsStaff();
   const contextIsEnrolled = useCourseIsEnrolled();
-  const classId = propClassId || contextCourseId;
+  const classId = propClassId || classroom?.id || contextCourseId;
   const isStaff = propIsStaff !== undefined ? propIsStaff : (contextIsStaff ?? false);
   const isEnrolled = propIsEnrolled !== undefined ? propIsEnrolled : (contextIsEnrolled ?? true);
   const { authStatus } = useAuth();

@@ -5,77 +5,64 @@ export const matches = (value = "", query = "") =>
 
 export function filterAndSortPeople(
   users = [],
-  { searchQuery = "", personFilter = "all", currentUser = null } = {}
+  { searchQuery = "", personFilter = "all", currentUser = null } = {},
 ) {
   const trimmedQuery = searchQuery.trim();
 
   const selfResult =
     trimmedQuery &&
     currentUser &&
-    matches(
-      `${currentUser.name || ""} ${currentUser.handle || ""} ${
-        currentUser.department || ""
-      }`,
-      trimmedQuery
-    )
+    matches(`${currentUser.name || ""} ${currentUser.handle || ""}`, trimmedQuery)
       ? [currentUser]
       : [];
 
   return [...selfResult, ...users]
     .filter((person) => {
       if (!person) return false;
-      if (personFilter === "all") return true;
-      if (personFilter === "recommended") {
+      if (selfResult.includes(person)) return true;
+
+      const sharedCount =
+        (person.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, person);
+      const mutualCount = person.mutualPeersCount ?? 0;
+
+      if (personFilter === "mutual") {
         return (
-          (person.sharedCoursesCount ?? 0) > 0 ||
-          (person.mutualPeersCount ?? 0) > 0 ||
-          person.recommendationReason === "SHARED_SPACES" ||
-          person.recommendationReason === "MUTUAL_SPACE_PEERS" ||
-          getSharedClassCount(currentUser, person) > 0
+          person.recommendationReason === "MUTUAL_SPACE_PEERS" || mutualCount > 0
         );
       }
+
       if (personFilter === "shared") {
         return (
-          (person.sharedCoursesCount ?? 0) > 0 ||
-          getSharedClassCount(currentUser, person) > 0
+          person.recommendationReason === "SHARED_SPACES" || sharedCount > 0
         );
       }
+
+      // "all" or "recommended": must have shared spaces or mutual space peers
       return (
-        Boolean(person.department) &&
-        person.department.trim().toLowerCase() === personFilter.trim().toLowerCase()
+        sharedCount > 0 ||
+        mutualCount > 0 ||
+        person.recommendationReason === "SHARED_SPACES" ||
+        person.recommendationReason === "MUTUAL_SPACE_PEERS"
       );
     })
     .filter((person) => {
       if (!trimmedQuery) return true;
       return matches(
-        `${person.name || ""} ${person.handle || ""} ${
-          person.department || ""
-        }`,
-        trimmedQuery
+        `${person.name || ""} ${person.handle || ""}`,
+        trimmedQuery,
       );
     })
     .sort((a, b) => {
-      if (personFilter === "recommended") {
-        const scoreA =
-          ((a.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, a)) * 10 +
-          (a.mutualPeersCount ?? 0) * 3 +
-          (a.sameDepartment || (a.department && a.department === currentUser?.department) ? 5 : 0);
-        const scoreB =
-          ((b.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, b)) * 10 +
-          (b.mutualPeersCount ?? 0) * 3 +
-          (b.sameDepartment || (b.department && b.department === currentUser?.department) ? 5 : 0);
-        if (scoreB !== scoreA) return scoreB - scoreA;
-      }
+      const sharedA =
+        (a.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, a);
+      const sharedB =
+        (b.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, b);
+      const mutualA = a.mutualPeersCount ?? 0;
+      const mutualB = b.mutualPeersCount ?? 0;
 
-      const sharedA = (a.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, a);
-      const sharedB = (b.sharedCoursesCount ?? 0) || getSharedClassCount(currentUser, b);
-      const sharedDiff = sharedB - sharedA;
-      if (sharedDiff !== 0) return sharedDiff;
-
-      const deptA = Number(Boolean(a.department && a.department === currentUser?.department));
-      const deptB = Number(Boolean(b.department && b.department === currentUser?.department));
-      const deptDiff = deptB - deptA;
-      if (deptDiff !== 0) return deptDiff;
+      const scoreA = sharedA * 10 + mutualA * 3;
+      const scoreB = sharedB * 10 + mutualB * 3;
+      if (scoreB !== scoreA) return scoreB - scoreA;
 
       return (a.name || "").localeCompare(b.name || "");
     });

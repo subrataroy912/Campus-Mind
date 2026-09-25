@@ -1,10 +1,12 @@
 import { baseApi } from "@/app/baseApi.js";
+import { exploreApi } from "@/features/explore/api/exploreApi.js";
 import { setActiveCourse } from "../courseContextSlice.js";
 
 const exploreTags = [
   { type: "CourseFeed", id: "LIST" },
   { type: "CourseSearch", id: "LIST" },
   { type: "CourseRecommendations", id: "LIST" },
+  { type: "Profile", id: "RECOMMENDATIONS" },
 ];
 
 const discoveryFieldsChanged = (changes = {}) =>
@@ -118,6 +120,26 @@ export const classroomApi = baseApi.injectEndpoints({
             ]
           : [{ type: "Classrooms", id: "LIST" }],
       keepUnusedDataFor: 300,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: courses } = await queryFulfilled;
+          if (Array.isArray(courses)) {
+            courses.forEach((course) => {
+              if (course?.id) {
+                dispatch(
+                  classroomApi.util.upsertQueryData(
+                    "findClassroomById",
+                    course.id,
+                    course,
+                  ),
+                );
+              }
+            });
+          }
+        } catch {
+          // Ignore cache seeding errors
+        }
+      },
     }),
     findClassroomById: builder.query({
       query: (classId) => `/courses/${classId}`,
@@ -152,6 +174,7 @@ export const classroomApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, classId) => [
         { type: "Classrooms", id: `${classId}:roster` },
       ],
+      keepUnusedDataFor: 300,
     }),
     createClassroom: builder.mutation({
       query: (details) => ({ url: "/courses", method: "POST", body: details }),
@@ -159,6 +182,7 @@ export const classroomApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, details) => [
         { type: "Classrooms", id: "LIST" },
         { type: "Profile", id: "CURRENT" },
+        { type: "Profile", id: "RECOMMENDATIONS" },
         ...(details?.visibility === "PUBLIC" ? exploreTags : []),
       ],
       async onQueryStarted(details, { dispatch, queryFulfilled }) {
@@ -179,6 +203,13 @@ export const classroomApi = baseApi.injectEndpoints({
                 (draft) => {
                   getDraftCourseList(draft)?.unshift(newCourse);
                 },
+              ),
+            );
+            dispatch(
+              exploreApi.util.prefetch(
+                "getExplorePeopleRecommendations",
+                { page: 0, size: 20 },
+                { force: true },
               ),
             );
           }
@@ -474,6 +505,13 @@ export const classroomApi = baseApi.injectEndpoints({
                   },
                 ),
               );
+              dispatch(
+                exploreApi.util.prefetch(
+                  "getExplorePeopleRecommendations",
+                  { page: 0, size: 20 },
+                  { force: true },
+                ),
+              );
             }
           }
         } catch {
@@ -508,6 +546,11 @@ export const classroomApi = baseApi.injectEndpoints({
         if (!courseId) return;
         const patches = [];
         const previousContext = getState()?.courseContext;
+        const currentUserId = getState()?.auth?.user?.id;
+        const cachedCourse =
+          classroomApi.endpoints.findClassroomById.select(courseId)(getState())
+            ?.data;
+        const leftCourseTitle = cachedCourse?.title || cachedCourse?.name || "";
 
         if (previousContext?.activeCourseId === courseId) {
           dispatch(
@@ -542,6 +585,7 @@ export const classroomApi = baseApi.injectEndpoints({
         );
 
         // 2. Optimistically remove from fetchClassrooms list
+        let remainingEnrolledCount = 0;
         patches.push(
           dispatch(
             classroomApi.util.updateQueryData(
@@ -556,6 +600,67 @@ export const classroomApi = baseApi.injectEndpoints({
                   if (idx !== -1) {
                     list.splice(idx, 1);
                   }
+                  remainingEnrolledCount = list.length;
+                }
+              },
+            ),
+          ),
+        );
+
+        // 3. Optimistically remove current user from getClassroomRoster
+        if (currentUserId) {
+          patches.push(
+            dispatch(
+              classroomApi.util.updateQueryData(
+                "getClassroomRoster",
+                courseId,
+                (draft) => {
+                  if (!Array.isArray(draft)) return;
+                  const idx = draft.findIndex(
+                    (m) => String(m?.id || m?.userId) === String(currentUserId),
+                  );
+                  if (idx !== -1) draft.splice(idx, 1);
+                },
+              ),
+            ),
+          );
+        }
+
+        // 4. Optimistically update getExplorePeopleRecommendations so the Users/People tab updates in 0ms
+        patches.push(
+          dispatch(
+            exploreApi.util.updateQueryData(
+              "getExplorePeopleRecommendations",
+              { page: 0, size: 20 },
+              (draft) => {
+                if (!draft || !Array.isArray(draft.content)) return;
+                if (remainingEnrolledCount === 0) {
+                  draft.content = [];
+                  return;
+                }
+                if (leftCourseTitle) {
+                  draft.content = draft.content.filter((person) => {
+                    if (
+                      Array.isArray(person.sharedCourseTitles) &&
+                      person.sharedCourseTitles.includes(leftCourseTitle)
+                    ) {
+                      person.sharedCourseTitles =
+                        person.sharedCourseTitles.filter(
+                          (t) => t !== leftCourseTitle,
+                        );
+                      person.sharedCoursesCount = Math.max(
+                        0,
+                        (person.sharedCoursesCount || 1) - 1,
+                      );
+                      if (
+                        person.sharedCoursesCount === 0 &&
+                        (person.mutualPeersCount || 0) === 0
+                      ) {
+                        return false;
+                      }
+                    }
+                    return true;
+                  });
                 }
               },
             ),
@@ -564,6 +669,13 @@ export const classroomApi = baseApi.injectEndpoints({
 
         try {
           await queryFulfilled;
+          dispatch(
+            exploreApi.util.prefetch(
+              "getExplorePeopleRecommendations",
+              { page: 0, size: 20 },
+              { force: true },
+            ),
+          );
         } catch {
           patches.forEach((patch) => patch.undo());
           if (previousContext?.activeCourseId === courseId) {
@@ -587,7 +699,29 @@ export const classroomApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { courseId }) => [
         { type: "Classrooms", id: courseId },
         { type: "Classrooms", id: `${courseId}:roster` },
+        { type: "Profile", id: "RECOMMENDATIONS" },
       ],
+      async onQueryStarted({ courseId, userId }, { dispatch, queryFulfilled }) {
+        if (!courseId || !userId) return;
+        const patchRoster = dispatch(
+          classroomApi.util.updateQueryData(
+            "getClassroomRoster",
+            courseId,
+            (draft) => {
+              if (!Array.isArray(draft)) return;
+              const idx = draft.findIndex(
+                (m) => String(m?.id || m?.userId) === String(userId),
+              );
+              if (idx !== -1) draft.splice(idx, 1);
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchRoster.undo();
+        }
+      },
     }),
     updateMemberRole: builder.mutation({
       query: ({ courseId, userId, role }) => ({
@@ -599,6 +733,30 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
         { type: "Classrooms", id: `${courseId}:roster` },
       ],
+      async onQueryStarted(
+        { courseId, userId, role },
+        { dispatch, queryFulfilled },
+      ) {
+        if (!courseId || !userId || !role) return;
+        const patchRoster = dispatch(
+          classroomApi.util.updateQueryData(
+            "getClassroomRoster",
+            courseId,
+            (draft) => {
+              if (!Array.isArray(draft)) return;
+              const member = draft.find(
+                (m) => String(m?.id || m?.userId) === String(userId),
+              );
+              if (member) member.role = String(role).toLowerCase();
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchRoster.undo();
+        }
+      },
     }),
     cancelJoinRequest: builder.mutation({
       query: (courseId) => ({
@@ -647,7 +805,29 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
         { type: "Classrooms", id: `${courseId}:roster` },
         { type: "Classrooms", id: `${courseId}:requests` },
+        { type: "Profile", id: "RECOMMENDATIONS" },
       ],
+      async onQueryStarted({ courseId, userId }, { dispatch, queryFulfilled }) {
+        if (!courseId || !userId) return;
+        const patchRequests = dispatch(
+          classroomApi.util.updateQueryData(
+            "getPendingJoinRequests",
+            courseId,
+            (draft) => {
+              if (!Array.isArray(draft)) return;
+              const idx = draft.findIndex(
+                (r) => String(r?.userId || r?.id) === String(userId),
+              );
+              if (idx !== -1) draft.splice(idx, 1);
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchRequests.undo();
+        }
+      },
     }),
     declineJoinRequest: builder.mutation({
       query: ({ courseId, userId }) => ({
@@ -658,6 +838,27 @@ export const classroomApi = baseApi.injectEndpoints({
         { type: "Classrooms", id: courseId },
         { type: "Classrooms", id: `${courseId}:requests` },
       ],
+      async onQueryStarted({ courseId, userId }, { dispatch, queryFulfilled }) {
+        if (!courseId || !userId) return;
+        const patchRequests = dispatch(
+          classroomApi.util.updateQueryData(
+            "getPendingJoinRequests",
+            courseId,
+            (draft) => {
+              if (!Array.isArray(draft)) return;
+              const idx = draft.findIndex(
+                (r) => String(r?.userId || r?.id) === String(userId),
+              );
+              if (idx !== -1) draft.splice(idx, 1);
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchRequests.undo();
+        }
+      },
     }),
     generateInviteLink: builder.mutation({
       query: (courseId) => ({

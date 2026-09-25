@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Bell, Check } from "lucide-react";
+import {
+  Bell,
+  BookOpen,
+  Check,
+  CheckCheck,
+  CheckCircle2,
+  ChevronRight,
+  GraduationCap,
+  MessageSquare,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
 import { useNotificationsPolling } from "../hooks/useNotificationsPolling.js";
 import { useMarkNotificationReadMutation } from "../api/notificationsApi.js";
 import {
@@ -12,6 +23,139 @@ import { Skeleton } from "@/components/ui/skeleton.jsx";
 import { useNavigate } from "react-router";
 import { routes } from "@/routes/paths.js";
 
+const NOTIFICATION_META = {
+  COURSE_JOIN_REQUEST: {
+    label: "Join Request",
+    actionText: "Review in People",
+    Icon: UserPlus,
+    iconWrap:
+      "bg-amber-500/12 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20",
+    badgeClass:
+      "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25",
+  },
+  COURSE_JOIN_APPROVED: {
+    label: "Approved",
+    actionText: "Open Space",
+    Icon: CheckCircle2,
+    iconWrap:
+      "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20",
+    badgeClass:
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+  },
+  COURSE_JOIN_DECLINED: {
+    label: "Declined",
+    actionText: "View Space",
+    Icon: XCircle,
+    iconWrap:
+      "bg-rose-500/12 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/20",
+    badgeClass:
+      "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25",
+  },
+  COURSE_INVITATION: {
+    label: "Invitation",
+    actionText: "Open Space",
+    Icon: UserPlus,
+    iconWrap: "bg-primary/12 text-primary ring-1 ring-primary/20",
+    badgeClass: "bg-primary/10 text-primary border-primary/25",
+  },
+  COURSEWORK_PUBLISHED: {
+    label: "New Post",
+    actionText: "View Classwork",
+    Icon: BookOpen,
+    iconWrap: "bg-primary/12 text-primary ring-1 ring-primary/20",
+    badgeClass: "bg-primary/10 text-primary border-primary/25",
+  },
+  COURSEWORK_UPDATED: {
+    label: "Updated",
+    actionText: "View Classwork",
+    Icon: BookOpen,
+    iconWrap:
+      "bg-sky-500/12 text-sky-600 dark:text-sky-400 ring-1 ring-sky-500/20",
+    badgeClass:
+      "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25",
+  },
+  SUBMISSION_GRADED: {
+    label: "Graded",
+    actionText: "View Grades",
+    Icon: GraduationCap,
+    iconWrap:
+      "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20",
+    badgeClass:
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+  },
+  ASSIGNMENT_GRADED: {
+    label: "Graded",
+    actionText: "View Grades",
+    Icon: GraduationCap,
+    iconWrap:
+      "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20",
+    badgeClass:
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25",
+  },
+  COMMENT_ADDED: {
+    label: "Comment",
+    actionText: "View Discussion",
+    Icon: MessageSquare,
+    iconWrap:
+      "bg-violet-500/12 text-violet-600 dark:text-violet-400 ring-1 ring-violet-500/20",
+    badgeClass:
+      "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/25",
+  },
+};
+
+function getNotificationMeta(type) {
+  if (type && NOTIFICATION_META[type]) {
+    return NOTIFICATION_META[type];
+  }
+  return {
+    label: type ? type.replace(/_/g, " ") : "Update",
+    actionText: "Open",
+    Icon: Bell,
+    iconWrap: "bg-muted/60 text-text-muted ring-1 ring-border/60",
+    badgeClass: "bg-muted/40 text-text-muted border-border/50",
+  };
+}
+
+function resolveNotificationTargetLink(item) {
+  if (!item) return null;
+  if (item.link) return item.link;
+
+  const targetCourseId =
+    item.courseId || (item.resourceType === "COURSE" ? item.resourceId : null);
+
+  if (item.type === "COURSE_JOIN_REQUEST" && targetCourseId) {
+    return routes.space.people(targetCourseId);
+  }
+
+  if (
+    (item.type === "COURSEWORK_PUBLISHED" ||
+      item.type === "COURSEWORK_UPDATED" ||
+      item.resourceType === "COURSEWORK") &&
+    (targetCourseId || item.resourceId)
+  ) {
+    return routes.space.classwork(targetCourseId || item.resourceId);
+  }
+
+  if (
+    (item.type === "SUBMISSION_GRADED" ||
+      item.type === "ASSIGNMENT_GRADED" ||
+      item.resourceType === "SUBMISSION") &&
+    (targetCourseId || item.resourceId)
+  ) {
+    return routes.space.grades(targetCourseId || item.resourceId);
+  }
+
+  if (targetCourseId) {
+    return routes.spaces.detail(targetCourseId);
+  }
+
+  if (item.resourceId) {
+    return routes.spaces.detail(item.resourceId);
+  }
+
+  return null;
+}
+
 export default function NotificationsMenu() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,6 +166,7 @@ export default function NotificationsMenu() {
   const [markRead] = useMarkNotificationReadMutation();
 
   const handleMarkNotificationRead = async (id) => {
+    if (!id) return;
     try {
       await markRead(id).unwrap();
     } catch {
@@ -32,9 +177,18 @@ export default function NotificationsMenu() {
   const apiData = Array.isArray(response)
     ? response
     : response?.content || response?.data;
-  const notifications =
-    apiData && apiData.length > 0 ? apiData : DUMMY_NOTIFICATIONS;
-  const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
+  const notifications = Array.isArray(apiData) ? apiData : [];
+  const unreadNotifications = notifications.filter((n) => !n.read && !n.isRead);
+  const unreadCount = unreadNotifications.length;
+
+  const handleMarkAllRead = async () => {
+    await Promise.allSettled(
+      unreadNotifications
+        .map((n) => n.id || n._id)
+        .filter(Boolean)
+        .map((id) => markRead(id).unwrap()),
+    );
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -50,48 +204,69 @@ export default function NotificationsMenu() {
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 p-0">
+      <DropdownMenuContent
+        align="end"
+        className="w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 p-0 overflow-hidden rounded-xl border border-border/80 shadow-xl"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-3 py-2">
-          <span className="font-semibold text-xs text-text-heading">
-            Notifications
-          </span>
+        <div className="flex items-center justify-between border-b border-border/70 bg-surface/90 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-xs text-text-heading">
+              Notifications
+            </span>
+            {unreadCount > 0 && (
+              <Badge
+                variant="secondary"
+                className="h-4.5 px-1.5 text-[10px] font-semibold text-primary bg-primary/10"
+              >
+                {unreadCount} new
+              </Badge>
+            )}
+          </div>
           {unreadCount > 0 && (
-            <Badge variant="secondary" className="h-4 px-1.5 text-[10px] font-semibold text-primary">
-              {unreadCount} new
-            </Badge>
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+            >
+              <CheckCheck size={12} />
+              <span>Mark all read</span>
+            </button>
           )}
         </div>
 
         {/* Body list */}
-        <div className="max-h-72 overflow-y-auto divide-y divide-border/50">
+        <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
           {isLoading ? (
-            <div className="flex flex-col gap-2 p-3">
-              <Skeleton className="h-10 w-full rounded-md" />
-              <Skeleton className="h-10 w-full rounded-md" />
-              <Skeleton className="h-10 w-4/5 rounded-md" />
+            <div className="flex flex-col gap-2.5 p-3.5">
+              <Skeleton className="h-14 w-full rounded-lg" />
+              <Skeleton className="h-14 w-full rounded-lg" />
+              <Skeleton className="h-14 w-4/5 rounded-lg" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="py-5 text-center text-xs text-text-muted">
-              No new notifications
+            <div className="flex flex-col items-center justify-center gap-1.5 py-8 px-4 text-center">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/50 text-text-muted">
+                <Bell size={16} />
+              </div>
+              <p className="text-xs font-semibold text-text-heading">
+                You&apos;re all caught up
+              </p>
+              <p className="text-[11px] text-text-muted max-w-[220px]">
+                Join requests, coursework updates, and space announcements will appear here.
+              </p>
             </div>
           ) : (
             notifications.map((n) => (
               <NotificationItem
                 key={n.id || n._id}
                 notification={n}
-                size="md"
                 onMarkRead={handleMarkNotificationRead}
                 onClick={(item) => {
-                  const targetLink =
-                    item.link ||
-                    (item.courseId
-                      ? routes.spaces.detail(item.courseId)
-                      : item.resourceType === "SUBMISSION" && item.resourceId
-                        ? routes.spaces.detail(item.resourceId)
-                        : item.resourceType === "ANNOUNCEMENT" || item.resourceType === "POST_COMMENT"
-                          ? routes.spaces.detail(item.courseId || item.resourceId)
-                          : null);
+                  const itemId = item.id || item._id;
+                  if (!item.read && !item.isRead && itemId) {
+                    handleMarkNotificationRead(itemId);
+                  }
+                  const targetLink = resolveNotificationTargetLink(item);
                   if (targetLink) {
                     setOpen(false);
                     navigate(targetLink);
@@ -110,63 +285,24 @@ function NotificationItem({
   notification,
   onMarkRead,
   onClick,
-  size = "md",
   className = "",
 }) {
   const {
     id,
+    _id,
     type,
     title = "Notification",
     message = "",
-    resourceType,
-    resourceId,
     read,
+    isRead,
     createdAt,
   } = notification || {};
 
-  const isUnread = !read;
-
-  const sizeStyles = {
-    sm: {
-      container: "px-3 py-2",
-      gap: "gap-2",
-      title: "text-xs",
-      message: "text-[11px] leading-4 mt-0.5",
-      meta: "text-[10px] mt-1",
-      badge: "text-[9px] px-1.5 py-0.5",
-      icon: 12,
-      button: "h-6 w-6",
-    },
-    md: {
-      container: "px-3 py-2",
-      gap: "gap-2.5",
-      title: "text-xs",
-      message: "text-[11px] leading-4 mt-0.5",
-      meta: "text-[10px] mt-1",
-      badge: "text-[9px] px-1.5 py-0.5",
-      icon: 12,
-      button: "h-6 w-6",
-    },
-    lg: {
-      container: "px-4 py-3",
-      gap: "gap-3",
-      title: "text-sm",
-      message: "text-xs leading-5 mt-0.5",
-      meta: "text-[11px] mt-1.5",
-      badge: "text-[10px] px-2 py-0.5",
-      icon: 14,
-      button: "h-7 w-7",
-    },
-  }[size] || {
-    container: "px-3 py-2",
-    gap: "gap-2.5",
-    title: "text-xs",
-    message: "text-[11px] leading-4 mt-0.5",
-    meta: "text-[10px] mt-1",
-    badge: "text-[9px] px-1.5 py-0.5",
-    icon: 12,
-    button: "h-6 w-6",
-  };
+  const notificationId = id || _id;
+  const isUnread = !read && !isRead;
+  const meta = getNotificationMeta(type);
+  const IconComponent = meta.Icon;
+  const targetLink = resolveNotificationTargetLink(notification);
 
   const handleCardClick = () => {
     onClick?.(notification);
@@ -174,9 +310,8 @@ function NotificationItem({
 
   const handleMarkRead = (e) => {
     e.stopPropagation();
-
-    if (onMarkRead && id) {
-      onMarkRead(id);
+    if (onMarkRead && notificationId) {
+      onMarkRead(notificationId);
     }
   };
 
@@ -192,124 +327,89 @@ function NotificationItem({
         }
       }}
       className={[
-        "group relative flex items-start gap-3",
-        "border-b border-border/50 last:border-b-0",
-        "transition-all duration-150",
+        "group relative flex items-start gap-3 px-3.5 py-2.5",
+        "transition-colors duration-150",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-        sizeStyles.container,
         onClick && "cursor-pointer",
         isUnread
-          ? ["bg-primary/[0.035]", "hover:bg-primary/[0.07]"]
-          : ["bg-transparent", "hover:bg-muted/30"],
+          ? "bg-primary/[0.04] hover:bg-primary/[0.08]"
+          : "bg-transparent hover:bg-muted/35",
         className,
       ]
-        .flat()
         .filter(Boolean)
         .join(" ")}
     >
-      {/* Unread indicator */}
-      <div
-        className={[
-          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-          "transition-all duration-200",
-          isUnread
-            ? "bg-primary shadow-[0_0_0_3px] shadow-primary/10"
-            : "bg-transparent",
-        ].join(" ")}
-        aria-hidden="true"
-      />
+      {/* Contextual Type Icon + Unread Dot */}
+      <div className="relative mt-0.5 shrink-0">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-lg ${meta.iconWrap}`}
+        >
+          <IconComponent size={15} strokeWidth={2} />
+        </div>
+        {isUnread && (
+          <span
+            className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-surface"
+            aria-hidden="true"
+          />
+        )}
+      </div>
 
       {/* Content */}
-      <div className="min-w-0 flex-1">
-        {/* Title + Type */}
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="min-w-0 flex-1 space-y-1">
+        {/* Title + Semantic Badge */}
+        <div className="flex min-w-0 items-center justify-between gap-2">
           <p
             className={[
-              "min-w-0 flex-1 truncate text-text-heading",
-              sizeStyles.title,
+              "min-w-0 flex-1 truncate text-xs text-text-heading",
               isUnread ? "font-semibold" : "font-medium",
             ].join(" ")}
           >
             {title}
           </p>
 
-          {type && (
-            <span
-              className={[
-                "shrink-0 rounded-md",
-                "bg-muted/40 text-text-muted",
-                "border border-border/40",
-                "font-mono font-medium uppercase tracking-wide",
-                sizeStyles.badge,
-              ].join(" ")}
-            >
-              {type.replace(/_/g, " ")}
-            </span>
-          )}
+          <span
+            className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold tracking-wide ${meta.badgeClass}`}
+          >
+            {meta.label}
+          </span>
         </div>
 
         {/* Message */}
         {message && (
-          <p
-            className={[
-              "line-clamp-2 text-text-muted",
-              sizeStyles.message,
-            ].join(" ")}
-          >
+          <p className="line-clamp-2 text-[11px] leading-relaxed text-text-muted">
             {message}
           </p>
         )}
 
-        {/* Metadata */}
-        {(createdAt || (resourceType && resourceId)) && (
-          <div
-            className={[
-              "flex min-w-0 items-center gap-1.5",
-              "text-text-muted/70",
-              sizeStyles.meta,
-            ].join(" ")}
-          >
-            {createdAt && (
-              <time dateTime={createdAt}>{formatRelativeTime(createdAt)}</time>
-            )}
+        {/* Footer: Relative time + Action hint */}
+        <div className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-text-muted/80">
+          {createdAt ? (
+            <time dateTime={createdAt} className="font-medium">
+              {formatRelativeTime(createdAt)}
+            </time>
+          ) : (
+            <span />
+          )}
 
-            {createdAt && resourceType && resourceId && (
-              <span aria-hidden="true">·</span>
-            )}
-
-            {resourceType && resourceId && (
-              <span className="min-w-0 truncate">
-                {resourceType}:{" "}
-                <span className="font-mono text-text-muted/80">
-                  {resourceId}
-                </span>
-              </span>
-            )}
-          </div>
-        )}
+          {targetLink && (
+            <span className="inline-flex items-center gap-0.5 font-semibold text-primary opacity-85 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+              <span>{meta.actionText}</span>
+              <ChevronRight size={11} />
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Mark as read */}
+      {/* Mark as read button */}
       {isUnread && onMarkRead && (
         <button
           type="button"
           onClick={handleMarkRead}
           title="Mark as read"
           aria-label={`Mark "${title}" as read`}
-          className={[
-            "shrink-0 rounded-md",
-            "flex items-center justify-center",
-            "text-text-muted/60",
-            "opacity-0 group-hover:opacity-100",
-            "focus:opacity-100",
-            "hover:bg-primary/10 hover:text-primary",
-            "active:scale-95",
-            "transition-all duration-150",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-            sizeStyles.button,
-          ].join(" ")}
+          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted/70 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
         >
-          <Check size={sizeStyles.icon} strokeWidth={2} />
+          <Check size={12} strokeWidth={2.2} />
         </button>
       )}
     </div>
@@ -327,41 +427,3 @@ function formatRelativeTime(dateString) {
   return `${Math.floor(diffInSeconds / 86400)}d ago`;
 }
 
-const DUMMY_NOTIFICATIONS = [
-  {
-    id: "notif-98f2b1a4-6c3e-4d5f-9e7a-1234567890ab",
-    type: "ASSIGNMENT_GRADED",
-    title: "Assignment Graded: Distributed Systems Lab 3",
-    message:
-      "Prof. Sarah Jenkins returned your submission with feedback: 'Excellent concurrency model! (96/100)'",
-    resourceType: "SUBMISSION",
-    resourceId: "sub-2026-8812",
-    read: true,
-    readAt: "2026-09-13T10:15:30Z",
-    createdAt: "2026-09-13T08:00:00Z",
-  },
-  {
-    id: "notif-55a1e8c9-7d2b-4b10-8a90-fedcba098765",
-    type: "CLASS_MENTION",
-    title: "Mentioned in CS401 Study Group",
-    message:
-      "Alex Chen tagged you in a discussion: '@you check out the lecture notes on Raft consensus before tomorrow.'",
-    resourceType: "POST_COMMENT",
-    resourceId: "post-77419",
-    read: true,
-    readAt: null,
-    createdAt: "2026-09-13T12:30:00Z",
-  },
-  {
-    id: "notif-11c3d5e7-9a8f-4123-bcde-456789abcdef",
-    type: "NEW_ANNOUNCEMENT",
-    title: "New Stream Announcement",
-    message:
-      "Dr. Martinez posted an update: 'Tomorrow's Advanced Algorithms seminar has been moved to Lecture Hall B.'",
-    resourceType: "ANNOUNCEMENT",
-    resourceId: "ann-40912",
-    read: true,
-    readAt: null,
-    createdAt: "2026-09-13T13:05:12Z",
-  },
-];

@@ -1,5 +1,6 @@
 export const routes = {
   home: "/",
+  dashboard: "/",
 
   auth: {
     root: "/auth",
@@ -9,8 +10,6 @@ export const routes = {
     resetPassword: "/auth/reset-password",
     callback: "/auth/callback",
   },
-
-  dashboard: "/dashboard",
 
   community: "/community",
   messages: "/messages",
@@ -22,24 +21,40 @@ export const routes = {
     list: "/spaces",
     new: "/spaces/new",
     join: "/spaces/join",
-    detail: (spaceId = ":classId") => `/spaces/${spaceId}`,
+    detail: (spaceId = ":spaceId") => `/spaces/${spaceId}`,
   },
 
+  space: {
+    home: (spaceId = ":spaceId") => `/spaces/${spaceId}`,
+    stream: (spaceId = ":spaceId") => `/spaces/${spaceId}`,
+    posts: (spaceId = ":spaceId") => `/spaces/${spaceId}/posts`,
+    announcements: (spaceId = ":spaceId") => `/spaces/${spaceId}/announcements`,
+    classwork: (spaceId = ":spaceId") => `/spaces/${spaceId}/classwork`,
+    assignments: (spaceId = ":spaceId") => `/spaces/${spaceId}/assignments`,
+    materials: (spaceId = ":spaceId") => `/spaces/${spaceId}/materials`,
+    resources: (spaceId = ":spaceId") => `/spaces/${spaceId}/resources`,
+    people: (spaceId = ":spaceId") => `/spaces/${spaceId}/people`,
+    grades: (spaceId = ":spaceId") => `/spaces/${spaceId}/grades`,
+    settings: (spaceId = ":spaceId") => `/spaces/${spaceId}/settings`,
+  },
+
+  // Backward-compatible alias for legacy callers
   classes: {
     list: "/spaces",
     new: "/spaces/new",
     join: "/spaces/join",
-    detail: (classId = ":classId") => `/spaces/${classId}`,
+    detail: (spaceId = ":spaceId") => `/spaces/${spaceId}`,
   },
 
   profile: {
     root: "/profile",
-    new: "/users/new",
+    new: "/profile/new",
     tab: (tab) =>
       tab ? `/profile?tab=${encodeURIComponent(tab)}` : "/profile",
   },
 
   user: (userId = ":userId") => `/users/${userId}`,
+
   settings: "/settings",
 
   serverDown: "/server-down",

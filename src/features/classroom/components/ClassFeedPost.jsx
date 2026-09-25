@@ -247,7 +247,7 @@ function ClassFeedPost({
             )}
           </div>
           <Link
-            to="?tab=classwork"
+            to={post.courseId ? routes.space.classwork(post.courseId) : "?tab=classwork"}
             className="text-[11px] font-medium text-primary hover:underline"
           >
             View in Classwork &rarr;

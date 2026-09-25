@@ -3,12 +3,12 @@ import { Outlet } from "react-router";
 import { usePreventSamePageNavigation } from "@/hooks/usePreventSamePageNavigation";
 import SessionBootstrapSkeleton from "@/features/auth/components/SessionBootstrapSkeleton.jsx";
 
-function RootLayout() {
+function RootLayout({ children }) {
   usePreventSamePageNavigation();
   return (
     <div>
       <Suspense fallback={<SessionBootstrapSkeleton />}>
-        <Outlet />
+        {children ?? <Outlet />}
       </Suspense>
     </div>
   );

@@ -6,38 +6,36 @@ describe("peopleFilter", () => {
     id: "user-current",
     name: "Alice Current",
     handle: "alice",
-    department: "Computer Science",
     joined_class_ids: ["class-1", "class-2"],
   };
 
   const sampleUsers = [
     {
       id: "user-1",
-      name: "Bob Builder",
+      name: "Bob Unconnected",
       handle: "bob",
-      department: "Civil Engineering",
       joined_class_ids: [],
     },
     {
       id: "user-2",
-      name: "Charlie CS",
+      name: "Charlie Classmate",
       handle: "charlie",
-      department: "Computer Science",
-      joined_class_ids: ["class-1"], // 1 shared class
+      sharedCoursesCount: 1,
+      recommendationReason: "SHARED_SPACES",
     },
     {
       id: "user-3",
       name: "Diana Dual",
       handle: "diana",
-      department: "Mathematics",
-      joined_class_ids: ["class-1", "class-2"], // 2 shared classes
+      sharedCoursesCount: 2,
+      recommendationReason: "SHARED_SPACES",
     },
     {
       id: "user-4",
-      name: "Aaron CS",
+      name: "Aaron Mutual",
       handle: "aaron",
-      department: "Computer Science",
-      joined_class_ids: [], // 0 shared, CS
+      mutualPeersCount: 2,
+      recommendationReason: "MUTUAL_SPACE_PEERS",
     },
   ];
 
@@ -46,7 +44,7 @@ describe("peopleFilter", () => {
     expect(matches("Alice", "BOB")).toBe(false);
   });
 
-  it("returns all users sorted by shared classes, then same department, then name when filter is 'all'", () => {
+  it("returns only recommended users (shared spaces or mutual peers) sorted by score when filter is 'all'", () => {
     const result = filterAndSortPeople(sampleUsers, {
       searchQuery: "",
       personFilter: "all",
@@ -54,14 +52,23 @@ describe("peopleFilter", () => {
     });
 
     expect(result.map((u) => u.id)).toEqual([
-      "user-3", // 2 shared classes
-      "user-2", // 1 shared class
-      "user-4", // 0 shared, same dept (CS), name "Aaron"
-      "user-1", // 0 shared, different dept (Civil)
+      "user-3", // 2 shared spaces -> score 20
+      "user-2", // 1 shared space -> score 10
+      "user-4", // 2 mutual peers -> score 6
     ]);
   });
 
-  it("filters by shared classes only when personFilter is 'shared'", () => {
+  it("filters by mutual space peers only when personFilter is 'mutual'", () => {
+    const result = filterAndSortPeople(sampleUsers, {
+      searchQuery: "",
+      personFilter: "mutual",
+      currentUser,
+    });
+
+    expect(result.map((u) => u.id)).toEqual(["user-4"]);
+  });
+
+  it("filters by shared spaces only when personFilter is 'shared'", () => {
     const result = filterAndSortPeople(sampleUsers, {
       searchQuery: "",
       personFilter: "shared",
@@ -69,32 +76,6 @@ describe("peopleFilter", () => {
     });
 
     expect(result.map((u) => u.id)).toEqual(["user-3", "user-2"]);
-  });
-
-  it("filters by department when personFilter is a department name", () => {
-    const result = filterAndSortPeople(sampleUsers, {
-      searchQuery: "",
-      personFilter: "Computer Science",
-      currentUser,
-    });
-
-    expect(result.map((u) => u.id)).toEqual(["user-2", "user-4"]);
-  });
-
-  it("filters by department case-insensitively and handles mixed casings", () => {
-    const mixedUsers = [
-      { id: "u-1", name: "User 1", department: "computer science and engineering" },
-      { id: "u-2", name: "User 2", department: "Computer Science and Engineering" },
-      { id: "u-3", name: "User 3", department: "Electrical Engineering" },
-    ];
-
-    const result = filterAndSortPeople(mixedUsers, {
-      searchQuery: "",
-      personFilter: "Computer Science And Engineering",
-      currentUser: null,
-    });
-
-    expect(result.map((u) => u.id)).toEqual(["u-1", "u-2"]);
   });
 
   it("prepends current user when searchQuery matches current user", () => {
@@ -107,42 +88,13 @@ describe("peopleFilter", () => {
     expect(result[0].id).toBe("user-current");
   });
 
-  it("filters users by searchQuery matching name, handle, or department", () => {
+  it("filters recommended users by searchQuery matching name or handle", () => {
     const result = filterAndSortPeople(sampleUsers, {
-      searchQuery: "builder",
+      searchQuery: "charlie",
       personFilter: "all",
       currentUser,
     });
 
-    expect(result.map((u) => u.id)).toEqual(["user-1"]);
-  });
-
-  it("filters and ranks users when personFilter is 'recommended'", () => {
-    const recommendedUsers = [
-      {
-        id: "user-rec-1",
-        name: "Zachary Peer",
-        sharedCoursesCount: 3,
-        sameDepartment: true,
-      },
-      {
-        id: "user-rec-2",
-        name: "Aaron Mutual",
-        mutualPeersCount: 2,
-        recommendationReason: "MUTUAL_SPACE_PEERS",
-      },
-      {
-        id: "user-rec-3",
-        name: "Bob Plain",
-      },
-    ];
-
-    const result = filterAndSortPeople(recommendedUsers, {
-      searchQuery: "",
-      personFilter: "recommended",
-      currentUser,
-    });
-
-    expect(result.map((u) => u.id)).toEqual(["user-rec-1", "user-rec-2"]);
+    expect(result.map((u) => u.id)).toEqual(["user-2"]);
   });
 });

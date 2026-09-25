@@ -36,12 +36,39 @@ export const courseworkApi = baseApi.injectEndpoints({
     getCourseworkList: builder.query({
       query: ({ courseId, page = 0, size = 20 }) => ({ url: `/courses/${courseId}/coursework`, params: { page, size } }),
       transformResponse: (response) => {
-        return { ...response, content: response.content.map(normalizeCoursework) };
+        const payload = response?.data ?? response ?? {};
+        const rawContent = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload.content)
+          ? payload.content
+          : [];
+        return { ...payload, content: rawContent.map(normalizeCoursework) };
       },
       providesTags: (result, _error, { courseId }) => [
         { type: "Coursework", id: `LIST-${courseId}` },
         ...(result?.content?.map((item) => ({ type: "Coursework", id: item.id })) || []),
       ],
+      keepUnusedDataFor: 300,
+      async onQueryStarted({ courseId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (courseId && Array.isArray(data?.content)) {
+            data.content.forEach((item) => {
+              if (item?.id) {
+                dispatch(
+                  courseworkApi.util.upsertQueryData(
+                    "getCourseworkById",
+                    { courseId, courseworkId: item.id },
+                    item,
+                  ),
+                );
+              }
+            });
+          }
+        } catch {
+          // Ignore detail cache seeding errors
+        }
+      },
     }),
     getCourseworkById: builder.query({
       query: ({ courseId, courseworkId }) =>
@@ -49,6 +76,7 @@ export const courseworkApi = baseApi.injectEndpoints({
       transformResponse: (response) =>
         normalizeCoursework(response?.data ?? response),
       providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: courseworkId }],
+      keepUnusedDataFor: 300,
     }),
     createCoursework: builder.mutation({
       query: ({ courseId, payload }) => ({
@@ -154,18 +182,21 @@ export const courseworkApi = baseApi.injectEndpoints({
         return { ...response, content: response.content.map(normalizeSubmission) };
       },
       providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: `SUBMISSIONS-${courseworkId}` }],
+      keepUnusedDataFor: 300,
     }),
     getMySubmission: builder.query({
       query: ({ courseworkId }) => `/coursework/${courseworkId}/submissions/me`,
       transformResponse: (response) =>
         normalizeSubmission(response?.data ?? response),
       providesTags: (_result, _error, { courseworkId }) => [{ type: "Coursework", id: `MYSUBMISSION-${courseworkId}` }],
+      keepUnusedDataFor: 300,
     }),
     getStudentGradebook: builder.query({
       query: ({ courseId, studentId }) =>
         `/analytics/courses/${courseId}/students/${studentId}/gradebook`,
       transformResponse: normalizeGradebook,
       providesTags: (_result, _error, { courseId, studentId }) => [{ type: "Coursework", id: `GRADEBOOK-${courseId}-${studentId}` }],
+      keepUnusedDataFor: 300,
     }),
     getCourseGradebook: builder.query({
       query: (courseId) => `/analytics/courses/${courseId}/gradebook`,
@@ -183,9 +214,11 @@ export const courseworkApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, courseId) => [
         { type: "Coursework", id: `COURSE-GRADEBOOK-${courseId}` },
       ],
+      keepUnusedDataFor: 300,
     }),
     getCourseAnalyticsSummary: builder.query({
       query: (courseId) => `/analytics/courses/${courseId}/summary`,
+      keepUnusedDataFor: 300,
     }),
     startSubmission: builder.mutation({
       query: ({ courseworkId, payload = {} }) => ({

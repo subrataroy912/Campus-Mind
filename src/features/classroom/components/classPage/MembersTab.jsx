@@ -383,14 +383,18 @@ export function MembersTab({
     }
   };
 
-  const { roster = [] } = useGetClassroomRosterQuery(
-    authStatus === "hydrating" || !classroom?.id || !isEnrolled
-      ? skipToken
-      : classroom.id,
-    {
-      selectFromResult: ({ data }) => ({ roster: data ?? [] }),
-    },
-  );
+  const { roster = [], isLoading: isLoadingRoster = false } =
+    useGetClassroomRosterQuery(
+      authStatus === "hydrating" || !classroom?.id || !isEnrolled
+        ? skipToken
+        : classroom.id,
+      {
+        selectFromResult: ({ data, isLoading }) => ({
+          roster: data ?? [],
+          isLoading: Boolean(isLoading),
+        }),
+      },
+    );
 
   const members = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -613,7 +617,11 @@ export function MembersTab({
           />
         </div>
 
-        {members.length === 0 ? (
+        {isLoadingRoster && roster.length === 0 ? (
+          <div className="rounded-lg border border-border/60 bg-muted/20 p-6 text-center text-xs text-muted-foreground">
+            Loading space members…
+          </div>
+        ) : members.length === 0 ? (
           <EmptyState
             title="No members found"
             description="Try searching with a different name or spelling."

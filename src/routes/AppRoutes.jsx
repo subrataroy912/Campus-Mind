@@ -101,11 +101,6 @@ export const appRouteConfig = [
         handle: { requiresSessionRestore: true },
         children: [
           {
-            path: routes.home,
-            element: <RootLayout />,
-            children: [{ index: true, element: <GetStartedPage /> }],
-          },
-          {
             path: routes.auth.root,
             element: <AuthLayout />,
             children: [
@@ -127,19 +122,31 @@ export const appRouteConfig = [
           AUTHENTICATED APPLICATION ROUTES (DashboardLayout as Pathless Layout)
           ===================================================================== */
       {
-        element: <ProtectedRoute />,
+        element: (
+          <ProtectedRoute
+            unauthenticatedHomeElement={
+              <RootLayout>
+                <GetStartedPage />
+              </RootLayout>
+            }
+          />
+        ),
         handle: { requiresSessionRestore: true, isProtected: true },
         children: [
           {
             element: <DashboardLayout />,
             errorElement: <RouteErrorBoundary isInline />,
             children: [
-              // Application Core
+              // Application Core (Unified Home "/" + backward-compatible "/home" redirect)
               {
-                path: routes.dashboard,
+                path: routes.home,
                 element: <DashboardHome />,
                 loader: createDashboardLoader(store),
                 shouldRevalidate: dashboardShouldRevalidate,
+              },
+              {
+                path: "/home",
+                element: <Navigate to={routes.home} replace />,
               },
               { path: routes.community, element: <DashboardCommunityPage /> },
               { path: routes.messages, element: <DashboardMessagesPage /> },
@@ -151,7 +158,7 @@ export const appRouteConfig = [
                 shouldRevalidate: exploreShouldRevalidate,
               },
 
-              // Spaces (formerly Classes)
+              // Spaces & Nested Sub-Routes (/spaces/:spaceId/*)
               {
                 path: routes.spaces.list,
                 element: <SpaceListPage />,
@@ -164,6 +171,20 @@ export const appRouteConfig = [
                 element: <SpacePage />,
                 loader: createSpaceDetailLoader(store),
                 shouldRevalidate: spaceDetailShouldRevalidate,
+                children: [
+                  { index: true, element: null },
+                  { path: "posts", element: null },
+                  { path: "announcements", element: null },
+                  { path: "classwork", element: null },
+                  { path: "assignments", element: null },
+                  { path: "materials", element: null },
+                  { path: "resources", element: null },
+                  { path: "quick-links", element: null },
+                  { path: "people", element: null },
+                  { path: "members", element: null },
+                  { path: "grades", element: null },
+                  { path: "settings", element: null },
+                ],
               },
               {
                 element: <CreatorRoute />,
@@ -207,23 +228,23 @@ export const appRouteConfig = [
               /* Backward-Compatible Redirects for legacy /dashboard/* paths */
               {
                 path: "/dashboard/classes",
-                element: <Navigate to={routes.classes.list} replace />,
+                element: <Navigate to={routes.spaces.list} replace />,
               },
               {
                 path: "/dashboard/classes/:classId",
                 element: (
                   <ParamRedirect
-                    to={(params) => routes.classes.detail(params.classId)}
+                    to={(params) => routes.spaces.detail(params.classId)}
                   />
                 ),
               },
               {
                 path: "/dashboard/class/join",
-                element: <ParamRedirect to={routes.classes.join} />,
+                element: <ParamRedirect to={routes.spaces.join} />,
               },
               {
                 path: "/dashboard/class/create",
-                element: <Navigate to={routes.classes.new} replace />,
+                element: <Navigate to={routes.spaces.new} replace />,
               },
               {
                 path: "/dashboard/community",
@@ -260,6 +281,10 @@ export const appRouteConfig = [
           {
             path: routes.profile.new,
             element: <CreateProfilePage />,
+          },
+          {
+            path: "/users/new",
+            element: <Navigate to={routes.profile.new} replace />,
           },
         ],
       },
