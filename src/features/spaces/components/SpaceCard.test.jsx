@@ -1,0 +1,110 @@
+import { describe, expect, it, vi } from "vitest";
+import React from "react";
+import { renderToString } from "react-dom/server";
+import SpaceCard from "./SpaceCard.jsx";
+import { ContentList } from "@/components/common/ContentList.jsx";
+
+vi.mock("@/context/AuthContext.jsx", () => ({
+  useAuth: () => ({
+    user: { id: "user-1", name: "Test User" },
+  }),
+}));
+
+vi.mock("react-router", () => ({
+  Link: ({ children, to, ...props }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+  useNavigate: () => vi.fn(),
+}));
+
+
+describe("SpaceCard", () => {
+  it("renders rich classroom details with full height and non-breaking structure", () => {
+    const classroom = {
+      id: "class-1",
+      title: "Algorithms & Data Structures",
+      subject: "COMPUTER_SCIENCE",
+      section: "Section A - Fall 2026",
+      owner: { name: "Dr. Christopher Henderson" },
+      role: "MEMBER",
+      accessType: "code",
+      code: "ALGO1234",
+      memberCount: 25,
+      unreadCount: 3,
+    };
+
+    const html = renderToString(<SpaceCard classroom={classroom} />);
+
+    expect(html).toContain("Algorithms &amp; Data Structures");
+    expect(html).toContain("Computer Science");
+    expect(html).toContain("Section A - Fall 2026");
+    expect(html).toContain("Dr. Christopher Henderson");
+    expect(html).toContain("new");
+    expect(html).toContain("h-full");
+    expect(html).toContain("w-full");
+
+  });
+
+  it("renders minimal classroom details preserving placeholders for consistent height", () => {
+    const classroom = {
+      id: "class-2",
+      title: "Simple Math",
+      memberCount: 5,
+    };
+
+    const html = renderToString(<SpaceCard classroom={classroom} />);
+
+    expect(html).toContain("Simple Math");
+    expect(html).toContain("Self-paced");
+    expect(html).toContain("Up to date");
+    expect(html).toContain("h-full");
+    expect(html).toContain("w-full");
+  });
+
+  it("renders Private badge when accessType is PRIVATE", () => {
+    const classroom = {
+      id: "class-private",
+      title: "Algorithms Lab",
+      accessType: "PRIVATE",
+    };
+
+    const html = renderToString(<SpaceCard classroom={classroom} />);
+
+    expect(html).toContain("Private");
+    expect(html).not.toContain("Invite");
+  });
+
+  it("renders Public badge when accessType is PUBLIC", () => {
+    const classroom = {
+      id: "class-public",
+      title: "Open Seminar",
+      accessType: "PUBLIC",
+    };
+
+    const html = renderToString(<SpaceCard classroom={classroom} />);
+
+    expect(html).toContain("Public");
+    expect(html).not.toContain("Private");
+  });
+
+  it("ContentList applies uniform width and items-stretch to carousel items", () => {
+    const classrooms = [
+      { id: "c-1", title: "Course 1" },
+      { id: "c-2", title: "Course 2" },
+    ];
+
+    const html = renderToString(
+      <ContentList
+        layout="carousel"
+        items={classrooms}
+        renderItem={(c) => <SpaceCard classroom={c} />}
+      />
+    );
+
+    expect(html).toContain("items-stretch");
+    expect(html).toContain("max-w-[320px]");
+    expect(html).not.toContain("max-w-70");
+  });
+});

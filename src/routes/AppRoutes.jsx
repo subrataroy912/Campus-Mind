@@ -26,19 +26,19 @@ import {
 } from "./routeLoaders.js";
 const GetStartedPage = lazy(() => import("../pages/GetStartedPage.jsx"));
 const DashboardHome = lazy(
-  () => import("../features/dashboard/pages/DashboardHomePage.jsx"),
+  () => import("../features/dashboard/pages/HomePage.jsx"),
 );
-const DashboardCommunityPage = lazy(
-  () => import("../features/dashboard/pages/DashboardCommunityPage.jsx"),
+const CommunityPage = lazy(
+  () => import("../features/community/pages/CommunityPage.jsx"),
 );
-const DashboardMessagesPage = lazy(
-  () => import("../features/dashboard/pages/DashboardMessagesPage.jsx"),
+const MessagesPage = lazy(
+  () => import("../features/messages/pages/MessagesPage.jsx"),
 );
-const DashboardSavedPage = lazy(
-  () => import("../features/dashboard/pages/DashboardSavedPage.jsx"),
+const SavedPage = lazy(
+  () => import("../features/community/pages/SavedPage.jsx"),
 );
-const DashboardHeaderSearchPage = lazy(
-  () => import("../features/dashboard/pages/DashboardHeaderSearchPage.jsx"),
+const HeaderSearchPage = lazy(
+  () => import("../features/dashboard/pages/HeaderSearchPage.jsx"),
 );
 const ExplorePage = lazy(
   () => import("../features/explore/pages/ExplorePage.jsx"),
@@ -58,16 +58,16 @@ const OAuthCallbackPage = lazy(
 );
 
 const SpaceListPage = lazy(
-  () => import("../features/dashboard/pages/SpaceListPage.jsx"),
+  () => import("../features/spaces/pages/SpaceListPage.jsx"),
 );
 const SpacePage = lazy(
-  () => import("../features/classroom/pages/SpacePage.jsx"),
+  () => import("../features/spaces/pages/SpacePage.jsx"),
 );
 const CreateSpacePage = lazy(
-  () => import("../features/classroom/pages/CreateSpace.jsx"),
+  () => import("../features/spaces/pages/CreateSpace.jsx"),
 );
 const JoinSpacePage = lazy(
-  () => import("../features/classroom/pages/JoinSpace.jsx"),
+  () => import("../features/spaces/pages/JoinSpace.jsx"),
 );
 const ProfilePage = lazy(
   () => import("../features/profile/pages/ProfilePage.jsx"),
@@ -148,9 +148,9 @@ export const appRouteConfig = [
                 path: "/home",
                 element: <Navigate to={routes.home} replace />,
               },
-              { path: routes.community, element: <DashboardCommunityPage /> },
-              { path: routes.messages, element: <DashboardMessagesPage /> },
-              { path: routes.saved, element: <DashboardSavedPage /> },
+              { path: routes.community, element: <CommunityPage /> },
+              { path: routes.messages, element: <MessagesPage /> },
+              { path: routes.saved, element: <SavedPage /> },
               {
                 path: routes.explore,
                 element: <ExplorePage />,
@@ -216,7 +216,7 @@ export const appRouteConfig = [
               },
               {
                 path: routes.search,
-                element: <DashboardHeaderSearchPage />,
+                element: <HeaderSearchPage />,
               },
               // Users & Profile
               { path: routes.profile.root, element: <ProfilePage /> },

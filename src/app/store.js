@@ -7,7 +7,7 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 import { baseApi } from "./baseApi.js";
 import authReducer from "@/features/auth/authSlice.js";
 import uiReducer from "@/features/ui/uiSlice.js";
-import courseContextReducer from "@/features/classroom/courseContextSlice.js";
+import courseContextReducer from "@/features/spaces/courseContextSlice.js";
 import { clearCredentials, forcedSignOut } from "@/features/auth/authSlice.js";
 import {
   persistApiState,

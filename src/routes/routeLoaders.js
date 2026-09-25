@@ -1,7 +1,7 @@
-import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { classroomApi } from "@/features/spaces/api/classroomApi.js";
 import { exploreApi } from "@/features/explore/api/exploreApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
-import { courseworkApi } from "@/features/classroom/api/courseworkApi.js";
+import { courseworkApi } from "@/features/spaces/api/courseworkApi.js";
 
 /** /dashboard — no dynamic params; never needs a loader re-run after mutations. */
 export const dashboardShouldRevalidate = () => false;

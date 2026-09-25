@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
-import EmptyState from "@/components/common/EmptyState.jsx";
+import ErrorState from "@/components/common/ErrorState.jsx";
 import { useExploreData } from "../hooks/useExploreData.js";
 import { useExplorePeople } from "../hooks/useExplorePeople.js";
 import ExploreHeroBanner from "../components/ExploreHeroBanner.jsx";
@@ -62,12 +62,14 @@ export default function ExplorePage() {
     if (resetPage) setPage(0);
   };
 
-  if (status === "error") {
+  if (status === "error" && classes.length === 0) {
     return (
       <div className="mx-auto max-w-7xl p-4">
-        <EmptyState
+        <ErrorState
+          error={query?.error}
           title="We could not load Explore"
-          description="Please refresh and try again."
+          description="Please check your connection and try again."
+          onRetry={query?.refetch}
         />
       </div>
     );

@@ -251,7 +251,7 @@ export default function NotificationsMenu() {
 
         {/* Body list */}
         <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
-          {isLoading ? (
+          {isLoading && notifications.length === 0 ? (
             <div className="flex flex-col gap-2.5 p-3.5">
               <Skeleton className="h-14 w-full rounded-lg" />
               <Skeleton className="h-14 w-full rounded-lg" />

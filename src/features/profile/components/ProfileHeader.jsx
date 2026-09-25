@@ -58,7 +58,7 @@ export default function ProfileHeader({
       toast.add({
         title: "Course Creator Unlocked",
         description:
-          "You now have privileges to build classes and host learning groups.",
+          "You now have privileges to build spaces and host learning groups.",
         type: "success",
       });
       setShowCreatorConfirm(false);
@@ -244,7 +244,7 @@ export default function ProfileHeader({
                     <span>·</span>
                     <span className="font-medium text-primary">
                       {sharedClassCount} shared{" "}
-                      {sharedClassCount === 1 ? "class" : "classes"}
+                      {sharedClassCount === 1 ? "space" : "spaces"}
                     </span>
                   </>
                 )}
@@ -409,7 +409,7 @@ export default function ProfileHeader({
               Become a Course Creator
             </DialogTitle>
             <DialogDescription className="mt-1 text-xs text-muted-foreground">
-              Unlock course-creation privileges to build classes and host
+              Unlock course-creation privileges to build spaces and host
               learning groups. This is a permanent change and cannot be undone.
             </DialogDescription>
           </DialogHeader>

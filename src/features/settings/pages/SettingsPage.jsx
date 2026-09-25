@@ -23,8 +23,9 @@ import {
 import { initials } from "@/utils/initials.js";
 import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
+import { Skeleton } from "@/components/ui/skeleton.jsx";
 
-function SettingRow({ title, description, checked, onChange }) {
+function SettingRow({ title, description, checked, onChange, isLoading = false }) {
   return (
     <label className="flex min-h-11 items-center justify-between gap-4 py-2.5 first:pt-1 last:pb-1 cursor-pointer">
       <span className="min-w-0 flex-1">
@@ -35,11 +36,15 @@ function SettingRow({ title, description, checked, onChange }) {
           {description}
         </span>
       </span>
-      <Switch
-        checked={checked}
-        onCheckedChange={onChange}
-        className="shrink-0 scale-90"
-      />
+      {isLoading ? (
+        <Skeleton className="h-5 w-9 rounded-full shrink-0" />
+      ) : (
+        <Switch
+          checked={checked}
+          onCheckedChange={onChange}
+          className="shrink-0 scale-90"
+        />
+      )}
     </label>
   );
 }
@@ -49,7 +54,8 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { data: serverSettings } = useGetNotificationSettingsQuery();
+  const { data: serverSettings, isLoading: isNotificationsLoading } =
+    useGetNotificationSettingsQuery();
   const [updateNotificationSettings] = useUpdateNotificationSettingsMutation();
   const {
     theme,
@@ -178,18 +184,21 @@ export default function SettingsPage() {
                   title="Email notifications"
                   description="Receive account and learning updates by email."
                   checked={notifications.emailEnabled}
+                  isLoading={isNotificationsLoading && !serverSettings}
                   onChange={() => handleToggleNotification("emailEnabled")}
                 />
                 <SettingRow
                   title="Push notifications"
                   description="Allow browser or device push notifications."
                   checked={notifications.pushEnabled}
+                  isLoading={isNotificationsLoading && !serverSettings}
                   onChange={() => handleToggleNotification("pushEnabled")}
                 />
                 <SettingRow
                   title="In-app notifications"
                   description="Show activity updates inside CampusMind."
                   checked={notifications.inAppEnabled}
+                  isLoading={isNotificationsLoading && !serverSettings}
                   onChange={() => handleToggleNotification("inAppEnabled")}
                 />
               </div>

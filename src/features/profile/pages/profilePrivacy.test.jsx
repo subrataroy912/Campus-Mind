@@ -89,7 +89,7 @@ describe("ProfilePage privacy access control", () => {
     // Private profile placeholder must be rendered
     expect(html).toContain("This profile is private");
     expect(html).toContain(
-      "This member is only visible to people in a shared class."
+      "This member is only visible to people in a shared space."
     );
 
     // Sensitive contact details must NOT be rendered

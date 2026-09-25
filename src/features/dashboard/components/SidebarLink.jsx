@@ -1,6 +1,6 @@
 import { NavLink } from "react-router";
 import { store } from "@/app/store.js";
-import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { classroomApi } from "@/features/spaces/api/classroomApi.js";
 import { exploreApi } from "@/features/explore/api/exploreApi.js";
 import { messagesApi } from "@/features/messages/api/messagesApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";

@@ -1,4 +1,4 @@
-import EmptyState from "@/components/common/EmptyState.jsx";
+import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import { Sparkles } from "lucide-react";
 import ExplorePersonCard from "./ExplorePersonCard.jsx";
 import FilterButton from "./FilterButton.jsx";
@@ -10,6 +10,8 @@ export default function ExplorePeopleTab({
   searchQuery = "",
   currentUser = null,
   isLoading = false,
+  error = null,
+  onRetry,
   onFilterChange,
 }) {
   return (
@@ -34,16 +36,21 @@ export default function ExplorePeopleTab({
           </h2>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-20 rounded-lg border border-border bg-surface p-2.5 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : filteredPeople.length > 0 ? (
+        <AsyncStateBoundary
+          isLoading={isLoading}
+          hasData={filteredPeople.length > 0}
+          error={error}
+          errorTitle="Could not load people recommendations"
+          onRetry={onRetry}
+          loadingFallback="people-grid"
+          isEmpty={filteredPeople.length === 0}
+          emptyTitle="No recommendations yet"
+          emptyDescription={
+            searchQuery
+              ? "Try adjusting your search query or filter."
+              : "Join or create spaces to discover classmates and mutual space peers."
+          }
+        >
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
             {filteredPeople.map((person) => (
               <ExplorePersonCard
@@ -53,18 +60,7 @@ export default function ExplorePeopleTab({
               />
             ))}
           </div>
-        ) : (
-          <div className="mt-4">
-            <EmptyState
-              title="No recommendations yet"
-              description={
-                searchQuery
-                  ? "Try adjusting your search query or filter."
-                  : "Join or create spaces to discover classmates and mutual space peers."
-              }
-            />
-          </div>
-        )}
+        </AsyncStateBoundary>
       </section>
     </>
   );

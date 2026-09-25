@@ -40,7 +40,7 @@ function BrandLogo({
       </div>
 
       <span className="ml-1 rounded-[4px] bg-primary/10 border border-primary/20 px-1 py-0.2 text-[8px] font-bold uppercase tracking-wider text-primary">
-        beta
+        beta v1.0
       </span>
     </Link>
   );

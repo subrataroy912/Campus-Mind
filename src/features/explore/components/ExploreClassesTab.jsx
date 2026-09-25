@@ -1,12 +1,13 @@
 import { useSelector } from "react-redux";
-import { Flame, Loader2, Sparkles } from "lucide-react";
-import EmptyState from "@/components/common/EmptyState.jsx";
-import ExploreClassCard from "@/features/dashboard/components/ExploreClassCard.jsx";
+import { Flame, Sparkles } from "lucide-react";
+import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
+import { InlineLoader } from "@/components/common/LoadingState.jsx";
+import ExploreSpaceCard from "@/features/explore/components/ExploreSpaceCard.jsx";
 import FilterButton from "./FilterButton.jsx";
 import ExploreCardSkeleton from "./ExploreCardSkeleton.jsx";
 import ExplorePagination from "./ExplorePagination.jsx";
 import { BUILT_IN_CLASS_FILTERS } from "../model/exploreConstants.js";
-import { selectEnrolledCourseIds } from "@/features/classroom/classroomSelectors.js";
+import { selectEnrolledCourseIds } from "@/features/spaces/classroomSelectors.js";
 
 export default function ExploreClassesTab({
   classes = [],
@@ -17,6 +18,8 @@ export default function ExploreClassesTab({
   isLoading = false,
   isFetching = false,
   isPlaceholderData = false,
+  error = null,
+  onRetry,
   onFilterChange,
   onPreviousPage,
   onNextPage,
@@ -28,7 +31,6 @@ export default function ExploreClassesTab({
 
   const enrolledIds = useSelector(selectEnrolledCourseIds);
 
-  // Fix 1: Better skeleton logic to cover filter changes/refetches when data is empty
   const hasClasses = classes.length > 0;
   const showSkeletons = isLoading || (isFetching && !hasClasses);
 
@@ -48,15 +50,34 @@ export default function ExploreClassesTab({
       </div>
 
       {/* 2. Content Area */}
-      {/* Fix 2: Wrap all states in the exact same section container to prevent layout jumps */}
       <section className="flex flex-col gap-4">
-        {showSkeletons ? (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <ExploreCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : hasClasses ? (
+        <AsyncStateBoundary
+          isLoading={showSkeletons}
+          hasData={hasClasses}
+          error={error}
+          errorTitle="Could not load public courses"
+          onRetry={onRetry}
+          loadingFallback={
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <ExploreCardSkeleton key={index} />
+              ))}
+            </div>
+          }
+          isEmpty={!hasClasses}
+          emptyTitle={
+            debouncedSearchQuery
+              ? "No courses matched your search."
+              : classFilter !== "all" &&
+                  classFilter !== "popular" &&
+                  classFilter !== "recommended"
+                ? "No public courses found for this subject."
+                : classFilter === "recommended"
+                  ? "No recommendations available."
+                  : "No public courses found."
+          }
+          emptyDescription={isFetching ? "Loading courses..." : undefined}
+        >
           <>
             {/* Status Header */}
             <div className="flex items-center justify-between">
@@ -79,10 +100,7 @@ export default function ExploreClassesTab({
               </div>
 
               {(isPlaceholderData || isFetching) && (
-                <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  <span>Updating...</span>
-                </div>
+                <InlineLoader label="Updating..." />
               )}
             </div>
 
@@ -97,7 +115,7 @@ export default function ExploreClassesTab({
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   {trendingItems.map((classroom) => (
-                    <ExploreClassCard
+                    <ExploreSpaceCard
                       key={classroom.courseId || classroom.id || classroom._id}
                       classroom={classroom}
                       isEnrolled={enrolledIds.has(
@@ -121,7 +139,7 @@ export default function ExploreClassesTab({
               }`}
             >
               {(isDefaultBrowse ? mainGridItems : classes).map((classroom) => (
-                <ExploreClassCard
+                <ExploreSpaceCard
                   key={classroom.courseId || classroom.id || classroom._id}
                   classroom={classroom}
                   isEnrolled={enrolledIds.has(
@@ -145,24 +163,7 @@ export default function ExploreClassesTab({
               onNext={onNextPage}
             />
           </>
-        ) : (
-          <div className="pt-4">
-            <EmptyState
-              title={
-                debouncedSearchQuery
-                  ? "No courses matched your search."
-                  : classFilter !== "all" &&
-                      classFilter !== "popular" &&
-                      classFilter !== "recommended"
-                    ? "No public courses found for this subject."
-                    : classFilter === "recommended"
-                      ? "No recommendations available."
-                      : "No public courses found."
-              }
-              description={isFetching ? "Loading courses..." : undefined}
-            />
-          </div>
-        )}
+        </AsyncStateBoundary>
       </section>
     </div>
   );

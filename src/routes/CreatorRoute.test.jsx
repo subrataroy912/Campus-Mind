@@ -43,14 +43,14 @@ describe("CreatorRoute access control", () => {
     expect(html).toContain('data-to="/auth/login"');
   });
 
-  it("redirects non-creator authenticated users to /dashboard", () => {
+  it("redirects non-creator authenticated users to home/dashboard", () => {
     mockAuthState = {
       authStatus: "authenticated",
       isAuthenticated: true,
       user: { id: "u1", canCreateCourses: false },
     };
     const html = renderToString(<CreatorRoute />);
-    expect(html).toContain('data-to="/dashboard"');
+    expect(html).toContain('data-to="/"');
     expect(html).not.toContain("Outlet Content");
   });
 

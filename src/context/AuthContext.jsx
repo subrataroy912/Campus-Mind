@@ -41,7 +41,7 @@ import {
   selectAccessToken,
   selectCurrentUser,
 } from "../features/auth/authSelectors.js";
-import { usePresenceHeartbeat } from "@/features/presence/usePresenceHeartbeat.js";
+import { usePresenceHeartbeat } from "@/features/profile/hooks/usePresenceHeartbeat.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);

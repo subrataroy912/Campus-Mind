@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { useFetchClassroomsQuery } from "../../classroom/api/classroomApi.js";
+import { useFetchClassroomsQuery } from "@/features/spaces/api/classroomApi.js";
 import { useGetExploreFeedQuery } from "../../explore/api/exploreApi.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 

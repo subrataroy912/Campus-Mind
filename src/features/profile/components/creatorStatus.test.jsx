@@ -125,7 +125,7 @@ describe("ProfileHeader creator action and confirmation", () => {
     const html = renderToString(<ProfileHeader profile={profile} isOwner={true} />);
 
     expect(html).toContain("Become a Course Creator");
-    expect(html).toContain("Unlock course-creation privileges to build classes and host learning groups. This is a permanent change and cannot be undone.");
+    expect(html).toContain("Unlock course-creation privileges to build spaces and host learning groups. This is a permanent change and cannot be undone.");
     expect(html).toContain("Yes, Become Creator");
   });
 });

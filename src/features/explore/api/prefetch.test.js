@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { store } from "@/app/store.js";
-import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { classroomApi } from "@/features/spaces/api/classroomApi.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
 
 describe("Prefetch Handlers", () => {

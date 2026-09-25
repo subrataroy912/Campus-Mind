@@ -2,9 +2,9 @@ import { Suspense, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
+import Header from "../../features/dashboard/components/Header";
 import Sidebar from "../../features/dashboard/components/Sidebar";
-import DashboardSkeleton from "../../features/dashboard/components/DashboardSkeleton";
+import RouteSuspenseFallback from "./RouteSuspenseFallback.jsx";
 import {
   selectIsMobileMenuOpen,
   selectIsSidebarOpen,
@@ -31,7 +31,7 @@ function DashboardLayout() {
 
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
-      <DashboardHeader />
+      <Header />
 
       {/* Main App Workspace */}
       <div className="relative flex min-w-0 flex-1 overflow-hidden">
@@ -65,7 +65,7 @@ function DashboardLayout() {
               : "overflow-y-auto"
           }`}
         >
-          <Suspense fallback={<DashboardSkeleton />}>
+          <Suspense fallback={<RouteSuspenseFallback />}>
             <Outlet />
           </Suspense>
         </main>

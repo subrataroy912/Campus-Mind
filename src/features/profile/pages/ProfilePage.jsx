@@ -13,8 +13,8 @@ import {
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
-import ClassCard from "@/features/classroom/components/ClassCard.jsx";
-import CompactSpaceRow from "@/features/classroom/components/CompactSpaceRow.jsx";
+import SpaceCard from "@/features/spaces/components/SpaceCard.jsx";
+import CompactSpaceRow from "@/features/spaces/components/CompactSpaceRow.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
 import {
   getSharedClassCount,
@@ -78,12 +78,12 @@ export default function ProfilePage() {
     authStatus,
   } = useAuth();
 
-  const activeTab = searchParams.get("tab") || "classes";
+  const activeTab = searchParams.get("tab") || "spaces";
   const setActiveTab = (tab) => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        if (tab === "classes") {
+        if (tab === "spaces") {
           next.delete("tab");
         } else {
           next.set("tab", tab);
@@ -132,7 +132,7 @@ export default function ProfilePage() {
   const sharedIds = getSharedClassIds(currentUser, viewedUser);
   const sharedClassCount = getSharedClassCount(currentUser, viewedUser);
 
-  const classes = isOwner
+  const spaces = isOwner
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
@@ -145,15 +145,15 @@ export default function ProfilePage() {
   };
 
   const createdClasses = useMemo(
-    () => classes.filter(isCreatedByMe),
+    () => spaces.filter(isCreatedByMe),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [classes, viewedUser?.id, isOwner],
+    [spaces, viewedUser?.id, isOwner],
   );
 
   const joinedClasses = useMemo(
-    () => classes.filter((item) => !isCreatedByMe(item)),
+    () => spaces.filter((item) => !isCreatedByMe(item)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [classes, viewedUser?.id, isOwner],
+    [spaces, viewedUser?.id, isOwner],
   );
 
   const [spacesTab, setSpacesTab] = useState("all");
@@ -177,8 +177,8 @@ export default function ProfilePage() {
   const currentSpacesTabItems = useMemo(() => {
     if (spacesTab === "created") return createdClasses;
     if (spacesTab === "joined") return joinedClasses;
-    return classes;
-  }, [spacesTab, classes, createdClasses, joinedClasses]);
+    return spaces;
+  }, [spacesTab, spaces, createdClasses, joinedClasses]);
 
   const filteredProfileSpaces = useMemo(() => {
     const q = spacesSearch.trim().toLowerCase();
@@ -242,7 +242,7 @@ export default function ProfilePage() {
         icon={Lock}
         badge="Private Profile"
         title="This profile is private"
-        description="This member is only visible to people in a shared class."
+        description="This member is only visible to people in a shared space."
       />
     );
   }
@@ -382,22 +382,22 @@ export default function ProfilePage() {
       );
     }
 
-    if (!classes.length) {
+    if (!spaces.length) {
       return (
         <EmptyState
           title={
             isOwner
-              ? "You haven't joined or created a class yet"
-              : "No shared classes yet"
+              ? "You haven't joined or created a space yet"
+              : "No shared spaces yet"
           }
           description={
             isOwner
-              ? "Join or create a class to see it on your profile."
-              : "You don't have any classes in common right now."
+              ? "Join or create a space to see it on your profile."
+              : "You don't have any spaces in common right now."
           }
           action={
             isOwner
-              ? { to: routes.explore, label: "Explore classes" }
+              ? { to: routes.explore, label: "Explore spaces" }
               : undefined
           }
         />
@@ -405,7 +405,7 @@ export default function ProfilePage() {
     }
 
     const spacesTabs = [
-      { id: "all", label: "All", count: classes.length },
+      { id: "all", label: "All", count: spaces.length },
       {
         id: "created",
         label: isOwner ? "Created by Me" : "Managed",
@@ -549,7 +549,7 @@ export default function ProfilePage() {
               }
               action={
                 isOwner
-                  ? { to: routes.classes.join, label: "Join a space" }
+                  ? { to: routes.spaces.join, label: "Join a space" }
                   : undefined
               }
             />
@@ -569,7 +569,7 @@ export default function ProfilePage() {
           <ContentList
             layout="grid"
             items={filteredProfileSpaces}
-            renderItem={(classroom) => <ClassCard classroom={classroom} />}
+            renderItem={(classroom) => <SpaceCard classroom={classroom} />}
           />
         )}
       </div>
@@ -627,15 +627,15 @@ export default function ProfilePage() {
           <button
             type="button"
             role="tab"
-            aria-selected={activeTab === "classes"}
-            onClick={() => setActiveTab("classes")}
+            aria-selected={activeTab === "spaces"}
+            onClick={() => setActiveTab("spaces")}
             className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all ${
-              activeTab === "classes"
+              activeTab === "spaces"
                 ? "bg-background text-foreground shadow-xs"
                 : "hover:text-foreground"
             }`}
           >
-            Classes
+            Spaces
           </button>
           {isOwner && (
             <button
@@ -674,7 +674,7 @@ function ProfileMessage({
   icon: Icon = Lock,
   badge = "Private Profile",
   title = "This profile is private",
-  description = "This member is only visible to people in a shared class.",
+  description = "This member is only visible to people in a shared space.",
   isLoading = false,
 }) {
   const navigate = useNavigate();

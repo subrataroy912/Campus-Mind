@@ -73,7 +73,7 @@ describe("ProfilePage compact spaces", () => {
     const html = renderToString(<ProfilePage />);
 
     // Top-level tab
-    expect(html).toContain("Classes");
+    expect(html).toContain("Spaces");
 
     // Sub-tabs for spaces
     expect(html).toContain("All");
