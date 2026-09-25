@@ -68,7 +68,15 @@ export default function ProfilePage() {
   const { userId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user: currentUser, updateProfile, authStatus } = useAuth();
+  const {
+    user: currentUser,
+    updateProfile,
+    uploadAvatar,
+    deleteAvatar,
+    uploadBanner,
+    deleteBanner,
+    authStatus,
+  } = useAuth();
 
   const activeTab = searchParams.get("tab") || "classes";
   const setActiveTab = (tab) => {
@@ -283,7 +291,7 @@ export default function ProfilePage() {
 
   const handleAvatarUpload = async (file) => {
     try {
-      await updateProfile({ avatarFile: file });
+      await uploadAvatar(file);
       toast.add({
         title: "Avatar updated",
         description: "Your profile picture has been updated.",
@@ -292,7 +300,26 @@ export default function ProfilePage() {
     } catch (err) {
       toast.add({
         title: "Avatar upload failed",
-        description: parseApiError(err, "Unable to upload avatar picture.").message,
+        description: parseApiError(err, "Unable to upload avatar picture.")
+          .message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    try {
+      await deleteAvatar();
+      toast.add({
+        title: "Avatar removed",
+        description: "Your profile picture has been reset to default.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Avatar removal failed",
+        description: parseApiError(err, "Unable to remove avatar picture.")
+          .message,
         type: "error",
       });
     }
@@ -300,7 +327,7 @@ export default function ProfilePage() {
 
   const handleBannerUpload = async (file) => {
     try {
-      await updateProfile({ bannerFile: file });
+      await uploadBanner(file);
       toast.add({
         title: "Banner updated",
         description: "Your profile header banner has been updated.",
@@ -309,7 +336,26 @@ export default function ProfilePage() {
     } catch (err) {
       toast.add({
         title: "Banner upload failed",
-        description: parseApiError(err, "Unable to upload banner image.").message,
+        description: parseApiError(err, "Unable to upload banner image.")
+          .message,
+        type: "error",
+      });
+    }
+  };
+
+  const handleBannerDelete = async () => {
+    try {
+      await deleteBanner();
+      toast.add({
+        title: "Banner removed",
+        description: "Your profile banner has been reset to default.",
+        type: "success",
+      });
+    } catch (err) {
+      toast.add({
+        title: "Banner removal failed",
+        description: parseApiError(err, "Unable to remove banner image.")
+          .message,
         type: "error",
       });
     }
@@ -567,7 +613,9 @@ export default function ProfilePage() {
         onPreview={() => setPreview((p) => !p)}
         sharedClassCount={sharedClassCount}
         onAvatarUpload={handleAvatarUpload}
+        onAvatarDelete={handleAvatarDelete}
         onBannerUpload={handleBannerUpload}
+        onBannerDelete={handleBannerDelete}
       />
 
       <ProfileDetails details={details} />

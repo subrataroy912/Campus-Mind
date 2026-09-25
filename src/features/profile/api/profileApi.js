@@ -17,71 +17,192 @@ export const profileApi = baseApi.injectEndpoints({
     }),
 
     updateCurrentProfile: builder.mutation({
-      query: (changes) => {
-        const { avatarFile, bannerFile, ...profile } = changes;
-
-        if (!avatarFile && !bannerFile) {
-          return { url: "/users/me", method: "PATCH", body: profile };
-        }
-
-        const body = new FormData();
-
-        body.append(
-          "profile",
-          new Blob([JSON.stringify(profile)], { type: "application/json" }),
-        );
-
-        if (avatarFile) body.append("avatarFile", avatarFile, avatarFile.name);
-        if (bannerFile) body.append("bannerFile", bannerFile, bannerFile.name);
-
-        return { url: "/users/me", method: "PATCH", body };
-      },
+      query: (profile) => ({
+        url: "/users/me",
+        method: "PATCH",
+        body: profile,
+      }),
       invalidatesTags: [
         { type: "Profile", id: "CURRENT" },
         { type: "Classrooms", id: "LIST" },
       ],
-      async onQueryStarted(changes, { dispatch, queryFulfilled }) {
-        const { avatarFile, bannerFile, ...profile } = changes;
-        const tempUrls = []; // Array to track local URLs for cleanup
-
+      async onQueryStarted(profile, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           profileApi.util.updateQueryData(
             "getCurrentProfile",
             undefined,
             (draft) => {
               Object.assign(draft, profile);
-
-              if (avatarFile) {
-                const url = URL.createObjectURL(avatarFile);
-                tempUrls.push(url);
-                draft.avatar = url;
-                draft.avatarUrl = url;
-              }
-              if (bannerFile) {
-                const url = URL.createObjectURL(bannerFile);
-                tempUrls.push(url);
-                draft.banner = url;
-                draft.bannerUrl = url;
-              }
             },
           ),
         );
-
         try {
           await queryFulfilled;
         } catch {
           patchResult.undo();
-        } finally {
-          // Free up browser memory by revoking the preview URLs
-          // once the network request finishes (success or fail).
-          tempUrls.forEach((url) => URL.revokeObjectURL(url));
         }
       },
     }),
 
+    uploadAvatar: builder.mutation({
+      query: (file) => {
+        const body = new FormData();
+        body.append("file", file, file.name);
+        return { url: "/users/me/avatar", method: "PUT", body };
+      },
+      invalidatesTags: [
+        { type: "Profile", id: "CURRENT" },
+        { type: "Classrooms", id: "LIST" },
+      ],
+      async onQueryStarted(file, { dispatch, queryFulfilled }) {
+        const url = URL.createObjectURL(file);
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData(
+            "getCurrentProfile",
+            undefined,
+            (draft) => {
+              draft.avatar = url;
+              draft.avatarUrl = url;
+            },
+          ),
+        );
+        try {
+          const { data } = await queryFulfilled;
+          const remoteUrl = data?.avatarUrl || data?.data?.avatarUrl;
+          if (remoteUrl) {
+            dispatch(
+              profileApi.util.updateQueryData(
+                "getCurrentProfile",
+                undefined,
+                (draft) => {
+                  draft.avatar = remoteUrl;
+                  draft.avatarUrl = remoteUrl;
+                },
+              ),
+            );
+          }
+        } catch {
+          patchResult.undo();
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      },
+    }),
+
+    deleteAvatar: builder.mutation({
+      query: () => ({
+        url: "/users/me/avatar",
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Profile", id: "CURRENT" },
+        { type: "Classrooms", id: "LIST" },
+      ],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData(
+            "getCurrentProfile",
+            undefined,
+            (draft) => {
+              draft.avatar = null;
+              draft.avatarUrl = null;
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    uploadBanner: builder.mutation({
+      query: (file) => {
+        const body = new FormData();
+        body.append("file", file, file.name);
+        return { url: "/users/me/banner", method: "PUT", body };
+      },
+      invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
+      async onQueryStarted(file, { dispatch, queryFulfilled }) {
+        const url = URL.createObjectURL(file);
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData(
+            "getCurrentProfile",
+            undefined,
+            (draft) => {
+              draft.banner = url;
+              draft.bannerUrl = url;
+            },
+          ),
+        );
+        try {
+          const { data } = await queryFulfilled;
+          const remoteUrl = data?.bannerUrl || data?.data?.bannerUrl;
+          if (remoteUrl) {
+            dispatch(
+              profileApi.util.updateQueryData(
+                "getCurrentProfile",
+                undefined,
+                (draft) => {
+                  draft.banner = remoteUrl;
+                  draft.bannerUrl = remoteUrl;
+                },
+              ),
+            );
+          }
+        } catch {
+          patchResult.undo();
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      },
+    }),
+
+    deleteBanner: builder.mutation({
+      query: () => ({
+        url: "/users/me/banner",
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData(
+            "getCurrentProfile",
+            undefined,
+            (draft) => {
+              draft.banner = null;
+              draft.bannerUrl = null;
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    updateCreatorProfile: builder.mutation({
+      query: (payload) => ({
+        url: "/users/me/creator-profile",
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
+    }),
+
+    deleteAccount: builder.mutation({
+      query: () => ({
+        url: "/users/me",
+        method: "DELETE",
+      }),
+    }),
+
     unlockCreator: builder.mutation({
       query: () => ({
-        url: "/users/me/unlock-creator",
+        url: "/users/me/creator/unlock",
         method: "POST",
       }),
       invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
@@ -93,5 +214,11 @@ export const {
   useGetCurrentProfileQuery,
   useGetPublicProfileQuery,
   useUpdateCurrentProfileMutation,
+  useUploadAvatarMutation,
+  useDeleteAvatarMutation,
+  useUploadBannerMutation,
+  useDeleteBannerMutation,
+  useUpdateCreatorProfileMutation,
+  useDeleteAccountMutation,
   useUnlockCreatorMutation,
 } = profileApi;

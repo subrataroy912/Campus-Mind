@@ -102,6 +102,54 @@ export async function updateProfile(details) {
   );
 }
 
+export async function uploadAvatar(file) {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.uploadAvatar.initiate(file))
+      .unwrap()
+  );
+}
+
+export async function deleteAvatar() {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.deleteAvatar.initiate())
+      .unwrap()
+  );
+}
+
+export async function uploadBanner(file) {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.uploadBanner.initiate(file))
+      .unwrap()
+  );
+}
+
+export async function deleteBanner() {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.deleteBanner.initiate())
+      .unwrap()
+  );
+}
+
+export async function updateCreatorProfile(payload) {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.updateCreatorProfile.initiate(payload))
+      .unwrap()
+  );
+}
+
+export async function deleteAccount() {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.deleteAccount.initiate())
+      .unwrap()
+  );
+}
+
 export async function unlockCreator() {
   return unwrapResponse(
     await store.dispatch(profileApi.endpoints.unlockCreator.initiate()).unwrap()

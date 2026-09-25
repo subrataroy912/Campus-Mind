@@ -13,6 +13,12 @@ import {
   refresh as refreshRequest,
   getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
+  uploadAvatar as uploadAvatarRequest,
+  deleteAvatar as deleteAvatarRequest,
+  uploadBanner as uploadBannerRequest,
+  deleteBanner as deleteBannerRequest,
+  updateCreatorProfile as updateCreatorProfileRequest,
+  deleteAccount as deleteAccountRequest,
   unlockCreator as unlockCreatorRequest,
   logout as logoutRequest,
 } from "../features/auth/api/authService";
@@ -58,10 +64,7 @@ export function AuthProvider({ children }) {
   const userRef = useRef(user);
   const explicitTeardownErrorRef = useRef(null);
   const [authState, setAuthState] = useState(() => ({
-    status:
-      requiresSessionRestore && !accessToken
-        ? "hydrating"
-        : "succeeded",
+    status: requiresSessionRestore && !accessToken ? "hydrating" : "succeeded",
     error: null,
   }));
 
@@ -80,7 +83,7 @@ export function AuthProvider({ children }) {
           error: new Error("Your session has expired. Please log in again."),
         });
       }),
-    [store]
+    [store],
   );
 
   useEffect(() => {
@@ -90,7 +93,7 @@ export function AuthProvider({ children }) {
       setAuthState((current) =>
         current.status === "succeeded" && current.error === null
           ? current
-          : { status: "succeeded", error: null }
+          : { status: "succeeded", error: null },
       );
       return () => {
         ignore = true;
@@ -118,23 +121,26 @@ export function AuthProvider({ children }) {
         if (ignore) return;
         if (!isRecord(profile)) {
           throw new Error(
-            "Your profile could not be loaded. Please sign in again."
+            "Your profile could not be loaded. Please sign in again.",
           );
         }
 
         const nextSession = mergeProfileIntoCurrentSession(
           store.getState,
-          profile
+          profile,
         );
         if (!nextSession) return;
         commitAuthSession(dispatch, nextSession);
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {
         if (ignore) return;
-        
-        const status = error?.status ?? error?.originalStatus ?? error?.response?.status;
+
+        const status =
+          error?.status ?? error?.originalStatus ?? error?.response?.status;
         const isUnauthenticated = status === 400 || status === 401;
-        const hydrationError = isUnauthenticated ? null : getHydrationFailureError(error);
+        const hydrationError = isUnauthenticated
+          ? null
+          : getHydrationFailureError(error);
 
         explicitTeardownErrorRef.current = hydrationError;
         clearLocalAuthSession(
@@ -142,7 +148,7 @@ export function AuthProvider({ children }) {
           (reason) => {
             explicitTeardownErrorRef.current = reason;
           },
-          explicitTeardownErrorRef.current
+          explicitTeardownErrorRef.current,
         );
 
         if (isUnauthenticated) {
@@ -168,8 +174,7 @@ export function AuthProvider({ children }) {
       user,
       // A persisted user is only authenticated after its profile has been
       // validated and its credentials are installed in Redux.
-      isAuthenticated:
-        authState.status === "succeeded" && Boolean(accessToken),
+      isAuthenticated: authState.status === "succeeded" && Boolean(accessToken),
       authStatus: authState.status,
       authError: authState.error,
       clearAuthError() {
@@ -186,7 +191,7 @@ export function AuthProvider({ children }) {
         }
         if (!accessToken) {
           const error = new Error(
-            "The social sign-in response was incomplete."
+            "The social sign-in response was incomplete.",
           );
           setAuthState({ status: "failed", error });
           throw error;
@@ -221,7 +226,7 @@ export function AuthProvider({ children }) {
         if (!isRecord(profile)) {
           clearLocalAuthSession(dispatch);
           const error = new Error(
-            "The social sign-in response did not include a valid profile."
+            "The social sign-in response did not include a valid profile.",
           );
           setAuthState({ status: "failed", error });
           throw error;
@@ -257,10 +262,21 @@ export function AuthProvider({ children }) {
           const hydratedUser = {
             ...nextUser,
             ...(profile || {}),
-            avatar: profile?.avatarUrl ?? nextUser?.avatar ?? nextUser?.avatarUrl ?? null,
-            banner: profile?.bannerUrl ?? nextUser?.banner ?? nextUser?.bannerUrl ?? null,
-            displayName: profile?.displayName ?? nextUser?.displayName ?? nextUser?.name,
-            canCreateCourses: Boolean(profile?.canCreateCourses ?? nextUser?.canCreateCourses),
+            avatar:
+              profile?.avatarUrl ??
+              nextUser?.avatar ??
+              nextUser?.avatarUrl ??
+              null,
+            banner:
+              profile?.bannerUrl ??
+              nextUser?.banner ??
+              nextUser?.bannerUrl ??
+              null,
+            displayName:
+              profile?.displayName ?? nextUser?.displayName ?? nextUser?.name,
+            canCreateCourses: Boolean(
+              profile?.canCreateCourses ?? nextUser?.canCreateCourses,
+            ),
             isAdmin: Boolean(profile?.isAdmin ?? nextUser?.isAdmin),
           };
           resetApiCache(dispatch);
@@ -289,13 +305,30 @@ export function AuthProvider({ children }) {
             const hydratedUser = {
               ...result.user,
               ...(profile || {}),
-              avatar: profile?.avatarUrl ?? result.user?.avatar ?? result.user?.avatarUrl ?? null,
-              banner: profile?.bannerUrl ?? result.user?.banner ?? result.user?.bannerUrl ?? null,
-              displayName: profile?.displayName ?? result.user?.displayName ?? result.user?.name,
-              canCreateCourses: Boolean(profile?.canCreateCourses ?? result.user?.canCreateCourses),
+              avatar:
+                profile?.avatarUrl ??
+                result.user?.avatar ??
+                result.user?.avatarUrl ??
+                null,
+              banner:
+                profile?.bannerUrl ??
+                result.user?.banner ??
+                result.user?.bannerUrl ??
+                null,
+              displayName:
+                profile?.displayName ??
+                result.user?.displayName ??
+                result.user?.name,
+              canCreateCourses: Boolean(
+                profile?.canCreateCourses ?? result.user?.canCreateCourses,
+              ),
               isAdmin: Boolean(profile?.isAdmin ?? result.user?.isAdmin),
               isNewUser: Boolean(result.user?.isNewUser ?? true),
-              profileCompleted: Boolean(profile?.profileCompleted ?? result.user?.profileCompleted ?? false),
+              profileCompleted: Boolean(
+                profile?.profileCompleted ??
+                result.user?.profileCompleted ??
+                false,
+              ),
             };
             resetApiCache(dispatch);
             commitAuthSession(dispatch, {
@@ -312,23 +345,40 @@ export function AuthProvider({ children }) {
         }
       },
       async updateProfile(details) {
-        const profilePatch = toProfilePatch(details, user);
-        const nextProfile = await updateProfileRequest({
-          ...profilePatch,
-          avatarFile: details.avatarFile,
-          bannerFile: details.bannerFile,
-        });
+        const { avatarFile, bannerFile, ...textDetails } = details || {};
+        const profilePatch = toProfilePatch(textDetails, user);
+        let nextProfile = null;
+
+        if (Object.keys(profilePatch).length > 0 || (!avatarFile && !bannerFile)) {
+          nextProfile = await updateProfileRequest(profilePatch);
+        }
+
+        if (avatarFile) {
+          const avatarRes = await uploadAvatarRequest(avatarFile);
+          if (avatarRes?.avatarUrl) {
+            nextProfile = { ...(nextProfile || user), avatarUrl: avatarRes.avatarUrl };
+          }
+        }
+
+        if (bannerFile) {
+          const bannerRes = await uploadBannerRequest(bannerFile);
+          if (bannerRes?.bannerUrl) {
+            nextProfile = { ...(nextProfile || user), bannerUrl: bannerRes.bannerUrl };
+          }
+        }
+
+        const effectiveProfile = nextProfile || user;
         const nextUser = {
           ...user,
-          ...nextProfile,
-          name: nextProfile.displayName || user?.name,
-          avatar: nextProfile.avatarUrl ?? user?.avatar ?? null,
-          banner: nextProfile.bannerUrl ?? user?.banner ?? null,
-          bio: nextProfile.about || user?.bio,
-          phone: nextProfile.phone || user?.phone,
-          gender: nextProfile.gender || user?.gender,
-          dateOfBirth: nextProfile.dateOfBirth || user?.dateOfBirth,
-          address: nextProfile.address || user?.address,
+          ...effectiveProfile,
+          name: effectiveProfile.displayName || user?.name,
+          avatar: effectiveProfile.avatarUrl ?? user?.avatar ?? null,
+          banner: effectiveProfile.bannerUrl ?? user?.banner ?? null,
+          bio: effectiveProfile.about || user?.bio,
+          phone: effectiveProfile.phone || user?.phone,
+          gender: effectiveProfile.gender || user?.gender,
+          dateOfBirth: effectiveProfile.dateOfBirth || user?.dateOfBirth,
+          address: effectiveProfile.address || user?.address,
           profileCompleted: true,
           isNewUser: false,
         };
@@ -338,9 +388,84 @@ export function AuthProvider({ children }) {
         });
         triggerLifecycleRefresh(
           dispatch,
-          getProfileUpdateLifecycleEvent(profilePatch)
+          getProfileUpdateLifecycleEvent(profilePatch),
         );
+        return effectiveProfile;
+      },
+      async uploadAvatar(file) {
+        const result = await uploadAvatarRequest(file);
+        const newAvatarUrl = result?.avatarUrl || null;
+        const nextUser = {
+          ...user,
+          avatar: newAvatarUrl,
+          avatarUrl: newAvatarUrl,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
+        return result;
+      },
+      async deleteAvatar() {
+        const result = await deleteAvatarRequest();
+        const nextUser = {
+          ...user,
+          avatar: null,
+          avatarUrl: null,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
+        return result;
+      },
+      async uploadBanner(file) {
+        const result = await uploadBannerRequest(file);
+        const newBannerUrl = result?.bannerUrl || null;
+        const nextUser = {
+          ...user,
+          banner: newBannerUrl,
+          bannerUrl: newBannerUrl,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
+        return result;
+      },
+      async deleteBanner() {
+        const result = await deleteBannerRequest();
+        const nextUser = {
+          ...user,
+          banner: null,
+          bannerUrl: null,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
+        return result;
+      },
+      async updateCreatorProfile(data) {
+        const nextProfile = await updateCreatorProfileRequest(data);
+        const nextUser = {
+          ...user,
+          ...nextProfile,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
         return nextProfile;
+      },
+      async deleteAccount() {
+        await deleteAccountRequest();
+        clearLocalAuthSession(dispatch);
       },
       async unlockCreator() {
         const nextProfile = await unlockCreatorRequest();
@@ -365,7 +490,7 @@ export function AuthProvider({ children }) {
         // session so neither the access nor refresh token can be reverted.
         const nextSession = mergeProfileIntoCurrentSession(
           store.getState,
-          profile
+          profile,
         );
         if (!nextSession)
           throw new Error("The authenticated session was cleared.");
@@ -381,7 +506,7 @@ export function AuthProvider({ children }) {
         });
       },
     }),
-    [authState, dispatch, accessToken, store, user]
+    [authState, dispatch, accessToken, store, user],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

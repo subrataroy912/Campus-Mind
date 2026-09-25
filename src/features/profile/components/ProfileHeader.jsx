@@ -7,6 +7,7 @@ import {
   MessageCircle,
   Pencil,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { routes } from "@/routes/paths.js";
 import { Button } from "@/components/ui/button.jsx";
@@ -36,7 +37,9 @@ export default function ProfileHeader({
   onPreview,
   sharedClassCount,
   onAvatarUpload,
+  onAvatarDelete,
   onBannerUpload,
+  onBannerDelete,
 }) {
   const { unlockCreator } = useAuth();
   const [showCreatorConfirm, setShowCreatorConfirm] = useState(false);
@@ -86,25 +89,39 @@ export default function ProfileHeader({
           <div className="h-full w-full bg-gradient-to-r from-primary/15 via-primary/5 to-muted" />
         )}
 
-        {isOwner && onBannerUpload && (
-          <label
-            title="Change profile banner (Recommended: 1200 × 300px, 4:1 ratio · Keep important text centered)"
-            className="absolute bottom-2 right-2 flex cursor-pointer items-center gap-1 rounded-md bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background"
-          >
-            <Camera className="h-3 w-3" />
-            <input
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  onBannerUpload(file);
-                  e.target.value = "";
-                }
-              }}
-            />
-          </label>
+        {isOwner && (onBannerUpload || onBannerDelete) && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+            {onBannerUpload && (
+              <label
+                title="Change profile banner (Recommended: 1200 × 300px, 4:1 ratio · Keep important text centered)"
+                className="flex cursor-pointer items-center gap-1 rounded-md bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background"
+              >
+                <Camera className="h-3 w-3" />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      onBannerUpload(file);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </label>
+            )}
+            {profile.banner && onBannerDelete && (
+              <button
+                type="button"
+                onClick={onBannerDelete}
+                title="Remove banner cover"
+                className="flex cursor-pointer items-center justify-center rounded-md bg-background/85 p-1 text-[10px] text-destructive hover:bg-destructive/10 shadow-2xs backdrop-blur-xs transition"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -130,25 +147,39 @@ export default function ProfileHeader({
                 )}
               </div>
 
-              {isOwner && onAvatarUpload && (
-                <label
-                  title="Change avatar (Recommended: 400 × 400px, 1:1 square · Max 2MB)"
-                  className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground hover:bg-canvas"
-                >
-                  <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onAvatarUpload(file);
-                        e.target.value = "";
-                      }
-                    }}
-                  />
-                </label>
+              {isOwner && (onAvatarUpload || onAvatarDelete) && (
+                <div className="absolute -bottom-0.5 -right-0.5 flex items-center gap-0.5">
+                  {onAvatarUpload && (
+                    <label
+                      title="Change avatar (Recommended: 400 × 400px, 1:1 square · Max 2MB)"
+                      className="flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground hover:bg-canvas"
+                    >
+                      <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            onAvatarUpload(file);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+                  {profile.avatar && onAvatarDelete && (
+                    <button
+                      type="button"
+                      onClick={onAvatarDelete}
+                      title="Remove avatar picture"
+                      className="flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-destructive shadow-2xs transition hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                    </button>
+                  )}
+                </div>
               )}
             </div>
 
