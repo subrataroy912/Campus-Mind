@@ -88,6 +88,8 @@ export function AuthProvider({ children }) {
     [store],
   );
 
+  const backgroundProfileCheckedRef = useRef(false);
+
   useEffect(() => {
     let ignore = false;
     const hasAccessToken = Boolean(accessToken);
@@ -97,6 +99,26 @@ export function AuthProvider({ children }) {
           ? current
           : { status: "succeeded", error: null },
       );
+
+      // Silently revalidate profile in background once per session bootstrap without blocking UI
+      if (hasAccessToken && !backgroundProfileCheckedRef.current) {
+        backgroundProfileCheckedRef.current = true;
+        getCurrentProfileRequest()
+          .then((profile) => {
+            if (ignore || !isRecord(profile)) return;
+            const nextSession = mergeProfileIntoCurrentSession(
+              store.getState,
+              profile,
+            );
+            if (nextSession) {
+              commitAuthSession(dispatch, nextSession);
+            }
+          })
+          .catch(() => {
+            // Handled automatically by baseQueryWithRefresh on 401
+          });
+      }
+
       return () => {
         ignore = true;
       };
@@ -108,16 +130,36 @@ export function AuthProvider({ children }) {
       try {
         const refreshed = await refreshRequest();
         if (ignore) return;
-        const accessToken = refreshed.accessToken;
+        const nextToken = refreshed.accessToken;
 
-        if (!accessToken) {
+        if (!nextToken) {
           throw new Error("Refresh failed");
         }
 
+        const provisionalUser = refreshed.user ?? userRef.current;
         commitAuthSession(dispatch, {
-          accessToken,
-          user: refreshed.user ?? userRef.current,
+          accessToken: nextToken,
+          user: provisionalUser,
         });
+
+        // If we already have a user object, unblock the UI immediately (0ms wait for second round-trip)
+        if (isRecord(provisionalUser) && Object.keys(provisionalUser).length > 0) {
+          backgroundProfileCheckedRef.current = true;
+          setAuthState({ status: "succeeded", error: null });
+          getCurrentProfileRequest()
+            .then((profile) => {
+              if (ignore || !isRecord(profile)) return;
+              const nextSession = mergeProfileIntoCurrentSession(
+                store.getState,
+                profile,
+              );
+              if (nextSession) {
+                commitAuthSession(dispatch, nextSession);
+              }
+            })
+            .catch(() => {});
+          return;
+        }
 
         const profile = await getCurrentProfileRequest();
         if (ignore) return;
@@ -132,6 +174,7 @@ export function AuthProvider({ children }) {
           profile,
         );
         if (!nextSession) return;
+        backgroundProfileCheckedRef.current = true;
         commitAuthSession(dispatch, nextSession);
         setAuthState({ status: "succeeded", error: null });
       } catch (error) {

@@ -23,6 +23,7 @@ import {
   courseworkApi,
   useGetCourseworkListQuery,
 } from "../api/courseworkApi.js";
+import { exploreApi } from "@/features/explore/api/exploreApi.js";
 import { setCourseTypeFilter } from "../courseContextSlice.js";
 import { isStaffRole, isUserEnrolled } from "../utils/roles.js";
 import { routes } from "@/routes/paths";
@@ -118,7 +119,7 @@ export default function SpacePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classId]);
 
-  // Instant fallback from the already-loaded enrolled courses list (if present)
+  // Instant fallback from the already-loaded enrolled courses list or public explore feed (if present)
   const { cachedListCourse } = classroomApi.endpoints.fetchClassrooms.useQueryState(
     undefined,
     {
@@ -133,6 +134,23 @@ export default function SpacePage() {
     },
   );
 
+  const { cachedPublicCourse } = exploreApi.endpoints.getPublicCourse.useQueryState(
+    classId,
+    {
+      selectFromResult: ({ data }) => ({
+        cachedPublicCourse: data
+          ? {
+              ...data,
+              id: data.id ?? data.courseId ?? classId,
+              name: data.name ?? data.title ?? "Untitled class",
+              title: data.title ?? data.name ?? "Untitled class",
+              role: data.role ?? "VIEWER",
+            }
+          : undefined,
+      }),
+    },
+  );
+
   const {
     data: fetchedClassroom,
     isLoading,
@@ -141,7 +159,7 @@ export default function SpacePage() {
     skip: isHydrating || !classId,
   });
 
-  const classroom = fetchedClassroom ?? cachedListCourse;
+  const classroom = fetchedClassroom ?? cachedListCourse ?? cachedPublicCourse;
 
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [classCodeInput, setClassCodeInput] = useState("");

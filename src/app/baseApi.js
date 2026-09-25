@@ -234,8 +234,8 @@ export const baseApi = createApi({
     "SubmissionComments",
   ],
   baseQuery: baseQueryWithRefresh,
-  refetchOnFocus: true,
+  refetchOnFocus: false,
   refetchOnReconnect: true,
-  keepUnusedDataFor: 300,
+  keepUnusedDataFor: 600,
   endpoints: () => ({}),
 });

@@ -24,7 +24,10 @@ import {
 } from "lucide-react";
 
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
-import { useGetClassroomRosterQuery } from "@/features/classroom/api/classroomApi.js";
+import {
+  classroomApi,
+  useGetClassroomRosterQuery,
+} from "@/features/classroom/api/classroomApi.js";
 import {
   useDeleteSpaceMessageMutation,
   useGetSpaceChatHistoryQuery,
@@ -368,7 +371,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
 
   const { data: spaceRoster = [] } = useGetClassroomRosterQuery(room.spaceId, {
     skip: !room.spaceId,
-    refetchOnMountOrArgChange: true,
+    refetchOnMountOrArgChange: 120,
   });
 
   const {
@@ -1598,12 +1601,38 @@ export default function DashboardMessagesPage() {
   const currentUserId = useSelector(selectCurrentUserId);
 
   const {
-    data: rooms = [],
+    data: fetchedRooms,
     isLoading,
     error,
   } = useGetSpaceChatRoomsQuery(undefined, {
     refetchOnFocus: false,
   });
+
+  const { cachedClassrooms } =
+    classroomApi.endpoints.fetchClassrooms.useQueryState(undefined, {
+      selectFromResult: ({ data }) => ({
+        cachedClassrooms: Array.isArray(data) ? data : undefined,
+      }),
+    });
+
+  const rooms = useMemo(() => {
+    if (Array.isArray(fetchedRooms) && fetchedRooms.length > 0) {
+      return fetchedRooms;
+    }
+    if (Array.isArray(cachedClassrooms) && cachedClassrooms.length > 0) {
+      return cachedClassrooms.map((c) => ({
+        spaceId: c.id || c.courseId,
+        title: c.title || c.name || "Space",
+        subtitle: c.section || c.subtitle || "",
+        avatarUrl: c.logoUrl || c.logo || null,
+        memberCount: c.memberCount || 0,
+        onlineCount: 0,
+        onlineUserIds: [],
+        unreadCount: 0,
+      }));
+    }
+    return fetchedRooms ?? [];
+  }, [fetchedRooms, cachedClassrooms]);
 
   const [query, setQuery] = useState("");
   const [selectedSpaceId, setSelectedSpaceId] = useState(
@@ -1643,7 +1672,7 @@ export default function DashboardMessagesPage() {
     [rooms, effectiveSpaceId],
   );
 
-  if (isLoading) {
+  if (isLoading && rooms.length === 0) {
     return (
       <div className="grid min-h-64 place-items-center text-xs text-text-muted">
         Loading space chat rooms…

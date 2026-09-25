@@ -13,10 +13,14 @@ import {
   persistApiState,
   readPersistedApiState,
 } from "./apiCachePersistence.js";
-import { getPersistedUserId } from "@/utils/sessionStorage.js";
+import {
+  getPersistedUserId,
+  readPersistedAuthSession,
+} from "@/utils/sessionStorage.js";
 
+const preloadedAuthSession = readPersistedAuthSession();
 const preloadedApiState = readPersistedApiState({
-  user: { id: getPersistedUserId() },
+  user: { id: preloadedAuthSession?.user?.id ?? getPersistedUserId() },
 });
 
 const appReducer = {
@@ -49,10 +53,14 @@ persistenceListener.startListening({
   },
 });
 
+const preloadedState = {
+  ...(preloadedAuthSession ? { auth: preloadedAuthSession } : {}),
+  ...(preloadedApiState ? { [baseApi.reducerPath]: preloadedApiState } : {}),
+};
+
 export const store = configureStore({
-  preloadedState: preloadedApiState
-    ? { [baseApi.reducerPath]: preloadedApiState }
-    : undefined,
+  preloadedState:
+    Object.keys(preloadedState).length > 0 ? preloadedState : undefined,
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

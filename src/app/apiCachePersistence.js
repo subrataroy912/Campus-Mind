@@ -5,7 +5,8 @@ import {
 import { getPersistedUserId } from "@/utils/sessionStorage.js";
 
 const STORAGE_KEY = "campus-mind.api-cache.v1";
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours stale-while-revalidate window
+const MAX_BYTES = 512 * 1024; // 512 KB budget
 const PERSISTED_ENDPOINTS = new Set([
   "fetchClassrooms",
   "findClassroomById",
@@ -14,6 +15,16 @@ const PERSISTED_ENDPOINTS = new Set([
   "getCurrentProfile",
   "getPublicProfile",
   "listNotifications",
+  "getExploreFeed",
+  "getExploreRecommendations",
+  "getExplorePeopleRecommendations",
+  "getPublicCourse",
+  "getSpaceChatRooms",
+  "listMySpaceRooms",
+  "getSpaceChatHistory",
+  "getPendingJoinRequests",
+  "getCourseGradebook",
+  "getStudentGradebook",
 ]);
 
 function getUserId(authState) {
@@ -40,7 +51,27 @@ export function readPersistedApiState(authState) {
       return undefined;
     }
 
-    return stored.apiState;
+    const rawApiState = stored.apiState;
+    if (rawApiState && rawApiState.queries && typeof rawApiState.queries === "object") {
+      // Refresh fulfilledTimeStamp so RTK Query immediately serves warm data (isLoading: false)
+      // while still allowing background revalidation (ifOlderThan: 60)
+      const warmTimestamp = Date.now() - 30 * 1000;
+      const hydratedQueries = {};
+      for (const [key, query] of Object.entries(rawApiState.queries)) {
+        if (query && typeof query === "object") {
+          hydratedQueries[key] = {
+            ...query,
+            fulfilledTimeStamp: warmTimestamp,
+          };
+        }
+      }
+      return {
+        ...rawApiState,
+        queries: hydratedQueries,
+      };
+    }
+
+    return rawApiState;
   } catch {
     clearPersistedApiState();
     return undefined;
@@ -76,14 +107,20 @@ export function persistApiState(apiState, authState) {
     };
 
     let serialized = JSON.stringify(payload);
-    const MAX_BYTES = 50 * 1024; // 50 KB budget
 
     if (serialized.length > MAX_BYTES) {
-      // Exceeds 50 KB budget: progressively retain only the most critical queries
+      // Exceeds 512 KB budget: progressively retain the highest-priority queries
       const priorityOrder = [
         "getCurrentProfile",
         "fetchClassrooms",
+        "getSpaceChatRooms",
+        "listMySpaceRooms",
+        "getExploreFeed",
         "findClassroomById",
+        "getCourseworkList",
+        "getClassroomRoster",
+        "getSpaceChatHistory",
+        "getExplorePeopleRecommendations",
         "getPublicProfile",
         "listNotifications",
       ];
@@ -94,13 +131,17 @@ export function persistApiState(apiState, authState) {
             trimmedQueries[key] = q;
           }
         }
-        payload.apiState.queries = trimmedQueries;
-        serialized = JSON.stringify(payload);
-        if (serialized.length <= MAX_BYTES) break;
+        payload.apiState.queries = { ...trimmedQueries };
+        const candidate = JSON.stringify(payload);
+        if (candidate.length <= MAX_BYTES) {
+          serialized = candidate;
+        } else {
+          break;
+        }
       }
     }
 
-    if (serialized.length <= 50 * 1024) {
+    if (serialized.length <= MAX_BYTES) {
       window.localStorage.setItem(STORAGE_KEY, serialized);
     }
   } catch {

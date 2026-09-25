@@ -1,4 +1,44 @@
 import { NavLink } from "react-router";
+import { store } from "@/app/store.js";
+import { classroomApi } from "@/features/classroom/api/classroomApi.js";
+import { exploreApi } from "@/features/explore/api/exploreApi.js";
+import { messagesApi } from "@/features/messages/api/messagesApi.js";
+import { profileApi } from "@/features/profile/api/profileApi.js";
+import { routes } from "@/routes/paths.js";
+
+function prefetchRouteData(to) {
+  if (!to || !store?.dispatch) return;
+  if (to === routes.home || to === routes.spaces.list) {
+    store.dispatch(
+      classroomApi.util.prefetch("fetchClassrooms", undefined, {
+        ifOlderThan: 120,
+      }),
+    );
+  }
+  if (to === routes.home || to === routes.explore) {
+    store.dispatch(
+      exploreApi.util.prefetch(
+        "getExploreFeed",
+        { page: 0, size: 20 },
+        { ifOlderThan: 120 },
+      ),
+    );
+  }
+  if (to === routes.messages) {
+    store.dispatch(
+      messagesApi.util.prefetch("getSpaceChatRooms", undefined, {
+        ifOlderThan: 60,
+      }),
+    );
+  }
+  if (to === routes.profile.me) {
+    store.dispatch(
+      profileApi.util.prefetch("getCurrentProfile", undefined, {
+        ifOlderThan: 120,
+      }),
+    );
+  }
+}
 
 export function SidebarLink({
   to,
@@ -8,12 +48,6 @@ export function SidebarLink({
   onNavigate,
   end,
 }) {
-  // Default to exact-match (`end=true`) so a nav item is only highlighted when
-  // the current path matches it exactly — not when it merely starts with the
-  // same prefix. Without this, "/spaces" lights up on "/spaces/new" and
-  // "/spaces/join" because NavLink uses a prefix match when end=false.
-  // Callers can pass `end={false}` explicitly for items that should stay active
-  // across a full sub-tree (e.g. a section that owns many nested pages).
   const isEnd = end ?? true;
 
   return (
@@ -21,6 +55,8 @@ export function SidebarLink({
       to={to}
       end={isEnd}
       prefetch="intent"
+      onMouseEnter={() => prefetchRouteData(to)}
+      onFocus={() => prefetchRouteData(to)}
       className={(navState) => {
         const isActive = typeof navState === "object" ? navState?.isActive : false;
         return `group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${

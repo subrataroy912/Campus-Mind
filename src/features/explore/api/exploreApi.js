@@ -50,6 +50,25 @@ const normalizePeoplePage = (response = {}) => {
   };
 };
 
+function seedPublicCourseEntries(dispatch, pageData) {
+  const courses = pageData?.content;
+  if (!dispatch || !Array.isArray(courses)) return;
+  courses.forEach((course) => {
+    const courseId = course?.id || course?.courseId;
+    if (courseId) {
+      dispatch(
+        exploreApi.util.upsertQueryData("getPublicCourse", courseId, {
+          ...course,
+          id: courseId,
+          courseId,
+          name: course.title ?? course.name ?? "Untitled course",
+          title: course.title ?? course.name ?? "Untitled course",
+        }),
+      );
+    }
+  });
+}
+
 export const exploreApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getExploreFeed: builder.query({
@@ -59,6 +78,15 @@ export const exploreApi = baseApi.injectEndpoints({
       }),
       transformResponse: normalizeDiscoveryPage,
       providesTags: [{ type: "CourseFeed", id: "LIST" }],
+      keepUnusedDataFor: 600,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          seedPublicCourseEntries(dispatch, data);
+        } catch {
+          // Ignore cache seeding errors
+        }
+      },
     }),
     searchExploreCourses: builder.query({
       query: ({ q, page = 0, size = 20 }) => ({
@@ -67,6 +95,15 @@ export const exploreApi = baseApi.injectEndpoints({
       }),
       transformResponse: normalizeDiscoveryPage,
       providesTags: [{ type: "CourseSearch", id: "LIST" }],
+      keepUnusedDataFor: 600,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          seedPublicCourseEntries(dispatch, data);
+        } catch {
+          // Ignore cache seeding errors
+        }
+      },
     }),
     getExploreRecommendations: builder.query({
       query: ({ page = 0, size = 20 } = {}) => ({
@@ -75,6 +112,15 @@ export const exploreApi = baseApi.injectEndpoints({
       }),
       transformResponse: normalizeDiscoveryPage,
       providesTags: [{ type: "CourseRecommendations", id: "LIST" }],
+      keepUnusedDataFor: 600,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          seedPublicCourseEntries(dispatch, data);
+        } catch {
+          // Ignore cache seeding errors
+        }
+      },
     }),
     getExplorePeopleRecommendations: builder.query({
       query: ({ page = 0, size = 20 } = {}) => ({
@@ -83,6 +129,7 @@ export const exploreApi = baseApi.injectEndpoints({
       }),
       transformResponse: normalizePeoplePage,
       providesTags: [{ type: "Profile", id: "RECOMMENDATIONS" }],
+      keepUnusedDataFor: 600,
     }),
     getPublicCourse: builder.query({
       query: (courseId) => `/explore/courses/${courseId}`,
@@ -99,6 +146,7 @@ export const exploreApi = baseApi.injectEndpoints({
       providesTags: (_res, _err, courseId) => [
         { type: "PublicCourse", id: courseId },
       ],
+      keepUnusedDataFor: 600,
     }),
   }),
 });
