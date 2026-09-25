@@ -25,6 +25,7 @@ import {
 import { SUBJECTS, THEME_COLORS } from "../model/createSpaceForm.js";
 import { getClassTheme } from "../utils/classTheme.js";
 import {
+  IMAGE_PROFILES,
   optimizeImage,
   uploadCourseAssetWithFallback,
 } from "@/utils/optimizeImage.js";
@@ -166,7 +167,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
   const handleCoverSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const optimized = await optimizeImage(file, 1600);
+    const optimized = await optimizeImage(file, IMAGE_PROFILES.HERO_BANNER);
     setCoverFile(optimized);
     setCoverRemoved(false);
     setCoverPreview(URL.createObjectURL(optimized));
@@ -182,7 +183,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
   const handleLogoSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const optimized = await optimizeImage(file, 600);
+    const optimized = await optimizeImage(file, IMAGE_PROFILES.AVATAR);
     setLogoFile(optimized);
     setLogoRemoved(false);
     setLogoPreview(URL.createObjectURL(optimized));
@@ -222,6 +223,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
         coverUrl = await uploadCourseAssetWithFallback(
           coverFile,
           requestCourseCoverUpload,
+          null,
         );
       } else if (coverRemoved) {
         coverUrl = "";
@@ -232,6 +234,7 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
         logoUrl = await uploadCourseAssetWithFallback(
           logoFile,
           requestCourseLogoUpload,
+          null,
         );
       } else if (logoRemoved) {
         logoUrl = "";

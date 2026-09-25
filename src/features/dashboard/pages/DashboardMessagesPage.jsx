@@ -34,7 +34,13 @@ import { selectCurrentUserId } from "@/features/auth/authSelectors.js";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { routes } from "@/routes/paths.js";
-import { fileToDataUrl, optimizeImage } from "@/utils/optimizeImage.js";
+import {
+  fileToDataUrl,
+  formatFileSize,
+  IMAGE_PROFILES,
+  MAX_RAW_IMAGE_BYTES,
+  optimizeImage,
+} from "@/utils/optimizeImage.js";
 
 const QUICK_EMOJIS = ["👍", "❤️", "🚀", "🔥", "🎉"];
 
@@ -279,25 +285,31 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     }
   };
 
-  const applySelectedImage = (file) => {
+  const applySelectedImage = async (file) => {
     if (!file) return;
     if (!file.type || !file.type.startsWith("image/")) {
-      setImageUploadError("Please select an image file (JPG, PNG, GIF, or WebP).");
+      setImageUploadError("Please select an image file (JPG, PNG, GIF, WebP, or AVIF).");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setImageUploadError("Image must be smaller than 10 MB.");
+    if (file.size > MAX_RAW_IMAGE_BYTES) {
+      setImageUploadError("Raw image must be smaller than 20 MB.");
       return;
     }
     setImageUploadError(null);
-    setSelectedImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setSelectedImagePreview(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingImage(true);
+    try {
+      const optimizedFile = await optimizeImage(
+        file,
+        IMAGE_PROFILES.FEED_ATTACHMENT,
+      );
+      setSelectedImageFile(optimizedFile);
+      const dataUrl = await fileToDataUrl(optimizedFile);
+      setSelectedImagePreview(dataUrl);
+    } catch {
+      setImageUploadError("Could not optimize selected image.");
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleImageFileSelect = (event) => {
@@ -346,10 +358,14 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
       setIsUploadingImage(true);
       setImageUploadError(null);
       try {
-        const optimizedFile = await optimizeImage(selectedImageFile, {
-          maxDimension: 1600,
-          quality: 0.85,
-        });
+        const optimizedFile =
+          selectedImageFile.size <= IMAGE_PROFILES.FEED_ATTACHMENT.maxBytes &&
+          selectedImageFile.type === "image/webp"
+            ? selectedImageFile
+            : await optimizeImage(
+                selectedImageFile,
+                IMAGE_PROFILES.FEED_ATTACHMENT,
+              );
         let uploadedAttachment = null;
         try {
           uploadedAttachment = await uploadSpaceChatImage({
@@ -357,10 +373,11 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
             file: optimizedFile,
           }).unwrap();
         } catch {
-          const dataUrl = await fileToDataUrl(optimizedFile);
+          const dataUrl =
+            selectedImagePreview || (await fileToDataUrl(optimizedFile));
           uploadedAttachment = {
             url: dataUrl,
-            name: selectedImageFile.name || "chat-image.webp",
+            name: optimizedFile.name || "chat-image.webp",
             type: "IMAGE",
             mimeType: optimizedFile.type || "image/webp",
             size: optimizedFile.size,
@@ -798,8 +815,8 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                 ) : (
                   <p className="text-[11px] text-text-muted">
                     {isUploadingImage
-                      ? "Uploading image…"
-                      : "Ready to send"}
+                      ? "Optimizing & uploading image…"
+                      : `Ready to send · ${formatFileSize(selectedImageFile?.size || 0)} WebP`}
                   </p>
                 )}
               </div>

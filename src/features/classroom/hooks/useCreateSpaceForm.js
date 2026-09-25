@@ -9,6 +9,7 @@ import {
 } from "../api/classroomService.js";
 import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
 import {
+  IMAGE_PROFILES,
   optimizeImage,
   uploadCourseAssetWithFallback,
 } from "@/utils/optimizeImage.js";
@@ -34,7 +35,7 @@ export function useCreateSpaceForm() {
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const optimizedFile = await optimizeImage(file, 1600);
+    const optimizedFile = await optimizeImage(file, IMAGE_PROFILES.HERO_BANNER);
     update("coverImage", optimizedFile);
     setPreview(URL.createObjectURL(optimizedFile));
   };
@@ -50,7 +51,7 @@ export function useCreateSpaceForm() {
   const handleLogoUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const optimizedFile = await optimizeImage(file, 600);
+    const optimizedFile = await optimizeImage(file, IMAGE_PROFILES.AVATAR);
     update("logoImage", optimizedFile);
     setLogoPreview(URL.createObjectURL(optimizedFile));
   };
@@ -103,19 +104,21 @@ export function useCreateSpaceForm() {
       let coverUrl = null;
       let logoUrl = null;
 
-      // Upload cover image if provided (with server-side fallback)
+      // Upload cover image if provided (already optimized with HERO_BANNER preset)
       if (form.coverImage) {
         coverUrl = await uploadCourseAssetWithFallback(
           form.coverImage,
           requestCourseCoverUpload,
+          null,
         );
       }
 
-      // Upload logo image if provided (with server-side fallback)
+      // Upload logo image if provided (already optimized with AVATAR preset)
       if (form.logoImage) {
         logoUrl = await uploadCourseAssetWithFallback(
           form.logoImage,
           requestCourseLogoUpload,
+          null,
         );
       }
 
