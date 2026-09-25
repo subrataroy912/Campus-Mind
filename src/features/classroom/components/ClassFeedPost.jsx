@@ -23,6 +23,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu.jsx";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.jsx";
+import { formatFileSize } from "@/utils/optimizeImage.js";
+import {
   MoreVertical,
   Pin,
   Trash2,
@@ -34,6 +41,7 @@ import {
   ClipboardList,
   BookOpen,
   Calendar,
+  Download,
 } from "lucide-react";
 
 function formatPostDate(isoString) {
@@ -67,6 +75,40 @@ function getYouTubeEmbedUrl(url) {
   return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : null;
 }
 
+function formatAttachmentSubtitle(att) {
+  const rawUrl = String(att?.url || "");
+  if (!rawUrl || rawUrl.startsWith("data:")) {
+    if (att?.sizeBytes) {
+      return `Attached file · ${formatFileSize(att.sizeBytes)}`;
+    }
+    return att?.type === "FILE" ? "Attached document" : "Attachment";
+  }
+  return rawUrl;
+}
+
+async function openOrDownloadAttachment(att) {
+  const rawUrl = String(att?.url || "");
+  if (!rawUrl) return;
+  if (rawUrl.startsWith("data:")) {
+    try {
+      const res = await fetch(rawUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = att?.title || "attachment";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    } catch {
+      // Ignore malformed data URI
+    }
+    return;
+  }
+  window.open(rawUrl, "_blank", "noopener,noreferrer");
+}
+
 function ClassFeedPost({
   post,
   pinned = false,
@@ -79,6 +121,7 @@ function ClassFeedPost({
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
   const [editTitle, setEditTitle] = useState(post.title || "");
   const [editDescription, setEditDescription] = useState(
     post.description || post.content || post.title || "",
@@ -405,37 +448,48 @@ function ClassFeedPost({
           {attachments.length > 0 && (
             <div className="mt-2.5 space-y-2">
               {/* Image Attachments */}
-              {attachments.filter((a) => a.type === "IMAGE").length > 0 && (
+              {attachments.filter(
+                (a) =>
+                  a.type === "IMAGE" || /^data:image\//i.test(a.url || ""),
+              ).length > 0 && (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {attachments
-                    .filter((a) => a.type === "IMAGE")
+                    .filter(
+                      (a) =>
+                        a.type === "IMAGE" ||
+                        /^data:image\//i.test(a.url || ""),
+                    )
                     .map((att, idx) => (
-                      <a
+                      <button
                         key={idx}
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group relative block aspect-video max-h-48 overflow-hidden rounded-lg border border-border/70 bg-muted/20"
+                        type="button"
+                        onClick={() =>
+                          setLightboxImage({
+                            url: att.url,
+                            title: att.title || "Image attachment",
+                          })
+                        }
+                        title="Click to view full image"
+                        className="group relative block aspect-video max-h-52 w-full overflow-hidden rounded-lg border border-border/70 bg-muted/20 text-left cursor-pointer"
                       >
                         <img
                           src={att.url}
                           alt={att.title || "Image attachment"}
-                          className="h-full w-full object-cover transition-transform group-hover:scale-102"
+                          className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-102"
                           loading="lazy"
                         />
-                        {att.title && (
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-2 text-[11px] font-medium text-white truncate">
-                            {att.title}
-                          </div>
-                        )}
-                      </a>
+                      </button>
                     ))}
                 </div>
               )}
 
-              {/* Video Attachments (YouTube or direct) */}
+              {/* Video Link Attachments (YouTube or external http/https video links only; skip raw data:video base64) */}
               {attachments
-                .filter((a) => a.type === "VIDEO")
+                .filter(
+                  (a) =>
+                    a.type === "VIDEO" &&
+                    !/^data:/i.test(a.url || ""),
+                )
                 .map((att, idx) => {
                   const ytUrl = getYouTubeEmbedUrl(att.url);
                   return ytUrl ? (
@@ -465,7 +519,7 @@ function ClassFeedPost({
                           {att.title || "Video Link"}
                         </p>
                         <p className="truncate text-[10px] text-muted-foreground">
-                          {att.url}
+                          {formatAttachmentSubtitle(att)}
                         </p>
                       </div>
                       <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
@@ -473,41 +527,107 @@ function ClassFeedPost({
                   );
                 })}
 
-              {/* File and Link Attachments */}
+              {/* File and Link Attachments (excluding raw data:video/ uploads) */}
               {attachments.filter(
-                (a) => a.type === "FILE" || a.type === "LINK",
+                (a) =>
+                  (a.type === "FILE" || a.type === "LINK") &&
+                  !/^data:image\//i.test(a.url || "") &&
+                  !/^data:video\//i.test(a.url || ""),
               ).length > 0 && (
                 <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                   {attachments
-                    .filter((a) => a.type === "FILE" || a.type === "LINK")
-                    .map((att, idx) => (
-                      <a
-                        key={idx}
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-2 rounded-lg border border-border/70 bg-muted/20 px-2.5 py-1.5 text-xs text-foreground transition-colors hover:border-border hover:bg-muted/50"
-                      >
-                        {att.type === "FILE" ? (
+                    .filter(
+                      (a) =>
+                        (a.type === "FILE" || a.type === "LINK") &&
+                        !/^data:image\//i.test(a.url || "") &&
+                        !/^data:video\//i.test(a.url || ""),
+                    )
+                    .map((att, idx) => {
+                      const isDataUri = /^data:/i.test(att.url || "");
+                      return isDataUri ? (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => openOrDownloadAttachment(att)}
+                          className="group flex w-full items-center gap-2 rounded-lg border border-border/70 bg-muted/20 px-2.5 py-1.5 text-left text-xs text-foreground transition-colors hover:border-border hover:bg-muted/50 cursor-pointer"
+                        >
                           <FileText className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                        ) : (
-                          <Globe className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium transition-colors group-hover:text-primary">
-                            {att.title || att.url}
-                          </p>
-                          <p className="truncate text-[10px] text-muted-foreground">
-                            {att.url}
-                          </p>
-                        </div>
-                        <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" />
-                      </a>
-                    ))}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium transition-colors group-hover:text-primary">
+                              {att.title || "Document"}
+                            </p>
+                            <p className="truncate text-[10px] text-muted-foreground">
+                              {formatAttachmentSubtitle(att)}
+                            </p>
+                          </div>
+                          <Download className="h-3 w-3 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" />
+                        </button>
+                      ) : (
+                        <a
+                          key={idx}
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center gap-2 rounded-lg border border-border/70 bg-muted/20 px-2.5 py-1.5 text-xs text-foreground transition-colors hover:border-border hover:bg-muted/50"
+                        >
+                          {att.type === "FILE" ? (
+                            <FileText className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          ) : (
+                            <Globe className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium transition-colors group-hover:text-primary">
+                              {att.title || att.url}
+                            </p>
+                            <p className="truncate text-[10px] text-muted-foreground">
+                              {formatAttachmentSubtitle(att)}
+                            </p>
+                          </div>
+                          <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" />
+                        </a>
+                      );
+                    })}
                 </div>
               )}
             </div>
           )}
+
+          {/* In-App Image Lightbox Modal */}
+          <Dialog
+            open={Boolean(lightboxImage)}
+            onOpenChange={(open) => {
+              if (!open) setLightboxImage(null);
+            }}
+          >
+            <DialogContent className="max-w-3xl p-3 sm:p-4">
+              <DialogHeader className="flex flex-row items-center justify-between pr-6">
+                <DialogTitle className="truncate text-xs sm:text-sm font-semibold">
+                  {lightboxImage?.title || "Image preview"}
+                </DialogTitle>
+                {lightboxImage && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    onClick={() => openOrDownloadAttachment(lightboxImage)}
+                    className="gap-1.5 shrink-0"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Download</span>
+                  </Button>
+                )}
+              </DialogHeader>
+              {lightboxImage?.url && (
+                <div className="mt-1 flex max-h-[75dvh] items-center justify-center overflow-hidden rounded-lg bg-black/5 dark:bg-black/40">
+                  <img
+                    src={lightboxImage.url}
+                    alt={lightboxImage.title || "Full preview"}
+                    className="max-h-[72dvh] w-auto max-w-full object-contain rounded-md"
+                  />
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Discussion / Comments Toggle */}
           <div className="mt-2.5 flex items-center">

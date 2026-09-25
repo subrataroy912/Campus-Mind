@@ -41,6 +41,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover.jsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { routes } from "@/routes/paths.js";
 import { formatLastActive } from "@/utils/formatLastActive.js";
@@ -311,6 +317,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
   const [sendCooldownLeftMs, setSendCooldownLeftMs] = useState(0);
   const [pendingMessages, setPendingMessages] = useState([]);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const messagesEndRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
@@ -1231,11 +1238,16 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                                   key={`${att.url}-${idx}`}
                                   className="relative overflow-hidden rounded-lg border border-border/40"
                                 >
-                                  <a
-                                    href={att.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="block"
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      !isAttUploading &&
+                                      setLightboxImage({
+                                        url: att.url,
+                                        name: att.name || "Chat image",
+                                      })
+                                    }
+                                    className="block cursor-pointer"
                                   >
                                     <img
                                       src={att.url}
@@ -1243,11 +1255,11 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                                       className={`max-h-56 w-auto object-cover transition ${
                                         isAttUploading
                                           ? "opacity-70 blur-[1px]"
-                                          : "opacity-100"
+                                          : "opacity-100 hover:opacity-95"
                                       }`}
                                       loading="lazy"
                                     />
-                                  </a>
+                                  </button>
                                   {isAttUploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/45">
                                       <span className="inline-flex items-center gap-1.5 rounded-full bg-black/75 px-3 py-1 text-[11px] font-medium text-white shadow-sm">
@@ -1552,6 +1564,30 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           )}
         </Button>
       </form>
+
+      <Dialog
+        open={Boolean(lightboxImage)}
+        onOpenChange={(open) => {
+          if (!open) setLightboxImage(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl p-3 sm:p-4">
+          <DialogHeader>
+            <DialogTitle className="truncate text-xs sm:text-sm font-semibold">
+              {lightboxImage?.name || "Image preview"}
+            </DialogTitle>
+          </DialogHeader>
+          {lightboxImage?.url && (
+            <div className="mt-1 flex max-h-[75dvh] items-center justify-center overflow-hidden rounded-lg bg-black/5 dark:bg-black/40">
+              <img
+                src={lightboxImage.url}
+                alt={lightboxImage.name || "Preview"}
+                className="max-h-[72dvh] w-auto max-w-full object-contain rounded-md"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

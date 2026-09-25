@@ -1,13 +1,21 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { ClassroomAvatar } from "./ClassroomAvatar.jsx";
+import { toast } from "@/components/ui/toast.jsx";
+import {
+  fileToDataUrl,
+  IMAGE_PROFILES,
+  MAX_RAW_IMAGE_BYTES,
+  optimizeImage,
+} from "@/utils/optimizeImage.js";
 import { Image, Paperclip, Video, Link2, X, Plus, Upload } from "lucide-react";
 
 export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState([]);
-  const [activeDrawer, setActiveDrawer] = useState(null); 
+  const [activeDrawer, setActiveDrawer] = useState(null);
+  const [isOptimizingAttachment, setIsOptimizingAttachment] = useState(false);
 
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaTitle, setMediaTitle] = useState("");
@@ -22,11 +30,74 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
   const userName = user?.name || user?.displayName || user?.firstName || "You";
   const userId = user?.id || null;
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
 
-    const isImg = file.type.startsWith("image/");
+    const isVideoFile =
+      file.type?.startsWith("video/") ||
+      /\.(mp4|webm|mov|mkv|avi|m4v)$/i.test(file.name || "");
+    if (isVideoFile) {
+      toast.add({
+        title: "Video file uploads not supported",
+        description:
+          "Please share a YouTube or external video link instead of uploading a video file directly.",
+        type: "error",
+      });
+      return;
+    }
+
+    const isImg = file.type?.startsWith("image/");
+    if (isImg) {
+      if (file.size > MAX_RAW_IMAGE_BYTES) {
+        toast.add({
+          title: "Image too large",
+          description: "Please select an image smaller than 20 MB.",
+          type: "error",
+        });
+        return;
+      }
+      setIsOptimizingAttachment(true);
+      try {
+        const optimizedFile = await optimizeImage(
+          file,
+          IMAGE_PROFILES.FEED_ATTACHMENT,
+        );
+        const dataUrl = await fileToDataUrl(optimizedFile);
+        setAttachments((prev) => [
+          ...prev,
+          {
+            type: "IMAGE",
+            title: file.name,
+            url: dataUrl,
+            sizeBytes: optimizedFile.size,
+          },
+        ]);
+        setActiveDrawer(null);
+      } catch {
+        toast.add({
+          title: "Could not process image",
+          description: "Please try another image file (JPEG, PNG, or WebP).",
+          type: "error",
+        });
+      } finally {
+        setIsOptimizingAttachment(false);
+      }
+      return;
+    }
+
+    // Document / non-video file limit (2 MB for inline attachments)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.add({
+        title: "File too large",
+        description:
+          "Please attach documents under 2 MB or share an external cloud link.",
+        type: "error",
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result;
@@ -34,7 +105,7 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
         setAttachments((prev) => [
           ...prev,
           {
-            type: isImg ? "IMAGE" : "FILE",
+            type: "FILE",
             title: file.name,
             url: dataUrl,
             sizeBytes: file.size,
@@ -43,7 +114,6 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
       }
     };
     reader.readAsDataURL(file);
-    e.target.value = "";
     setActiveDrawer(null);
   };
 
@@ -173,11 +243,14 @@ export default function ClassPostBox({ onSubmit, isSubmitting = false }) {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  disabled={isOptimizingAttachment}
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-foreground border border-border hover:bg-muted/80 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-foreground border border-border hover:bg-muted/80 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   <Upload className="h-3 w-3" />
-                  Upload from computer
+                  {isOptimizingAttachment
+                    ? "Optimizing image…"
+                    : "Upload from computer"}
                 </button>
                 <input
                   type="file"
