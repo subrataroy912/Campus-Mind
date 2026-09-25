@@ -1,5 +1,98 @@
 import { baseApi } from "@/app/baseApi.js";
 
+export const HISTORY_PAGE_LIMIT = 30;
+
+export function syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId) {
+  if (!spaceId || !payload) return;
+
+  if (payload.type === "TEXT_MESSAGE" || payload.type === "MEDIA_MESSAGE") {
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getSpaceChatHistory",
+        { spaceId, limit: HISTORY_PAGE_LIMIT },
+        (draft) => {
+          if (!draft) return;
+          const list = Array.isArray(draft.items) ? draft.items : [];
+          const existsIdx = list.findIndex((m) => m.eventId === payload.eventId);
+          if (existsIdx >= 0) {
+            list[existsIdx] = payload;
+          } else {
+            list.push(payload);
+          }
+          draft.items = list;
+          draft.messages = list;
+        },
+      ),
+    );
+
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getSpaceChatRooms",
+        undefined,
+        (draft) => {
+          if (!Array.isArray(draft)) return;
+          const room = draft.find((r) => r.spaceId === spaceId);
+          if (!room) return;
+          room.lastMessageText =
+            payload.content ||
+            (payload.attachments?.length ? "Shared an attachment" : "");
+          room.lastMessageSender =
+            payload.sender?.username || room.lastMessageSender || null;
+          room.lastMessageAt = payload.timestamp || new Date().toISOString();
+          if (
+            currentUserId &&
+            String(payload.sender?.userId || payload.senderId) ===
+              String(currentUserId)
+          ) {
+            room.unreadCount = 0;
+          }
+          draft.sort(
+            (a, b) =>
+              new Date(b.lastMessageAt || 0).getTime() -
+              new Date(a.lastMessageAt || 0).getTime(),
+          );
+        },
+      ),
+    );
+    return;
+  }
+
+  if (payload.type === "REACTION_ADDED" || payload.type === "REACTION_REMOVED") {
+    const targetId = payload.targetMessageId || payload.eventId;
+    if (!targetId || !payload.reactions) return;
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getSpaceChatHistory",
+        { spaceId, limit: HISTORY_PAGE_LIMIT },
+        (draft) => {
+          if (!draft || !Array.isArray(draft.items)) return;
+          const msg = draft.items.find((m) => m.eventId === targetId);
+          if (msg) {
+            msg.reactions = payload.reactions;
+          }
+        },
+      ),
+    );
+    return;
+  }
+
+  if (payload.type === "MESSAGE_DELETED") {
+    const targetId = payload.targetMessageId || payload.eventId;
+    if (!targetId) return;
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getSpaceChatHistory",
+        { spaceId, limit: HISTORY_PAGE_LIMIT },
+        (draft) => {
+          if (!draft || !Array.isArray(draft.items)) return;
+          draft.items = draft.items.filter((m) => m.eventId !== targetId);
+          draft.messages = draft.items;
+        },
+      ),
+    );
+  }
+}
+
 export const messagesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSpaceChatRooms: builder.query({
@@ -9,10 +102,10 @@ export const messagesApi = baseApi.injectEndpoints({
         return Array.isArray(list) ? list : [];
       },
       providesTags: ["Notifications"],
-      keepUnusedDataFor: 120,
+      keepUnusedDataFor: 300,
     }),
     getSpaceChatHistory: builder.query({
-      query: ({ spaceId, before, cursor, limit = 30 }) => ({
+      query: ({ spaceId, before, cursor, limit = HISTORY_PAGE_LIMIT }) => ({
         url: `/messages/spaces/${spaceId}`,
         params: {
           ...(before || cursor ? { before: before || cursor } : {}),
@@ -35,7 +128,7 @@ export const messagesApi = baseApi.injectEndpoints({
           joinedAt: payload?.joinedAt ?? null,
         };
       },
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 300,
     }),
     uploadSpaceChatImage: builder.mutation({
       query: ({ spaceId, file }) => {
@@ -56,7 +149,16 @@ export const messagesApi = baseApi.injectEndpoints({
         body: { content, attachments },
       }),
       transformResponse: (res) => res?.data ?? res,
-      invalidatesTags: ["Notifications"],
+      async onQueryStarted({ spaceId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data) {
+            syncEventIntoRoomCache(dispatch, spaceId, data, null);
+          }
+        } catch {
+          // Handled by caller
+        }
+      },
     }),
     toggleSpaceReactionRest: builder.mutation({
       query: ({ spaceId, targetMessageId, emoji }) => ({
@@ -111,4 +213,3 @@ export const {
   useMarkSpaceChatReadMutation,
   useDeleteSpaceMessageMutation,
 } = messagesApi;
-

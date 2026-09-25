@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { apiBaseUrl } from "@/app/baseApi.js";
 import { selectAccessToken, selectCurrentUserId } from "@/features/auth/authSelectors.js";
 import {
+  syncEventIntoRoomCache,
   useSendSpaceMessageRestMutation,
   useToggleSpaceReactionRestMutation,
 } from "../api/messagesApi.js";
@@ -22,6 +23,7 @@ export function useSpaceStompChat(spaceIdOrOptions) {
       ? spaceIdOrOptions
       : spaceIdOrOptions?.spaceId;
 
+  const dispatch = useDispatch();
   const accessToken = useSelector(selectAccessToken);
   const currentUserId = useSelector(selectCurrentUserId);
 
@@ -95,6 +97,7 @@ export function useSpaceStompChat(spaceIdOrOptions) {
           }
           return [...prev, payload];
         });
+        syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId);
         return;
       }
 
@@ -115,6 +118,7 @@ export function useSpaceStompChat(spaceIdOrOptions) {
                 : m,
             ),
           );
+          syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId);
         }
         return;
       }
@@ -128,10 +132,11 @@ export function useSpaceStompChat(spaceIdOrOptions) {
           setLiveEvents((prev) =>
             prev.filter((m) => m.eventId !== targetId),
           );
+          syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId);
         }
       }
     },
-    [currentUserId],
+    [currentUserId, dispatch, spaceId],
   );
 
   useEffect(() => {

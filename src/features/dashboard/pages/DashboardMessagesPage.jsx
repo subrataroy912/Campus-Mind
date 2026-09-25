@@ -43,6 +43,7 @@ import {
 } from "@/utils/optimizeImage.js";
 
 const QUICK_EMOJIS = ["👍", "❤️", "🚀", "🔥", "🎉"];
+const SEND_COOLDOWN_MS = 1500;
 
 function formatChatTime(isoString) {
   if (!isoString) return "";
@@ -163,17 +164,47 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const [hasOlderMore, setHasOlderMore] = useState(null);
   const [locallyDeletedIds, setLocallyDeletedIds] = useState(() => new Set());
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
+  const [sendCooldownLeftMs, setSendCooldownLeftMs] = useState(0);
 
   const messagesEndRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
   const imageInputRef = useRef(null);
+  const cooldownTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
+  }, []);
+
+  const startSendCooldown = () => {
+    if (cooldownTimerRef.current) {
+      clearInterval(cooldownTimerRef.current);
+    }
+    const expiresAt = Date.now() + SEND_COOLDOWN_MS;
+    setSendCooldownLeftMs(SEND_COOLDOWN_MS);
+    cooldownTimerRef.current = setInterval(() => {
+      const remaining = Math.max(0, expiresAt - Date.now());
+      setSendCooldownLeftMs(remaining);
+      if (remaining <= 0 && cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+        cooldownTimerRef.current = null;
+      }
+    }, 100);
+  };
 
   const {
     data: initialHistory,
     isLoading: isHistoryLoading,
   } = useGetSpaceChatHistoryQuery(
     { spaceId: room.spaceId, limit: 30 },
-    { skip: !room.spaceId },
+    {
+      skip: !room.spaceId,
+      refetchOnMountOrArgChange: false,
+      refetchOnFocus: false,
+    },
   );
 
   const [fetchOlderPage, { isFetching: isFetchingOlder }] =
@@ -193,11 +224,35 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     notifyTyping,
   } = useSpaceStompChat(room.spaceId);
 
-  // Mark chat read on room open and when new live events arrive
+  // Mark chat read only when unread messages exist on room open or when a live message from another user arrives (debounced)
+  const lastLiveEvent = liveEvents[liveEvents.length - 1] || null;
+  const lastLiveSenderId =
+    lastLiveEvent?.sender?.userId || lastLiveEvent?.senderId || null;
+
   useEffect(() => {
-    if (!room.spaceId) return;
-    markSpaceChatRead(room.spaceId);
-  }, [room.spaceId, liveEvents.length, markSpaceChatRead]);
+    if (!room.spaceId) return undefined;
+    const hasInitialUnread = (room.unreadCount || 0) > 0;
+    const isFromOtherUser =
+      lastLiveSenderId &&
+      String(lastLiveSenderId) !== String(currentUserId);
+
+    if (!hasInitialUnread && !isFromOtherUser) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      markSpaceChatRead(room.spaceId);
+    }, isFromOtherUser ? 800 : 150);
+
+    return () => clearTimeout(timer);
+  }, [
+    room.spaceId,
+    room.unreadCount,
+    lastLiveEvent?.eventId,
+    lastLiveSenderId,
+    currentUserId,
+    markSpaceChatRead,
+  ]);
 
   const effectiveCursor =
     olderCursor !== null ? olderCursor : (initialHistory?.nextCursor ?? null);
@@ -346,7 +401,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
 
   const handleSend = async (event) => {
     event.preventDefault();
-    if (isUploadingImage) return;
+    if (isUploadingImage || sendCooldownLeftMs > 0) return;
 
     const text = draft.trim();
     const cleanUrl = attachmentUrl.trim();
@@ -434,6 +489,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
       setShowAttachmentInput(false);
       handleClearImageFile();
       shouldAutoScrollRef.current = true;
+      startSendCooldown();
     }
   };
 
@@ -590,7 +646,8 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           mergedMessages.map((message) => {
             const isMine =
               currentUserId &&
-              String(message.sender?.userId) === String(currentUserId);
+              String(message.sender?.userId || message.senderId) ===
+                String(currentUserId);
             const canDelete = isMine || isSpaceModerator;
             const reactionsMap = message.reactions || {};
             const reactionEntries = Object.entries(reactionsMap).filter(
@@ -601,35 +658,43 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
               <div
                 key={message.eventId}
                 className={`group flex items-start gap-2.5 ${
-                  isMine ? "flex-row-reverse" : "flex-row"
+                  isMine ? "justify-end" : "flex-row"
                 }`}
               >
-                <ClassroomAvatar
-                  avatar={message.sender?.avatarUrl}
-                  name={message.sender?.username || "Member"}
-                  size="h-7 w-7 shrink-0 mt-0.5"
-                />
+                {!isMine && (
+                  <ClassroomAvatar
+                    avatar={message.sender?.avatarUrl}
+                    name={message.sender?.username || "Member"}
+                    size="h-7 w-7 shrink-0 mt-0.5"
+                  />
+                )}
 
                 <div
                   className={`flex max-w-[82%] sm:max-w-[72%] flex-col ${
                     isMine ? "items-end" : "items-start"
                   }`}
                 >
-                  {/* Sender Header */}
+                  {/* Sender Header (only shown for other members; own messages show timestamp only) */}
                   <div className="mb-0.5 flex items-center gap-1.5 px-0.5">
-                    <span className="text-[11px] font-semibold text-text-heading">
-                      {isMine
-                        ? "You"
-                        : message.sender?.username || "Space Member"}
-                    </span>
-                    <RoleBadge role={message.sender?.role} />
+                    {!isMine && (
+                      <>
+                        <span className="text-[11px] font-semibold text-text-heading">
+                          {message.sender?.username || "Space Member"}
+                        </span>
+                        <RoleBadge role={message.sender?.role} />
+                      </>
+                    )}
                     <span className="text-[10px] text-text-muted">
                       {formatChatTime(message.timestamp)}
                     </span>
                   </div>
 
                   {/* Message Bubble + Quick Actions */}
-                  <div className="relative flex items-center gap-1.5">
+                  <div
+                    className={`relative flex items-center gap-1.5 ${
+                      isMine ? "flex-row-reverse" : "flex-row"
+                    }`}
+                  >
                     <div
                       className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-2xs ${
                         isMine
@@ -926,13 +991,23 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           size="icon"
           disabled={
             isUploadingImage ||
+            sendCooldownLeftMs > 0 ||
             (!draft.trim() && !attachmentUrl.trim() && !selectedImageFile)
           }
+          title={
+            sendCooldownLeftMs > 0
+              ? `Wait ${(sendCooldownLeftMs / 1000).toFixed(1)}s before sending next message`
+              : "Send message"
+          }
           aria-label="Send message"
-          className="min-h-9 min-w-9 sm:h-8 sm:w-8"
+          className="min-h-9 min-w-9 sm:h-8 sm:w-8 px-1.5"
         >
           {isUploadingImage ? (
             <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+          ) : sendCooldownLeftMs > 0 ? (
+            <span className="text-[10px] font-semibold tabular-nums">
+              {(sendCooldownLeftMs / 1000).toFixed(1)}s
+            </span>
           ) : (
             <Send size={13} aria-hidden="true" />
           )}
@@ -951,7 +1026,9 @@ export default function DashboardMessagesPage() {
     data: rooms = [],
     isLoading,
     error,
-  } = useGetSpaceChatRoomsQuery();
+  } = useGetSpaceChatRoomsQuery(undefined, {
+    refetchOnFocus: false,
+  });
 
   const [query, setQuery] = useState("");
   const [selectedSpaceId, setSelectedSpaceId] = useState(
