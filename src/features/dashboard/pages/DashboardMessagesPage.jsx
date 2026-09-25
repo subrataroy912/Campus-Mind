@@ -15,12 +15,14 @@ import {
   Shield,
   SmilePlus,
   Trash2,
+  Users,
   Wifi,
   WifiOff,
   X,
 } from "lucide-react";
 
 import { ClassroomAvatar } from "@/features/classroom/components/ClassroomAvatar.jsx";
+import { useGetClassroomRosterQuery } from "@/features/classroom/api/classroomApi.js";
 import {
   useDeleteSpaceMessageMutation,
   useGetSpaceChatHistoryQuery,
@@ -32,8 +34,14 @@ import {
 import { useSpaceStompChat } from "@/features/messages/hooks/useSpaceStompChat.js";
 import { selectCurrentUserId } from "@/features/auth/authSelectors.js";
 import { Button } from "@/components/ui/button.jsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { routes } from "@/routes/paths.js";
+import { formatLastActive } from "@/utils/formatLastActive.js";
 import {
   fileToDataUrl,
   formatFileSize,
@@ -97,6 +105,11 @@ function SpaceRoomListItem({ room, active, onSelect }) {
     : "No messages yet — say hello!";
   const lastTime = room.lastMessageAt || lastMsg?.timestamp;
   const roomSubtitle = room.subtitle || room.section || room.subject || "";
+  const onlineCount = Math.max(
+    1,
+    Number(room.onlineCount) ||
+      (Array.isArray(room.onlineUserIds) ? room.onlineUserIds.length : 1),
+  );
 
   return (
     <button
@@ -108,11 +121,17 @@ function SpaceRoomListItem({ room, active, onSelect }) {
           : "hover:bg-canvas/70 text-text-main"
       }`}
     >
-      <ClassroomAvatar
-        avatar={room.logoUrl}
-        name={room.title}
-        size="h-9 w-9"
-      />
+      <div className="relative shrink-0">
+        <ClassroomAvatar
+          avatar={room.logoUrl}
+          name={room.title}
+          size="h-9 w-9"
+        />
+        <span
+          title={`${onlineCount} online`}
+          className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500"
+        />
+      </div>
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-1.5">
           <span
@@ -129,11 +148,18 @@ function SpaceRoomListItem({ room, active, onSelect }) {
           )}
         </span>
 
-        {roomSubtitle && (
-          <span className="block truncate text-[11px] text-text-muted">
-            {roomSubtitle}
+        <span className="mt-0.5 flex items-center gap-1.5 text-[10px] text-text-muted">
+          <span className="inline-flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400 shrink-0">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {onlineCount} online
           </span>
-        )}
+          {roomSubtitle && (
+            <>
+              <span>•</span>
+              <span className="truncate">{roomSubtitle}</span>
+            </>
+          )}
+        </span>
 
         <span className="mt-0.5 flex items-center justify-between gap-1.5">
           <span className="truncate text-xs text-text-muted">
@@ -214,11 +240,18 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const [markSpaceChatRead] = useMarkSpaceChatReadMutation();
   const [uploadSpaceChatImage] = useUploadSpaceChatImageMutation();
 
+  const { data: spaceRoster = [] } = useGetClassroomRosterQuery(room.spaceId, {
+    skip: !room.spaceId,
+    refetchOnMountOrArgChange: true,
+  });
+
   const {
     liveEvents = [],
     reactionPatches = {},
     deletedEventIds = [],
     typingUsers = [],
+    onlineUserIds: stompOnlineUserIds = [],
+    userPresenceMap = {},
     isConnected,
     sendMessage: sendStompMessage,
     toggleReaction,
@@ -629,6 +662,78 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     [typingUsers, currentUserId],
   );
 
+  const onlineUserIdsSet = useMemo(() => {
+    const set = new Set();
+    if (currentUserId) {
+      set.add(String(currentUserId));
+    }
+    if (Array.isArray(room.onlineUserIds)) {
+      room.onlineUserIds.forEach((id) => id && set.add(String(id)));
+    }
+    if (Array.isArray(stompOnlineUserIds)) {
+      stompOnlineUserIds.forEach((id) => id && set.add(String(id)));
+    }
+    if (Array.isArray(spaceRoster)) {
+      spaceRoster.forEach((m) => {
+        const uid = m?.userId || m?.id;
+        if (!uid) return;
+        const liveOverride = userPresenceMap[String(uid)];
+        if (liveOverride) {
+          if (liveOverride.online) set.add(String(uid));
+          else set.delete(String(uid));
+        } else if (m.online) {
+          set.add(String(uid));
+        }
+      });
+    }
+    Object.entries(userPresenceMap).forEach(([uid, state]) => {
+      if (state?.online) set.add(String(uid));
+      else if (String(uid) !== String(currentUserId)) set.delete(String(uid));
+    });
+    return set;
+  }, [
+    currentUserId,
+    room.onlineUserIds,
+    stompOnlineUserIds,
+    spaceRoster,
+    userPresenceMap,
+  ]);
+
+  const { onlineMembers, offlineMembers, activeOnlineCount } = useMemo(() => {
+    const list = Array.isArray(spaceRoster) ? spaceRoster : [];
+    const on = [];
+    const off = [];
+    list.forEach((m) => {
+      const uid = String(m?.userId || m?.id || "");
+      if (!uid) return;
+      const isUserOnline = onlineUserIdsSet.has(uid);
+      const lastActive =
+        userPresenceMap[uid]?.lastActiveAt || m?.lastActiveAt || m?.joinedAt;
+      const enriched = {
+        ...m,
+        userId: uid,
+        online: isUserOnline,
+        lastActiveAt: lastActive,
+      };
+      if (isUserOnline) {
+        on.push(enriched);
+      } else {
+        off.push(enriched);
+      }
+    });
+    const count = Math.max(
+      1,
+      on.length,
+      onlineUserIdsSet.size,
+      Number(room.onlineCount) || 1,
+    );
+    return {
+      onlineMembers: on,
+      offlineMembers: off,
+      activeOnlineCount: count,
+    };
+  }, [spaceRoster, onlineUserIdsSet, userPresenceMap, room.onlineCount]);
+
   return (
     <div className="flex h-full w-full flex-col min-w-0">
       {/* Header */}
@@ -642,11 +747,14 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           >
             <ArrowLeft size={18} />
           </button>
-          <ClassroomAvatar
-            avatar={room.logoUrl}
-            name={room.title}
-            size="h-8 w-8"
-          />
+          <div className="relative shrink-0">
+            <ClassroomAvatar
+              avatar={room.logoUrl}
+              name={room.title}
+              size="h-8 w-8"
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
+          </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <p className="truncate text-xs sm:text-sm font-semibold text-text-heading">
@@ -670,6 +778,134 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                   </>
                 )}
               </span>
+
+              <span>•</span>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition cursor-pointer"
+                    title="View online space members"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <Users className="h-2.5 w-2.5" />
+                    <span>{activeOnlineCount} online</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  className="w-64 p-2.5 space-y-2.5"
+                >
+                  <div className="flex items-center justify-between border-b border-border/70 pb-1.5">
+                    <span className="text-[11px] font-semibold text-text-heading">
+                      Space Presence
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      {activeOnlineCount} online
+                    </span>
+                  </div>
+
+                  <div className="max-h-56 space-y-1.5 overflow-y-auto pr-0.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                      Online Now ({onlineMembers.length || activeOnlineCount})
+                    </p>
+                    {onlineMembers.length === 0 ? (
+                      <p className="py-1 text-[11px] text-text-muted">
+                        You are currently active in this space.
+                      </p>
+                    ) : (
+                      onlineMembers.map((member) => {
+                        const mName =
+                          member.name ||
+                          member.displayName ||
+                          "Space Member";
+                        return (
+                          <Link
+                            key={member.userId}
+                            to={routes.user(member.userId)}
+                            className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1 hover:bg-canvas transition"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="relative shrink-0">
+                                <ClassroomAvatar
+                                  avatar={member.avatarUrl || member.avatar}
+                                  name={mName}
+                                  userId={member.userId}
+                                  size="h-6 w-6"
+                                />
+                                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-surface bg-emerald-500" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-xs font-medium text-text-heading">
+                                  {mName}
+                                  {String(member.userId) ===
+                                    String(currentUserId) && (
+                                    <span className="ml-1 text-[10px] text-text-muted">
+                                      (You)
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                                  Online now
+                                </p>
+                              </div>
+                            </div>
+                            <RoleBadge role={member.role} />
+                          </Link>
+                        );
+                      })
+                    )}
+
+                    {offlineMembers.length > 0 && (
+                      <>
+                        <p className="pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                          Offline ({offlineMembers.length})
+                        </p>
+                        {offlineMembers.map((member) => {
+                          const mName =
+                            member.name ||
+                            member.displayName ||
+                            "Space Member";
+                          return (
+                            <Link
+                              key={member.userId}
+                              to={routes.user(member.userId)}
+                              className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1 opacity-75 hover:opacity-100 hover:bg-canvas transition"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="relative shrink-0">
+                                  <ClassroomAvatar
+                                    avatar={member.avatarUrl || member.avatar}
+                                    name={mName}
+                                    userId={member.userId}
+                                    size="h-6 w-6"
+                                  />
+                                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-surface bg-muted-foreground/40" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-xs font-medium text-text-heading">
+                                    {mName}
+                                  </p>
+                                  <p className="text-[10px] text-text-muted">
+                                    {formatLastActive(
+                                      member.lastActiveAt,
+                                      false,
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              <RoleBadge role={member.role} />
+                            </Link>
+                          );
+                        })}
+                      </>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
               {roomSubtitle && (
                 <>
                   <span>•</span>
@@ -750,10 +986,18 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           </div>
         ) : (
           mergedMessages.map((message) => {
+            const senderId = message.sender?.userId || message.senderId;
             const isMine =
               currentUserId &&
-              String(message.sender?.userId || message.senderId) ===
-                String(currentUserId);
+              String(senderId) === String(currentUserId);
+            const isSenderOnline =
+              isMine ||
+              (senderId && onlineUserIdsSet.has(String(senderId))) ||
+              Boolean(message.sender?.online);
+            const senderLastActive =
+              (senderId && userPresenceMap[String(senderId)]?.lastActiveAt) ||
+              message.sender?.lastActiveAt ||
+              message.timestamp;
             const canDelete = isMine || isSpaceModerator;
             const reactionsMap = message.reactions || {};
             const reactionEntries = Object.entries(reactionsMap).filter(
@@ -768,11 +1012,23 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                 }`}
               >
                 {!isMine && (
-                  <ClassroomAvatar
-                    avatar={message.sender?.avatarUrl}
-                    name={message.sender?.username || "Member"}
-                    size="h-7 w-7 shrink-0 mt-0.5"
-                  />
+                  <div
+                    className="relative shrink-0 mt-0.5"
+                    title={formatLastActive(senderLastActive, isSenderOnline)}
+                  >
+                    <ClassroomAvatar
+                      avatar={message.sender?.avatarUrl}
+                      name={message.sender?.username || "Member"}
+                      size="h-7 w-7"
+                    />
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${
+                        isSenderOnline
+                          ? "bg-emerald-500"
+                          : "bg-muted-foreground/40"
+                      }`}
+                    />
+                  </div>
                 )}
 
                 <div

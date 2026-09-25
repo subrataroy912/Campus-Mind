@@ -28,6 +28,7 @@ import {
 import { toast } from "@/components/ui/toast.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
+import { formatLastActive } from "@/utils/formatLastActive.js";
 import { parseApiError } from "@/lib/errorUtils.js";
 
 export default function ProfileHeader({
@@ -44,6 +45,11 @@ export default function ProfileHeader({
   const { unlockCreator } = useAuth();
   const [showCreatorConfirm, setShowCreatorConfirm] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const isProfileOnline = Boolean(isOwner || profile?.online);
+  const activeStatusLabel = formatLastActive(
+    profile?.lastActiveAt || profile?.joinedAt,
+    isProfileOnline,
+  );
 
   const handleConfirmUnlock = async () => {
     setIsUnlocking(true);
@@ -147,6 +153,17 @@ export default function ProfileHeader({
                 )}
               </div>
 
+              {!isOwner && (
+                <span
+                  title={activeStatusLabel}
+                  className={`absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card ${
+                    isProfileOnline
+                      ? "bg-emerald-500"
+                      : "bg-muted-foreground/40"
+                  }`}
+                />
+              )}
+
               {isOwner && (onAvatarUpload || onAvatarDelete) && (
                 <div className="absolute -bottom-0.5 -right-0.5 flex items-center gap-0.5">
                   {onAvatarUpload && (
@@ -200,6 +217,24 @@ export default function ProfileHeader({
                     Creator
                   </span>
                 )}
+
+                <span
+                  data-slot="presence-badge"
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.2 text-[10px] font-medium ${
+                    isProfileOnline
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-muted/60 text-muted-foreground"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isProfileOnline
+                        ? "bg-emerald-500"
+                        : "bg-muted-foreground/50"
+                    }`}
+                  />
+                  {activeStatusLabel}
+                </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">

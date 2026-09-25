@@ -41,6 +41,7 @@ import {
   selectAccessToken,
   selectCurrentUser,
 } from "../features/auth/authSelectors.js";
+import { usePresenceHeartbeat } from "@/features/presence/usePresenceHeartbeat.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
@@ -55,6 +56,7 @@ function resetApiCache(dispatch) {
 }
 
 export function AuthProvider({ children }) {
+  usePresenceHeartbeat();
   const dispatch = useDispatch();
   const store = useStore();
   const matches = useMatches();

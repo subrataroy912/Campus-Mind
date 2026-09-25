@@ -38,6 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover.jsx";
+import { formatLastActive } from "@/utils/formatLastActive.js";
 
 // File-scoped, memoized row component to avoid re-creation on parent re-renders
 const MemberRow = React.memo(function MemberRow({
@@ -60,6 +61,12 @@ const MemberRow = React.memo(function MemberRow({
   const isOwner = role === "owner";
   const isAdmin = role === "admin";
   const isMember = !isOwner && !isAdmin;
+  const isOnline = Boolean(member?.online);
+  const statusLabel = formatLastActive(
+    member?.lastActiveAt || member?.joinedAt,
+    isOnline,
+    { shortOnline: true },
+  );
 
   // Permissions:
   // - Cannot manage space owner
@@ -70,29 +77,45 @@ const MemberRow = React.memo(function MemberRow({
 
   return (
     <div className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-canvas/50 transition-colors">
-      <div className="relative">
+      <div className="relative" title={statusLabel}>
         <ClassroomAvatar
           name={memberName}
           userId={memberId}
           avatar={member?.avatar || member?.avatarUrl}
           size="h-8 w-8"
         />
-        {member?.online && (
-          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-success" />
-        )}
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${
+            isOnline ? "bg-emerald-500" : "bg-muted-foreground/35"
+          }`}
+        />
       </div>
-      {memberId ? (
-        <Link
-          to={routes.user(memberId)}
-          className="min-w-0 flex-1 truncate text-sm font-medium text-text-main hover:text-primary hover:underline transition-colors"
+      <div className="min-w-0 flex-1">
+        {memberId ? (
+          <Link
+            to={routes.user(memberId)}
+            className="block truncate text-sm font-medium text-text-main hover:text-primary hover:underline transition-colors"
+          >
+            {memberName}
+          </Link>
+        ) : (
+          <span className="block truncate text-sm font-medium text-text-main">
+            {memberName}
+          </span>
+        )}
+        <span
+          className={`inline-flex items-center gap-1 text-[11px] ${
+            isOnline
+              ? "font-medium text-emerald-600 dark:text-emerald-400"
+              : "text-text-muted"
+          }`}
         >
-          {memberName}
-        </Link>
-      ) : (
-        <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-main">
-          {memberName}
+          {isOnline && (
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          )}
+          {statusLabel}
         </span>
-      )}
+      </div>
       {isOwner && (
         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
           Owner
@@ -396,15 +419,36 @@ export function MembersTab({
       },
     );
 
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+
+  const enrichedRoster = useMemo(() => {
+    return (roster || []).map((member) => {
+      const mId = member?.id || member?.userId;
+      const isSelf = user?.id && mId && String(mId) === String(user.id);
+      return {
+        ...member,
+        online: Boolean(member?.online || isSelf),
+      };
+    });
+  }, [roster, user?.id]);
+
+  const onlineMemberCount = useMemo(
+    () => enrichedRoster.filter((m) => m.online).length,
+    [enrichedRoster],
+  );
+
   const members = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return roster;
-    return roster.filter((member) =>
-      String(member?.name || member?.displayName || "")
-        .toLowerCase()
-        .includes(q),
-    );
-  }, [roster, query]);
+    return enrichedRoster
+      .filter((member) => {
+        if (showOnlineOnly && !member.online) return false;
+        if (!q) return true;
+        return String(member?.name || member?.displayName || "")
+          .toLowerCase()
+          .includes(q);
+      })
+      .sort((a, b) => Number(Boolean(b.online)) - Number(Boolean(a.online)));
+  }, [enrichedRoster, query, showOnlineOnly]);
 
   const staffMembers = useMemo(() => {
     return members.filter((x) => {
@@ -548,6 +592,10 @@ export function MembersTab({
               <span className="rounded-full bg-primary/10 px-2 py-0.2 text-[10px] font-semibold text-primary">
                 {classroom?.memberCount || roster.length}
               </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                {onlineMemberCount} online
+              </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               Enrolled members and administrators in this space.
@@ -604,17 +652,44 @@ export function MembersTab({
           )}
         </div>
 
-        <div className="relative">
-          <Search
-            className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search roster members by name…"
-            className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="relative flex-1">
+            <Search
+              className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search roster members by name…"
+              className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
+            />
+          </div>
+          <div className="inline-flex items-center rounded-lg border border-border/60 bg-muted/30 p-0.5 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setShowOnlineOnly(false)}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                !showOnlineOnly
+                  ? "bg-card text-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              All ({enrichedRoster.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowOnlineOnly(true)}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                showOnlineOnly
+                  ? "bg-card text-emerald-600 dark:text-emerald-400 shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Online ({onlineMemberCount})
+            </button>
+          </div>
         </div>
 
         {isLoadingRoster && roster.length === 0 ? (

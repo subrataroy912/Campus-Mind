@@ -32,6 +32,8 @@ export function useSpaceStompChat(spaceIdOrOptions) {
   const [reactionPatches, setReactionPatches] = useState({});
   const [deletedEventIds, setDeletedEventIds] = useState([]);
   const [typingUsersMap, setTypingUsersMap] = useState({});
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
+  const [userPresenceMap, setUserPresenceMap] = useState({});
 
   const clientRef = useRef(null);
   const lastTypingSentAtRef = useRef(0);
@@ -40,14 +42,48 @@ export function useSpaceStompChat(spaceIdOrOptions) {
   const [sendRest] = useSendSpaceMessageRestMutation();
   const [toggleReactionRest] = useToggleSpaceReactionRestMutation();
 
+  const markUserOnlineLocally = useCallback((uid) => {
+    if (!uid) return;
+    const idStr = String(uid);
+    setOnlineUserIds((prev) => (prev.includes(idStr) ? prev : [...prev, idStr]));
+    setUserPresenceMap((prev) => ({
+      ...prev,
+      [idStr]: {
+        online: true,
+        lastActiveAt: new Date().toISOString(),
+      },
+    }));
+  }, []);
+
   const handleIncomingEvent = useCallback(
     (payload) => {
       if (!payload || !payload.type) return;
+
+      if (payload.type === "PRESENCE_UPDATE") {
+        if (Array.isArray(payload.onlineUserIds)) {
+          setOnlineUserIds(payload.onlineUserIds.map(String));
+        }
+        if (payload.userId) {
+          const uid = String(payload.userId);
+          setUserPresenceMap((prev) => ({
+            ...prev,
+            [uid]: {
+              online: Boolean(payload.online),
+              lastActiveAt: payload.lastActiveAt || new Date().toISOString(),
+            },
+          }));
+        }
+        syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId);
+        return;
+      }
 
       if (payload.type === "TYPING_STATUS") {
         const typerId = payload.userId || payload.sender?.userId;
         const typerName =
           payload.username || payload.sender?.username || "Member";
+        if (typerId) {
+          markUserOnlineLocally(typerId);
+        }
         if (!typerId || String(typerId) === String(currentUserId)) {
           return;
         }
@@ -82,6 +118,7 @@ export function useSpaceStompChat(spaceIdOrOptions) {
       ) {
         const senderId = payload.sender?.userId;
         if (senderId) {
+          markUserOnlineLocally(senderId);
           setTypingUsersMap((prev) => {
             if (!prev[senderId]) return prev;
             const next = { ...prev };
@@ -136,7 +173,7 @@ export function useSpaceStompChat(spaceIdOrOptions) {
         }
       }
     },
-    [currentUserId, dispatch, spaceId],
+    [currentUserId, dispatch, markUserOnlineLocally, spaceId],
   );
 
   useEffect(() => {
@@ -285,6 +322,8 @@ export function useSpaceStompChat(spaceIdOrOptions) {
     reactionPatches,
     deletedEventIds,
     typingUsers,
+    onlineUserIds,
+    userPresenceMap,
     notifyTyping,
     sendMessage,
     toggleReaction,

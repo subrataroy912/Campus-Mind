@@ -90,6 +90,27 @@ export function syncEventIntoRoomCache(dispatch, spaceId, payload, currentUserId
         },
       ),
     );
+    return;
+  }
+
+  if (payload.type === "PRESENCE_UPDATE") {
+    dispatch(
+      messagesApi.util.updateQueryData(
+        "getSpaceChatRooms",
+        undefined,
+        (draft) => {
+          if (!Array.isArray(draft)) return;
+          const room = draft.find((r) => r.spaceId === spaceId);
+          if (!room) return;
+          if (Array.isArray(payload.onlineUserIds)) {
+            room.onlineUserIds = payload.onlineUserIds;
+            room.onlineCount = payload.onlineUserIds.length;
+          } else if (typeof payload.onlineCount === "number") {
+            room.onlineCount = payload.onlineCount;
+          }
+        },
+      ),
+    );
   }
 }
 
