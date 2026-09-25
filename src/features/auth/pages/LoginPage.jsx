@@ -33,7 +33,6 @@ function LoginPage() {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [showCookieNotice, setShowCookieNotice] = useState(true);
 
   const isLoading = authStatus === "loading";
   const errorMessage =
@@ -70,7 +69,7 @@ function LoginPage() {
         title: "Sign-in failed",
         description: parseApiError(
           err,
-          "Please check your email and password and try again."
+          "Please check your email and password and try again.",
         ).message,
         type: "error",
       });
@@ -85,29 +84,6 @@ function LoginPage() {
       <p className="mt-1 text-xs text-text-muted">
         Sign in to see what is happening in your classes.
       </p>
-
-      {/* 3rd-party cookie notice on page open */}
-      {showCookieNotice && (
-        <div
-          className="mt-3.5 flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-300"
-          role="alert"
-        >
-          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
-          <div className="flex-1 text-[11px] leading-relaxed">
-            <span className="font-semibold">Notice: </span>
-            Please enable 3rd-party cookies in your browser settings; otherwise,
-            your login session will not stay active.
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowCookieNotice(false)}
-            className="flex min-h-11 min-w-11 items-center justify-center text-amber-600/70 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded cursor-pointer -mr-1"
-            aria-label="Dismiss cookie notice"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
 
       {location.state?.registered && (
         <p
