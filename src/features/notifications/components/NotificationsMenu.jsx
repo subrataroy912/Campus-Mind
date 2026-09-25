@@ -12,7 +12,10 @@ import {
   XCircle,
 } from "lucide-react";
 import { useNotificationsPolling } from "../hooks/useNotificationsPolling.js";
-import { useMarkNotificationReadMutation } from "../api/notificationsApi.js";
+import {
+  useMarkAllNotificationsReadMutation,
+  useMarkNotificationReadMutation,
+} from "../api/notificationsApi.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,7 +119,8 @@ function getNotificationMeta(type) {
   };
 }
 
-function resolveNotificationTargetLink(item) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function resolveNotificationTargetLink(item) {
   if (!item) return null;
   if (item.link) return item.link;
 
@@ -162,8 +166,14 @@ export default function NotificationsMenu() {
 
   const { data: response, isLoading } = useNotificationsPolling({
     interval: 30000,
+    onNavigate: (targetLink) => {
+      if (targetLink) {
+        navigate(targetLink);
+      }
+    },
   });
   const [markRead] = useMarkNotificationReadMutation();
+  const [markAllRead] = useMarkAllNotificationsReadMutation();
 
   const handleMarkNotificationRead = async (id) => {
     if (!id) return;
@@ -182,12 +192,16 @@ export default function NotificationsMenu() {
   const unreadCount = unreadNotifications.length;
 
   const handleMarkAllRead = async () => {
-    await Promise.allSettled(
-      unreadNotifications
-        .map((n) => n.id || n._id)
-        .filter(Boolean)
-        .map((id) => markRead(id).unwrap()),
-    );
+    try {
+      await markAllRead().unwrap();
+    } catch {
+      await Promise.allSettled(
+        unreadNotifications
+          .map((n) => n.id || n._id)
+          .filter(Boolean)
+          .map((id) => markRead(id).unwrap()),
+      );
+    }
   };
 
   return (
