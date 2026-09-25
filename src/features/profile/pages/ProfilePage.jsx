@@ -11,7 +11,9 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import SpaceCard from "@/features/spaces/components/SpaceCard.jsx";
 import CompactSpaceRow from "@/features/spaces/components/CompactSpaceRow.jsx";
@@ -31,11 +33,14 @@ import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
 import { routes } from "@/routes/paths.js";
-import { toast } from "@/components/ui/toast.jsx";
+import { toast } from "@/components/ui/toast";
 import { parseApiError } from "@/lib/errorUtils.js";
 import { cn } from "@/lib/utils.js";
-
-const VIEW_MODE_KEY = "campus_mind_spaces_view_mode";
+import {
+  getSavedSpacesViewMode,
+  isSpaceOwner,
+  saveSpacesViewMode,
+} from "@/features/spaces/utils/roles.js";
 
 const profileFor = (user) => ({
   ...user,
@@ -136,13 +141,8 @@ export default function ProfilePage() {
     ? classrooms
     : classrooms.filter((item) => sharedIds.includes(item.id));
 
-  const isCreatedByMe = (item) => {
-    const role = String(item?.role || "").toUpperCase();
-    return (
-      item.ownerId === viewedUser?.id ||
-      (isOwner && (role === "OWNER" || role === "CREATED"))
-    );
-  };
+  const isCreatedByMe = (item) =>
+    item.ownerId === viewedUser?.id || (isOwner && isSpaceOwner(item, viewedUser?.id));
 
   const createdClasses = useMemo(
     () => spaces.filter(isCreatedByMe),
@@ -158,20 +158,11 @@ export default function ProfilePage() {
 
   const [spacesTab, setSpacesTab] = useState("all");
   const [spacesSearch, setSpacesSearch] = useState("");
-  const [spacesViewMode, setSpacesViewMode] = useState(() => {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return localStorage.getItem(VIEW_MODE_KEY) || "list";
-    }
-    return "list";
-  });
+  const [spacesViewMode, setSpacesViewMode] = useState(getSavedSpacesViewMode);
 
   const handleSpacesViewModeToggle = (mode) => {
     setSpacesViewMode(mode);
-    try {
-      localStorage.setItem(VIEW_MODE_KEY, mode);
-    } catch {
-      // storage disabled / unsupported
-    }
+    saveSpacesViewMode(mode);
   };
 
   const currentSpacesTabItems = useMemo(() => {
@@ -427,9 +418,11 @@ export default function ProfilePage() {
             {spacesTabs.map((tab) => {
               const isActive = spacesTab === tab.id;
               return (
-                <button
+                <Button
                   key={tab.id}
                   type="button"
+                  variant="ghost"
+                  size="xs"
                   onClick={() => setSpacesTab(tab.id)}
                   className={cn(
                     "flex items-center gap-1.5 shrink-0 rounded-md px-2.5 py-1 text-xs transition-all cursor-pointer",
@@ -439,17 +432,18 @@ export default function ProfilePage() {
                   )}
                 >
                   <span>{tab.label}</span>
-                  <span
+                  <Badge
+                    variant="secondary"
                     className={cn(
-                      "rounded-full px-1.5 py-0.2 text-[10px] font-semibold",
+                      "rounded-full px-1.5 py-0 h-4 text-[10px] font-semibold",
                       isActive
                         ? "bg-primary/15 text-primary"
                         : "bg-muted text-muted-foreground",
                     )}
                   >
                     {tab.count}
-                  </span>
-                </button>
+                  </Badge>
+                </Button>
               );
             })}
           </div>
@@ -459,31 +453,35 @@ export default function ProfilePage() {
             <div className="relative flex-1 sm:w-52 min-w-0">
               <Search
                 size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
                 aria-hidden="true"
               />
-              <input
+              <Input
                 type="text"
                 value={spacesSearch}
                 onChange={(e) => setSpacesSearch(e.target.value)}
                 placeholder="Search spaces…"
-                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
+                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
               />
               {spacesSearch && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => setSpacesSearch("")}
                   aria-label="Clear search"
                   className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X size={13} />
-                </button>
+                </Button>
               )}
             </div>
 
             <div className="flex items-center rounded-lg border border-border/60 bg-muted/50 p-0.5 shrink-0">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => handleSpacesViewModeToggle("list")}
                 aria-label="List view"
                 title="Dense list view"
@@ -495,9 +493,11 @@ export default function ProfilePage() {
                 )}
               >
                 <List size={14} aria-hidden="true" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => handleSpacesViewModeToggle("grid")}
                 aria-label="Grid view"
                 title="Card grid view"
@@ -509,7 +509,7 @@ export default function ProfilePage() {
                 )}
               >
                 <LayoutGrid size={14} aria-hidden="true" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -624,8 +624,10 @@ export default function ProfilePage() {
       <section className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-3 sm:p-4">
         {/* Segmented Pill Switcher */}
         <div className="inline-flex h-8 w-fit items-center rounded-lg bg-muted p-1 text-muted-foreground">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="xs"
             role="tab"
             aria-selected={activeTab === "spaces"}
             onClick={() => setActiveTab("spaces")}
@@ -636,10 +638,12 @@ export default function ProfilePage() {
             }`}
           >
             Spaces
-          </button>
+          </Button>
           {isOwner && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               role="tab"
               aria-selected={activeTab === "saved"}
               onClick={() => setActiveTab("saved")}
@@ -650,7 +654,7 @@ export default function ProfilePage() {
               }`}
             >
               Saved
-            </button>
+            </Button>
           )}
         </div>
 

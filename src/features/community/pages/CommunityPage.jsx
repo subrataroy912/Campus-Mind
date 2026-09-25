@@ -13,7 +13,9 @@ import { useSearchParams } from "react-router";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useCommunityFeed } from "../hooks/useCommunityFeed.js";
 import { SpaceAvatar } from "@/features/spaces/components/SpaceAvatar.jsx";
-import { Button } from "@/components/ui/button.jsx";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
@@ -78,15 +80,19 @@ function CommunityPost({ post }) {
           </p>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
-            <span
-              className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium border border-border/60 ${meta.className}`}
+            <Badge
+              variant="outline"
+              className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 h-5 text-[10px] font-medium border border-border/60 ${meta.className}`}
             >
               <Icon size={11} aria-hidden="true" />
               {meta.label}
-            </span>
-            <button
+            </Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
               onClick={toggleLike}
-              className={`flex items-center gap-1 text-[11px] font-medium transition hover:text-primary ${liked ? "text-primary" : "text-text-muted"}`}
+              className={`h-6 px-1.5 flex items-center gap-1 text-[11px] font-medium transition hover:text-primary ${liked ? "text-primary" : "text-text-muted"}`}
             >
               <Heart
                 size={12}
@@ -94,10 +100,15 @@ function CommunityPost({ post }) {
                 className={liked ? "fill-current" : ""}
               />{" "}
               {likeCount}
-            </button>
-            <button className="flex items-center gap-1 text-[11px] font-medium text-text-muted transition hover:text-primary">
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              className="h-6 px-1.5 flex items-center gap-1 text-[11px] font-medium text-text-muted transition hover:text-primary"
+            >
               <MessageCircle size={12} aria-hidden="true" /> {post.comments}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -179,10 +190,13 @@ export default function CommunityPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-surface px-2.5 py-1 text-xs font-medium text-text-heading shadow-2xs">
+          <Badge
+            variant="outline"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-surface px-2.5 py-1 h-7 text-xs font-medium text-text-heading shadow-2xs"
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>{filteredPosts.length} discussions</span>
-          </span>
+          </Badge>
         </div>
       </header>
 
@@ -203,12 +217,12 @@ export default function CommunityPage() {
                 size="h-7 w-7"
               />
               <div className="flex-1">
-                <textarea
+                <Textarea
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   rows={2}
                   placeholder="Ask a question or share something with your classes…"
-                  className="w-full resize-none rounded-md border border-border/70 bg-canvas px-2.5 py-1.5 text-base sm:text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
+                  className="w-full resize-none rounded-md border border-border/70 bg-canvas px-2.5 py-1.5 min-h-[54px] text-base sm:text-xs text-text-heading placeholder:text-text-muted"
                 />
                 <div className="mt-2 flex justify-end">
                   <Button
@@ -234,8 +248,11 @@ export default function CommunityPage() {
             {filters.map((filter) => {
               const active = communityFilter === filter.id;
               return (
-                <button
+                <Button
                   key={filter.id}
+                  type="button"
+                  variant="ghost"
+                  size="xs"
                   onClick={() => {
                     setSearchParams((prev) => {
                       const next = new URLSearchParams(prev);
@@ -256,7 +273,7 @@ export default function CommunityPage() {
                   }`}
                 >
                   <span>{filter.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

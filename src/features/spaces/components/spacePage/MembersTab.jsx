@@ -12,7 +12,8 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import { SpaceAvatar } from "../SpaceAvatar.jsx";
@@ -661,40 +662,44 @@ export function MembersTab({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1">
             <Search
-              className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none"
               aria-hidden="true"
             />
-            <input
+            <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search roster members by name…"
-              className="w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
+              className="h-8 w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="inline-flex items-center rounded-lg border border-border/60 bg-muted/30 p-0.5 self-start sm:self-auto">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               onClick={() => setShowOnlineOnly(false)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+              className={`h-auto rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
                 !showOnlineOnly
-                  ? "bg-card text-foreground shadow-2xs"
+                  ? "bg-card text-foreground shadow-2xs hover:bg-card"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               All ({enrichedRoster.length})
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               onClick={() => setShowOnlineOnly(true)}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+              className={`h-auto inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
                 showOnlineOnly
-                  ? "bg-card text-emerald-600 dark:text-emerald-400 shadow-2xs"
+                  ? "bg-card text-emerald-600 dark:text-emerald-400 shadow-2xs hover:bg-card"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               Online ({onlineMemberCount})
-            </button>
+            </Button>
           </div>
         </div>
 

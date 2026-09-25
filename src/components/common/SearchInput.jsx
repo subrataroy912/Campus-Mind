@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function SearchInput({
@@ -64,29 +66,30 @@ export default function SearchInput({
         )}
       />
 
-      <input
+      <Input
         type="text"
         value={currentValue}
         onChange={handleChange}
         placeholder={placeholder}
         aria-label={placeholder}
         className={cn(
-          "w-full rounded-md border border-input bg-background pr-7 text-base outline-none transition sm:text-xs",
-          "placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring",
+          "w-full rounded-md bg-background pr-7 text-base sm:text-xs",
           isSmall ? "h-8 pl-8" : "h-9 pl-9 sm:text-sm",
         )}
         {...props}
       />
 
       {currentValue && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={handleClear}
           aria-label="Clear search"
-          className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center rounded p-1 text-muted-foreground hover:text-foreground cursor-pointer"
+          className="absolute right-1 top-1/2 -translate-y-1/2 min-h-8 min-w-8 text-muted-foreground hover:text-foreground cursor-pointer"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       )}
     </div>
   );

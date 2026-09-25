@@ -7,6 +7,7 @@ import { selectEnrolledCourseIds } from "@/features/spaces/classroomSelectors.js
 import { useAuth } from "@/context/AuthContext.jsx";
 import { joinClassroom } from "@/features/spaces/api/classroomService.js";
 import { getClassTheme } from "@/features/spaces/utils/classTheme.js";
+import { getSpaceId } from "@/features/spaces/utils/roles.js";
 import { classroomApi } from "@/features/spaces/api/classroomApi.js";
 import { courseworkApi } from "@/features/spaces/api/courseworkApi.js";
 import { store } from "@/app/store.js";
@@ -47,12 +48,7 @@ function ExploreSpaceCard({
   const [joinErrorMessage, setJoinErrorMessage] = useState("");
   const [isJoinSubmitting, setIsJoinSubmitting] = useState(false);
 
-  const courseId =
-    classroom?.courseId ??
-    classroom?.id ??
-    classroom?.classId ??
-    classroom?._id ??
-    "";
+  const courseId = getSpaceId(classroom);
 
   const cardTitle = classroom?.title || "Class";
   const cardSubject = classroom?.subject || "";

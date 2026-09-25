@@ -12,10 +12,14 @@ import {
   RotateCcw,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
-import { Input } from "@/components/ui/input.jsx";
-import { Label } from "@/components/ui/label.jsx";
-import { Textarea } from "@/components/ui/textarea.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { cn } from "@/lib/utils.js";
 import { useCreateSpaceForm } from "../hooks/useCreateSpaceForm.js";
 import { SUBJECTS, THEME_COLORS } from "../model/createSpaceForm.js";
@@ -318,24 +322,23 @@ export default function CreateSpace() {
               >
                 Subject / Category <span className="text-secondary">*</span>
               </Label>
-              <select
+              <NativeSelect
                 id="subject"
                 value={form.subject}
                 onChange={(e) => update("subject", e.target.value)}
                 className={cn(
-                  "h-9 w-full rounded-lg border bg-surface px-3 text-sm text-text-heading outline-none transition focus:ring-1 focus:ring-focus",
-                  errors.subject
-                    ? "border-secondary focus:ring-secondary/20"
-                    : "border-border hover:border-text-muted/50"
+                  "w-full",
+                  errors.subject &&
+                    "[&_select]:border-secondary [&_select]:focus-visible:ring-secondary/20"
                 )}
               >
-                <option value="">Select subject or domain</option>
+                <NativeSelectOption value="">Select subject or domain</NativeSelectOption>
                 {SUBJECTS.map((s) => (
-                  <option key={s} value={s}>
+                  <NativeSelectOption key={s} value={s}>
                     {s}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
               {errors.subject && (
                 <p className="text-xs font-medium text-secondary">
                   {errors.subject}

@@ -11,19 +11,7 @@ import {
   MemberListSkeleton,
   SectionLoader,
 } from "@/components/common/LoadingState.jsx";
-
-const VIEW_MODE_KEY = "campus_mind_spaces_view_mode";
-
-function getSavedSpacesViewMode() {
-  try {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage.getItem(VIEW_MODE_KEY) || "list";
-    }
-  } catch {
-    // Ignore storage errors
-  }
-  return "list";
-}
+import { getSavedSpacesViewMode } from "@/features/spaces/utils/roles.js";
 
 function SpaceListPageFallback() {
   const viewMode = getSavedSpacesViewMode();

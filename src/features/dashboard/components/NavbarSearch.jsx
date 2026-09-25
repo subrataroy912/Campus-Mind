@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router";
 import { useState, useRef, useEffect } from "react";
 import { Search, X, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 
 // ------------------------------------------------------------------
 //  MOCK DATA
@@ -42,14 +45,15 @@ function SearchSuggestions({ suggestions, query, onSelect, isVisible }) {
         {suggestions.length > 0 ? (
           suggestions.map((suggestion, index) => (
             <li key={index}>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => onSelect(suggestion)}
-                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted/60 flex items-center gap-2 transition-colors"
+                className="w-full justify-start rounded-none text-left px-3 py-2 h-auto text-sm text-foreground hover:bg-muted/60 flex items-center gap-2 transition-colors"
               >
                 <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                 {suggestion}
-              </button>
+              </Button>
             </li>
           ))
         ) : (
@@ -109,24 +113,16 @@ function NavbarSearch() {
         MOBILE SEARCH TRIGGER
     ========================================================= */}
       {!isMobileExpanded && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={() => setIsMobileExpanded(true)}
           aria-label="Open search"
-          className="
-          md:hidden
-          inline-flex items-center justify-center
-          h-9 w-9
-          rounded-xl
-          text-muted-foreground
-          hover:bg-muted
-          hover:text-foreground
-          active:scale-95
-          transition-all duration-200
-        "
+          className="md:hidden h-9 w-9 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all duration-200"
         >
           <Search className="h-[18px] w-[18px]" />
-        </button>
+        </Button>
       )}
 
       {/* =========================================================
@@ -211,7 +207,7 @@ function NavbarSearch() {
           {/* =====================================================
             INPUT
         ===================================================== */}
-          <input
+          <Input
             type="search"
             value={query}
             onChange={(e) => {
@@ -221,121 +217,53 @@ function NavbarSearch() {
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search spaces, topics..."
             autoFocus={isMobileExpanded}
-            className="
-            min-w-0
-            flex-1
-
-            bg-transparent
-            outline-none
-
-            text-sm
-            text-foreground
-
-            placeholder:text-muted-foreground/80
-
-            selection:bg-primary/20
-
-            [&::-webkit-search-cancel-button]:hidden
-          "
+            className="min-w-0 flex-1 h-auto border-0 bg-transparent px-0 py-0 shadow-none outline-none focus-visible:ring-0 text-sm text-foreground placeholder:text-muted-foreground/80 selection:bg-primary/20 dark:bg-transparent [&::-webkit-search-cancel-button]:hidden"
           />
 
           {/* =====================================================
             CLEAR BUTTON
         ===================================================== */}
           {query && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => {
                 setQuery("");
                 setShowSuggestions(true);
               }}
               aria-label="Clear search"
-              className="
-              shrink-0
-              inline-flex
-              items-center
-              justify-center
-
-              h-6 w-6
-              rounded-md
-
-              text-muted-foreground
-
-              hover:bg-muted
-              hover:text-foreground
-
-              transition-colors
-            "
+              className="shrink-0 h-6 w-6 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
 
           {/* =====================================================
             KEYBOARD SHORTCUT
         ===================================================== */}
-          <kbd
-            className="
-            hidden
-            lg:inline-flex
-
-            h-5
-            shrink-0
-            items-center
-
-            rounded-md
-            border border-border/70
-
-            bg-background
-            px-1.5
-
-            text-[10px]
-            font-medium
-            font-mono
-
-            text-muted-foreground
-
-            shadow-sm
-          "
-          >
+          <Kbd className="hidden lg:inline-flex h-5 shrink-0 items-center rounded-md border border-border/70 bg-background px-1.5 text-[10px] font-medium font-mono text-muted-foreground shadow-sm">
             Ctrl K
-          </kbd>
+          </Kbd>
 
           {/* =====================================================
             MOBILE CLOSE
         ===================================================== */}
           {isMobileExpanded && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => {
                 setIsMobileExpanded(false);
                 setShowSuggestions(false);
                 setQuery("");
               }}
               aria-label="Close search"
-              className="
-              md:hidden
-              shrink-0
-
-              inline-flex
-              items-center
-              justify-center
-
-              h-7 w-7
-              rounded-lg
-
-              text-muted-foreground
-
-              hover:bg-muted
-              hover:text-foreground
-
-              active:scale-95
-
-              transition-all
-            "
+              className="md:hidden shrink-0 h-7 w-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           )}
         </form>
 

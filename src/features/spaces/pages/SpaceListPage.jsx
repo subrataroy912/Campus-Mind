@@ -1,6 +1,5 @@
 import { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { Link } from "react-router";
 import { useSelector } from "react-redux";
 import {
   Plus,
@@ -22,40 +21,26 @@ import {
   selectCreatedSpaces,
   selectJoinedSpaces,
 } from "@/features/spaces/classroomSelectors.js";
-import { Button } from "@/components/ui/button.jsx";
+import {
+  getSavedSpacesViewMode,
+  isSpaceOwner,
+  saveSpacesViewMode,
+} from "@/features/spaces/utils/roles.js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { routes } from "@/routes/paths.js";
 import { cn } from "@/lib/utils.js";
-
-const VIEW_MODE_KEY = "campus_mind_spaces_view_mode";
-
-const isCreatedSpace = (c, userId) => {
-  const role = String(c?.role || "").toUpperCase();
-  return (
-    role === "OWNER" ||
-    role === "CREATED" ||
-    (Boolean(userId) && c?.ownerId === userId)
-  );
-};
 
 export default function SpaceListPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [viewMode, setViewMode] = useState(() => {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return localStorage.getItem(VIEW_MODE_KEY) || "list";
-    }
-    return "list";
-  });
+  const [viewMode, setViewMode] = useState(getSavedSpacesViewMode);
 
   const handleViewModeToggle = (mode) => {
     setViewMode(mode);
-    try {
-      localStorage.setItem(VIEW_MODE_KEY, mode);
-    } catch {
-      // storage disabled / unsupported
-    }
+    saveSpacesViewMode(mode);
   };
 
   const { classrooms = [], status } = useDashboardData({
@@ -71,12 +56,12 @@ export default function SpaceListPage() {
 
   const createdSpaces = useMemo(() => {
     if (memoizedCreated && memoizedCreated.length > 0) return memoizedCreated;
-    return classrooms.filter((c) => isCreatedSpace(c, user?.id));
+    return classrooms.filter((c) => isSpaceOwner(c, user?.id));
   }, [memoizedCreated, classrooms, user?.id]);
 
   const joinedSpaces = useMemo(() => {
     if (memoizedJoined && memoizedJoined.length > 0) return memoizedJoined;
-    return classrooms.filter((c) => !isCreatedSpace(c, user?.id));
+    return classrooms.filter((c) => !isSpaceOwner(c, user?.id));
   }, [memoizedJoined, classrooms, user?.id]);
 
   const currentTabItems = useMemo(() => {
@@ -171,28 +156,32 @@ export default function SpaceListPage() {
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <Button
                 key={tab.id}
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-1.5 shrink-0 rounded-md px-2.5 py-1 text-xs transition-all cursor-pointer",
+                  "flex h-auto items-center gap-1.5 shrink-0 rounded-md px-2.5 py-1 text-xs transition-all cursor-pointer",
                   isActive
-                    ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                    ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60 hover:bg-card"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/60 font-medium",
                 )}
               >
                 <span>{tab.label}</span>
-                <span
+                <Badge
+                  variant="secondary"
                   className={cn(
-                    "rounded-full px-1.5 py-0.2 text-[10px] font-semibold",
+                    "h-auto rounded-full px-1.5 py-0.2 text-[10px] font-semibold",
                     isActive
                       ? "bg-primary/15 text-primary"
                       : "bg-muted text-muted-foreground",
                   )}
                 >
                   {tab.count}
-                </span>
-              </button>
+                </Badge>
+              </Button>
             );
           })}
         </div>
@@ -206,52 +195,61 @@ export default function SpaceListPage() {
               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
               aria-hidden="true"
             />
-            <input
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search spaces…"
-              className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/50"
+              className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
             />
             {searchQuery && (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
                 className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X size={13} />
-              </button>
+              </Button>
             )}
           </div>
 
           {/* View Mode Toggle: Dense List vs Grid */}
           <div className="flex items-center rounded-lg border border-border/60 bg-muted/50 p-0.5 shrink-0">
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => handleViewModeToggle("list")}
               aria-label="List view"
               title="Dense list view"
               className={cn(
                 "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                 viewMode === "list"
-                  ? "bg-card text-foreground shadow-2xs border border-border/50"
+                  ? "bg-card text-foreground shadow-2xs border border-border/50 hover:bg-card"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
               <List size={14} aria-hidden="true" />
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => handleViewModeToggle("grid")}
               aria-label="Grid view"
               title="Card grid view"
               className={cn(
                 "flex min-h-8 min-w-8 sm:h-7 sm:w-7 items-center justify-center rounded-md transition-all cursor-pointer",
                 viewMode === "grid"
-                  ? "bg-card text-foreground shadow-2xs border border-border/50"
+                  ? "bg-card text-foreground shadow-2xs border border-border/50 hover:bg-card"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
               <LayoutGrid size={14} aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

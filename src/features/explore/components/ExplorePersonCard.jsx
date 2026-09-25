@@ -1,4 +1,9 @@
 import { memo } from "react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { initials } from "@/utils/initials.js";
 import { profileApi } from "@/features/profile/api/profileApi.js";
 import { store } from "@/app/store.js";
@@ -33,19 +38,18 @@ function ExplorePersonCard({ person }) {
         className="group flex flex-col justify-center rounded-lg border border-border/70 bg-surface/90 px-3 py-2.5 shadow-2xs transition-all hover:border-border hover:bg-surface hover:shadow-xs min-h-[56px]"
       >
         <div className="flex items-center gap-2.5">
-          {person.avatar ? (
-            <img
+          <Avatar className="h-8 w-8 rounded-full border border-border/80 shrink-0">
+            <AvatarImage
               src={person.avatar}
-              alt=""
+              alt={person.name || "CampusMind member"}
               loading="lazy"
               decoding="async"
-              className="h-8 w-8 rounded-full border border-border/80 object-cover shrink-0"
+              className="h-full w-full rounded-full object-cover"
             />
-          ) : (
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary shrink-0">
+            <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">
               {initials(person.name || "CampusMind member")}
-            </div>
-          )}
+            </AvatarFallback>
+          </Avatar>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-[13px] sm:text-sm font-semibold text-text-heading leading-tight group-hover:text-primary transition-colors">
               {person.name || "CampusMind member"}

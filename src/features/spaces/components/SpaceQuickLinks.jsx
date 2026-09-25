@@ -12,17 +12,23 @@ import {
   Video,
   Bookmark,
 } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog.jsx";
+} from "@/components/ui/dialog";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { useUpdateClassroomMutation } from "../api/classroomApi.js";
-import { toast } from "@/components/ui/toast.jsx";
+import { toast } from "@/components/ui/toast";
 import { parseApiError } from "@/lib/errorUtils.js";
 import { useCourseIsStaff } from "../hooks/useCourseContext.js";
 
@@ -244,8 +250,10 @@ export default function SpaceQuickLinks({
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100">
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-xs"
                         onClick={() => handleCopy(link.id, link.url)}
                         title="Copy link"
                         className="grid h-6 w-6 place-items-center rounded-md text-text-muted hover:bg-canvas hover:text-text-main transition-colors cursor-pointer"
@@ -255,7 +263,7 @@ export default function SpaceQuickLinks({
                         ) : (
                           <Copy size={12} />
                         )}
-                      </button>
+                      </Button>
                       <a
                         href={link.url}
                         target="_blank"
@@ -266,14 +274,16 @@ export default function SpaceQuickLinks({
                         <ExternalLink size={12} />
                       </a>
                       {isStaff && (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-xs"
                           onClick={() => handleDelete(link.id)}
                           title="Remove resource"
                           className="grid h-6 w-6 place-items-center rounded-md text-text-muted hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
                         >
                           <Trash2 size={12} />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -317,56 +327,56 @@ export default function SpaceQuickLinks({
 
           <form onSubmit={handleAddSubmit} className="space-y-3 pt-2">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-heading">
+              <Label className="text-xs font-semibold text-text-heading">
                 Resource Title <span className="text-destructive">*</span>
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. GitHub Repository, Course Syllabus, Zoom Room"
-                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main focus:border-primary focus:outline-hidden"
+                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main"
                 required
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-heading">
+              <Label className="text-xs font-semibold text-text-heading">
                 URL <span className="text-destructive">*</span>
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main focus:border-primary focus:outline-hidden font-mono"
+                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main font-mono"
                 required
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-heading">Category</label>
-              <select
+              <Label className="text-xs font-semibold text-text-heading">Category</Label>
+              <NativeSelect
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main focus:border-primary focus:outline-hidden"
+                className="w-full"
               >
                 {LINK_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
+                  <NativeSelectOption key={cat.value} value={cat.value}>
                     {cat.label}
-                  </option>
+                  </NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-heading">Description (optional)</label>
-              <input
+              <Label className="text-xs font-semibold text-text-heading">Description (optional)</Label>
+              <Input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Brief note or instructions for members..."
-                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main focus:border-primary focus:outline-hidden"
+                className="w-full rounded-lg border border-border bg-canvas px-2.5 py-1.5 text-xs text-text-main"
               />
             </div>
 

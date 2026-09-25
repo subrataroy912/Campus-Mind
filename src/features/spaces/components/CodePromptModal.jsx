@@ -1,5 +1,14 @@
 import { Link } from "react-router";
-import { ArrowRight, KeyRound, Loader2, X } from "lucide-react";
+import { ArrowRight, KeyRound, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { routes } from "@/routes/paths";
 
 export function CodePromptModal({
@@ -16,53 +25,35 @@ export function CodePromptModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="code-prompt-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in-0 duration-150"
-      onClick={() => !isJoining && onClose()}
-    >
-      <div
-        className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isJoining && onClose()}>
+      <DialogContent className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6">
+        <DialogHeader>
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
               <KeyRound size={18} aria-hidden="true" />
             </div>
-            <div className="min-w-0">
-              <h3
+            <div className="min-w-0 text-left">
+              <DialogTitle
                 id="code-prompt-dialog-title"
                 className="text-base font-bold text-text-heading truncate"
               >
                 Enter Class Code
-              </h3>
-              <p className="text-xs text-text-muted truncate">
+              </DialogTitle>
+              <DialogDescription className="text-xs text-text-muted truncate">
                 Code required to join this class
-              </p>
+              </DialogDescription>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isJoining}
-            className="rounded-lg p-1 text-text-muted hover:bg-canvas hover:text-text-heading cursor-pointer"
-            aria-label="Close dialog"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        </DialogHeader>
 
-        <p className="mt-3 text-xs text-text-muted">
+        <p className="mt-1 text-xs text-text-muted">
           Enter the code provided by your instructor to join{" "}
           <span className="font-semibold text-text-heading">{cardTitle}</span>.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
+        <form onSubmit={onSubmit} className="mt-2 space-y-3">
           <div>
-            <input
+            <Input
               type="text"
               autoFocus
               value={classCode}
@@ -70,7 +61,7 @@ export function CodePromptModal({
               placeholder="e.g. ABCD1234"
               maxLength={16}
               aria-label="Class Code"
-              className="w-full rounded-lg border border-border bg-canvas px-3 py-2 text-center font-mono text-base font-semibold tracking-wider text-text-heading uppercase outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-10 w-full rounded-lg border border-border bg-canvas px-3 py-2 text-center font-mono text-base font-semibold tracking-wider text-text-heading uppercase"
             />
             {joinError && (
               <p className="mt-1.5 text-xs text-destructive">{joinError}</p>
@@ -88,18 +79,21 @@ export function CodePromptModal({
               Dedicated join page
             </Link>
             <div className="flex items-center gap-2">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={onClose}
                 disabled={isJoining}
-                className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-muted hover:bg-canvas hover:text-text-heading cursor-pointer"
+                className="text-xs font-semibold cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
+                size="sm"
                 disabled={!classCode.trim() || isJoining}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
               >
                 {isJoining ? (
                   <>
@@ -116,12 +110,12 @@ export function CodePromptModal({
                     <ArrowRight size={13} aria-hidden="true" />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import * as RechartsPrimitive from "recharts"
 
 // Format: { THEME_NAME: CSS_SELECTOR }

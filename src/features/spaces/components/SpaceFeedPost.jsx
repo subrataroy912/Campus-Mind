@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.jsx";
 import { formatFileSize } from "@/utils/optimizeImage.js";
+import { formatRelativeDate } from "@/utils/dateFormat.js";
 import {
   MoreVertical,
   Pin,
@@ -45,28 +46,7 @@ import {
   Download,
 } from "lucide-react";
 
-function formatPostDate(isoString) {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return "";
-  const now = new Date();
-  const diffMs = now - date;
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSecs < 60) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-  });
-}
+const formatPostDate = (isoString) => formatRelativeDate(isoString) || "";
 
 function getYouTubeEmbedUrl(url) {
   if (!url) return null;

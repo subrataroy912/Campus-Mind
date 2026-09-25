@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 function Empty({
   className,

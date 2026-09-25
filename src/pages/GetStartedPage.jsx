@@ -1,6 +1,6 @@
 import { ArrowRight, BookOpen, HeartHandshake, Users } from "lucide-react";
-import BrandLogo from "../components/common/BrandLogo.jsx";
-import { Button } from "../components/ui/button.jsx";
+import BrandLogo from "@/components/common/BrandLogo";
+import { Button } from "@/components/ui/button";
 import { routes } from "@/routes/paths.js";
 
 const features = [

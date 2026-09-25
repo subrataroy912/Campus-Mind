@@ -2,13 +2,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
   BookOpen,
-  Calendar,
   Clock,
   Globe,
-  GraduationCap,
   Shield,
   Tag,
-  UserPlus,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";

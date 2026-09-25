@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { CLASS_TABS } from "../data/classPageData.js";
 
 export default function SpaceTabs({ active, onChange, onPrefetch, isStaff = false }) {
@@ -8,22 +10,25 @@ export default function SpaceTabs({ active, onChange, onPrefetch, isStaff = fals
       {visibleTabs.map((tab) => {
         const isActive = active === tab.id;
         return (
-          <button
+          <Button
             key={tab.id}
             type="button"
+            variant="ghost"
+            size="sm"
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
             onMouseEnter={() => onPrefetch?.(tab.id)}
             onFocus={() => onPrefetch?.(tab.id)}
-            className={`inline-flex min-h-8 sm:min-h-7 items-center justify-center shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            className={cn(
+              "inline-flex min-h-8 sm:min-h-7 h-auto items-center justify-center shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-all cursor-pointer",
               isActive
-                ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60"
+                ? "bg-card text-foreground font-semibold shadow-2xs border border-border/60 hover:bg-card"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-            }`}
+            )}
           >
             {tab.label}
-          </button>
+          </Button>
         );
       })}
     </div>

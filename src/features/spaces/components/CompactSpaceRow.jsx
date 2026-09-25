@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { ChevronRight, Globe, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 import { getClassTheme } from "../utils/classTheme.js";
+import { isSpaceOwner } from "../utils/roles.js";
 import { classroomApi } from "../api/classroomApi.js";
 import { courseworkApi } from "../api/courseworkApi.js";
 import { store } from "@/app/store.js";
@@ -15,10 +16,7 @@ function CompactSpaceRow({ classroom, className = "" }) {
   const { user: currentUser } = useAuth();
 
   const role = String(classroom?.role || "").toUpperCase();
-  const isOwner =
-    role === "OWNER" ||
-    role === "CREATED" ||
-    (currentUser?.id && classroom?.ownerId === currentUser.id);
+  const isOwner = isSpaceOwner(classroom, currentUser?.id);
   const isAdmin = !isOwner && role === "ADMIN";
 
   const handlePrefetch = () => {

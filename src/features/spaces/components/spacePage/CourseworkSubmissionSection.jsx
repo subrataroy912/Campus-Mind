@@ -1,13 +1,15 @@
 import { useRef, useState } from "react";
-import { Upload } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
+import { Upload, CheckCircle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import {
   useStartSubmissionMutation,
   useGetMySubmissionQuery,
   useSaveSubmissionMutation,
 } from "../../api/courseworkApi.js";
-import { CheckCircle, Clock } from "lucide-react";
 import {
   useCompleteUploadMutation,
   useRequestUploadUrlMutation,
@@ -138,9 +140,9 @@ export function CourseworkSubmissionSection({ item }) {
               Status: {mySubmission.status || "Assigned"}
             </span>
             {mySubmission.late && (
-              <span className="rounded-md bg-destructive/10 text-destructive px-1.5 py-0.5 text-[10px] font-bold">
+              <Badge variant="destructive" className="rounded-md px-1.5 py-0.5 text-[10px] font-bold h-auto">
                 Late
-              </span>
+              </Badge>
             )}
           </div>
           {mySubmission.score != null && (
@@ -150,11 +152,11 @@ export function CourseworkSubmissionSection({ item }) {
           )}
         </div>
       )}
-      <textarea
+      <Textarea
         value={draftSubmission}
         onChange={(e) => setDraftSubmission(e.target.value)}
-        className="w-full resize-none rounded-xl border border-border bg-surface p-3 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
-        rows="2"
+        className="w-full resize-none rounded-xl border border-border bg-surface p-3 text-sm text-text-heading"
+        rows={2}
         placeholder="Add a private note or submission details…"
       />
       {submissionError && (
@@ -180,7 +182,7 @@ export function CourseworkSubmissionSection({ item }) {
 
       <div className="flex items-center justify-between gap-2">
         <div>
-          <input
+          <Input
             ref={fileInputRef}
             type="file"
             className="hidden"

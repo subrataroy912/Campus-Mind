@@ -10,22 +10,28 @@ import {
   Trash2,
 } from "lucide-react";
 import { routes } from "@/routes/paths.js";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.jsx";
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.jsx";
-import { toast } from "@/components/ui/toast.jsx";
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { initials } from "@/utils/initials.js";
 import { formatLastActive } from "@/utils/formatLastActive.js";
@@ -103,7 +109,7 @@ export default function ProfileHeader({
                 className="flex cursor-pointer items-center gap-1 rounded-md bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-2xs backdrop-blur-xs transition hover:bg-background"
               >
                 <Camera className="h-3 w-3" />
-                <input
+                <Input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="sr-only"
@@ -118,14 +124,16 @@ export default function ProfileHeader({
               </label>
             )}
             {profile.banner && onBannerDelete && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={onBannerDelete}
                 title="Remove banner cover"
-                className="flex cursor-pointer items-center justify-center rounded-md bg-background/85 p-1 text-[10px] text-destructive hover:bg-destructive/10 shadow-2xs backdrop-blur-xs transition"
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md bg-background/85 p-1 text-[10px] text-destructive hover:bg-destructive/10 shadow-2xs backdrop-blur-xs transition"
               >
                 <Trash2 className="h-3 w-3" />
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -138,9 +146,9 @@ export default function ProfileHeader({
           <div className="flex items-end gap-3 sm:gap-4">
             {/* Anchored Responsive Avatar (h-14 mobile, h-18 tablet, h-21 desktop) */}
             <div className="relative -mt-7 sm:-mt-9 md:-mt-11 flex h-14 w-14 sm:h-18 sm:w-18 md:h-21 md:w-21 shrink-0 items-center justify-center rounded-full border-2 sm:border-[3px] md:border-4 border-card bg-primary text-xs sm:text-base md:text-lg font-bold text-primary-foreground shadow-md">
-              <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full">
+              <Avatar className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground">
                 {profile.avatar ? (
-                  <img
+                  <AvatarImage
                     className="h-full w-full object-cover"
                     src={profile.avatar}
                     alt={`${profile.name}'s avatar`}
@@ -148,10 +156,11 @@ export default function ProfileHeader({
                     loading="lazy"
                     decoding="async"
                   />
-                ) : (
-                  initials(profile.name)
-                )}
-              </div>
+                ) : null}
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-base md:text-lg font-bold">
+                  {initials(profile.name)}
+                </AvatarFallback>
+              </Avatar>
 
               {!isOwner && (
                 <span
@@ -172,7 +181,7 @@ export default function ProfileHeader({
                       className="flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-muted-foreground shadow-2xs transition hover:text-foreground hover:bg-canvas"
                     >
                       <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                      <input
+                      <Input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="sr-only"
@@ -187,14 +196,16 @@ export default function ProfileHeader({
                     </label>
                   )}
                   {profile.avatar && onAvatarDelete && (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       onClick={onAvatarDelete}
                       title="Remove avatar picture"
                       className="flex h-5 w-5 sm:h-6 sm:w-6 cursor-pointer items-center justify-center rounded-full border border-card bg-background text-destructive shadow-2xs transition hover:bg-destructive/10"
                     >
                       <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               )}

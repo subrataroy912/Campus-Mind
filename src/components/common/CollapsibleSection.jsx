@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { safeParseStorageJson, safeLocalStorageSet } from "@/utils/storage.js";
 
 export function CollapsibleSection({
@@ -32,10 +33,11 @@ export function CollapsibleSection({
       <div
         className={`flex items-center justify-between gap-3 p-4 sm:p-5 ${headerClassName}`}
       >
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="group flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-lg text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="group flex h-auto min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-lg p-0 hover:bg-transparent text-left"
           aria-expanded={isExpanded}
         >
           <div className="min-w-0 flex-1">
@@ -59,7 +61,7 @@ export function CollapsibleSection({
               aria-hidden="true"
             />
           </div>
-        </button>
+        </Button>
 
         {action && <div className="shrink-0">{action}</div>}
       </div>

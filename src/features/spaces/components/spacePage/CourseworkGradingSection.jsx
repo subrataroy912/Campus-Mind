@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import {
   useGetSubmissionListQuery,
@@ -122,7 +123,7 @@ export function CourseworkGradingSection({
               </div>
 
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="number"
                   min="0"
                   max="100"
@@ -137,7 +138,7 @@ export function CourseworkGradingSection({
                       [submission.id]: e.target.value,
                     }))
                   }
-                  className="w-24 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                  className="h-8 w-24 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm text-text-heading"
                   placeholder="Score"
                 />
                 <Button
@@ -150,7 +151,7 @@ export function CourseworkGradingSection({
               </div>
 
               <div className="flex gap-2">
-                <input
+                <Input
                   value={feedbackDrafts[submission.id] ?? ""}
                   onChange={(e) =>
                     setFeedbackDrafts((curr) => ({
@@ -158,7 +159,7 @@ export function CourseworkGradingSection({
                       [submission.id]: e.target.value,
                     }))
                   }
-                  className="flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                  className="h-8 flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-sm text-text-heading"
                   placeholder="Add feedback for member…"
                 />
                 <Button

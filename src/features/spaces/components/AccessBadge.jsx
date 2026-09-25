@@ -1,4 +1,6 @@
 import { Globe, KeyRound, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export const ACCESS_TYPES = Object.freeze({
   PUBLIC: "PUBLIC",
@@ -14,44 +16,60 @@ export function AccessBadge({ accessType = ACCESS_TYPES.PUBLIC, className = "" }
 
   if (normalized === ACCESS_TYPES.PRIVATE) {
     return (
-      <span
-        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-900/80 text-zinc-100 backdrop-blur-xs border border-white/10 shadow-xs ${className}`}
+      <Badge
+        variant="secondary"
+        className={cn(
+          "inline-flex h-auto items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-900/80 text-zinc-100 backdrop-blur-xs border border-white/10 shadow-xs",
+          className
+        )}
       >
         <Lock size={10} aria-hidden="true" />
         <span>Private</span>
-      </span>
+      </Badge>
     );
   }
 
   if (normalized === ACCESS_TYPES.INVITE || normalized === ACCESS_TYPES.LINK_ONLY) {
     return (
-      <span
-        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-900/80 text-zinc-100 backdrop-blur-xs border border-white/10 shadow-xs ${className}`}
+      <Badge
+        variant="secondary"
+        className={cn(
+          "inline-flex h-auto items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-900/80 text-zinc-100 backdrop-blur-xs border border-white/10 shadow-xs",
+          className
+        )}
       >
         <Lock size={10} aria-hidden="true" />
         <span>Invite only</span>
-      </span>
+      </Badge>
     );
   }
 
   if (normalized === ACCESS_TYPES.CODE) {
     return (
-      <span
-        className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-600/90 text-white backdrop-blur-xs shadow-xs ${className}`}
+      <Badge
+        variant="default"
+        className={cn(
+          "inline-flex h-auto items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-amber-600/90 text-white backdrop-blur-xs shadow-xs",
+          className
+        )}
       >
         <KeyRound size={10} aria-hidden="true" />
         <span>Code</span>
-      </span>
+      </Badge>
     );
   }
 
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-600/90 text-white backdrop-blur-xs shadow-xs ${className}`}
+    <Badge
+      variant="default"
+      className={cn(
+        "inline-flex h-auto items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-600/90 text-white backdrop-blur-xs shadow-xs",
+        className
+      )}
     >
       <Globe size={10} aria-hidden="true" />
       <span>Public</span>
-    </span>
+    </Badge>
   );
 }
 

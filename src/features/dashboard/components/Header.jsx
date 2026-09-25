@@ -12,13 +12,13 @@ import { useAuth } from "@/context/AuthContext.jsx";
 import { logoutFromHeader } from "./headerLogout.js";
 import NotificationsMenu from "@/features/notifications/components/NotificationsMenu.jsx";
 import { routes } from "@/routes/paths";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar.jsx";
-import { Skeleton } from "@/components/ui/skeleton.jsx";
+} from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { selectIsMobileMenuOpen } from "@/features/ui/uiSelectors.js";
 import { setMobileMenuOpen } from "@/features/ui/uiSlice.js";
 import NavbarSearch from "./NavbarSearch";

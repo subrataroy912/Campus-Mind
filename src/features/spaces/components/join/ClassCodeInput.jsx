@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 import { CLASS_CODE_LENGTH, normalizeClassCode } from "@/utils/classCode.js";
 
 /**
@@ -79,7 +80,7 @@ export function ClassCodeInput({
     <div className="flex items-center justify-center gap-1 sm:gap-1.5">
       {codeArray.map((char, i) => (
         <div key={i} className="flex items-center">
-          <input
+          <Input
             ref={(el) => {
               inputsRef.current[i] = el;
             }}
@@ -91,10 +92,10 @@ export function ClassCodeInput({
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={handlePaste}
-            className={`h-10 w-8 rounded-lg border text-center text-base font-semibold uppercase outline-none transition focus:ring-1 sm:h-11 sm:w-10 sm:text-lg ${
+            className={`h-10 w-8 rounded-lg border px-0 text-center text-base font-semibold uppercase sm:h-11 sm:w-10 sm:text-lg ${
               hasError
-                ? "border-destructive focus:border-destructive focus:ring-destructive/30 text-destructive"
-                : "border-border text-text-heading focus:border-primary focus:ring-focus"
+                ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30 text-destructive"
+                : "border-border text-text-heading"
             } ${disabled ? "opacity-50 cursor-not-allowed bg-muted/40" : "bg-background"}`}
             aria-label={`Code character ${i + 1}`}
           />

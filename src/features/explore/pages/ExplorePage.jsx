@@ -84,9 +84,11 @@ export default function ExplorePage() {
           {TABS.map(({ id, label, paramVal }) => {
             const isActive = tab === id;
             return (
-              <button
+              <Button
                 key={id}
                 type="button"
+                variant="ghost"
+                size="xs"
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => updateParam("tab", paramVal, true)}
@@ -97,7 +99,7 @@ export default function ExplorePage() {
                 }`}
               >
                 {label}
-              </button>
+              </Button>
             );
           })}
         </div>

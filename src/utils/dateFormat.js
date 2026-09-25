@@ -52,7 +52,9 @@ export function formatRelativeDate(iso) {
   if (diffSec < 60) return "Just now";
   if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
   if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+  const diffDays = Math.floor(diffSec / 86400);
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
 
   return d.toLocaleDateString(undefined, {
     month: "short",
@@ -60,6 +62,26 @@ export function formatRelativeDate(iso) {
     year: d.getFullYear() === now.getFullYear() ? undefined : "numeric",
   });
 }
+
+/**
+ * Formats chat message timestamps (HH:MM if today, otherwise short Month Day).
+ */
+export function formatChatTime(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "";
+  const now = new Date();
+  const isSameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isSameDay) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
 /**
  * Formats a date for Group profiles, About pages, or Headers.
  * @param {string} iso - The ISO date string from the backend.
@@ -77,3 +99,4 @@ export function formatAbsoluteDate(iso, includeDay = true) {
     ...(includeDay && { day: "numeric" }),
   });
 }
+

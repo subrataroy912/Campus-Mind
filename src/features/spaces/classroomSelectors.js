@@ -1,5 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { classroomApi } from "./api/classroomApi.js";
+import { isSpaceOwner } from "./utils/roles.js";
 
 const EMPTY_ARRAY = Object.freeze([]);
 const EMPTY_SET = Object.freeze(new Set());
@@ -36,15 +37,6 @@ export const selectEnrolledCourseIds = createSelector(
   }
 );
 
-const isCreatedSpace = (c, userId) => {
-  const role = String(c?.role || "").toUpperCase();
-  return (
-    role === "OWNER" ||
-    role === "CREATED" ||
-    (Boolean(userId) && c?.ownerId === userId)
-  );
-};
-
 /**
  * Memoized selector for spaces created by the user.
  */
@@ -52,7 +44,7 @@ export const selectCreatedSpaces = createSelector(
   [selectClassroomsData, (_state, userId) => userId],
   (classrooms, userId) => {
     if (!classrooms || classrooms.length === 0) return EMPTY_ARRAY;
-    return classrooms.filter((c) => isCreatedSpace(c, userId));
+    return classrooms.filter((c) => isSpaceOwner(c, userId));
   }
 );
 
@@ -63,6 +55,7 @@ export const selectJoinedSpaces = createSelector(
   [selectClassroomsData, (_state, userId) => userId],
   (classrooms, userId) => {
     if (!classrooms || classrooms.length === 0) return EMPTY_ARRAY;
-    return classrooms.filter((c) => !isCreatedSpace(c, userId));
+    return classrooms.filter((c) => !isSpaceOwner(c, userId));
   }
 );
+

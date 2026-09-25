@@ -27,6 +27,7 @@ import { SpaceAvatar } from "@/features/spaces/components/SpaceAvatar.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import ErrorState from "@/components/common/ErrorState.jsx";
 import { ChatLayoutSkeleton } from "@/components/common/LoadingState.jsx";
+import { formatChatTime } from "@/utils/dateFormat.js";
 import {
   classroomApi,
   useGetClassroomRosterQuery,
@@ -41,18 +42,20 @@ import {
 } from "@/features/messages/api/messagesApi.js";
 import { useSpaceStompChat } from "@/features/messages/hooks/useSpaceStompChat.js";
 import { selectCurrentUserId } from "@/features/auth/authSelectors.js";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover.jsx";
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.jsx";
+} from "@/components/ui/dialog";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { routes } from "@/routes/paths.js";
 import { formatLastActive } from "@/utils/formatLastActive.js";
@@ -210,22 +213,6 @@ function FormattedMessageContent({ content, isMine }) {
       )}
     </div>
   );
-}
-
-function formatChatTime(isoString) {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) return "";
-  const now = new Date();
-  const isSameDay =
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate();
-
-  if (isSameDay) {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
 function RoleBadge({ role }) {
@@ -928,14 +915,17 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           >
             <ArrowLeft size={18} />
           </button>
-          <div className="relative shrink-0">
-            <SpaceAvatar
-              avatar={room.logoUrl}
-              name={room.title}
-              size="h-8 w-8"
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
-          </div>
+          <Link to={routes.spaces.detail(room.spaceId)} className="">
+            <div className="relative shrink-0">
+              <SpaceAvatar
+                avatar={room.logoUrl}
+                name={room.title}
+                size="h-8 w-8"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
+            </div>
+          </Link>
+
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <p className="truncate text-xs sm:text-sm font-semibold text-text-heading">
@@ -944,7 +934,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
               <RoleBadge role={userRole} />
             </div>
             <div className="flex items-center gap-2 text-[11px] text-text-muted">
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 ">
                 {isConnected ? (
                   <>
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -966,7 +956,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition cursor-pointer"
+                    className="inline-flex truncate items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition cursor-pointer"
                     title="View online space members"
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -1092,14 +1082,6 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
             </div>
           </div>
         </div>
-
-        <Link
-          to={routes.spaces.detail(room.spaceId)}
-          className="inline-flex items-center gap-1 rounded-md border border-border/70 bg-canvas px-2.5 py-1 text-[11px] font-medium text-text-heading hover:border-primary/40 hover:text-primary transition shrink-0"
-        >
-          <span>View Space</span>
-          <ExternalLink className="h-3 w-3" />
-        </Link>
       </div>
 
       {/* Messages Stream */}
@@ -1458,15 +1440,17 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           ) : (
             <p className="text-xs text-destructive">{imageUploadError}</p>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={handleClearImageFile}
             disabled={isUploadingImage}
             className="rounded p-1 text-text-muted hover:text-text-heading cursor-pointer disabled:opacity-50"
             aria-label="Remove selected image"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1474,22 +1458,24 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
       {showAttachmentInput && (
         <div className="flex flex-wrap items-center gap-2 border-t border-border/70 bg-canvas/60 px-3 py-2">
           <Link2 className="h-3.5 w-3.5 text-text-muted shrink-0" />
-          <input
+          <Input
             type="url"
             value={attachmentUrl}
             onChange={(e) => setAttachmentUrl(e.target.value)}
             placeholder="Paste attachment or image URL (https://…)"
-            className="flex-1 min-w-44 h-7 rounded border border-border/70 bg-surface px-2 text-xs text-text-heading outline-none focus:border-primary"
+            className="flex-1 min-w-44 h-7 rounded border border-border/70 bg-surface px-2 text-xs text-text-heading"
           />
-          <input
+          <Input
             type="text"
             value={attachmentName}
             onChange={(e) => setAttachmentName(e.target.value)}
             placeholder="Label (optional)"
-            className="w-36 h-7 rounded border border-border/70 bg-surface px-2 text-xs text-text-heading outline-none focus:border-primary"
+            className="w-36 h-7 rounded border border-border/70 bg-surface px-2 text-xs text-text-heading"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={() => {
               setShowAttachmentInput(false);
               setAttachmentUrl("");
@@ -1499,7 +1485,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
             aria-label="Close attachment input"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -1508,7 +1494,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
         onSubmit={handleSend}
         className="flex items-end gap-2 border-t border-border/70 p-2.5 bg-surface"
       >
-        <input
+        <Input
           ref={imageInputRef}
           type="file"
           accept="image/jpeg,image/png,image/gif,image/webp"
@@ -1517,8 +1503,10 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           tabIndex={-1}
         />
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={() => imageInputRef.current?.click()}
           disabled={isUploadingImage}
           title="Upload image"
@@ -1530,10 +1518,12 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           }`}
         >
           <ImagePlus size={15} />
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           onClick={() => setShowAttachmentInput((prev) => !prev)}
           title="Attach link or media URL"
           aria-label="Attach link or media URL"
@@ -1544,10 +1534,10 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           }`}
         >
           <Plus size={15} />
-        </button>
+        </Button>
 
         <div className="relative flex-1 min-w-0">
-          <textarea
+          <Textarea
             ref={composerTextareaRef}
             rows={1}
             maxLength={MAX_MESSAGE_LENGTH}
@@ -1556,7 +1546,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
             onKeyDown={handleComposerKeyDown}
             onPaste={handlePaste}
             placeholder={`Message ${room.title}…`}
-            className="block w-full min-h-[34px] max-h-32 resize-none overflow-y-auto rounded-md border border-border/70 bg-canvas px-3 py-1.5 text-base sm:text-xs leading-relaxed text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
+            className="block w-full min-h-[34px] max-h-32 resize-none overflow-y-auto rounded-md border border-border/70 bg-canvas px-3 py-1.5 text-base sm:text-xs leading-relaxed text-text-heading placeholder:text-text-muted"
           />
           {draft.length >= 1500 && (
             <span
@@ -1758,14 +1748,14 @@ export default function MessagesPage() {
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted z-10"
               />
-              <input
+              <Input
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search space chats…"
-                className="h-8 w-full rounded-md border border-border/70 bg-canvas py-1.5 pl-8 pr-2.5 text-base sm:text-xs text-text-heading outline-none focus:border-primary focus:ring-1 focus:ring-focus placeholder:text-text-muted"
+                className="h-8 w-full rounded-md border border-border/70 bg-canvas py-1.5 pl-8 pr-2.5 text-base sm:text-xs text-text-heading placeholder:text-text-muted"
               />
             </div>
           </div>

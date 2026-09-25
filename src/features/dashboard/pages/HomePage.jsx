@@ -13,6 +13,7 @@ import { routes } from "@/routes/paths.js";
 import { HomeSection } from "../components/HomeSection.jsx";
 import WelcomeModal from "../components/WelcomeModal.jsx";
 import HomeSkeleton from "../components/HomeSkeleton.jsx";
+import { getSpaceId } from "@/features/spaces/utils/roles.js";
 
 const SuggestedSpacesSection = ({
   exploreClassrooms,
@@ -23,12 +24,11 @@ const SuggestedSpacesSection = ({
     if (!Array.isArray(exploreClassrooms) || !Array.isArray(classrooms))
       return [];
 
-    const getId = (c) => c?.id || c?.courseId || c?.classId || c?._id;
-    const joinedCourseIds = new Set(classrooms.map(getId).filter(Boolean));
+    const joinedCourseIds = new Set(classrooms.map(getSpaceId).filter(Boolean));
     const suggestions = [];
 
     for (const space of exploreClassrooms) {
-      if (!joinedCourseIds.has(getId(space))) {
+      if (!joinedCourseIds.has(getSpaceId(space))) {
         suggestions.push(space);
         if (suggestions.length === 3) break;
       }

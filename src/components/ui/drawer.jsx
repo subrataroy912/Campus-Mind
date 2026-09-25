@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 const DrawerContext = React.createContext(null)
 

@@ -1,7 +1,14 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { SpaceAvatar } from "./SpaceAvatar.jsx";
-import { toast } from "@/components/ui/toast.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
+import { toast } from "@/components/ui/toast";
 import {
   fileToDataUrl,
   IMAGE_PROFILES,
@@ -180,12 +187,12 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
           size="h-7 w-7"
         />
         <div className="flex-1 space-y-2">
-          <textarea
+          <Textarea
             rows={2}
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="Share an announcement or update with this space…"
-            className="w-full resize-none rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-base sm:text-xs text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring/50"
+            className="w-full resize-none rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
           />
 
           {/* Attachments preview chips */}
@@ -211,14 +218,16 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
                   <span className="max-w-[160px] sm:max-w-[220px] truncate font-medium">
                     {att.title || att.url}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-xs"
                     onClick={() => removeAttachment(idx)}
-                    className="ml-0.5 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                    className="ml-0.5 h-4 w-4 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
                     title="Remove attachment"
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -231,28 +240,32 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
                 <span className="font-semibold text-foreground text-[11px]">
                   Attach Image or File
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => setActiveDrawer(null)}
-                  className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
 
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="xs"
                   disabled={isOptimizingAttachment}
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-foreground border border-border hover:bg-muted/80 transition-colors cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-foreground border border-border hover:bg-muted/80 transition-colors cursor-pointer"
                 >
                   <Upload className="h-3 w-3" />
                   {isOptimizingAttachment
                     ? "Optimizing image…"
                     : "Upload from computer"}
-                </button>
-                <input
+                </Button>
+                <Input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
@@ -268,35 +281,37 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
                 onSubmit={handleAddMediaUrl}
                 className="flex flex-col sm:flex-row gap-1.5"
               >
-                <select
+                <NativeSelect
+                  size="sm"
                   value={mediaType}
                   onChange={(e) => setMediaType(e.target.value)}
-                  className="rounded-md border border-border/60 bg-surface px-2 py-1 text-[11px] text-foreground outline-none"
+                  className="w-28"
                 >
-                  <option value="IMAGE">Image</option>
-                  <option value="FILE">File / Doc</option>
-                </select>
-                <input
+                  <NativeSelectOption value="IMAGE">Image</NativeSelectOption>
+                  <NativeSelectOption value="FILE">File / Doc</NativeSelectOption>
+                </NativeSelect>
+                <Input
                   type="url"
                   value={mediaUrl}
                   onChange={(e) => setMediaUrl(e.target.value)}
                   placeholder="https://example.com/file.png"
-                  className="min-w-0 flex-1 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+                  className="min-w-0 flex-1 h-7 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground placeholder:text-muted-foreground"
                 />
-                <input
+                <Input
                   type="text"
                   value={mediaTitle}
                   onChange={(e) => setMediaTitle(e.target.value)}
                   placeholder="Title (optional)"
-                  className="w-full sm:w-36 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+                  className="w-full sm:w-36 h-7 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground placeholder:text-muted-foreground"
                 />
-                <button
+                <Button
                   type="submit"
+                  size="xs"
                   disabled={!mediaUrl.trim()}
-                  className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50 cursor-pointer"
+                  className="h-7 rounded-md px-2.5 py-1 text-xs font-semibold cursor-pointer"
                 >
                   Add
-                </button>
+                </Button>
               </form>
             </div>
           )}
@@ -308,40 +323,43 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
                 <span className="font-semibold text-foreground text-[11px]">
                   Add Video or Web Link
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => setActiveDrawer(null)}
-                  className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
 
               <form
                 onSubmit={handleAddLink}
                 className="flex flex-col sm:flex-row gap-1.5"
               >
-                <input
+                <Input
                   type="url"
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://youtube.com/watch?v=... or website URL"
-                  className="min-w-0 flex-1 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+                  className="min-w-0 flex-1 h-7 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground placeholder:text-muted-foreground"
                 />
-                <input
+                <Input
                   type="text"
                   value={linkTitle}
                   onChange={(e) => setLinkTitle(e.target.value)}
                   placeholder="Title (optional)"
-                  className="w-full sm:w-36 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+                  className="w-full sm:w-36 h-7 rounded-md border border-border/60 bg-surface px-2.5 py-1 text-xs text-foreground placeholder:text-muted-foreground"
                 />
-                <button
+                <Button
                   type="submit"
+                  size="xs"
                   disabled={!linkUrl.trim()}
-                  className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50 cursor-pointer"
+                  className="h-7 rounded-md px-2.5 py-1 text-xs font-semibold cursor-pointer"
                 >
                   Add
-                </button>
+                </Button>
               </form>
             </div>
           )}
@@ -350,43 +368,48 @@ export default function SpacePostBox({ onSubmit, isSubmitting = false }) {
 
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-2">
         <div className="flex flex-wrap items-center gap-1">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() =>
               setActiveDrawer((prev) => (prev === "file" ? null : "file"))
             }
-            className={`inline-flex min-h-8 sm:min-h-7 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex min-h-8 sm:min-h-7 h-auto items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
               activeDrawer === "file"
-                ? "bg-primary/10 text-primary font-semibold"
+                ? "bg-primary/10 text-primary font-semibold hover:bg-primary/15"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             }`}
           >
             <Paperclip className="h-3.5 w-3.5" /> Attach
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() =>
               setActiveDrawer((prev) => (prev === "link" ? null : "link"))
             }
-            className={`inline-flex min-h-8 sm:min-h-7 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+            className={`inline-flex min-h-8 sm:min-h-7 h-auto items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
               activeDrawer === "link"
-                ? "bg-primary/10 text-primary font-semibold"
+                ? "bg-primary/10 text-primary font-semibold hover:bg-primary/15"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
             }`}
           >
             <Video className="h-3.5 w-3.5" /> Video / Link
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           type="button"
+          size="sm"
           onClick={submit}
           disabled={!hasContent || isSubmitting}
-          className="inline-flex min-h-8 sm:min-h-7 items-center rounded-md bg-primary px-3.5 py-1 text-xs font-semibold text-primary-foreground shadow-2xs transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="inline-flex min-h-8 sm:min-h-7 h-auto items-center rounded-md px-3.5 py-1 text-xs font-semibold cursor-pointer"
         >
           {isSubmitting ? "Posting…" : "Post"}
-        </button>
+        </Button>
       </div>
     </div>
   );

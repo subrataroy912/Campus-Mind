@@ -6,10 +6,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.jsx";
-import { Button } from "@/components/ui/button.jsx";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 import { useGenerateInviteLinkMutation } from "../api/classroomApi.js";
-import { toast } from "@/components/ui/toast.jsx";
 import { parseApiError } from "@/lib/errorUtils.js";
 
 function formatExpiry(expiresAt) {
@@ -96,15 +98,15 @@ export function InviteLinkModal({ isOpen, onClose, classroom }) {
         <div className="mt-3 space-y-3.5">
           {/* Link box */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground">
+            <Label className="text-xs font-medium text-foreground">
               Invite URL
-            </label>
+            </Label>
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="text"
                 readOnly
                 value={inviteUrl}
-                className="flex-1 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs font-mono text-foreground focus:outline-hidden"
+                className="flex-1 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs font-mono text-foreground"
               />
               <Button
                 size="sm"

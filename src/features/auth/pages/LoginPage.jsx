@@ -11,15 +11,17 @@ import {
 } from "lucide-react";
 import AuthInput from "../components/AuthInput";
 import { getOAuthRedirectUrl } from "../api/authService.js";
-import { Button } from "@/components/ui/button.jsx";
-import { toast } from "@/components/ui/toast.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { routes } from "@/routes/paths.js";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip.jsx";
+} from "@/components/ui/tooltip";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 import { parseApiError } from "@/lib/errorUtils.js";
 
@@ -127,10 +129,12 @@ function LoginPage() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="flex min-h-11 min-w-11 items-center justify-center text-text-muted hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded cursor-pointer"
+                    className="flex min-h-11 min-w-11 items-center justify-center text-text-muted hover:text-text-main hover:bg-transparent cursor-pointer"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -149,9 +153,9 @@ function LoginPage() {
           disabled={isLoading}
         />
         <div className="flex items-center justify-between text-xs">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-text-muted hover:text-text-main font-medium">
-            <input
-              className="h-3.5 w-3.5 accent-primary rounded cursor-pointer"
+          <Label className="flex items-center gap-1.5 cursor-pointer select-none text-text-muted hover:text-text-main font-medium">
+            <Input
+              className="h-3.5 w-3.5 accent-primary rounded cursor-pointer p-0 border-0 shadow-none"
               name="rememberMe"
               onChange={updateField}
               type="checkbox"
@@ -159,7 +163,7 @@ function LoginPage() {
               disabled={isLoading}
             />
             Remember me
-          </label>
+          </Label>
           <Link
             className="text-primary hover:underline font-medium text-[11px]"
             to={routes.auth.forgotPassword}

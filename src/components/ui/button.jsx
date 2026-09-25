@@ -1,6 +1,6 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Link } from "react-router";
 
 const buttonVariants = cva(

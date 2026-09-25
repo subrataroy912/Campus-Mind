@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { Link } from "react-router";
-import { Globe, KeyRound, Lock, MessageCircle, Users } from "lucide-react";
+import { Globe, Lock, MessageCircle, Users } from "lucide-react";
 import { formatDisplayText } from "@/utils/textFormat.js";
 import { getClassTheme } from "../utils/classTheme.js";
+import { isSpaceOwner } from "../utils/roles.js";
 import { classroomApi } from "../api/classroomApi.js";
 import { courseworkApi } from "../api/courseworkApi.js";
 import { store } from "@/app/store.js";
@@ -14,8 +15,7 @@ function SpaceCard({ classroom, priority = false }) {
 
   const { user: currentUser } = useAuth();
 
-  const isOwner =
-    classroom.role === "OWNER" || currentUser?.id === classroom.ownerId;
+  const isOwner = isSpaceOwner(classroom, currentUser?.id);
 
   const handlePrefetch = () => {
     if (classroom?.id) {

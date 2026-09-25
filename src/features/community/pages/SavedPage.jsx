@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useSavedItems } from "../hooks/useSavedItems.js";
 
 export default function SavedPage() {
@@ -40,7 +43,7 @@ export default function SavedPage() {
         <div className="mb-4">
           <div className="relative max-w-md">
             <svg
-              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted"
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted z-10"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -52,15 +55,18 @@ export default function SavedPage() {
                 d="M21 21l-4.35-4.35M17 10.5A6.5 6.5 0 114 10.5a6.5 6.5 0 0113 0z"
               />
             </svg>
-            <input
+            <Input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search your saved items…"
-              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-base sm:text-xs text-text-heading outline-none transition focus:ring-1 focus:ring-primary"
+              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-base sm:text-xs text-text-heading"
             />
             {query && (
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => setQuery("")}
                 className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-text-muted hover:text-text-main cursor-pointer"
                 aria-label="Clear search"
@@ -78,7 +84,7 @@ export default function SavedPage() {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -92,10 +98,12 @@ export default function SavedPage() {
               </p>
               <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
                 {collections.map((c) => (
-                  <button
+                  <Button
                     key={c.id}
+                    type="button"
+                    variant="ghost"
                     onClick={() => setActiveCollection(c.id)}
-                    className={`flex shrink-0 items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition lg:w-full ${
+                    className={`flex shrink-0 items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition lg:w-full h-auto ${
                       activeCollection === c.id
                         ? "bg-canvas text-primary-hover"
                         : "text-text-main hover:bg-canvas"
@@ -105,40 +113,45 @@ export default function SavedPage() {
                     {c.count !== null && (
                       <span className="text-xs text-text-muted">{c.count}</span>
                     )}
-                  </button>
+                  </Button>
                 ))}
               </nav>
 
               {showNewCollection ? (
                 <form onSubmit={handleCreateCollection} className="mt-3 px-1">
-                  <input
+                  <Input
                     autoFocus
                     type="text"
                     value={newCollectionName}
                     onChange={(e) => setNewCollectionName(e.target.value)}
                     placeholder="Collection name"
-                    className="w-full rounded-lg border border-border px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-focus"
+                    className="w-full h-8 rounded-lg border border-border px-3 py-1.5 text-sm"
                   />
                   <div className="mt-2 flex gap-2">
-                    <button
+                    <Button
                       type="submit"
+                      size="xs"
                       className="flex-1 rounded-lg bg-primary px-2 py-1.5 text-xs font-medium text-surface hover:bg-primary-hover"
                     >
                       Create
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="xs"
                       onClick={() => setShowNewCollection(false)}
                       className="rounded-lg border border-border px-2 py-1.5 text-xs font-medium text-text-main hover:bg-canvas"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </form>
               ) : (
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowNewCollection(true)}
-                  className="mt-2 flex w-full items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-canvas"
+                  className="mt-2 flex w-full items-center justify-start gap-1.5 rounded-lg px-3 py-2 h-auto text-sm font-medium text-primary hover:bg-canvas"
                 >
                   <svg
                     className="h-4 w-4"
@@ -154,7 +167,7 @@ export default function SavedPage() {
                     />
                   </svg>
                   New collection
-                </button>
+                </Button>
               )}
             </div>
           </aside>
@@ -164,17 +177,20 @@ export default function SavedPage() {
             {/* Content filters */}
             <div className="mb-4 flex flex-wrap gap-2">
               {filters.map((f) => (
-                <button
+                <Button
                   key={f.id}
+                  type="button"
+                  variant={activeFilter === f.id ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setActiveFilter(f.id)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition sm:text-sm ${
+                  className={`rounded-full px-3.5 py-1.5 h-auto text-xs font-medium transition sm:text-sm ${
                     activeFilter === f.id
                       ? "bg-text-heading text-surface"
                       : "bg-surface text-text-main ring-1 ring-border hover:bg-canvas"
                   }`}
                 >
                   {f.label}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -198,11 +214,12 @@ export default function SavedPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="mb-1.5 flex items-center gap-2">
-                          <span
+                          <Badge
+                            variant="secondary"
                             className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${typeMeta[item.type].color}`}
                           >
                             {typeMeta[item.type].label}
-                          </span>
+                          </Badge>
                           <span className="truncate text-xs text-text-muted">
                             {item.meta}
                           </span>
@@ -215,7 +232,10 @@ export default function SavedPage() {
                         </p>
                       </div>
 
-                      <button
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => handleUnsave(item.id)}
                         aria-label="Remove from saved"
                         className="shrink-0 rounded-lg p-1.5 text-primary transition hover:bg-canvas"
@@ -228,7 +248,7 @@ export default function SavedPage() {
                         >
                           <path d="M6 3a1 1 0 00-1 1v17l7-4 7 4V4a1 1 0 00-1-1H6z" />
                         </svg>
-                      </button>
+                      </Button>
                     </div>
                   </li>
                 ))}

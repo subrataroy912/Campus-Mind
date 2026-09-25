@@ -20,9 +20,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.jsx";
-import { Badge } from "@/components/ui/badge.jsx";
-import { Skeleton } from "@/components/ui/skeleton.jsx";
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router";
 import { routes } from "@/routes/paths.js";
 
@@ -238,14 +239,16 @@ export default function NotificationsMenu() {
             )}
           </div>
           {unreadCount > 0 && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="xs"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
             >
               <CheckCheck size={12} />
               <span>Mark all read</span>
-            </button>
+            </Button>
           )}
         </div>
 
@@ -381,11 +384,12 @@ function NotificationItem({
             {title}
           </p>
 
-          <span
-            className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold tracking-wide ${meta.badgeClass}`}
+          <Badge
+            variant="outline"
+            className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold tracking-wide h-auto ${meta.badgeClass}`}
           >
             {meta.label}
-          </span>
+          </Badge>
         </div>
 
         {/* Message */}
@@ -416,15 +420,17 @@ function NotificationItem({
 
       {/* Mark as read button */}
       {isUnread && onMarkRead && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           onClick={handleMarkRead}
           title="Mark as read"
           aria-label={`Mark "${title}" as read`}
           className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted/70 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
         >
           <Check size={12} strokeWidth={2.2} />
-        </button>
+        </Button>
       )}
     </div>
   );

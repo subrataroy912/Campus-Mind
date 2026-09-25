@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useLocation } from "react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "../../features/dashboard/components/Header";
 import Sidebar from "../../features/dashboard/components/Sidebar";
 import RouteSuspenseFallback from "./RouteSuspenseFallback.jsx";
@@ -40,10 +41,12 @@ function DashboardLayout() {
           <Sidebar compact={isCompact} />
 
           {/* Floating Edge Toggle Button */}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon-xs"
             onClick={() => dispatch(toggleSidebar())}
-            className="absolute -right-3 top-5 z-30 hidden h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:flex"
+            className="absolute -right-3 top-5 z-30 hidden h-6 w-6 items-center justify-center rounded-full bg-card text-muted-foreground shadow-xs hover:bg-accent hover:text-foreground md:flex"
             aria-label={isCompact ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCompact ? (
@@ -51,7 +54,7 @@ function DashboardLayout() {
             ) : (
               <ChevronLeft className="h-3.5 w-3.5" />
             )}
-          </button>
+          </Button>
         </aside>
 
         {/* Primary Scrollable Viewport */}

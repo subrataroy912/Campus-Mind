@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react";
 
 import { Button } from "@/components/ui/button"

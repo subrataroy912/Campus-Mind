@@ -1,7 +1,10 @@
 import { useMemo, useState, useCallback } from "react";
 import { useBlocker, useBeforeUnload } from "react-router";
 import { ClipboardList, Plus, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -17,7 +20,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog.jsx";
+} from "@/components/ui/dialog";
 import { formatDueDate } from "@/utils/dateFormat.js";
 import { parseApiError } from "@/lib/errorUtils.js";
 import {
@@ -388,10 +391,10 @@ export function ClassworkTab({
                 </p>
               )}
               <div>
-                <label className="block text-xs font-medium text-text-heading mb-1">
+                <Label className="block text-xs font-medium text-text-heading mb-1">
                   Title <span className="text-destructive">*</span>
-                </label>
-                <input
+                </Label>
+                <Input
                   type="text"
                   required
                   value={formTitle}
@@ -401,15 +404,15 @@ export function ClassworkTab({
                       ? "e.g. Problem Set 1"
                       : "e.g. Week 1 Lecture Slides"
                   }
-                  className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                  className="h-9 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-text-heading mb-1">
+                <Label className="block text-xs font-medium text-text-heading mb-1">
                   {createType === "ASSIGNMENT" ? "Instructions" : "Description"}
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   rows={3}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
@@ -418,34 +421,34 @@ export function ClassworkTab({
                       ? "Describe instructions or questions…"
                       : "Add notes or resource details…"
                   }
-                  className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                  className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading"
                 />
               </div>
 
               {createType === "ASSIGNMENT" && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-text-heading mb-1">
+                    <Label className="block text-xs font-medium text-text-heading mb-1">
                       Due Date
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="datetime-local"
                       value={formDueDate}
                       onChange={(e) => setFormDueDate(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                      className="h-9 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-text-heading mb-1">
+                    <Label className="block text-xs font-medium text-text-heading mb-1">
                       Points
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       min={0}
                       value={formPoints}
                       onChange={(e) => setFormPoints(e.target.value)}
                       placeholder="100"
-                      className="w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading outline-none focus:ring-2 focus:ring-focus"
+                      className="h-9 w-full rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-text-heading"
                     />
                   </div>
                 </div>

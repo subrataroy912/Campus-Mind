@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import {
   useAddCourseworkCommentMutation,
@@ -76,7 +77,7 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
       </AsyncStateBoundary>
 
       <div className="flex gap-2 pt-1">
-        <input
+        <Input
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           onKeyDown={(e) => {
@@ -85,7 +86,7 @@ export function CourseworkCommentSection({ courseId, courseworkId }) {
               handleAddComment();
             }
           }}
-          className="flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-xs text-text-heading outline-none focus:ring-2 focus:ring-focus"
+          className="h-8 flex-1 rounded-lg border border-border bg-canvas px-3 py-1.5 text-xs text-text-heading"
           placeholder="Add a class comment…"
         />
         <Button size="sm" loading={isPosting} onClick={handleAddComment}>

@@ -1,7 +1,17 @@
 import React from "react";
 import { Camera, Plus, Trash2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
-import { Input } from "@/components/ui/input.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   Field,
   FieldDescription,
@@ -9,7 +19,7 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@/components/ui/field.jsx";
+} from "@/components/ui/field";
 import { MAX_BIO_LENGTH } from "../../utils/profileValidation.js";
 
 /**
@@ -71,19 +81,18 @@ export function ProfileMediaSection({
       {/* Avatar Preview Area */}
       <div className="px-6 flex items-end -mt-10 sm:-mt-14 mb-3 relative z-10">
         <div className="relative group">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-muted border-4 border-background shadow-sm flex items-center justify-center overflow-hidden">
+          <Avatar className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-muted border-4 border-background shadow-sm flex items-center justify-center overflow-hidden">
             {avatarPreview ? (
-              <img
+              <AvatarImage
                 src={avatarPreview}
                 alt="Avatar preview"
                 className="w-full h-full object-cover"
               />
-            ) : (
-              <span className="text-muted-foreground text-xs font-medium">
-                Avatar
-              </span>
-            )}
-          </div>
+            ) : null}
+            <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
+              Avatar
+            </AvatarFallback>
+          </Avatar>
           <label className="absolute inset-0 flex items-center justify-center cursor-pointer rounded-full bg-black/0 group-hover:bg-black/30 transition-colors">
             <span className="bg-black/75 text-white px-2.5 py-1 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
               Edit
@@ -233,13 +242,13 @@ export function ProfileDetailsSection({
             {currentBioLength} / {MAX_BIO_LENGTH}
           </span>
         </div>
-        <textarea
+        <Textarea
           id="profile-bio"
           value={formData.bio}
           disabled={disabled}
           onChange={(e) => handleChange("bio", e.target.value)}
           onBlur={() => handleBlur("bio")}
-          className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-[100px] w-full"
           placeholder="Share your interests, goals, or background..."
           maxLength={MAX_BIO_LENGTH}
         />
@@ -311,20 +320,20 @@ export function ProfileLocationSection({
 
       <Field data-invalid={Boolean(errors.profileVisibility)}>
         <FieldLabel htmlFor="profile-visibility">Profile visibility</FieldLabel>
-        <select
+        <NativeSelect
           id="profile-visibility"
           value={formData.profileVisibility}
           disabled={disabled}
           onChange={(e) => handleChange("profileVisibility", e.target.value)}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full"
         >
-          <option value="PUBLIC" className="bg-background text-foreground">
+          <NativeSelectOption value="PUBLIC">
             Public - Anyone can view your profile
-          </option>
-          <option value="PRIVATE" className="bg-background text-foreground">
+          </NativeSelectOption>
+          <NativeSelectOption value="PRIVATE">
             Private - Only you can view full details
-          </option>
-        </select>
+          </NativeSelectOption>
+        </NativeSelect>
         <FieldError id="profile-visibility-error">
           {errors.profileVisibility}
         </FieldError>
@@ -367,32 +376,29 @@ export function ProfilePersonalSection({
 
         <Field data-invalid={Boolean(errors.gender)}>
           <FieldLabel htmlFor="profile-gender">Gender</FieldLabel>
-          <select
+          <NativeSelect
             id="profile-gender"
             value={formData.gender}
             disabled={disabled}
             onChange={(e) => handleChange("gender", e.target.value)}
-            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full"
           >
-            <option value="" className="bg-background text-foreground">
+            <NativeSelectOption value="">
               Select gender
-            </option>
-            <option value="Male" className="bg-background text-foreground">
+            </NativeSelectOption>
+            <NativeSelectOption value="Male">
               Male
-            </option>
-            <option value="Female" className="bg-background text-foreground">
+            </NativeSelectOption>
+            <NativeSelectOption value="Female">
               Female
-            </option>
-            <option value="Other" className="bg-background text-foreground">
+            </NativeSelectOption>
+            <NativeSelectOption value="Other">
               Other
-            </option>
-            <option
-              value="Prefer not to say"
-              className="bg-background text-foreground"
-            >
+            </NativeSelectOption>
+            <NativeSelectOption value="Prefer not to say">
               Prefer not to say
-            </option>
-          </select>
+            </NativeSelectOption>
+          </NativeSelect>
           <FieldError id="profile-gender-error">{errors.gender}</FieldError>
         </Field>
 

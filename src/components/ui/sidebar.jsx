@@ -3,7 +3,7 @@ import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva } from "class-variance-authority";
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 import { useIsMobile } from "@/hooks/useMobile"
 import { Button } from "@/components/ui/button"
