@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router";
 import { useSelector } from "react-redux";
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   ExternalLink,
   History,
   ImagePlus,
@@ -52,6 +54,123 @@ import {
 
 const QUICK_EMOJIS = ["👍", "❤️", "🚀", "🔥", "🎉"];
 const SEND_COOLDOWN_MS = 1500;
+const MAX_MESSAGE_LENGTH = 2000;
+const MESSAGE_COLLAPSE_CHAR_LIMIT = 340;
+const MESSAGE_COLLAPSE_LINE_LIMIT = 6;
+
+function splitIntoReadableParagraphs(text) {
+  const normalized = String(text || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (!normalized) return [];
+
+  const rawParagraphs = normalized.split(/\n{2,}/);
+  const result = [];
+
+  for (const block of rawParagraphs) {
+    // If a single paragraph has no newlines at all and is very long (> 380 chars),
+    // group every ~3 sentences into readable paragraphs with line gaps
+    if (!block.includes("\n") && block.length > 380) {
+      const sentences = block.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) || [
+        block,
+      ];
+      let currentChunk = "";
+      let sentenceCount = 0;
+      for (const sentence of sentences) {
+        currentChunk += sentence;
+        sentenceCount += 1;
+        if (sentenceCount >= 3 && currentChunk.length >= 220) {
+          result.push(currentChunk.trim());
+          currentChunk = "";
+          sentenceCount = 0;
+        }
+      }
+      if (currentChunk.trim()) {
+        result.push(currentChunk.trim());
+      }
+    } else {
+      result.push(block);
+    }
+  }
+
+  return result;
+}
+
+function FormattedMessageContent({ content, isMine }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const normalized = useMemo(
+    () =>
+      String(content || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim(),
+    [content],
+  );
+
+  const lines = useMemo(() => normalized.split("\n"), [normalized]);
+  const isLong =
+    normalized.length > MESSAGE_COLLAPSE_CHAR_LIMIT ||
+    lines.length > MESSAGE_COLLAPSE_LINE_LIMIT;
+
+  const displayedText = useMemo(() => {
+    if (!isLong || expanded) {
+      return normalized;
+    }
+    let slice = normalized;
+    if (lines.length > MESSAGE_COLLAPSE_LINE_LIMIT) {
+      slice = lines.slice(0, MESSAGE_COLLAPSE_LINE_LIMIT).join("\n");
+    }
+    if (slice.length > MESSAGE_COLLAPSE_CHAR_LIMIT) {
+      const cut = slice.slice(0, MESSAGE_COLLAPSE_CHAR_LIMIT);
+      const lastSpace = cut.lastIndexOf(" ");
+      slice = lastSpace > 180 ? cut.slice(0, lastSpace) : cut;
+    }
+    return `${slice.trimEnd()}…`;
+  }, [normalized, lines, isLong, expanded]);
+
+  const paragraphs = useMemo(
+    () => splitIntoReadableParagraphs(displayedText),
+    [displayedText],
+  );
+
+  return (
+    <div>
+      <div className="space-y-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed">
+        {paragraphs.map((para, idx) => (
+          <p key={idx} className="whitespace-pre-wrap break-words">
+            {para}
+          </p>
+        ))}
+      </div>
+
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className={`mt-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition cursor-pointer ${
+            isMine
+              ? "bg-white/15 text-white hover:bg-white/25"
+              : "bg-primary/10 text-primary hover:bg-primary/20"
+          }`}
+        >
+          {expanded ? (
+            <>
+              <span>Show less</span>
+              <ChevronUp className="h-3 w-3" />
+            </>
+          ) : (
+            <>
+              <span>Read more</span>
+              <ChevronDown className="h-3 w-3" />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function formatChatTime(isoString) {
   if (!isoString) return "";
@@ -372,11 +491,33 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const userRole = (room.myRole || room.userRole || "").toUpperCase();
   const isSpaceModerator = userRole === "OWNER" || userRole === "ADMIN";
   const roomSubtitle = room.subtitle || room.section || room.subject || "";
+  const composerTextareaRef = useRef(null);
+
+  useEffect(() => {
+    const el = composerTextareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const nextHeight = Math.min(el.scrollHeight, 128);
+    el.style.height = `${Math.max(34, nextHeight)}px`;
+  }, [draft]);
 
   const handleInputChange = (e) => {
-    setDraft(e.target.value);
-    if (e.target.value.trim()) {
+    const val = e.target.value.slice(0, MAX_MESSAGE_LENGTH);
+    setDraft(val);
+    if (val.trim()) {
       notifyTyping();
+    }
+  };
+
+  const handleComposerKeyDown = (e) => {
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.nativeEvent?.isComposing &&
+      (typeof window === "undefined" || window.innerWidth >= 640)
+    ) {
+      e.preventDefault();
+      handleSend(e);
     }
   };
 
@@ -1032,7 +1173,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                 )}
 
                 <div
-                  className={`flex max-w-[82%] sm:max-w-[72%] flex-col ${
+                  className={`flex max-w-[85%] sm:max-w-[60ch] flex-col ${
                     isMine ? "items-end" : "items-start"
                   }`}
                 >
@@ -1058,16 +1199,17 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                     }`}
                   >
                     <div
-                      className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-2xs ${
+                      className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-2xs ${
                         isMine
                           ? "bg-primary text-primary-foreground rounded-tr-xs"
                           : "bg-surface border border-border/70 text-text-heading rounded-tl-xs"
                       }`}
                     >
                       {message.content && (
-                        <p className="whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
+                        <FormattedMessageContent
+                          content={message.content}
+                          isMine={isMine}
+                        />
                       )}
 
                       {Array.isArray(message.attachments) &&
@@ -1318,7 +1460,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
       {/* Message Composer */}
       <form
         onSubmit={handleSend}
-        className="flex items-center gap-2 border-t border-border/70 p-2.5 bg-surface"
+        className="flex items-end gap-2 border-t border-border/70 p-2.5 bg-surface"
       >
         <input
           ref={imageInputRef}
@@ -1335,7 +1477,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           disabled={isUploadingImage}
           title="Upload image"
           aria-label="Upload image"
-          className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-md border transition cursor-pointer disabled:opacity-50 ${
+          className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-md border transition cursor-pointer disabled:opacity-50 ${
             selectedImageFile
               ? "border-primary bg-primary/10 text-primary"
               : "border-border/70 bg-canvas text-text-muted hover:text-text-heading"
@@ -1349,7 +1491,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           onClick={() => setShowAttachmentInput((prev) => !prev)}
           title="Attach link or media URL"
           aria-label="Attach link or media URL"
-          className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-md border transition cursor-pointer ${
+          className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-md border transition cursor-pointer ${
             showAttachmentInput
               ? "border-primary bg-primary/10 text-primary"
               : "border-border/70 bg-canvas text-text-muted hover:text-text-heading"
@@ -1358,14 +1500,30 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           <Plus size={15} />
         </button>
 
-        <input
-          type="text"
-          value={draft}
-          onChange={handleInputChange}
-          onPaste={handlePaste}
-          placeholder={`Message ${room.title}…`}
-          className="flex-1 h-9 sm:h-8 rounded-md border border-border/70 bg-canvas px-3 text-base sm:text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
-        />
+        <div className="relative flex-1 min-w-0">
+          <textarea
+            ref={composerTextareaRef}
+            rows={1}
+            maxLength={MAX_MESSAGE_LENGTH}
+            value={draft}
+            onChange={handleInputChange}
+            onKeyDown={handleComposerKeyDown}
+            onPaste={handlePaste}
+            placeholder={`Message ${room.title}… (Shift+Enter for new line)`}
+            className="block w-full min-h-[34px] max-h-32 resize-none overflow-y-auto rounded-md border border-border/70 bg-canvas px-3 py-1.5 text-base sm:text-xs leading-relaxed text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
+          />
+          {draft.length >= 1500 && (
+            <span
+              className={`pointer-events-none absolute bottom-1 right-2 rounded bg-surface/90 px-1 text-[10px] font-medium tabular-nums ${
+                draft.length >= MAX_MESSAGE_LENGTH
+                  ? "text-destructive"
+                  : "text-text-muted"
+              }`}
+            >
+              {draft.length}/{MAX_MESSAGE_LENGTH}
+            </span>
+          )}
+        </div>
 
         <Button
           type="submit"
@@ -1378,10 +1536,10 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           title={
             sendCooldownLeftMs > 0
               ? `Wait ${(sendCooldownLeftMs / 1000).toFixed(1)}s before sending next message`
-              : "Send message"
+              : "Send message (Enter)"
           }
           aria-label="Send message"
-          className="min-h-9 min-w-9 sm:h-8 sm:w-8 px-1.5"
+          className="min-h-9 min-w-9 sm:h-8 sm:w-8 shrink-0 px-1.5"
         >
           {isUploadingImage ? (
             <Loader2 size={13} className="animate-spin" aria-hidden="true" />
