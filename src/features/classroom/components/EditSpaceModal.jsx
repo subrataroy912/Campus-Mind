@@ -24,7 +24,10 @@ import {
 } from "../api/classroomService.js";
 import { SUBJECTS, THEME_COLORS } from "../model/createSpaceForm.js";
 import { getClassTheme } from "../utils/classTheme.js";
-import { optimizeImage } from "@/utils/optimizeImage.js";
+import {
+  optimizeImage,
+  uploadCourseAssetWithFallback,
+} from "@/utils/optimizeImage.js";
 import { initials } from "@/utils/initials.js";
 import { cn } from "@/lib/utils.js";
 import { parseApiError } from "@/lib/errorUtils.js";
@@ -214,34 +217,22 @@ export function EditSpaceModal({ isOpen, onClose, classroom }) {
       let coverUrl = classroom?.coverUrl || classroom?.cover || null;
       let logoUrl = classroom?.logoUrl || classroom?.logo || null;
 
-      // Handle cover file upload
+      // Handle cover file upload (with server-side fallback)
       if (coverFile) {
-        const upload = await requestCourseCoverUpload();
-        const body = new FormData();
-        body.append("file", coverFile);
-        body.append("api_key", upload.uploadApiKey);
-        body.append("timestamp", String(upload.uploadTimestamp));
-        body.append("signature", upload.uploadSignature);
-        body.append("public_id", upload.publicId);
-        const res = await fetch(upload.uploadUrl, { method: "POST", body });
-        if (!res.ok) throw new Error("Failed to upload space banner");
-        coverUrl = (await res.json()).secure_url;
+        coverUrl = await uploadCourseAssetWithFallback(
+          coverFile,
+          requestCourseCoverUpload,
+        );
       } else if (coverRemoved) {
         coverUrl = "";
       }
 
-      // Handle logo file upload
+      // Handle logo file upload (with server-side fallback)
       if (logoFile) {
-        const upload = await requestCourseLogoUpload();
-        const body = new FormData();
-        body.append("file", logoFile);
-        body.append("api_key", upload.uploadApiKey);
-        body.append("timestamp", String(upload.uploadTimestamp));
-        body.append("signature", upload.uploadSignature);
-        body.append("public_id", upload.publicId);
-        const res = await fetch(upload.uploadUrl, { method: "POST", body });
-        if (!res.ok) throw new Error("Failed to upload space logo");
-        logoUrl = (await res.json()).secure_url;
+        logoUrl = await uploadCourseAssetWithFallback(
+          logoFile,
+          requestCourseLogoUpload,
+        );
       } else if (logoRemoved) {
         logoUrl = "";
       }

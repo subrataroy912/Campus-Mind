@@ -37,6 +37,18 @@ export const messagesApi = baseApi.injectEndpoints({
       },
       keepUnusedDataFor: 60,
     }),
+    uploadSpaceChatImage: builder.mutation({
+      query: ({ spaceId, file }) => {
+        const body = new FormData();
+        body.append("file", file, file.name || "image.webp");
+        return {
+          url: `/messages/spaces/${spaceId}/upload-image`,
+          method: "POST",
+          body,
+        };
+      },
+      transformResponse: (res) => res?.data ?? res,
+    }),
     sendSpaceMessageRest: builder.mutation({
       query: ({ spaceId, content, attachments = [] }) => ({
         url: `/messages/spaces/${spaceId}`,
@@ -93,8 +105,10 @@ export const {
   useGetSpaceChatRoomsQuery,
   useGetSpaceChatHistoryQuery,
   useLazyGetSpaceChatHistoryQuery,
+  useUploadSpaceChatImageMutation,
   useSendSpaceMessageRestMutation,
   useToggleSpaceReactionRestMutation,
   useMarkSpaceChatReadMutation,
   useDeleteSpaceMessageMutation,
 } = messagesApi;
+

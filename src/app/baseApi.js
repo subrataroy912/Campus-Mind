@@ -48,7 +48,6 @@ const PUBLIC_AUTH_ENDPOINTS = new Set(["login", "register", "refresh"]);
 const PUBLIC_DISCOVERY_ENDPOINTS = new Set([
   "getExploreFeed",
   "searchExploreCourses",
-  "requestCourseCoverUpload",
 ]);
 const UNAUTHENTICATED_ERROR = Object.freeze({
   status: 401,

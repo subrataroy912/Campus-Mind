@@ -8,7 +8,10 @@ import {
   updateClassroom,
 } from "../api/classroomService.js";
 import { INITIAL_SPACE_FORM } from "../model/createSpaceForm.js";
-import { optimizeImage } from "@/utils/optimizeImage.js";
+import {
+  optimizeImage,
+  uploadCourseAssetWithFallback,
+} from "@/utils/optimizeImage.js";
 import { routes } from "@/routes/paths.js";
 import { parseApiError } from "@/lib/errorUtils.js";
 
@@ -100,38 +103,20 @@ export function useCreateSpaceForm() {
       let coverUrl = null;
       let logoUrl = null;
 
-      // Upload cover image if provided (optional)
+      // Upload cover image if provided (with server-side fallback)
       if (form.coverImage) {
-        const upload = await requestCourseCoverUpload();
-        const body = new FormData();
-        body.append("file", form.coverImage);
-        body.append("api_key", upload.uploadApiKey);
-        body.append("timestamp", String(upload.uploadTimestamp));
-        body.append("signature", upload.uploadSignature);
-        body.append("public_id", upload.publicId);
-        const response = await fetch(upload.uploadUrl, {
-          method: "POST",
-          body,
-        });
-        if (!response.ok) throw new Error("Unable to upload the space cover.");
-        coverUrl = (await response.json()).secure_url;
+        coverUrl = await uploadCourseAssetWithFallback(
+          form.coverImage,
+          requestCourseCoverUpload,
+        );
       }
 
-      // Upload logo image if provided (optional)
+      // Upload logo image if provided (with server-side fallback)
       if (form.logoImage) {
-        const upload = await requestCourseLogoUpload();
-        const body = new FormData();
-        body.append("file", form.logoImage);
-        body.append("api_key", upload.uploadApiKey);
-        body.append("timestamp", String(upload.uploadTimestamp));
-        body.append("signature", upload.uploadSignature);
-        body.append("public_id", upload.publicId);
-        const response = await fetch(upload.uploadUrl, {
-          method: "POST",
-          body,
-        });
-        if (!response.ok) throw new Error("Unable to upload the space logo.");
-        logoUrl = (await response.json()).secure_url;
+        logoUrl = await uploadCourseAssetWithFallback(
+          form.logoImage,
+          requestCourseLogoUpload,
+        );
       }
 
       const effectiveSubject =

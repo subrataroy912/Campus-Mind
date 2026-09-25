@@ -5,7 +5,9 @@ import {
   ArrowLeft,
   ExternalLink,
   History,
+  ImagePlus,
   Link2,
+  Loader2,
   MessageSquare,
   Plus,
   Search,
@@ -25,12 +27,14 @@ import {
   useGetSpaceChatRoomsQuery,
   useLazyGetSpaceChatHistoryQuery,
   useMarkSpaceChatReadMutation,
+  useUploadSpaceChatImageMutation,
 } from "@/features/messages/api/messagesApi.js";
 import { useSpaceStompChat } from "@/features/messages/hooks/useSpaceStompChat.js";
 import { selectCurrentUserId } from "@/features/auth/authSelectors.js";
 import { Button } from "@/components/ui/button.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import { routes } from "@/routes/paths.js";
+import { fileToDataUrl, optimizeImage } from "@/utils/optimizeImage.js";
 
 const QUICK_EMOJIS = ["👍", "❤️", "🚀", "🔥", "🎉"];
 
@@ -144,6 +148,10 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [attachmentName, setAttachmentName] = useState("");
   const [showAttachmentInput, setShowAttachmentInput] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState(null);
   const [olderMessages, setOlderMessages] = useState([]);
   const [olderCursor, setOlderCursor] = useState(null);
   const [hasOlderMore, setHasOlderMore] = useState(null);
@@ -152,6 +160,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
 
   const messagesEndRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
+  const imageInputRef = useRef(null);
 
   const {
     data: initialHistory,
@@ -165,6 +174,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     useLazyGetSpaceChatHistoryQuery();
   const [deleteSpaceMessage] = useDeleteSpaceMessageMutation();
   const [markSpaceChatRead] = useMarkSpaceChatReadMutation();
+  const [uploadSpaceChatImage] = useUploadSpaceChatImageMutation();
 
   const {
     liveEvents = [],
@@ -269,23 +279,131 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
     }
   };
 
-  const handleSend = (event) => {
+  const applySelectedImage = (file) => {
+    if (!file) return;
+    if (!file.type || !file.type.startsWith("image/")) {
+      setImageUploadError("Please select an image file (JPG, PNG, GIF, or WebP).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setImageUploadError("Image must be smaller than 10 MB.");
+      return;
+    }
+    setImageUploadError(null);
+    setSelectedImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setSelectedImagePreview(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageFileSelect = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      applySelectedImage(file);
+    }
+    event.target.value = "";
+  };
+
+  const handleClearImageFile = () => {
+    setSelectedImageFile(null);
+    setSelectedImagePreview(null);
+    setImageUploadError(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
+
+  const handlePaste = (event) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type?.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          event.preventDefault();
+          applySelectedImage(file);
+          break;
+        }
+      }
+    }
+  };
+
+  const handleSend = async (event) => {
     event.preventDefault();
+    if (isUploadingImage) return;
+
     const text = draft.trim();
     const cleanUrl = attachmentUrl.trim();
-    if (!text && !cleanUrl) return;
+    if (!text && !cleanUrl && !selectedImageFile) return;
 
-    const attachments = cleanUrl
-      ? [
-          {
-            url: cleanUrl,
-            name: attachmentName.trim() || cleanUrl,
-            type: /\.(png|jpe?g|gif|webp|svg)$/i.test(cleanUrl)
-              ? "IMAGE"
-              : "LINK",
-          },
-        ]
-      : [];
+    const attachments = [];
+
+    if (selectedImageFile) {
+      setIsUploadingImage(true);
+      setImageUploadError(null);
+      try {
+        const optimizedFile = await optimizeImage(selectedImageFile, {
+          maxDimension: 1600,
+          quality: 0.85,
+        });
+        let uploadedAttachment = null;
+        try {
+          uploadedAttachment = await uploadSpaceChatImage({
+            spaceId: room.spaceId,
+            file: optimizedFile,
+          }).unwrap();
+        } catch {
+          const dataUrl = await fileToDataUrl(optimizedFile);
+          uploadedAttachment = {
+            url: dataUrl,
+            name: selectedImageFile.name || "chat-image.webp",
+            type: "IMAGE",
+            mimeType: optimizedFile.type || "image/webp",
+            size: optimizedFile.size,
+          };
+        }
+
+        if (uploadedAttachment?.url) {
+          attachments.push({
+            url: uploadedAttachment.url,
+            name:
+              uploadedAttachment.name ||
+              selectedImageFile.name ||
+              "chat-image.webp",
+            type: "IMAGE",
+            mimeType:
+              uploadedAttachment.mimeType ||
+              optimizedFile.type ||
+              "image/webp",
+            size: uploadedAttachment.size || optimizedFile.size,
+          });
+        }
+      } catch (err) {
+        setImageUploadError(
+          err?.data?.message || err?.message || "Failed to process image.",
+        );
+        setIsUploadingImage(false);
+        return;
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
+    if (cleanUrl) {
+      const isImgUrl =
+        /^data:image\//i.test(cleanUrl) ||
+        /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(cleanUrl);
+      attachments.push({
+        url: cleanUrl,
+        name: attachmentName.trim() || cleanUrl,
+        type: isImgUrl ? "IMAGE" : "LINK",
+        mimeType: isImgUrl ? "image/webp" : undefined,
+      });
+    }
 
     const sent = sendStompMessage({
       content: text,
@@ -297,6 +415,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
       setAttachmentUrl("");
       setAttachmentName("");
       setShowAttachmentInput(false);
+      handleClearImageFile();
       shouldAutoScrollRef.current = true;
     }
   };
@@ -510,8 +629,15 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                       {Array.isArray(message.attachments) &&
                         message.attachments.length > 0 && (
                           <div className="mt-2 space-y-1.5">
-                            {message.attachments.map((att, idx) =>
-                              att.type === "IMAGE" ? (
+                            {message.attachments.map((att, idx) => {
+                              const isImageAttachment =
+                                att.type === "IMAGE" ||
+                                att.mimeType?.startsWith("image/") ||
+                                /^data:image\//i.test(att.url || "") ||
+                                /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(
+                                  att.url || "",
+                                );
+                              return isImageAttachment ? (
                                 <a
                                   key={`${att.url}-${idx}`}
                                   href={att.url}
@@ -522,7 +648,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                                   <img
                                     src={att.url}
                                     alt={att.name || "Attachment"}
-                                    className="max-h-48 w-auto object-cover"
+                                    className="max-h-56 w-auto object-cover"
                                     loading="lazy"
                                   />
                                 </a>
@@ -543,8 +669,8 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
                                     {att.name || att.url}
                                   </span>
                                 </a>
-                              ),
-                            )}
+                              );
+                            })}
                           </div>
                         )}
                     </div>
@@ -651,6 +777,48 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
         </div>
       )}
 
+      {/* Selected Image Preview Drawer */}
+      {(selectedImagePreview || imageUploadError) && (
+        <div className="flex items-center justify-between gap-3 border-t border-border/70 bg-canvas/60 px-3 py-2">
+          {selectedImagePreview ? (
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={selectedImagePreview}
+                alt={selectedImageFile?.name || "Selected preview"}
+                className="h-12 w-12 rounded-md border border-border/70 object-cover shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-text-heading">
+                  {selectedImageFile?.name || "Image attached"}
+                </p>
+                {imageUploadError ? (
+                  <p className="text-[11px] text-destructive">
+                    {imageUploadError}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-text-muted">
+                    {isUploadingImage
+                      ? "Uploading image…"
+                      : "Ready to send"}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-destructive">{imageUploadError}</p>
+          )}
+          <button
+            type="button"
+            onClick={handleClearImageFile}
+            disabled={isUploadingImage}
+            className="rounded p-1 text-text-muted hover:text-text-heading cursor-pointer disabled:opacity-50"
+            aria-label="Remove selected image"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Optional Attachment Input Drawer */}
       {showAttachmentInput && (
         <div className="flex flex-wrap items-center gap-2 border-t border-border/70 bg-canvas/60 px-3 py-2">
@@ -689,10 +857,35 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
         onSubmit={handleSend}
         className="flex items-center gap-2 border-t border-border/70 p-2.5 bg-surface"
       >
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={handleImageFileSelect}
+          className="sr-only"
+          tabIndex={-1}
+        />
+
+        <button
+          type="button"
+          onClick={() => imageInputRef.current?.click()}
+          disabled={isUploadingImage}
+          title="Upload image"
+          aria-label="Upload image"
+          className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-md border transition cursor-pointer disabled:opacity-50 ${
+            selectedImageFile
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border/70 bg-canvas text-text-muted hover:text-text-heading"
+          }`}
+        >
+          <ImagePlus size={15} />
+        </button>
+
         <button
           type="button"
           onClick={() => setShowAttachmentInput((prev) => !prev)}
           title="Attach link or media URL"
+          aria-label="Attach link or media URL"
           className={`inline-flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-md border transition cursor-pointer ${
             showAttachmentInput
               ? "border-primary bg-primary/10 text-primary"
@@ -706,6 +899,7 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
           type="text"
           value={draft}
           onChange={handleInputChange}
+          onPaste={handlePaste}
           placeholder={`Message ${room.title}…`}
           className="flex-1 h-9 sm:h-8 rounded-md border border-border/70 bg-canvas px-3 text-base sm:text-xs text-text-heading outline-none placeholder:text-text-muted focus:border-primary focus:ring-1 focus:ring-focus"
         />
@@ -713,11 +907,18 @@ function SpaceChatThread({ room, currentUserId, onBack }) {
         <Button
           type="submit"
           size="icon"
-          disabled={!draft.trim() && !attachmentUrl.trim()}
+          disabled={
+            isUploadingImage ||
+            (!draft.trim() && !attachmentUrl.trim() && !selectedImageFile)
+          }
           aria-label="Send message"
           className="min-h-9 min-w-9 sm:h-8 sm:w-8"
         >
-          <Send size={13} aria-hidden="true" />
+          {isUploadingImage ? (
+            <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Send size={13} aria-hidden="true" />
+          )}
         </Button>
       </form>
     </div>

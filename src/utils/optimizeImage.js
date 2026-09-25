@@ -38,3 +38,42 @@ export function optimizeImage(file, maxDimension, quality = 0.82) {
     image.src = sourceUrl;
   });
 }
+
+export function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read image file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function uploadCourseAssetWithFallback(file, requestUploadFn) {
+  try {
+    const upload = await requestUploadFn();
+    if (
+      upload?.uploadUrl &&
+      upload?.uploadApiKey &&
+      upload?.uploadSignature &&
+      upload?.publicId
+    ) {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("api_key", upload.uploadApiKey);
+      body.append("timestamp", String(upload.uploadTimestamp));
+      body.append("signature", upload.uploadSignature);
+      body.append("public_id", upload.publicId);
+      const res = await fetch(upload.uploadUrl, { method: "POST", body });
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.secure_url) {
+          return json.secure_url;
+        }
+      }
+    }
+  } catch {
+    // Fall back to base64 data URI so the backend uploads/stores it server-side
+  }
+  return fileToDataUrl(file);
+}
+
