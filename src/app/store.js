@@ -63,7 +63,16 @@ export const store = configureStore({
     Object.keys(preloadedState).length > 0 ? preloadedState : undefined,
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      immutableCheck: {
+        warnAfter: 128,
+        ignoredPaths: [baseApi.reducerPath],
+      },
+      serializableCheck: {
+        warnAfter: 128,
+        ignoredPaths: [baseApi.reducerPath],
+      },
+    })
       .concat(baseApi.middleware)
       .concat(persistenceListener.middleware),
 
