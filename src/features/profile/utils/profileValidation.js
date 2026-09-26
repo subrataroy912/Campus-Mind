@@ -1,4 +1,4 @@
-export const MAX_BIO_LENGTH = 500;
+export const MAX_BIO_LENGTH = 200;
 
 function ValidateField(name, value) {
   const text = String(value || "");
@@ -13,8 +13,8 @@ function ValidateField(name, value) {
       return "Use only letters, numbers, and underscores.";
     if (text.trim().length < 3)
       return "Username must be at least 3 characters.";
-    if (text.trim().length > 30)
-      return "Username must be less than 30 characters.";
+    if (text.trim().length > 20)
+      return "Username must be less than 20 characters.";
   }
   if (name === "bio" && text.length > MAX_BIO_LENGTH) {
     return `Bio must be ${MAX_BIO_LENGTH} characters or less.`;
@@ -24,11 +24,13 @@ function ValidateField(name, value) {
   }
   if (name === "firstName") {
     if (!text.trim()) return "First name is required.";
-    if (text.trim().length > 100) return "First name must be less than 100 characters.";
+    if (text.trim().length > 100)
+      return "First name must be less than 100 characters.";
   }
   if (name === "lastName") {
     if (!text.trim()) return "Last name is required.";
-    if (text.trim().length > 100) return "Last name must be less than 100 characters.";
+    if (text.trim().length > 100)
+      return "Last name must be less than 100 characters.";
   }
   if (name === "phone" && text.trim().length > 20) {
     return "Phone number must be 20 characters or less.";

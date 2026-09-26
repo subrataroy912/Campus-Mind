@@ -32,6 +32,7 @@ import ProfileHeader from "../components/ProfileHeader.jsx";
 import ProfileDetails from "../components/ProfileDetails.jsx";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton.jsx";
 import { EditProfileModal } from "../components/EditProfileModal.jsx";
+import { ChangeHandleModal } from "../components/ChangeHandleModal.jsx";
 import { routes } from "@/routes/paths.js";
 import { toast } from "@/components/ui/toast";
 import { parseApiError } from "@/lib/errorUtils.js";
@@ -100,6 +101,7 @@ export default function ProfilePage() {
   };
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangeHandleOpen, setIsChangeHandleOpen] = useState(false);
   const [preview, setPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { classrooms = [] } = useDashboardData({ includeExplore: false });
@@ -610,6 +612,7 @@ export default function ProfilePage() {
         profile={profile}
         isOwner={isOwner}
         onEdit={() => setIsEditing(true)}
+        onEditHandle={() => setIsChangeHandleOpen(true)}
         onPreview={() => setPreview((p) => !p)}
         sharedClassCount={sharedClassCount}
         onAvatarUpload={handleAvatarUpload}
@@ -668,6 +671,16 @@ export default function ProfilePage() {
           profile={profile}
           onSave={save}
           isSaving={isSaving}
+        />
+      )}
+
+      {isOwner && (
+        <ChangeHandleModal
+          isOpen={isChangeHandleOpen}
+          onClose={() => setIsChangeHandleOpen(false)}
+          currentHandle={profile?.handle}
+          remainingChanges={profile?.handleChangesRemaining ?? 3}
+          nextAllowedChangeAt={profile?.handleNextChangeAllowedAt}
         />
       )}
     </div>

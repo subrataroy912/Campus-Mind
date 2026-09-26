@@ -13,6 +13,7 @@ import {
   refresh as refreshRequest,
   getCurrentProfile as getCurrentProfileRequest,
   updateProfile as updateProfileRequest,
+  updateHandle as updateHandleRequest,
   uploadAvatar as uploadAvatarRequest,
   deleteAvatar as deleteAvatarRequest,
   uploadBanner as uploadBannerRequest,
@@ -21,6 +22,8 @@ import {
   deleteAccount as deleteAccountRequest,
   unlockCreator as unlockCreatorRequest,
   logout as logoutRequest,
+  completeOnboarding as completeOnboardingRequest,
+  cancelOnboarding as cancelOnboardingRequest,
 } from "../features/auth/api/authService";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { baseApi } from "../app/baseApi.js";
@@ -341,41 +344,25 @@ export function AuthProvider({ children }) {
         try {
           const result = await registerRequest(details);
           if (result.accessToken && result.user) {
-            let profile = null;
-            try {
-              profile = await getCurrentProfileRequest();
-            } catch {
-              // optional fallback
-            }
+            const userDetails = result.user;
+            const fallbackName =
+              `${details.firstName || ""} ${details.lastName || ""}`.trim() ||
+              userDetails.email?.split("@")[0] ||
+              "";
             const hydratedUser = {
-              ...result.user,
-              ...(profile || {}),
-              avatar:
-                profile?.avatarUrl ??
-                result.user?.avatar ??
-                result.user?.avatarUrl ??
-                null,
-              banner:
-                profile?.bannerUrl ??
-                result.user?.banner ??
-                result.user?.bannerUrl ??
-                null,
+              ...userDetails,
+              avatar: userDetails.avatar ?? userDetails.avatarUrl ?? null,
+              banner: userDetails.banner ?? userDetails.bannerUrl ?? null,
               displayName:
-                profile?.displayName ??
-                result.user?.displayName ??
-                result.user?.name,
-              canCreateCourses: Boolean(
-                profile?.canCreateCourses ?? result.user?.canCreateCourses,
-              ),
-              isAdmin: Boolean(profile?.isAdmin ?? result.user?.isAdmin),
-              isNewUser: Boolean(result.user?.isNewUser ?? true),
-              profileCompleted: Boolean(
-                profile?.profileCompleted ??
-                result.user?.profileCompleted ??
-                false,
-              ),
+                userDetails.displayName || userDetails.name || fallbackName,
+              canCreateCourses: Boolean(userDetails.canCreateCourses),
+              isAdmin: Boolean(userDetails.isAdmin),
+              isNewUser: true,
+              profileCompleted: false,
+              isOnboarding: true,
             };
             resetApiCache(dispatch);
+            backgroundProfileCheckedRef.current = true;
             commitAuthSession(dispatch, {
               accessToken: result.accessToken,
               user: hydratedUser,
@@ -436,6 +423,23 @@ export function AuthProvider({ children }) {
           getProfileUpdateLifecycleEvent(profilePatch),
         );
         return effectiveProfile;
+      },
+      async updateHandle(details) {
+        const rawHandle = typeof details === "string" ? details : details?.handle;
+        const cleanHandle = (rawHandle || "").trim().replace(/^@+/, "");
+        const res = await updateHandleRequest({ handle: cleanHandle });
+        const effectiveProfile = res || user;
+        const nextUser = {
+          ...user,
+          ...effectiveProfile,
+          handle: effectiveProfile.handle || cleanHandle,
+        };
+        commitAuthSession(dispatch, {
+          ...store.getState().auth,
+          user: nextUser,
+        });
+        triggerLifecycleRefresh(dispatch, "user-profile-updated");
+        return res;
       },
       async uploadAvatar(file) {
         const result = await uploadAvatarRequest(file);
@@ -549,6 +553,60 @@ export function AuthProvider({ children }) {
             userRef.current = null;
           },
         });
+      },
+      async completeOnboarding(details) {
+        setAuthState({ status: "loading", error: null });
+        try {
+          const { avatarFile, bannerFile, ...textDetails } = details || {};
+          let avatarUrl = details?.avatarUrl || null;
+          let bannerUrl = details?.bannerUrl || null;
+
+          if (avatarFile) {
+            const avatarRes = await uploadAvatarRequest(avatarFile);
+            if (avatarRes?.avatarUrl) {
+              avatarUrl = avatarRes.avatarUrl;
+            }
+          }
+          if (bannerFile) {
+            const bannerRes = await uploadBannerRequest(bannerFile);
+            if (bannerRes?.bannerUrl) {
+              bannerUrl = bannerRes.bannerUrl;
+            }
+          }
+
+          const payload = {
+            ...textDetails,
+            ...(avatarUrl ? { avatarUrl } : {}),
+            ...(bannerUrl ? { bannerUrl } : {}),
+          };
+
+          const result = await completeOnboardingRequest(payload);
+          commitAuthSession(dispatch, {
+            accessToken: result.accessToken,
+            user: result.user,
+          });
+          backgroundProfileCheckedRef.current = true;
+          triggerLifecycleRefresh(dispatch, "user-registered");
+          setAuthState({ status: "succeeded", error: null });
+          return result;
+        } catch (error) {
+          setAuthState({ status: "failed", error });
+          throw error;
+        }
+      },
+      async cancelOnboarding() {
+        setAuthState({ status: "loading", error: null });
+        try {
+          await cancelOnboardingRequest({
+            onLocalTeardown() {
+              userRef.current = null;
+            },
+          });
+          setAuthState({ status: "idle", error: null });
+        } catch (error) {
+          setAuthState({ status: "failed", error });
+          throw error;
+        }
       },
     }),
     [authState, dispatch, accessToken, store, user],

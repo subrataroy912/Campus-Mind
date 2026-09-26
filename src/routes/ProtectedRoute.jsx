@@ -24,11 +24,14 @@ export default function ProtectedRoute({ unauthenticatedHomeElement = null }) {
     );
   }
 
-  if (user?.profileCompleted === false && location.pathname !== routes.profile.new) {
+  const isOnboarding =
+    user?.profileCompleted === false || user?.isOnboarding === true;
+
+  if (isOnboarding && location.pathname !== routes.profile.new) {
     return <Navigate to={routes.profile.new} replace />;
   }
 
-  if (user?.profileCompleted === true && location.pathname === routes.profile.new) {
+  if (!isOnboarding && location.pathname === routes.profile.new) {
     return <Navigate to={routes.home} replace />;
   }
 

@@ -67,7 +67,7 @@ function getInitialFormData(profile) {
   };
 }
 
-export function useProfileForm({ profile, isOpen = true, onClose, onSave }) {
+export function useProfileForm({ profile, isOpen = true, onClose, onSave, isInitialSetup = false }) {
   const initialFormData = useMemo(() => getInitialFormData(profile), [profile]);
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
@@ -151,14 +151,17 @@ export function useProfileForm({ profile, isOpen = true, onClose, onSave }) {
     if (event && event.preventDefault) {
       event.preventDefault();
     }
+    const activeFields = isInitialSetup
+      ? FORM_FIELDS
+      : FORM_FIELDS.filter((f) => f !== "handle");
+
     const nextErrors = Object.fromEntries(
-      FORM_FIELDS.map((field) => [
-        field,
-        ValidateField(field, formData[field]),
-      ]).filter(([, error]) => error),
+      activeFields
+        .map((field) => [field, ValidateField(field, formData[field])])
+        .filter(([, error]) => error),
     );
     setErrors(nextErrors);
-    setTouched(Object.fromEntries(FORM_FIELDS.map((field) => [field, true])));
+    setTouched(Object.fromEntries(activeFields.map((field) => [field, true])));
     if (Object.keys(nextErrors).length > 0) return;
 
     const displayName = [formData.firstName, formData.lastName]
@@ -174,15 +177,21 @@ export function useProfileForm({ profile, isOpen = true, onClose, onSave }) {
 
     try {
       if (onSave) {
-        const savePromise = onSave({
+        const payload = {
           ...formData,
           name: displayName,
           displayName,
-          handle: (formData.handle || "").trim().replace(/^@+/, ""),
           links: cleanedLinks,
           ...(avatarFile ? { avatarFile } : {}),
           ...(bannerFile ? { bannerFile } : {}),
-        });
+        };
+        if (isInitialSetup) {
+          payload.handle = (formData.handle || "").trim().replace(/^@+/, "");
+        } else {
+          delete payload.handle;
+        }
+
+        const savePromise = onSave(payload);
         if (savePromise && typeof savePromise.unwrap === "function") {
           await savePromise.unwrap();
         } else {
@@ -202,6 +211,8 @@ export function useProfileForm({ profile, isOpen = true, onClose, onSave }) {
             "taken",
             "14-day",
             "twice",
+            "three",
+            "3 times",
             "limit",
             "period",
             "already exists",

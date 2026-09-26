@@ -44,6 +44,47 @@ export const profileApi = baseApi.injectEndpoints({
       },
     }),
 
+    updateCurrentHandle: builder.mutation({
+      query: (payload) => ({
+        url: "/users/me/handle",
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: [
+        { type: "Profile", id: "CURRENT" },
+        { type: "Classrooms", id: "LIST" },
+      ],
+      async onQueryStarted(payload, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          profileApi.util.updateQueryData(
+            "getCurrentProfile",
+            undefined,
+            (draft) => {
+              if (draft && payload?.handle) {
+                draft.handle = payload.handle;
+              }
+            },
+          ),
+        );
+        try {
+          const { data } = await queryFulfilled;
+          if (data) {
+            dispatch(
+              profileApi.util.updateQueryData(
+                "getCurrentProfile",
+                undefined,
+                (draft) => {
+                  Object.assign(draft, data);
+                },
+              ),
+            );
+          }
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
     uploadAvatar: builder.mutation({
       query: (file) => {
         const body = new FormData();
@@ -214,6 +255,7 @@ export const {
   useGetCurrentProfileQuery,
   useGetPublicProfileQuery,
   useUpdateCurrentProfileMutation,
+  useUpdateCurrentHandleMutation,
   useUploadAvatarMutation,
   useDeleteAvatarMutation,
   useUploadBannerMutation,

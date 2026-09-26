@@ -28,6 +28,8 @@ export default function ProfileForm({
   submitLabel = "Save changes",
   showCancel = true,
   className = "",
+  isInitialSetup = false,
+  onChangeHandleClick,
   // Optional controlled overrides if caller wants custom state
   formState,
 }) {
@@ -36,6 +38,7 @@ export default function ProfileForm({
     isOpen: true,
     onClose: onCancel,
     onSave,
+    isInitialSetup,
   });
 
   const {
@@ -78,6 +81,8 @@ export default function ProfileForm({
         handleChange={handleChange}
         handleBlur={handleBlur}
         disabled={isSaving}
+        isInitialSetup={isInitialSetup}
+        onChangeHandleClick={onChangeHandleClick}
       />
 
       <ProfileDetailsSection

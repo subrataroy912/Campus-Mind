@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog.jsx";
 import { useProfileForm } from "../hooks/useProfileForm.js";
 import ProfileForm from "./form/ProfileForm.jsx";
+import { ChangeHandleModal } from "./ChangeHandleModal.jsx";
 
 export function EditProfileModal({
   isOpen,
@@ -16,7 +17,8 @@ export function EditProfileModal({
   onSave,
   isSaving,
 }) {
-  const formState = useProfileForm({ profile, isOpen, onClose, onSave });
+  const [isChangeHandleOpen, setIsChangeHandleOpen] = useState(false);
+  const formState = useProfileForm({ profile, isOpen, onClose, onSave, isInitialSetup: false });
 
   if (!isOpen) return null;
 
@@ -44,9 +46,19 @@ export function EditProfileModal({
             isSaving={isSaving}
             showMedia={false}
             submitLabel="Save changes"
+            isInitialSetup={false}
+            onChangeHandleClick={() => setIsChangeHandleOpen(true)}
           />
         </div>
       </DialogContent>
+
+      <ChangeHandleModal
+        isOpen={isChangeHandleOpen}
+        onClose={() => setIsChangeHandleOpen(false)}
+        currentHandle={profile?.handle}
+        remainingChanges={profile?.handleChangesRemaining ?? 3}
+        nextAllowedChangeAt={profile?.handleNextChangeAllowedAt}
+      />
     </Dialog>
   );
 }

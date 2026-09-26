@@ -275,7 +275,11 @@ function SpaceFeedPost({
             )}
           </div>
           <Link
-            to={post.courseId ? routes.space.classwork(post.courseId) : "?tab=classwork"}
+            to={
+              post.courseId
+                ? routes.space.classwork(post.courseId)
+                : "?tab=classwork"
+            }
             className="text-[11px] font-medium text-primary hover:underline"
           >
             View in Classwork &rarr;
@@ -434,8 +438,7 @@ function SpaceFeedPost({
             <div className="mt-2.5 space-y-2">
               {/* Image Attachments */}
               {attachments.filter(
-                (a) =>
-                  a.type === "IMAGE" || /^data:image\//i.test(a.url || ""),
+                (a) => a.type === "IMAGE" || /^data:image\//i.test(a.url || ""),
               ).length > 0 && (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {attachments
@@ -471,9 +474,7 @@ function SpaceFeedPost({
               {/* Video Link Attachments (YouTube or external http/https video links only; skip raw data:video base64) */}
               {attachments
                 .filter(
-                  (a) =>
-                    a.type === "VIDEO" &&
-                    !/^data:/i.test(a.url || ""),
+                  (a) => a.type === "VIDEO" && !/^data:/i.test(a.url || ""),
                 )
                 .map((att, idx) => {
                   const ytUrl = getYouTubeEmbedUrl(att.url);

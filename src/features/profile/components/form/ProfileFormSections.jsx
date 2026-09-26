@@ -126,6 +126,8 @@ export function ProfileIdentitySection({
   handleChange,
   handleBlur,
   disabled = false,
+  isInitialSetup = false,
+  onChangeHandleClick,
 }) {
   return (
     <FieldSet className="space-y-4 rounded-xl border border-border/70 bg-card p-4 sm:p-5">
@@ -166,35 +168,64 @@ export function ProfileIdentitySection({
           </FieldError>
         </Field>
 
-        <Field
-          data-invalid={Boolean(errors.handle)}
-          className="sm:col-span-2 lg:col-span-1"
-        >
-          <FieldLabel htmlFor="profile-handle">Username / Handle</FieldLabel>
-          <div className="relative flex items-center">
-            <span className="absolute left-3 text-sm text-muted-foreground select-none">
-              @
-            </span>
-            <Input
-              id="profile-handle"
-              className="pl-7"
-              value={formData.handle}
-              disabled={disabled}
-              onChange={(e) => {
-                const raw = e.target.value.replace(/^@+/, "");
-                handleChange("handle", raw);
-              }}
-              onBlur={() => handleBlur("handle")}
-              placeholder="username"
-              maxLength={30}
-            />
-          </div>
-          <FieldError id="profile-handle-error">{errors.handle}</FieldError>
-        </Field>
+        {isInitialSetup ? (
+          <Field
+            data-invalid={Boolean(errors.handle)}
+            className="sm:col-span-2 lg:col-span-1"
+          >
+            <FieldLabel htmlFor="profile-handle">Username / Handle</FieldLabel>
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-sm text-muted-foreground select-none">
+                @
+              </span>
+              <Input
+                id="profile-handle"
+                className="pl-7"
+                value={formData.handle}
+                disabled={disabled}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/^@+/, "");
+                  handleChange("handle", raw);
+                }}
+                onBlur={() => handleBlur("handle")}
+                placeholder="username"
+                maxLength={30}
+              />
+            </div>
+            <FieldError id="profile-handle-error">{errors.handle}</FieldError>
+          </Field>
+        ) : (
+          <Field className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between">
+              <FieldLabel htmlFor="profile-handle-readonly">Username / Handle</FieldLabel>
+              {onChangeHandleClick && (
+                <button
+                  type="button"
+                  onClick={onChangeHandleClick}
+                  className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                >
+                  Change handle
+                </button>
+              )}
+            </div>
+            <div className="relative flex items-center mt-1">
+              <span className="absolute left-3 text-sm text-muted-foreground select-none">
+                @
+              </span>
+              <Input
+                id="profile-handle-readonly"
+                className="pl-7 bg-muted/40 text-muted-foreground cursor-not-allowed font-mono"
+                value={formData.handle || ""}
+                readOnly
+                disabled
+              />
+            </div>
+          </Field>
+        )}
       </div>
       <p className="text-xs text-muted-foreground">
         Your handle is unique and used across discussions and spaces. Note:
-        handles can only be updated twice within 14 days.
+        handles can only be updated 3 times within 14 days.
       </p>
     </FieldSet>
   );

@@ -2,7 +2,6 @@ const PROFILE_FIELDS = {
   name: "displayName",
   firstName: "firstName",
   lastName: "lastName",
-  handle: "handle",
   headline: "headline",
   bio: "about",
   avatar: "avatarUrl",

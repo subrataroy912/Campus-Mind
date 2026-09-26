@@ -1,23 +1,61 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useBlocker, useBeforeUnload } from "react-router";
 import { toast } from "@/components/ui/toast.jsx";
 import { routes } from "@/routes/paths.js";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { useGetCurrentProfileQuery } from "../api/profileApi.js";
 import ProfileForm from "../components/form/ProfileForm.jsx";
+import { OnboardingDiscardDialog } from "../components/OnboardingDiscardDialog.jsx";
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, updateHandle, completeOnboarding, cancelOnboarding, logout } = useAuth();
   const { data: profileResponse } = useGetCurrentProfileQuery();
   const [isSaving, setIsSaving] = useState(false);
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
+  const [isDiscarding, setIsDiscarding] = useState(false);
 
   const activeProfile = profileResponse?.data ?? profileResponse ?? user;
+
+  // Intercept client-side SPA navigations (such as browser Back button)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSaving &&
+      !isDiscarding &&
+      user?.profileCompleted !== true &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setIsDiscardDialogOpen(true);
+    }
+  }, [blocker.state]);
+
+  // Tab close or reload warning
+  const beforeUnloadHandler = useCallback(
+    (e) => {
+      if (!isSaving && !isDiscarding && user?.profileCompleted !== true) {
+        e.preventDefault();
+        return (e.returnValue = "Leaving now will cancel your registration.");
+      }
+    },
+    [isSaving, isDiscarding, user?.profileCompleted],
+  );
+  useBeforeUnload(beforeUnloadHandler);
 
   const handleSave = async (profileData) => {
     setIsSaving(true);
     try {
-      await updateProfile(profileData);
+      if (completeOnboarding) {
+        await completeOnboarding(profileData);
+      } else {
+        const { handle, ...profilePatch } = profileData || {};
+        await updateProfile(profilePatch);
+        if (handle) {
+          await updateHandle({ handle });
+        }
+      }
       const uid = activeProfile?.id || activeProfile?._id || user?.id;
       sessionStorage.setItem("show_welcome_after_profile_create", "true");
       if (uid) {
@@ -28,21 +66,46 @@ export default function CreateProfilePage() {
         description: "Your profile has been saved successfully.",
         type: "success",
       });
-      navigate(routes.dashboard);
+      navigate(routes.dashboard, { replace: true });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCancel = async () => {
-    setIsSaving(true);
+  const handleCancelClick = () => {
+    setIsDiscardDialogOpen(true);
+  };
+
+  const handleConfirmDiscard = async () => {
+    setIsDiscarding(true);
     try {
-      await updateProfile({});
+      if (cancelOnboarding) {
+        await cancelOnboarding();
+      } else if (logout) {
+        await logout();
+      }
+      toast.add({
+        title: "Registration cancelled",
+        description: "Your registration was cancelled.",
+        type: "info",
+      });
+      if (blocker.state === "blocked") {
+        blocker.proceed();
+      } else {
+        navigate(routes.home, { replace: true });
+      }
     } catch {
-      // Best-effort profile initialization on skip
+      navigate(routes.home, { replace: true });
     } finally {
-      setIsSaving(false);
-      navigate(routes.dashboard);
+      setIsDiscarding(false);
+      setIsDiscardDialogOpen(false);
+    }
+  };
+
+  const handleCancelDiscard = () => {
+    setIsDiscardDialogOpen(false);
+    if (blocker.state === "blocked") {
+      blocker.reset();
     }
   };
 
@@ -62,9 +125,20 @@ export default function CreateProfilePage() {
           profile={activeProfile}
           showMedia={true}
           onSave={handleSave}
-          onCancel={handleCancel}
+          onCancel={handleCancelClick}
           isSaving={isSaving}
           submitLabel="Save Profile"
+          isInitialSetup={true}
+        />
+
+        <OnboardingDiscardDialog
+          open={isDiscardDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) handleCancelDiscard();
+          }}
+          onConfirm={handleConfirmDiscard}
+          onCancel={handleCancelDiscard}
+          isDiscarding={isDiscarding}
         />
       </div>
     </div>

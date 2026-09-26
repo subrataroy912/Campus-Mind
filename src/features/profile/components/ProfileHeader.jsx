@@ -41,6 +41,7 @@ export default function ProfileHeader({
   profile,
   isOwner,
   onEdit,
+  onEditHandle,
   onPreview,
   sharedClassCount,
   onAvatarUpload,
@@ -249,7 +250,20 @@ export default function ProfileHeader({
               </div>
 
               <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
-                <span>@{profile.handle || "unknown"}</span>
+                <span className="inline-flex items-center gap-1">
+                  @{profile.handle || "unknown"}
+                  {isOwner && onEditHandle && (
+                    <button
+                      type="button"
+                      onClick={onEditHandle}
+                      className="text-muted-foreground hover:text-primary transition-colors cursor-pointer p-0.5 rounded"
+                      title="Change username / handle"
+                      aria-label="Change username / handle"
+                    >
+                      <Pencil className="h-2.5 w-2.5" />
+                    </button>
+                  )}
+                </span>
                 {!isOwner && sharedClassCount > 0 && (
                   <>
                     <span>·</span>
@@ -311,6 +325,11 @@ export default function ProfileHeader({
                     <DropdownMenuItem onClick={onPreview} className="text-xs">
                       View as others see it
                     </DropdownMenuItem>
+                    {onEditHandle && (
+                      <DropdownMenuItem onClick={onEditHandle} className="text-xs">
+                        Change username / handle
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       render={<Link to={routes.settings} />}

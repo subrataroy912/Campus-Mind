@@ -37,5 +37,20 @@ export const authApi = baseApi.injectEndpoints({
         };
       },
     }),
+    completeOnboarding: builder.mutation({
+      query: (profileData) => ({
+        url: "/auth/onboarding/complete",
+        method: "POST",
+        body: profileData,
+      }),
+      invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
+    }),
+    cancelOnboarding: builder.mutation({
+      query: () => ({
+        url: "/auth/onboarding/cancel",
+        method: "POST",
+      }),
+      invalidatesTags: [{ type: "Profile", id: "CURRENT" }],
+    }),
   }),
 });

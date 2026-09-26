@@ -9,6 +9,13 @@ describe("profileApi endpoint definitions", () => {
     expect(req).toBeDefined();
   });
 
+  it("defines dedicated updateCurrentHandle mutation targeting PATCH /users/me/handle", () => {
+    const endpoint = profileApi.endpoints.updateCurrentHandle;
+    expect(endpoint).toBeDefined();
+    const req = endpoint.initiate({ handle: "cool_handle" });
+    expect(req).toBeDefined();
+  });
+
   it("defines uploadAvatar mutation targeting PUT /users/me/avatar", () => {
     const endpoint = profileApi.endpoints.uploadAvatar;
     expect(endpoint).toBeDefined();

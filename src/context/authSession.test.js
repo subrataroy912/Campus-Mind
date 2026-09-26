@@ -211,3 +211,52 @@ describe("conditional session restoration", () => {
     });
   });
 });
+
+describe("profile merging onboarding protection", () => {
+  it("preserves onboarding flags when an onboarding user merges a profile response", () => {
+    const onboardingSession = {
+      accessToken: "token-1",
+      user: {
+        id: "user-1",
+        name: "New User",
+        profileCompleted: false,
+        isOnboarding: true,
+        isNewUser: true,
+      },
+    };
+
+    const nextSession = mergeProfileIntoCurrentSession(
+      () => ({ auth: onboardingSession }),
+      {
+        displayName: "Updated Name",
+        profileCompleted: false,
+      }
+    );
+
+    expect(nextSession.user.profileCompleted).toBe(false);
+    expect(nextSession.user.isOnboarding).toBe(true);
+    expect(nextSession.user.isNewUser).toBe(true);
+    expect(nextSession.user.name).toBe("Updated Name");
+  });
+
+  it("completes onboarding when the incoming profile has profileCompleted: true", () => {
+    const onboardingSession = {
+      accessToken: "token-1",
+      user: {
+        id: "user-1",
+        profileCompleted: false,
+        isOnboarding: true,
+      },
+    };
+
+    const nextSession = mergeProfileIntoCurrentSession(
+      () => ({ auth: onboardingSession }),
+      {
+        profileCompleted: true,
+      }
+    );
+
+    expect(nextSession.user.profileCompleted).toBe(true);
+    expect(nextSession.user.isOnboarding).toBe(false);
+  });
+});

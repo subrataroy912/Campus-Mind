@@ -7,12 +7,15 @@ import CreateProfilePage from "../../pages/CreateProfilePage.jsx";
 // Mock react-router
 vi.mock("react-router", () => ({
   useNavigate: () => vi.fn(),
+  useBlocker: () => ({ state: "unblocked", proceed: vi.fn(), reset: vi.fn() }),
+  useBeforeUnload: vi.fn(),
 }));
 
 // Mock auth context
 vi.mock("@/context/AuthContext.jsx", () => ({
   useAuth: () => ({
     updateProfile: vi.fn().mockResolvedValue({}),
+    updateHandle: vi.fn().mockResolvedValue({}),
     user: {},
   }),
 }));
@@ -23,7 +26,7 @@ vi.mock("../../api/profileApi.js", () => ({
 }));
 
 describe("ProfileForm Component", () => {
-  it("renders all form sections with default props", () => {
+  it("renders all form sections with default props and read-only handle with change action", () => {
     const html = renderToString(
       <ProfileForm
         profile={{
@@ -32,6 +35,7 @@ describe("ProfileForm Component", () => {
           handle: "alexm",
           headline: "CS Student",
         }}
+        onChangeHandleClick={() => {}}
       />
     );
 
@@ -39,6 +43,7 @@ describe("ProfileForm Component", () => {
     expect(html).toContain("Alex");
     expect(html).toContain("Morgan");
     expect(html).toContain("alexm");
+    expect(html).toContain("Change handle");
     expect(html).toContain("About &amp; Bio");
     expect(html).toContain("CS Student");
     expect(html).toContain("Location &amp; Visibility");

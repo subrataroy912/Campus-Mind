@@ -90,6 +90,16 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
     return current;
   }
 
+  const wasOnboarding =
+    current.user?.isOnboarding === true ||
+    current.user?.profileCompleted === false;
+
+  const nextProfileCompleted = wasOnboarding
+    ? Boolean(profile.profileCompleted)
+    : Boolean(profile.profileCompleted ?? current.user?.profileCompleted ?? true);
+
+  const nextIsOnboarding = wasOnboarding && !nextProfileCompleted;
+
   const user = {
     ...current.user,
     ...profile,
@@ -98,6 +108,11 @@ export function mergeProfileIntoCurrentSession(getState, profile) {
     banner: profile.bannerUrl ?? current.user?.banner ?? null,
     canCreateCourses: Boolean(profile.canCreateCourses ?? current.user?.canCreateCourses),
     isAdmin: Boolean(profile.isAdmin ?? current.user?.isAdmin),
+    profileCompleted: nextProfileCompleted,
+    isOnboarding: nextIsOnboarding,
+    isNewUser: wasOnboarding
+      ? Boolean(current.user?.isNewUser ?? true)
+      : Boolean(profile.isNewUser ?? current.user?.isNewUser),
   };
   if (user?.id || current.accessToken) {
     safeLocalStorageSet(

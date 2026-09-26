@@ -35,6 +35,7 @@ export function normalizeAuthResponse(response) {
     role: payload.role ?? nestedUser.role,
     isNewUser: payload.isNewUser ?? nestedUser.isNewUser ?? payload.newUser,
     profileCompleted: payload.profileCompleted ?? nestedUser.profileCompleted,
+    isOnboarding: payload.isOnboarding ?? nestedUser.isOnboarding,
     isLongTimeAway: payload.isLongTimeAway ?? nestedUser.isLongTimeAway,
   };
 
@@ -102,6 +103,14 @@ export async function updateProfile(details) {
   );
 }
 
+export async function updateHandle(details) {
+  return unwrapResponse(
+    await store
+      .dispatch(profileApi.endpoints.updateCurrentHandle.initiate(details))
+      .unwrap()
+  );
+}
+
 export async function uploadAvatar(file) {
   return unwrapResponse(
     await store
@@ -164,6 +173,24 @@ export async function logout({ onLocalTeardown } = {}) {
     await store.dispatch(authApi.endpoints.logout.initiate()).unwrap();
   } catch {
     // Revocation is best-effort; local cleanup still happens below.
+  } finally {
+    clearLocalAuthSession(store.dispatch, onLocalTeardown);
+  }
+}
+
+export async function completeOnboarding(profileData) {
+  return normalizeAuthResponse(
+    await store
+      .dispatch(authApi.endpoints.completeOnboarding.initiate(profileData))
+      .unwrap(),
+  );
+}
+
+export async function cancelOnboarding({ onLocalTeardown } = {}) {
+  try {
+    await store.dispatch(authApi.endpoints.cancelOnboarding.initiate()).unwrap();
+  } catch {
+    // Best-effort cancellation on backend
   } finally {
     clearLocalAuthSession(store.dispatch, onLocalTeardown);
   }
