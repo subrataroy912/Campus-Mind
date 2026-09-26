@@ -146,7 +146,10 @@ export function AuthProvider({ children }) {
         });
 
         // If we already have a user object, unblock the UI immediately (0ms wait for second round-trip)
-        if (isRecord(provisionalUser) && Object.keys(provisionalUser).length > 0) {
+        if (
+          isRecord(provisionalUser) &&
+          Object.keys(provisionalUser).length > 0
+        ) {
           backgroundProfileCheckedRef.current = true;
           setAuthState({ status: "succeeded", error: null });
           getCurrentProfileRequest()
@@ -381,21 +384,30 @@ export function AuthProvider({ children }) {
         const profilePatch = toProfilePatch(textDetails, user);
         let nextProfile = null;
 
-        if (Object.keys(profilePatch).length > 0 || (!avatarFile && !bannerFile)) {
+        if (
+          Object.keys(profilePatch).length > 0 ||
+          (!avatarFile && !bannerFile)
+        ) {
           nextProfile = await updateProfileRequest(profilePatch);
         }
 
         if (avatarFile) {
           const avatarRes = await uploadAvatarRequest(avatarFile);
           if (avatarRes?.avatarUrl) {
-            nextProfile = { ...(nextProfile || user), avatarUrl: avatarRes.avatarUrl };
+            nextProfile = {
+              ...(nextProfile || user),
+              avatarUrl: avatarRes.avatarUrl,
+            };
           }
         }
 
         if (bannerFile) {
           const bannerRes = await uploadBannerRequest(bannerFile);
           if (bannerRes?.bannerUrl) {
-            nextProfile = { ...(nextProfile || user), bannerUrl: bannerRes.bannerUrl };
+            nextProfile = {
+              ...(nextProfile || user),
+              bannerUrl: bannerRes.bannerUrl,
+            };
           }
         }
 
@@ -425,7 +437,8 @@ export function AuthProvider({ children }) {
         return effectiveProfile;
       },
       async updateHandle(details) {
-        const rawHandle = typeof details === "string" ? details : details?.handle;
+        const rawHandle =
+          typeof details === "string" ? details : details?.handle;
         const cleanHandle = (rawHandle || "").trim().replace(/^@+/, "");
         const res = await updateHandleRequest({ handle: cleanHandle });
         const effectiveProfile = res || user;

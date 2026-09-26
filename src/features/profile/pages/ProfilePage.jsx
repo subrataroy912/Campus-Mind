@@ -6,18 +6,16 @@ import {
   LayoutGrid,
   List,
   Lock,
-  Search,
   UserX,
-  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext.jsx";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import SpaceCard from "@/features/spaces/components/SpaceCard.jsx";
 import CompactSpaceRow from "@/features/spaces/components/CompactSpaceRow.jsx";
 import { ContentList } from "@/components/common/ContentList.jsx";
+import SearchInput from "@/components/common/SearchInput.jsx";
 import {
   getSharedClassCount,
   getSharedClassIds,
@@ -160,6 +158,7 @@ export default function ProfilePage() {
 
   const [spacesTab, setSpacesTab] = useState("all");
   const [spacesSearch, setSpacesSearch] = useState("");
+  const [debouncedSpacesSearch, setDebouncedSpacesSearch] = useState("");
   const [spacesViewMode, setSpacesViewMode] = useState(getSavedSpacesViewMode);
 
   const handleSpacesViewModeToggle = (mode) => {
@@ -174,7 +173,7 @@ export default function ProfilePage() {
   }, [spacesTab, spaces, createdClasses, joinedClasses]);
 
   const filteredProfileSpaces = useMemo(() => {
-    const q = spacesSearch.trim().toLowerCase();
+    const q = debouncedSpacesSearch.trim().toLowerCase();
     if (!q) return currentSpacesTabItems;
     return currentSpacesTabItems.filter((c) => {
       const title = (c.title || "").toLowerCase();
@@ -182,7 +181,7 @@ export default function ProfilePage() {
       const subtitle = (c.subtitle || c.section || "").toLowerCase();
       return title.includes(q) || subject.includes(q) || subtitle.includes(q);
     });
-  }, [currentSpacesTabItems, spacesSearch]);
+  }, [currentSpacesTabItems, debouncedSpacesSearch]);
 
   if (
     authStatus === "hydrating" ||
@@ -452,32 +451,13 @@ export default function ProfilePage() {
 
           {/* Search + View Toggle */}
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:w-52 min-w-0">
-              <Search
-                size={13}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
-                aria-hidden="true"
-              />
-              <Input
-                type="text"
-                value={spacesSearch}
-                onChange={(e) => setSpacesSearch(e.target.value)}
-                placeholder="Search spaces…"
-                className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
-              />
-              {spacesSearch && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setSpacesSearch("")}
-                  aria-label="Clear search"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  <X size={13} />
-                </Button>
-              )}
-            </div>
+            <SearchInput
+              value={spacesSearch}
+              onImmediateChange={setSpacesSearch}
+              onChange={setDebouncedSpacesSearch}
+              placeholder="Search spaces…"
+              className="flex-1 sm:w-52 min-w-0"
+            />
 
             <div className="flex items-center rounded-lg border border-border/60 bg-muted/50 p-0.5 shrink-0">
               <Button
@@ -518,12 +498,15 @@ export default function ProfilePage() {
 
         {/* Spaces Listing Content */}
         {filteredProfileSpaces.length === 0 ? (
-          spacesSearch.trim() ? (
+          debouncedSpacesSearch.trim() ? (
             <EmptyState
               title="No matching spaces"
-              description={`No spaces found matching "${spacesSearch}".`}
+              description={`No spaces found matching "${debouncedSpacesSearch}".`}
               action={{
-                onClick: () => setSpacesSearch(""),
+                onClick: () => {
+                  setSpacesSearch("");
+                  setDebouncedSpacesSearch("");
+                },
                 label: "Clear search",
               }}
             />

@@ -12,7 +12,6 @@ import {
   Loader2,
   MessageSquare,
   Plus,
-  Search,
   Send,
   Shield,
   SmilePlus,
@@ -23,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 
+import SearchInput from "@/components/common/SearchInput.jsx";
 import { SpaceAvatar } from "@/features/spaces/components/SpaceAvatar.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import ErrorState from "@/components/common/ErrorState.jsx";
@@ -1656,6 +1656,7 @@ export default function MessagesPage() {
   }, [fetchedRooms, cachedClassrooms]);
 
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedSpaceId, setSelectedSpaceId] = useState(
     () => requestedSpaceId || null,
   );
@@ -1679,14 +1680,14 @@ export default function MessagesPage() {
   };
 
   const filteredRooms = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.trim().toLowerCase();
     if (!q) return rooms;
     return rooms.filter(
       (room) =>
         (room.title || "").toLowerCase().includes(q) ||
         (room.subtitle || "").toLowerCase().includes(q),
     );
-  }, [rooms, query]);
+  }, [rooms, debouncedQuery]);
 
   const activeRoom = useMemo(
     () => rooms.find((room) => room.spaceId === effectiveSpaceId) || null,
@@ -1745,19 +1746,13 @@ export default function MessagesPage() {
                 Space Channels ({rooms.length})
               </h2>
             </div>
-            <div className="relative">
-              <Search
-                size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted z-10"
-              />
-              <Input
-                type="text"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search space chats…"
-                className="h-8 w-full rounded-md border border-border/70 bg-canvas py-1.5 pl-8 pr-2.5 text-base sm:text-xs text-text-heading placeholder:text-text-muted"
-              />
-            </div>
+            <SearchInput
+              value={query}
+              onImmediateChange={setQuery}
+              onChange={setDebouncedQuery}
+              placeholder="Search space chats…"
+              className="w-full"
+            />
           </div>
 
           <div className="flex-1 space-y-1 overflow-y-auto p-1.5">

@@ -7,13 +7,12 @@ import {
   Copy,
   MessageCircle,
   MoreVertical,
-  Search,
   Ticket,
   UserPlus,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import SearchInput from "@/components/common/SearchInput.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import { SpaceAvatar } from "../SpaceAvatar.jsx";
@@ -228,6 +227,7 @@ export function MembersTab({
   const contextIsStaff = useCourseIsStaff();
   const isEnrolled = isEnrolledProp !== undefined ? isEnrolledProp : (contextIsEnrolled ?? true);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [confirming, setConfirming] = useState(null);
   const [removingId, setRemovingId] = useState(null);
   const [updatingRoleId, setUpdatingRoleId] = useState(null);
@@ -445,7 +445,7 @@ export function MembersTab({
   );
 
   const members = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = debouncedQuery.trim().toLowerCase();
     return enrichedRoster
       .filter((member) => {
         if (showOnlineOnly && !member.online) return false;
@@ -455,7 +455,7 @@ export function MembersTab({
           .includes(q);
       })
       .sort((a, b) => Number(Boolean(b.online)) - Number(Boolean(a.online)));
-  }, [enrichedRoster, query, showOnlineOnly]);
+  }, [enrichedRoster, debouncedQuery, showOnlineOnly]);
 
   const staffMembers = useMemo(() => {
     return members.filter((x) => {
@@ -480,7 +480,7 @@ export function MembersTab({
         listRef.current.getBoundingClientRect().top + window.scrollY
       );
     }
-  }, [generalMembers.length, query]);
+  }, [generalMembers.length, debouncedQuery]);
 
   const virtualizer = useWindowVirtualizer({
     count: generalMembers.length,
@@ -660,18 +660,13 @@ export function MembersTab({
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <div className="relative flex-1">
-            <Search
-              className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search roster members by name…"
-              className="h-8 w-full rounded-lg border border-border/60 bg-muted/30 py-1.5 pl-8 pr-3 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
+          <SearchInput
+            value={query}
+            onImmediateChange={setQuery}
+            onChange={setDebouncedQuery}
+            placeholder="Search roster members by name…"
+            className="flex-1"
+          />
           <div className="inline-flex items-center rounded-lg border border-border/60 bg-muted/30 p-0.5 self-start sm:self-auto">
             <Button
               type="button"

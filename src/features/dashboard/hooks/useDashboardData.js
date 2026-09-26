@@ -35,14 +35,14 @@ export function useDashboardData({ includeExplore = true, skip = false } = {}) {
   const status = isClassroomsLoading
     ? "loading"
     : isClassroomsError
-    ? "error"
-    : "ready";
+      ? "error"
+      : "ready";
 
   const exploreStatus = isExploreLoading
     ? "loading"
     : isExploreError
-    ? "error"
-    : "ready";
+      ? "error"
+      : "ready";
 
   return {
     classrooms,

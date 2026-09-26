@@ -8,6 +8,7 @@ import ExploreClassesTab from "../components/ExploreClassesTab.jsx";
 import ExplorePeopleTab from "../components/ExplorePeopleTab.jsx";
 import { EXPLORE_TABS } from "../model/exploreConstants.js";
 import SearchInput from "@/components/common/SearchInput.jsx";
+import { Button } from "@/components/ui/button.jsx";
 
 const TABS = [
   { id: EXPLORE_TABS.CLASSES, label: "Classes", paramVal: null },
@@ -22,6 +23,7 @@ export default function ExplorePage() {
   const personFilter = searchParams.get("personFilter") || "all";
 
   const [page, setPage] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const isClassesTab = tab === EXPLORE_TABS.CLASSES;
@@ -105,7 +107,8 @@ export default function ExplorePage() {
         </div>
 
         <SearchInput
-          defaultValue={searchQuery}
+          value={searchInput}
+          onImmediateChange={setSearchInput}
           onChange={(debouncedVal) => {
             setSearchQuery(debouncedVal);
             setPage(0);

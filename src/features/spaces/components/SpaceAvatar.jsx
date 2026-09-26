@@ -1,9 +1,5 @@
 import { Link } from "react-router";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { routes } from "@/routes/paths";
 import { cn } from "@/lib/utils";
 
@@ -13,13 +9,22 @@ export function SpaceAvatar({
   userId,
   to = "#",
   size = "h-9 w-9",
+  className,
+  ...props
 }) {
   const safeAvatar =
     typeof avatar === "string" && avatar.trim() ? avatar : null;
   const targetLink = to !== "#" ? to : userId ? routes.user(userId) : "#";
 
   const avatarEl = (
-    <Avatar className={cn("shrink-0 bg-canvas text-xs font-medium text-text-main", size)}>
+    <Avatar
+      className={cn(
+        "shrink-0 bg-canvas text-xs font-medium text-text-main",
+        size,
+        className,
+      )}
+      {...props}
+    >
       <AvatarImage
         src={safeAvatar}
         alt={name || "User"}

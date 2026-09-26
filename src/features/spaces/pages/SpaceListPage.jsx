@@ -6,8 +6,6 @@ import {
   Ticket,
   LayoutGrid,
   List,
-  Search,
-  X,
 } from "lucide-react";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData.js";
 import { useAuth } from "@/context/AuthContext.jsx";
@@ -17,6 +15,7 @@ import CompactSpaceRow from "@/features/spaces/components/CompactSpaceRow.jsx";
 import EmptyState from "@/components/common/EmptyState.jsx";
 import AsyncStateBoundary from "@/components/common/AsyncStateBoundary.jsx";
 import SpaceListSkeleton from "@/features/spaces/components/SpaceListSkeleton.jsx";
+import SearchInput from "@/components/common/SearchInput.jsx";
 import {
   selectCreatedSpaces,
   selectJoinedSpaces,
@@ -27,7 +26,6 @@ import {
   saveSpacesViewMode,
 } from "@/features/spaces/utils/roles.js";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { routes } from "@/routes/paths.js";
 import { cn } from "@/lib/utils.js";
@@ -36,6 +34,7 @@ export default function SpaceListPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState(getSavedSpacesViewMode);
 
   const handleViewModeToggle = (mode) => {
@@ -71,7 +70,7 @@ export default function SpaceListPage() {
   }, [activeTab, classrooms, createdSpaces, joinedSpaces]);
 
   const filteredSpaces = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearchQuery.trim().toLowerCase();
     if (!q) return currentTabItems;
     return currentTabItems.filter((c) => {
       const title = (c.title || "").toLowerCase();
@@ -79,7 +78,7 @@ export default function SpaceListPage() {
       const subtitle = (c.subtitle || c.section || "").toLowerCase();
       return title.includes(q) || subject.includes(q) || subtitle.includes(q);
     });
-  }, [currentTabItems, searchQuery]);
+  }, [currentTabItems, debouncedSearchQuery]);
 
   const isLoadingSpaces =
     (status === "loading" || status === "idle") && classrooms.length === 0;
@@ -189,32 +188,13 @@ export default function SpaceListPage() {
         {/* Right tools: Search Bar + View Toggle */}
         <div className="flex items-center gap-2">
           {/* Search Bar */}
-          <div className="relative flex-1 sm:w-60 min-w-0">
-            <Search
-              size={13}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              aria-hidden="true"
-            />
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search spaces…"
-              className="h-8 w-full rounded-lg border border-border/60 bg-card pl-8 pr-7 text-base sm:text-xs text-foreground placeholder:text-muted-foreground"
-            />
-            {searchQuery && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-                className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                <X size={13} />
-              </Button>
-            )}
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onImmediateChange={setSearchQuery}
+            onChange={setDebouncedSearchQuery}
+            placeholder="Search spaces…"
+            className="flex-1 sm:w-60 min-w-0"
+          />
 
           {/* View Mode Toggle: Dense List vs Grid */}
           <div className="flex items-center rounded-lg border border-border/60 bg-muted/50 p-0.5 shrink-0">
@@ -272,12 +252,15 @@ export default function SpaceListPage() {
                 description="Join an existing space with an invite code or create a space."
                 action={{ to: routes.classes.join, label: "Join a space" }}
               />
-            ) : searchQuery.trim() ? (
+            ) : debouncedSearchQuery.trim() ? (
               <EmptyState
                 title="No matching spaces"
-                description={`No spaces found matching "${searchQuery}".`}
+                description={`No spaces found matching "${debouncedSearchQuery}".`}
                 action={{
-                  onClick: () => setSearchQuery(""),
+                  onClick: () => {
+                    setSearchQuery("");
+                    setDebouncedSearchQuery("");
+                  },
                   label: "Clear search",
                 }}
               />

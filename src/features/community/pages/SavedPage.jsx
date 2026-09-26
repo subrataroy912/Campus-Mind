@@ -1,7 +1,13 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSavedItems } from "../hooks/useSavedItems.js";
+import { SavedItemCard } from "../components/SavedItemCard.jsx";
+import ErrorState from "@/components/common/ErrorState.jsx";
+import EmptyState from "@/components/common/EmptyState.jsx";
+import SearchInput from "@/components/common/SearchInput.jsx";
+import { useNavigate } from "react-router";
 
 export default function SavedPage() {
   const {
@@ -22,7 +28,20 @@ export default function SavedPage() {
     setQuery,
     setShowNewCollection,
   } = useSavedItems();
+  const [inputQuery, setInputQuery] = useState(query);
+  const navigate = useNavigate();
+  const executeSearch = (searchQuery) => {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) return;
 
+    navigate(`/saved?q=${encodeURIComponent(trimmedQuery)}`);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    setQuery(inputQuery);
+    executeSearch(inputQuery);
+  };
   return (
     <div className="w-full bg-canvas py-3 px-3 sm:py-5 sm:px-6 lg:px-8 min-w-0">
       <div className="mx-auto max-w-7xl">
@@ -40,54 +59,14 @@ export default function SavedPage() {
         </div>
 
         {/* Quick search */}
-        <div className="mb-4">
-          <div className="relative max-w-md">
-            <svg
-              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted z-10"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35M17 10.5A6.5 6.5 0 114 10.5a6.5 6.5 0 0113 0z"
-              />
-            </svg>
-            <Input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search your saved items…"
-              className="h-9 w-full rounded-lg border border-border bg-surface pl-9 pr-8 text-base sm:text-xs text-text-heading"
-            />
-            {query && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 flex min-h-8 min-w-8 items-center justify-center text-text-muted hover:text-text-main cursor-pointer"
-                aria-label="Clear search"
-              >
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </Button>
-            )}
-          </div>
-        </div>
+        <form onSubmit={handleFormSubmit} className="mt-4">
+          <SearchInput
+            value={inputQuery}
+            onImmediateChange={setInputQuery}
+            onChange={setQuery}
+            placeholder="Search your saved items…"
+          />
+        </form>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
           {/* Collections sidebar */}
@@ -196,61 +175,16 @@ export default function SavedPage() {
 
             {/* Items list */}
             {filteredItems.length === 0 ? (
-              <div className="rounded-xl bg-surface py-16 text-center shadow-sm ring-1 ring-border">
-                <p className="text-sm font-medium text-text-main">
-                  No saved items match your search.
-                </p>
-                <p className="mt-1 text-sm text-text-muted">
-                  Try a different keyword or filter.
-                </p>
-              </div>
+              <EmptyState />
             ) : (
               <ul className="space-y-3">
                 {filteredItems.map((item) => (
-                  <li
+                  <SavedItemCard
                     key={item.id}
-                    className="group rounded-xl bg-surface p-4 shadow-sm ring-1 ring-border transition hover:shadow-md sm:p-5"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1.5 flex items-center gap-2">
-                          <Badge
-                            variant="secondary"
-                            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${typeMeta[item.type].color}`}
-                          >
-                            {typeMeta[item.type].label}
-                          </Badge>
-                          <span className="truncate text-xs text-text-muted">
-                            {item.meta}
-                          </span>
-                        </div>
-                        <h3 className="text-sm font-medium text-text-heading sm:text-base">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 line-clamp-2 text-sm text-text-muted">
-                          {item.snippet}
-                        </p>
-                      </div>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleUnsave(item.id)}
-                        aria-label="Remove from saved"
-                        className="shrink-0 rounded-lg p-1.5 text-primary transition hover:bg-canvas"
-                        title="Remove from saved"
-                      >
-                        <svg
-                          className="h-5 w-5"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M6 3a1 1 0 00-1 1v17l7-4 7 4V4a1 1 0 00-1-1H6z" />
-                        </svg>
-                      </Button>
-                    </div>
-                  </li>
+                    item={item}
+                    typeMeta={typeMeta}
+                    onUnsave={handleUnsave}
+                  />
                 ))}
               </ul>
             )}

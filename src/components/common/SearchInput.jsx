@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ export default function SearchInput({
   placeholder = "Search...",
   debounceMs = 250,
   className,
+  inputClassName,
   size = "sm",
   ...props
 }) {
@@ -30,14 +31,37 @@ export default function SearchInput({
 
   const currentValue = isControlled ? controlledValue : uncontrolledValue;
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+
+  const timerRef = useRef(null);
+  const isInitialMount = useRef(true);
+
   // Handle debouncing without triggering immediate cascading state changes
   useEffect(() => {
-    const handler = setTimeout(() => {
-      onChange?.(currentValue.trim());
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      onChangeRef.current?.(currentValue.trim());
+      timerRef.current = null;
     }, debounceMs);
 
-    return () => clearTimeout(handler);
-  }, [currentValue, debounceMs, onChange]);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [currentValue, debounceMs]);
 
   const handleChange = (e) => {
     const val = e.target.value;
@@ -48,10 +72,14 @@ export default function SearchInput({
   };
 
   const handleClear = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     if (!isControlled) {
       setUncontrolledValue("");
     }
-    onChange?.("");
+    onChangeRef.current?.("");
     onImmediateChange?.("");
   };
 
@@ -75,6 +103,7 @@ export default function SearchInput({
         className={cn(
           "w-full rounded-md bg-background pr-7 text-base sm:text-xs",
           isSmall ? "h-8 pl-8" : "h-9 pl-9 sm:text-sm",
+          inputClassName,
         )}
         {...props}
       />

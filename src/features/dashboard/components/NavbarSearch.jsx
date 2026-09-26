@@ -2,8 +2,9 @@ import { useNavigate } from "react-router";
 import { useState, useRef, useEffect } from "react";
 import { Search, X, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Kbd } from "@/components/ui/kbd";
+import SearchInput from "@/components/common/SearchInput";
 
 // ------------------------------------------------------------------
 //  MOCK DATA
@@ -104,6 +105,10 @@ function NavbarSearch() {
     executeSearch(suggestion);
   };
 
+  const handleDebouncedSearch = (debouncedTerm) => {
+    console.log("Debounced search ready for API:", debouncedTerm);
+  };
+
   return (
     <div
       ref={searchRef}
@@ -144,127 +149,25 @@ function NavbarSearch() {
         {isMobileExpanded && (
           <div
             className="
-            fixed inset-0
-            -z-10
-            bg-background/70
-            backdrop-blur-sm
-            md:hidden
-          "
+            fixed inset-0 -z-10 bg-background/70 backdrop-blur-sm md:hidden"
           />
         )}
 
         {/* =======================================================
           SEARCH FORM
       ======================================================= */}
-        <form
-          onSubmit={handleFormSubmit}
-          className="
-          group
-          flex items-center
-          w-full
-
-          h-10 md:h-9
-          gap-2
-
-          rounded-xl md:rounded-lg
-
-          border border-border/70
-          bg-background/95
-          md:bg-muted/40
-
-          px-3
-
-          shadow-sm
-          md:shadow-none
-
-          transition-all duration-200
-
-          hover:border-border
-          hover:bg-muted/60
-
-          focus-within:border-ring
-          focus-within:bg-background
-          focus-within:ring-2
-          focus-within:ring-ring/20
-
-          md:w-[240px]
-          lg:w-[320px]
-          xl:w-[400px]
-          2xl:w-[440px]
-        "
-        >
-          {/* Search icon */}
-          <Search
-            className="
-            h-4 w-4
-            shrink-0
-            text-muted-foreground
-            transition-colors
-            group-focus-within:text-foreground
-          "
-          />
-
-          {/* =====================================================
-            INPUT
-        ===================================================== */}
-          <Input
-            type="search"
+        <form onSubmit={handleFormSubmit}>
+          <SearchInput
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
+            onImmediateChange={(val) => {
+              setQuery(val);
               setShowSuggestions(true);
             }}
+            onChange={handleDebouncedSearch}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search spaces, topics..."
             autoFocus={isMobileExpanded}
-            className="min-w-0 flex-1 h-auto border-0 bg-transparent px-0 py-0 shadow-none outline-none focus-visible:ring-0 text-sm text-foreground placeholder:text-muted-foreground/80 selection:bg-primary/20 dark:bg-transparent [&::-webkit-search-cancel-button]:hidden"
           />
-
-          {/* =====================================================
-            CLEAR BUTTON
-        ===================================================== */}
-          {query && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => {
-                setQuery("");
-                setShowSuggestions(true);
-              }}
-              aria-label="Clear search"
-              className="shrink-0 h-6 w-6 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          )}
-
-          {/* =====================================================
-            KEYBOARD SHORTCUT
-        ===================================================== */}
-          <Kbd className="hidden lg:inline-flex h-5 shrink-0 items-center rounded-md border border-border/70 bg-background px-1.5 text-[10px] font-medium font-mono text-muted-foreground shadow-sm">
-            Ctrl K
-          </Kbd>
-
-          {/* =====================================================
-            MOBILE CLOSE
-        ===================================================== */}
-          {isMobileExpanded && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => {
-                setIsMobileExpanded(false);
-                setShowSuggestions(false);
-                setQuery("");
-              }}
-              aria-label="Close search"
-              className="md:hidden shrink-0 h-7 w-7 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
         </form>
 
         {/* =========================================================
@@ -272,15 +175,7 @@ function NavbarSearch() {
       ========================================================= */}
         <div
           className="
-          absolute
-          left-0
-          right-0
-          top-full
-
-          mt-2
-
-          z-[110]
-        "
+          absolute left-0 right-0 top-full mt-2 z-[110]"
         >
           <SearchSuggestions
             isVisible={showSuggestions}
